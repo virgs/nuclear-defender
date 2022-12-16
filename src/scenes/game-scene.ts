@@ -1,55 +1,59 @@
-import Phaser from 'phaser'
-import {Hero} from "../actors/hero";
-import {configuration} from "../constants/configuration";
-import WebFontFileLoader from "../file-loaders/web-font-file-loader";
-import {FeatureMap, MapFeaturesExtractor} from "../tiles/map-features-extractor";
-import {HeroMovementCoordinator} from "../actors/hero-movement-coordinator";
+import Phaser from 'phaser';
+import {Hero} from '../actors/hero';
+import {configuration} from '../constants/configuration';
+import {FeatureMap, MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {HeroMovementCoordinator} from '../actors/hero-movement-coordinator';
 
-export default class GameScene extends Phaser.Scene {
+export type GameSceneConfiguration = {
+    currentLevel: number,
+    hero: Hero,
+    bestMoves: number
+};
+
+export class GameScene extends Phaser.Scene {
     private readonly mapFeaturesExtractor: MapFeaturesExtractor;
-    private movementCoordinator: HeroMovementCoordinator;
 
     private mapLayer: Phaser.Tilemaps.TilemapLayer;
     private movesCountLabel: Phaser.GameObjects.Text;
+    private movementCoordinator: HeroMovementCoordinator;
 
     private hero: Hero;
     private featuresMap: FeatureMap;
+    private gameSceneConfiguration: GameSceneConfiguration;
 
     constructor() {
-        super('game-scene')
-        this.mapFeaturesExtractor = new MapFeaturesExtractor()
+        super('game');
+        this.mapFeaturesExtractor = new MapFeaturesExtractor();
     }
 
-    public preload(data: { level: number, hero: Hero } = {level: 2, hero: new Hero()}) {
-        const fonts = new WebFontFileLoader(this.load, 'google', [
-            'Poppins',
-            'Righteous'
-        ])
-        this.load.addFile(fonts)
+    public init(gameSceneConfiguration: GameSceneConfiguration) {
+        this.gameSceneConfiguration = gameSceneConfiguration;
+    }
 
-        this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}${data.level}.json`)
+    public preload() {
+        this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}${this.gameSceneConfiguration.currentLevel}.json`);
         this.load.spritesheet(configuration.spriteSheetKey, configuration.tileSheetAsset, {
             frameWidth: 64,
             startFrame: 0
-        })
+        });
         this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-            this.cache.tilemap.remove(configuration.tilemapKey)
-        })
-        this.hero = data.hero
+            this.cache.tilemap.remove(configuration.tilemapKey);
+        });
     }
 
-    public create() {
-        const map = this.make.tilemap({key: configuration.tilemapKey})
-        const tiles = map.addTilesetImage(configuration.tilesetName, configuration.spriteSheetKey)
-        this.mapLayer = map.createLayer(configuration.layerName, tiles)
+    public create(gameSceneConfiguration: GameSceneConfiguration) {
+        const map = this.make.tilemap({key: configuration.tilemapKey});
+        const tiles = map.addTilesetImage(configuration.tilesetName, configuration.spriteSheetKey);
+        this.mapLayer = map.createLayer(configuration.layerName, tiles);
 
         const mapFeaturesExtractor = new MapFeaturesExtractor();
         const featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);
-        this.featuresMap = featuresMap
+        this.featuresMap = featuresMap;
 
         this.featuresMap.target
-            .forEach(item => item.setDepth(0))
+            .forEach(item => item.setDepth(0));
 
+        this.hero = gameSceneConfiguration.hero;
         this.hero.init({scene: this, sprite: featuresMap.player[0]});
         this.movementCoordinator =
             new HeroMovementCoordinator({
@@ -57,10 +61,11 @@ export default class GameScene extends Phaser.Scene {
                 featuresMap: featuresMap,
                 mapLayer: this.mapLayer,
                 hero: this.hero
-            })
+            });
         this.movesCountLabel = this.add.text(540, 10, `Moves: 0`, {
-            fontFamily: 'Poppins'
-        })
+            fontFamily: 'Poppins',
+            fontSize: '30px'
+        });
 
     }
 
@@ -69,7 +74,7 @@ export default class GameScene extends Phaser.Scene {
         const movingIntention = this.hero.checkMovingIntention();
         if (movingIntention !== null) {
             if (this.movementCoordinator.moveHero(movingIntention)) {
-                this.movesCountLabel.text = `Moves: ${this.movementCoordinator.getMovesCount()}`
+                this.movesCountLabel.text = `Moves: ${this.movementCoordinator.getMovesCount()}`;
             }
         }
     }
@@ -82,14 +87,20 @@ export default class GameScene extends Phaser.Scene {
                     .some(target => {
                         const targetTilePosition = this.mapLayer.worldToTileXY(target.x, target.y);
                         return targetTilePosition.x === boxTilePosition.x &&
-                            targetTilePosition.y === boxTilePosition.y
-                    })
+                            targetTilePosition.y === boxTilePosition.y;
+                    });
             })) {
-            console.log('level complete')
+            console.log('currentLevel complete');
+            setTimeout(() => {
+                this.scene.start('next-level', {
+                    gameSceneConfiguration: this.gameSceneConfiguration,
+                    numMoves: this.movementCoordinator.getMovesCount()
+                });
+            }, 1000);
         }
     }
 
     public addTween(tween: Phaser.Types.Tweens.TweenBuilderConfig) {
-        this.tweens.add(tween)
+        this.tweens.add(tween);
     }
 }

@@ -1,17 +1,17 @@
-import {configuration} from "../constants/configuration";
-import {TimeController} from "../constants/time-controller";
-import {Direction} from "../constants/direction";
+import {configuration} from '../constants/configuration';
+import {TimeController} from '../constants/time-controller';
+import {Direction} from '../constants/direction';
 
 export function getTweenFromDirection(direction: Direction) {
     switch (direction) {
         case Direction.DOWN:
-            return tween.DOWN
+            return tween.DOWN;
         case Direction.UP:
-            return tween.UP
+            return tween.UP;
         case Direction.LEFT:
-            return tween.LEFT
+            return tween.LEFT;
         case Direction.RIGHT:
-            return tween.RIGHT
+            return tween.RIGHT;
     }
 }
 
@@ -32,4 +32,4 @@ const tween = {
         y: '-=' + configuration.verticalTileSize,
         duration: configuration.walkingDuration * TimeController.getTimeFactor()
     }
-}
+};

@@ -1,12 +1,14 @@
 export const configuration = {
     frameRate: 10,
     spriteSheetKey: 'tiles',
-    walkingDuration: 500,
+    walkingDuration: 250,
     verticalTileSize: 64,
     horizontalTileSize: 64,
     tilemapKey: 'tilemap',
     tileSheetAsset: 'assets/sokoban_tilesheet.png',
     levelAssetPrefix: 'levels/level-',
     layerName: 'Level',
-    tilesetName: 'sokoban'
-}
+    tilesetName: 'sokoban',
+    gameWidth: 800,
+    gameHeight: 600
+};

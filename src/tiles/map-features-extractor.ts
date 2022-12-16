@@ -1,6 +1,6 @@
-import {configuration} from "../constants/configuration";
-import Phaser from "phaser";
-import {tileCodes} from "./tile-codes";
+import {configuration} from '../constants/configuration';
+import Phaser from 'phaser';
+import {tileCodes} from './tile-codes';
 
 export type FeatureMap = { [propName: string]: Phaser.GameObjects.Sprite[] };
 
@@ -8,9 +8,9 @@ export class MapFeaturesExtractor {
     public extractFeatures(mapLayer: Phaser.Tilemaps.TilemapLayer): FeatureMap {
         return Object.keys(tileCodes)
             .reduce((acc, item) => {
-                acc[item] = this.extractFeature(mapLayer, tileCodes[item])
-                return acc
-            }, {})
+                acc[item] = this.extractFeature(mapLayer, tileCodes[item]);
+                return acc;
+            }, {});
     }
 
     private extractFeature(mapLayer: Phaser.Tilemaps.TilemapLayer, tileCode: number): Phaser.GameObjects.Sprite[] {
@@ -19,9 +19,9 @@ export class MapFeaturesExtractor {
             frame: tileCode
         })
             .map(item => {
-                item.setOrigin(0)
-                item.setDepth(item.y)
-                return item
+                item.setOrigin(0);
+                item.setDepth(item.y);
+                return item;
             });
     }
 }

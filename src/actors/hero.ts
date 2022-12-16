@@ -1,9 +1,9 @@
-import {configuration} from "../constants/configuration";
-import Phaser from "phaser";
-import {Direction} from "../constants/direction";
-import {HeroAnimator} from "./hero-animator";
-import {tileCodes} from "../tiles/tile-codes";
-import {MapFeaturesExtractor} from "../tiles/map-features-extractor";
+import {configuration} from '../constants/configuration';
+import Phaser from 'phaser';
+import {Direction} from '../constants/direction';
+import {HeroAnimator} from './hero-animator';
+import {tileCodes} from '../tiles/tile-codes';
+import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 
 export type MovingIntention = {
     direction: Direction,
@@ -24,29 +24,29 @@ export class Hero {
 
     public constructor() {
         this.inputMap = new Map<Direction, () => boolean>();
-        this.inputMap.set(Direction.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors.right))
-        this.inputMap.set(Direction.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors.left))
-        this.inputMap.set(Direction.DOWN, () => Phaser.Input.Keyboard.JustDown(this.cursors.down))
-        this.inputMap.set(Direction.UP, () => Phaser.Input.Keyboard.JustDown(this.cursors.up))
+        this.inputMap.set(Direction.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors.right));
+        this.inputMap.set(Direction.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors.left));
+        this.inputMap.set(Direction.DOWN, () => Phaser.Input.Keyboard.JustDown(this.cursors.down));
+        this.inputMap.set(Direction.UP, () => Phaser.Input.Keyboard.JustDown(this.cursors.up));
 
         this.heroAnimator = new HeroAnimator();
     }
 
     public init(data: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite }) {
         this.tweens = data.scene.tweens;
-        this.cursors = data.scene.input.keyboard.createCursorKeys()
+        this.cursors = data.scene.input.keyboard.createCursorKeys();
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
-        this.sprite = data.sprite
+        this.sprite = data.sprite;
 
         // this.sprite.setOrigin(0, 0.5)
-        this.sprite.setOrigin(0)
+        this.sprite.setOrigin(0);
 
         this.heroAnimator.createAnimations()
-            .forEach(item => this.sprite.anims.create(item))
+            .forEach(item => this.sprite.anims.create(item));
     }
 
     public update() {
-        this.sprite.setDepth(this.sprite.y - configuration.verticalTileSize / 2)
+        this.sprite.setDepth(this.sprite.y - configuration.verticalTileSize / 2);
     }
 
     public checkMovingIntention(): MovingIntention | null {
@@ -59,28 +59,28 @@ export class Hero {
                             x: this.sprite.x,
                             y: this.sprite.y
                         }
-                    }
+                    };
                 }
             }
         }
-        return null
+        return null;
     }
 
     public move(direction: Direction) {
         this.isMoving = true;
         const heroMovement = this.heroAnimator.map(direction);
 
-        this.sprite.anims.play(heroMovement.walking, true)
+        this.sprite.anims.play(heroMovement.walking, true);
 
         this.tweens.add({
             ...heroMovement.tween,
             targets: this.sprite,
             onComplete: () => {
-                this.sprite.anims.play(heroMovement.idle, true)
-                this.isMoving = false
+                this.sprite.anims.play(heroMovement.idle, true);
+                this.isMoving = false;
             },
             onCompleteScope: this
-        })
+        });
     }
 
 }

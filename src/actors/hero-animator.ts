@@ -1,6 +1,6 @@
-import {Direction} from "../constants/direction";
-import {configuration} from "../constants/configuration";
-import {getTweenFromDirection} from "./tween";
+import {Direction} from '../constants/direction';
+import {configuration} from '../constants/configuration';
+import {getTweenFromDirection} from './tween';
 
 export type HeroMovement = {
     tween: {
@@ -13,14 +13,14 @@ export type HeroMovement = {
 };
 
 enum HeroAnimation {
-    IDLE_DOWN = "IDLE_DOWN",
-    IDLE_LEFT = "IDLE_LEFT",
-    IDLE_UP = "IDLE_UP",
-    IDLE_RIGHT = "IDLE_RIGHT",
-    DOWN = "DOWN",
-    LEFT = "LEFT",
-    UP = "UP",
-    RIGHT = "RIGHT"
+    IDLE_DOWN = 'IDLE_DOWN',
+    IDLE_LEFT = 'IDLE_LEFT',
+    IDLE_UP = 'IDLE_UP',
+    IDLE_RIGHT = 'IDLE_RIGHT',
+    DOWN = 'DOWN',
+    LEFT = 'LEFT',
+    UP = 'UP',
+    RIGHT = 'RIGHT'
 }
 
 export class HeroAnimator {
@@ -31,25 +31,25 @@ export class HeroAnimator {
                     walking: HeroAnimation.DOWN,
                     idle: HeroAnimation.IDLE_DOWN,
                     tween: getTweenFromDirection(Direction.DOWN)
-                }
+                };
             case Direction.LEFT:
                 return {
                     walking: HeroAnimation.LEFT,
                     idle: HeroAnimation.IDLE_LEFT,
                     tween: getTweenFromDirection(Direction.LEFT)
-                }
+                };
             case Direction.RIGHT:
                 return {
                     walking: HeroAnimation.RIGHT,
                     idle: HeroAnimation.IDLE_RIGHT,
                     tween: getTweenFromDirection(Direction.RIGHT)
-                }
+                };
             case Direction.UP:
                 return {
                     walking: HeroAnimation.UP,
                     idle: HeroAnimation.IDLE_UP,
                     tween: getTweenFromDirection(Direction.UP)
-                }
+                };
         }
 
     }
@@ -96,7 +96,7 @@ export class HeroAnimator {
                 frameRate: configuration.frameRate,
                 repeat: -1
             },
-        ]
+        ];
     }
 
     private generateFrames(...frames: number[]) {
@@ -104,7 +104,7 @@ export class HeroAnimator {
             return {
                 key: configuration.spriteSheetKey,
                 frame: item
-            }
-        })
+            };
+        });
     }
 }

@@ -3,4 +3,4 @@ export const tileCodes = {
     target: 64,
     wall: 100,
     player: 52
-}
+};
