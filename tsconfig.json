@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"moduleResolution": "node",
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true
+	}
+}
