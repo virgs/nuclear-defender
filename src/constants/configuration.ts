@@ -7,5 +7,6 @@ export const configuration = {
     tilemapKey: 'tilemap',
     tileSheetAsset: 'assets/sokoban_tilesheet.png',
     levelAssetPrefix: 'levels/level-',
-    layerName: 'Level'
+    layerName: 'Level',
+    tilesetName: 'sokoban'
 }

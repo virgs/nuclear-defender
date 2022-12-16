@@ -1,5 +1,6 @@
 import {Direction} from "../constants/direction";
 import {configuration} from "../constants/configuration";
+import {getTweenFromDirection} from "./tween";
 
 export type HeroMovement = {
     tween: {
@@ -29,37 +30,25 @@ export class HeroAnimator {
                 return {
                     walking: HeroAnimation.DOWN,
                     idle: HeroAnimation.IDLE_DOWN,
-                    tween: {
-                        y: '+=' + configuration.verticalTileSize,
-                        duration: configuration.walkingDuration
-                    }
+                    tween: getTweenFromDirection(Direction.DOWN)
                 }
             case Direction.LEFT:
                 return {
                     walking: HeroAnimation.LEFT,
                     idle: HeroAnimation.IDLE_LEFT,
-                    tween: {
-                        x: '-=' + configuration.horizontalTileSize,
-                        duration: configuration.walkingDuration
-                    }
+                    tween: getTweenFromDirection(Direction.LEFT)
                 }
             case Direction.RIGHT:
                 return {
                     walking: HeroAnimation.RIGHT,
                     idle: HeroAnimation.IDLE_RIGHT,
-                    tween: {
-                        x: '+=' + configuration.horizontalTileSize,
-                        duration: configuration.walkingDuration
-                    }
+                    tween: getTweenFromDirection(Direction.RIGHT)
                 }
             case Direction.UP:
                 return {
                     walking: HeroAnimation.UP,
                     idle: HeroAnimation.IDLE_UP,
-                    tween: {
-                        y: '-=' + configuration.verticalTileSize,
-                        duration: configuration.walkingDuration
-                    }
+                    tween: getTweenFromDirection(Direction.UP)
                 }
         }
 

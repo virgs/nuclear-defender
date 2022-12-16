@@ -1,1 +1,1 @@
-# Sokoban ai
+# sokoban-ai

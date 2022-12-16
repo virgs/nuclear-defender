@@ -7,7 +7,10 @@ const config = {
 	parent: 'app',
 	width: 800,
 	height: 600,
-	scene: [GameScene],
+	dom: {
+		createContainer: true
+	},
+	scene: [GameScene]
 }
 
 export default new Phaser.Game(config)
