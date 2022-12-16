@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
 import {Hero} from '../actors/hero';
+import {levels} from '../levels/levels';
 import {configuration} from '../constants/configuration';
-import {FeatureMap, MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import {HeroMovementCoordinator} from '../actors/hero-movement-coordinator';
+import {FeatureMap, MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {TileCodes} from '../tiles/tile-codes';
 
 export type GameSceneConfiguration = {
     currentLevel: number,
@@ -20,6 +22,7 @@ export class GameScene extends Phaser.Scene {
     private hero: Hero;
     private featuresMap: FeatureMap;
     private gameSceneConfiguration: GameSceneConfiguration;
+    private dynamicLoaded: boolean = false;
 
     constructor() {
         super('game');
@@ -31,34 +34,48 @@ export class GameScene extends Phaser.Scene {
     }
 
     public preload() {
-        this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}${this.gameSceneConfiguration.currentLevel}.json`);
         this.load.spritesheet(configuration.spriteSheetKey, configuration.tileSheetAsset, {
             frameWidth: 64,
             startFrame: 0
         });
-        this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-            this.cache.tilemap.remove(configuration.tilemapKey);
-        });
+        if (!this.dynamicLoaded) {
+            this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}${this.gameSceneConfiguration.currentLevel}.json`);
+            this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+                this.cache.tilemap.remove(configuration.tilemapKey);
+            });
+        }
     }
 
     public create(gameSceneConfiguration: GameSceneConfiguration) {
-        const map = this.make.tilemap({key: configuration.tilemapKey});
-        const tiles = map.addTilesetImage(configuration.tilesetName, configuration.spriteSheetKey);
-        this.mapLayer = map.createLayer(configuration.layerName, tiles);
+        //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
+        if (!this.dynamicLoaded) {
+            const map = this.make.tilemap({key: configuration.tilemapKey});
+            const tileset = map.addTilesetImage(configuration.tilesetName, configuration.spriteSheetKey);
+            this.mapLayer = map.createLayer(configuration.layerName, tileset);
+        } else {
+            // When loading from an array, make sure to specify the tileWidth and tileHeight
+            const map = this.make.tilemap({
+                data: levels[gameSceneConfiguration.currentLevel],
+                tileWidth: configuration.horizontalTileSize,
+                tileHeight: configuration.verticalTileSize
+            });
+            const tilesetImage = map.addTilesetImage(configuration.spriteSheetKey);
+            this.mapLayer = map.createLayer(0, tilesetImage);
+        }
 
         const mapFeaturesExtractor = new MapFeaturesExtractor();
-        const featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);
-        this.featuresMap = featuresMap;
+        this.featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);
+        console.log(this.featuresMap);
 
         this.featuresMap.target
             .forEach(item => item.setDepth(0));
 
         this.hero = gameSceneConfiguration.hero;
-        this.hero.init({scene: this, sprite: featuresMap.player[0]});
+        this.hero.init({scene: this, sprite: this.featuresMap.hero[0]});
         this.movementCoordinator =
             new HeroMovementCoordinator({
                 gameScene: this,
-                featuresMap: featuresMap,
+                featuresMap: this.featuresMap,
                 mapLayer: this.mapLayer,
                 hero: this.hero
             });

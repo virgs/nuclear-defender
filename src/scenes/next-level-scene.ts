@@ -41,10 +41,6 @@ export class NextLevelScene extends Phaser.Scene {
                 this.scene.start('game', data.gameSceneConfiguration);
             });
 
-        if (data.gameSceneConfiguration.currentLevel + 1 > 2) {
-            return;
-        }
-
         const nextLevelButton = primaryButton('Next Level');
         this.add.dom(width * 0.5, retry.y + retry.height * 1.2, nextLevelButton)
             .addListener('click')

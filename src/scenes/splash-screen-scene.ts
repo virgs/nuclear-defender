@@ -18,7 +18,7 @@ export class SplashScreenScene extends Phaser.Scene {
     }
 
     create() {
-        const gameSceneConfiguration: GameSceneConfiguration = {currentLevel: 1, hero: new Hero(), bestMoves: 10};
+        const gameSceneConfiguration: GameSceneConfiguration = {currentLevel: 0, hero: new Hero(), bestMoves: 10};
         this.scene.start('game', gameSceneConfiguration);
     }
 }
