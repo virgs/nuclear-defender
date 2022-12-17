@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 
+import {GameSceneConfiguration} from './game-scene';
 import {defaultButton, primaryButton} from '../ui/button';
-import {Hero} from '../actors/hero';
-import {GameScene, GameSceneConfiguration} from './game-scene';
+import {levels} from '../levels/levels';
 
 export class NextLevelScene extends Phaser.Scene {
     constructor() {
@@ -42,10 +42,11 @@ export class NextLevelScene extends Phaser.Scene {
             });
 
         const nextLevelButton = primaryButton('Next Level');
-        this.add.dom(width * 0.5, retry.y + retry.height * 1.2, nextLevelButton)
+        this.add.dom(width * 0.5, retry.y + retry.height * 1.25, nextLevelButton)
             .addListener('click')
             .once('click', () => {
                 const nextLevelConfiguration: GameSceneConfiguration = {
+                    map: levels[0],
                     bestMoves: data.gameSceneConfiguration.bestMoves,
                     currentLevel: data.gameSceneConfiguration.currentLevel + 1,
                     hero: data.gameSceneConfiguration.hero

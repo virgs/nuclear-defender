@@ -3,5 +3,5 @@ export enum TileCodes {
     box = 9,
     target = 64,
     wall = 100,
-    hero = 54
+    hero = 52
 }

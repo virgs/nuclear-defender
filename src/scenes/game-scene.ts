@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
 import {Hero} from '../actors/hero';
-import {levels} from '../levels/levels';
+import {TileCodes} from '../tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 import {HeroMovementCoordinator} from '../actors/hero-movement-coordinator';
 import {FeatureMap, MapFeaturesExtractor} from '../tiles/map-features-extractor';
-import {TileCodes} from '../tiles/tile-codes';
 
 export type GameSceneConfiguration = {
+    map: TileCodes[][],
     currentLevel: number,
     hero: Hero,
     bestMoves: number
@@ -22,7 +22,6 @@ export class GameScene extends Phaser.Scene {
     private hero: Hero;
     private featuresMap: FeatureMap;
     private gameSceneConfiguration: GameSceneConfiguration;
-    private dynamicLoaded: boolean = false;
 
     constructor() {
         super('game');
@@ -38,30 +37,18 @@ export class GameScene extends Phaser.Scene {
             frameWidth: 64,
             startFrame: 0
         });
-        if (!this.dynamicLoaded) {
-            this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}${this.gameSceneConfiguration.currentLevel}.json`);
-            this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-                this.cache.tilemap.remove(configuration.tilemapKey);
-            });
-        }
     }
 
     public create(gameSceneConfiguration: GameSceneConfiguration) {
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
-        if (!this.dynamicLoaded) {
-            const map = this.make.tilemap({key: configuration.tilemapKey});
-            const tileset = map.addTilesetImage(configuration.tilesetName, configuration.spriteSheetKey);
-            this.mapLayer = map.createLayer(configuration.layerName, tileset);
-        } else {
-            // When loading from an array, make sure to specify the tileWidth and tileHeight
-            const map = this.make.tilemap({
-                data: levels[gameSceneConfiguration.currentLevel],
-                tileWidth: configuration.horizontalTileSize,
-                tileHeight: configuration.verticalTileSize
-            });
-            const tilesetImage = map.addTilesetImage(configuration.spriteSheetKey);
-            this.mapLayer = map.createLayer(0, tilesetImage);
-        }
+        console.log(gameSceneConfiguration.map);
+        const map = this.make.tilemap({
+            data: gameSceneConfiguration.map,
+            tileWidth: configuration.horizontalTileSize,
+            tileHeight: configuration.verticalTileSize
+        });
+        const tilesetImage = map.addTilesetImage(configuration.spriteSheetKey);
+        this.mapLayer = map.createLayer(0, tilesetImage);
 
         const mapFeaturesExtractor = new MapFeaturesExtractor();
         this.featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);

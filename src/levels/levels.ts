@@ -8,4 +8,7 @@ export const levels = [[
     [TileCodes.wall, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
     [TileCodes.wall, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
     [TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall]
-]].map(level => level.map(line => line.map(tile => tile + 0)));
+]]
+    .map(level => level
+        .map(line => line
+            .map(tile => tile + 1))); // to match the values generated from Tiled Software
