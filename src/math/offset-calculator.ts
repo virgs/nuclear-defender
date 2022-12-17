@@ -1,5 +1,5 @@
-import {MovingIntention} from '../actors/hero';
 import {Point} from './points';
+import {MovingIntention} from '../actors/hero';
 import {Direction} from '../constants/direction';
 import {configuration} from '../constants/configuration';
 

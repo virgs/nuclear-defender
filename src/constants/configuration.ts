@@ -9,6 +9,6 @@ export const configuration = {
     levelAssetPrefix: 'levels/level-',
     layerName: 'Level',
     tilesetName: 'sokoban',
-    gameWidth: 800,
-    gameHeight: 600
+    gameWidth: 1000,
+    gameHeight: 800
 };

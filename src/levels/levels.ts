@@ -1,13 +1,13 @@
-import {TileCodes} from '../tiles/tile-codes';
+import {TileCode} from '../tiles/tile-code';
 
 export const levels = [[
-    [TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall],
-    [TileCodes.wall, TileCodes.target, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
-    [TileCodes.wall, TileCodes.box, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
-    [TileCodes.wall, TileCodes.hero, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
-    [TileCodes.wall, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
-    [TileCodes.wall, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.empty, TileCodes.wall],
-    [TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall, TileCodes.wall]
+    [TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall],
+    [TileCode.wall, TileCode.target, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.wall],
+    [TileCode.wall, TileCode.box, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.wall],
+    [TileCode.wall, TileCode.hero, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.wall],
+    [TileCode.wall, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.wall],
+    [TileCode.wall, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.empty, TileCode.wall],
+    [TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall]
 ]]
     .map(level => level
         .map(line => line

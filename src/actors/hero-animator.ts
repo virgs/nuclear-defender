@@ -1,6 +1,6 @@
+import {getTweenFromDirection} from './tween';
 import {Direction} from '../constants/direction';
 import {configuration} from '../constants/configuration';
-import {getTweenFromDirection} from './tween';
 
 export type HeroMovement = {
     tween: {

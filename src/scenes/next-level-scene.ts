@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
-
+import {levels} from '../levels/levels';
 import {GameSceneConfiguration} from './game-scene';
 import {defaultButton, primaryButton} from '../ui/button';
-import {levels} from '../levels/levels';
 
 export class NextLevelScene extends Phaser.Scene {
     constructor() {

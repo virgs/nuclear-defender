@@ -1,9 +1,7 @@
-import {configuration} from '../constants/configuration';
 import Phaser from 'phaser';
-import {Direction} from '../constants/direction';
 import {HeroAnimator} from './hero-animator';
-import {tileCodes} from '../tiles/tile-codes';
-import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {Direction} from '../constants/direction';
+import {configuration} from '../constants/configuration';
 
 export type MovingIntention = {
     direction: Direction,

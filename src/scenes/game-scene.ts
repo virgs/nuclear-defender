@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
 import {Hero} from '../actors/hero';
-import {TileCodes} from '../tiles/tile-codes';
+import {TileCode} from '../tiles/tile-code';
 import {configuration} from '../constants/configuration';
 import {HeroMovementCoordinator} from '../actors/hero-movement-coordinator';
 import {FeatureMap, MapFeaturesExtractor} from '../tiles/map-features-extractor';
 
 export type GameSceneConfiguration = {
-    map: TileCodes[][],
+    map: TileCode[][],
     currentLevel: number,
     hero: Hero,
     bestMoves: number
@@ -41,7 +41,6 @@ export class GameScene extends Phaser.Scene {
 
     public create(gameSceneConfiguration: GameSceneConfiguration) {
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
-        console.log(gameSceneConfiguration.map);
         const map = this.make.tilemap({
             data: gameSceneConfiguration.map,
             tileWidth: configuration.horizontalTileSize,

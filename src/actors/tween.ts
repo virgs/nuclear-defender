@@ -1,6 +1,6 @@
+import {Direction} from '../constants/direction';
 import {configuration} from '../constants/configuration';
 import {TimeController} from '../constants/time-controller';
-import {Direction} from '../constants/direction';
 
 export function getTweenFromDirection(direction: Direction) {
     switch (direction) {
