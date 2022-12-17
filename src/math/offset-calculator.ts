@@ -4,14 +4,13 @@ import {Direction} from '../constants/direction';
 import {configuration} from '../constants/configuration';
 
 export function calculateOffset(movingIntention: MovingIntention) {
-
     const offset: Point = {
         x: movingIntention.position.x,
         y: movingIntention.position.y
     };
 
     if (movingIntention.direction == Direction.LEFT) {
-        offset.x -= configuration.horizontalTileSize;
+        offset.x -= configuration.horizontalTileSize; //TODO change this to 1
     } else if (movingIntention.direction == Direction.RIGHT) {
         offset.x += configuration.horizontalTileSize;
     }

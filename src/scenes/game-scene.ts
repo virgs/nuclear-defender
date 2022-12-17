@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 import {Hero} from '../actors/hero';
 import {TileCode} from '../tiles/tile-code';
 import {configuration} from '../constants/configuration';
-import {HeroMovementCoordinator} from '../actors/hero-movement-coordinator';
-import {FeatureMap, MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {MovementCoordinator} from '../actors/movement-coordinator';
+import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 
 export type GameSceneConfiguration = {
     map: TileCode[][],
@@ -17,10 +17,10 @@ export class GameScene extends Phaser.Scene {
 
     private mapLayer: Phaser.Tilemaps.TilemapLayer;
     private movesCountLabel: Phaser.GameObjects.Text;
-    private movementCoordinator: HeroMovementCoordinator;
+    private movementCoordinator: MovementCoordinator;
 
     private hero: Hero;
-    private featuresMap: FeatureMap;
+    private featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
     private gameSceneConfiguration: GameSceneConfiguration;
 
     constructor() {
@@ -34,7 +34,7 @@ export class GameScene extends Phaser.Scene {
 
     public preload() {
         this.load.spritesheet(configuration.spriteSheetKey, configuration.tileSheetAsset, {
-            frameWidth: 64,
+            frameWidth: configuration.horizontalTileSize,
             startFrame: 0
         });
     }
@@ -51,15 +51,21 @@ export class GameScene extends Phaser.Scene {
 
         const mapFeaturesExtractor = new MapFeaturesExtractor();
         this.featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);
+        //TODO check if map is valid. number of heroes = 1, number of box = targets, if it's solvable?...
         console.log(this.featuresMap);
 
-        this.featuresMap.target
+        [...this.featuresMap.get(TileCode.target),
+            ...this.featuresMap.get(TileCode.empty),
+            ...this.featuresMap.get(TileCode.floor)]
             .forEach(item => item.setDepth(0));
 
         this.hero = gameSceneConfiguration.hero;
-        this.hero.init({scene: this, sprite: this.featuresMap.hero[0]});
+        this.hero.init({
+            scene: this,
+            sprite: this.featuresMap.get(TileCode.hero)[0]
+        });
         this.movementCoordinator =
-            new HeroMovementCoordinator({
+            new MovementCoordinator({
                 gameScene: this,
                 featuresMap: this.featuresMap,
                 mapLayer: this.mapLayer,
@@ -82,11 +88,36 @@ export class GameScene extends Phaser.Scene {
         }
     }
 
-    public checkLevelComplete(): void {
-        if (this.featuresMap.box
+    public onMovementComplete(): void {
+        this.updateBoxesColor();
+        this.checkLevelComplete();
+        console.log(this.featuresMap);
+
+    }
+
+    private updateBoxesColor() {
+        this.featuresMap
+            .get(TileCode.box)
+            .forEach(box => {
+                const boxPosition = this.mapLayer.worldToTileXY(box.x, box.y);
+                if (this.featuresMap
+                    .get(TileCode.target)
+                    .some(target => {
+                        const targetPosition = this.mapLayer.worldToTileXY(target.x, target.y);
+                        return boxPosition.x === targetPosition.x && boxPosition.y === targetPosition.y;
+                    })) {
+                    box.setFrame(TileCode.boxOnTarget);
+                } else {
+                    box.setFrame(TileCode.box);
+                }
+            });
+    }
+
+    private checkLevelComplete() {
+        if (this.featuresMap.get(TileCode.box)
             .every(box => {
                 const boxTilePosition = this.mapLayer.worldToTileXY(box.x, box.y);
-                return this.featuresMap.target
+                return this.featuresMap.get(TileCode.target)
                     .some(target => {
                         const targetTilePosition = this.mapLayer.worldToTileXY(target.x, target.y);
                         return targetTilePosition.x === boxTilePosition.x &&

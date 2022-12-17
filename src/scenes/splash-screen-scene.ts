@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import {Hero} from '../actors/hero';
-import {levels} from '../levels/levels';
+import {TileCode} from '../tiles/tile-code';
 import {GameSceneConfiguration} from './game-scene';
 import {configuration} from '../constants/configuration';
 import {FileLevelExtractor} from '../levels/file-level-extractor';
 import WebFontFileLoader from '../file-loaders/web-font-file-loader';
-import {TileCode} from '../tiles/tile-code';
+import {levels} from '../levels/levels';
 
 export class SplashScreenScene extends Phaser.Scene {
     private readonly fileLevelExtractor: FileLevelExtractor;
@@ -23,17 +23,18 @@ export class SplashScreenScene extends Phaser.Scene {
         ]);
         this.load.addFile(fonts);
 
-        // this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}0.json`);
+        this.load.tilemapTiledJSON(configuration.tilemapKey, `${configuration.levelAssetPrefix}0.json`);
         this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.cache.tilemap.remove(configuration.tilemapKey);
         });
     }
 
     create(data: { map: TileCode[][] }) {
-        // const tileMap = this.make.tilemap({key: configuration.tilemapKey});
-        // const tileCodeMap = this.fileLevelExtractor.extractToTileCodeMap(tileMap);
-        const map = data.map;
-        console.log(map);
+        const tileMap = this.make.tilemap({key: configuration.tilemapKey});
+        const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap);
+        // const map = levels[0];
+        // const map = data.map;
+        // console.log(map);
         const gameSceneConfiguration: GameSceneConfiguration = {
             map: map,
             currentLevel: 0,

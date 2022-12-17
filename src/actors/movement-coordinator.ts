@@ -4,17 +4,24 @@ import {Hero, MovingIntention} from './hero';
 import {getTweenFromDirection} from './tween';
 import {GameScene} from '../scenes/game-scene';
 import {calculateOffset} from '../math/offset-calculator';
-import {FeatureMap} from '../tiles/map-features-extractor';
+import {TileCode} from '../tiles/tile-code';
 
-export class HeroMovementCoordinator {
+type MovementCoordinatorConfig = {
+    gameScene: GameScene;
+    featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
+    hero: Hero; mapLayer:
+        Phaser.Tilemaps.TilemapLayer
+};
+
+export class MovementCoordinator {
     private readonly gameScene: GameScene;
     private readonly mapLayer: Phaser.Tilemaps.TilemapLayer;
-    private readonly featuresMap: FeatureMap;
+    private readonly featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
     private readonly hero: Hero;
 
     private movesCount: number;
 
-    constructor(data: { gameScene: GameScene; featuresMap: FeatureMap; hero: Hero; mapLayer: Phaser.Tilemaps.TilemapLayer }) {
+    constructor(data: MovementCoordinatorConfig) {
         this.gameScene = data.gameScene;
         this.featuresMap = data.featuresMap;
         this.mapLayer = data.mapLayer;
@@ -67,7 +74,7 @@ export class HeroMovementCoordinator {
         const tween = {
             ...getTweenFromDirection(movingIntention.direction),
             targets: box,
-            onComplete: () => this.gameScene.checkLevelComplete(),
+            onComplete: () => this.gameScene.onMovementComplete(),
             onCompleteScope: this
         };
         this.gameScene.addTween(tween);
@@ -86,10 +93,10 @@ export class HeroMovementCoordinator {
     }
 
     public hasWallAt(offsetTilePosition: Phaser.Math.Vector2): Phaser.GameObjects.Sprite {
-        return this.hasFeatureAt(this.featuresMap.wall, offsetTilePosition);
+        return this.hasFeatureAt(this.featuresMap.get(TileCode.wall), offsetTilePosition);
     }
 
     public hasBoxAt(offsetTilePosition: Phaser.Math.Vector2): Phaser.GameObjects.Sprite {
-        return this.hasFeatureAt(this.featuresMap.box, offsetTilePosition);
+        return this.hasFeatureAt(this.featuresMap.get(TileCode.box), offsetTilePosition);
     }
 }
