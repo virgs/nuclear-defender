@@ -3,14 +3,6 @@ import {HeroAnimator} from './hero-animator';
 import {Direction} from '../constants/direction';
 import {configuration} from '../constants/configuration';
 
-export type MovingIntention = {
-    direction: Direction,
-    position: {
-        x: number,
-        y: number
-    }
-};
-
 export class Hero {
     private readonly heroAnimator: HeroAnimator;
     private readonly inputMap: Map<Direction, () => boolean>;
@@ -30,6 +22,7 @@ export class Hero {
         this.heroAnimator = new HeroAnimator();
     }
 
+    //TODO extract this to interface
     public init(data: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite }) {
         this.tweens = data.scene.tweens;
         this.cursors = data.scene.input.keyboard.createCursorKeys();
@@ -43,27 +36,23 @@ export class Hero {
             .forEach(item => this.sprite.anims.create(item));
     }
 
+    //TODO extract this to interface
     public update() {
         this.sprite.setDepth(this.sprite.y - configuration.verticalTileSize / 2);
     }
 
-    public checkMovingIntention(): MovingIntention | null {
+    public checkMovingIntentionDirection(): Direction {
         if (!this.isMoving) {
             for (let [direction, directionCheckFunction] of this.inputMap.entries()) {
                 if (directionCheckFunction()) {
-                    return {
-                        direction: direction,
-                        position: {
-                            x: this.sprite.x,
-                            y: this.sprite.y
-                        }
-                    };
+                    return direction;
                 }
             }
         }
         return null;
     }
 
+    //TODO extract this to interface
     public move(direction: Direction) {
         this.isMoving = true;
         const heroMovement = this.heroAnimator.map(direction);

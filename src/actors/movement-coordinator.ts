@@ -1,68 +1,70 @@
-import Phaser from 'phaser';
 import {Point} from '../math/points';
-import {Hero, MovingIntention} from './hero';
-import {getTweenFromDirection} from './tween';
-import {GameScene} from '../scenes/game-scene';
-import {calculateOffset} from '../math/offset-calculator';
 import {TileCode} from '../tiles/tile-code';
+import {Direction} from '../constants/direction';
 
-type MovementCoordinatorConfig = {
-    gameScene: GameScene;
-    featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
-    hero: Hero; mapLayer:
-        Phaser.Tilemaps.TilemapLayer
+type Movement = {
+    currentPosition: Point,
+    newPosition: Point,
+    direction: Direction
+};
+export type MovementCoordinatorOutput = {
+    newState: Map<TileCode, Point[]>,
+    movementMap: Map<TileCode, Movement[]>
 };
 
+export type MovementCoordinatorInput = { mapState: Map<TileCode, Point[]>; heroMovingIntentionDirection: Direction };
+
 export class MovementCoordinator {
-    private readonly gameScene: GameScene;
-    private readonly mapLayer: Phaser.Tilemaps.TilemapLayer;
-    private readonly featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
-    private readonly hero: Hero;
 
-    private movesCount: number;
+    public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
+        const result = this.initializeOutput();
+        const heroMovingIntentionDirection = input.heroMovingIntentionDirection;
+        if (heroMovingIntentionDirection !== null) {
+            const heroPosition = input.mapState.get(TileCode.hero)[0];
+            const newHeroPosition = this.calculateOffset(heroMovingIntentionDirection, heroPosition);
 
-    constructor(data: MovementCoordinatorConfig) {
-        this.gameScene = data.gameScene;
-        this.featuresMap = data.featuresMap;
-        this.mapLayer = data.mapLayer;
-        this.hero = data.hero;
+            if (this.heroMovementIsAvailable(newHeroPosition, input)) {
+                result.movementMap.set(TileCode.hero, [{
+                    currentPosition: heroPosition,
+                    newPosition: newHeroPosition,
+                    direction: heroMovingIntentionDirection
+                }]);
 
-        this.movesCount = 0;
-    }
-
-    public moveHero(movingIntention: MovingIntention): boolean {
-        if (this.movementIsAvailable(movingIntention)) {
-            ++this.movesCount;
-            this.hero.move(movingIntention.direction);
-
-            const offset = calculateOffset(movingIntention);
-            const offsetTilePosition = this.mapLayer.worldToTileXY(offset.x, offset.y);
-
-            const boxAhead = this.hasBoxAt(offsetTilePosition);
-            if (boxAhead) {
-                this.moveBox(boxAhead, movingIntention);
+                const boxAhead = this.getBoxAt(newHeroPosition, input.mapState);
+                if (boxAhead) {
+                    result.movementMap.set(TileCode.box, [{
+                        currentPosition: boxAhead,
+                        newPosition: this.calculateOffset(input.heroMovingIntentionDirection, boxAhead),
+                        direction: heroMovingIntentionDirection
+                    }]);
+                }
             }
-            return true;
         }
-        return false;
+        result.newState = this.generateNextState(result.movementMap);
+        return result;
     }
 
-    public movementIsAvailable(movingIntention: MovingIntention): boolean {
-        const offset = calculateOffset(movingIntention);
-        const offsetTilePosition = this.mapLayer.worldToTileXY(offset.x, offset.y);
+    private initializeOutput() {
+        const result: MovementCoordinatorOutput = {
+            movementMap: new Map<TileCode, Movement[]>(),
+            newState: undefined
+        };
+        result.movementMap.set(TileCode.hero, []);
+        result.movementMap.set(TileCode.box, []);
+        return result;
+    }
 
-        if (this.hasWallAt(offsetTilePosition)) {
+    private heroMovementIsAvailable(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
+        if (this.getWallAt(newHeroPosition, input.mapState)) {
             return false;
         }
 
-        const boxAhead = this.hasBoxAt(offsetTilePosition);
-        if (boxAhead) {
-            const afterNextMove = calculateOffset({position: offset, direction: movingIntention.direction});
-            const afterNextMoveTilePosition = this.mapLayer.worldToTileXY(afterNextMove.x, afterNextMove.y);
-            if (this.hasWallAt(afterNextMoveTilePosition)) {
+        if (this.getBoxAt(newHeroPosition, input.mapState)) {
+            const afterNextMove = this.calculateOffset(input.heroMovingIntentionDirection, newHeroPosition);
+            if (this.getWallAt(afterNextMove, input.mapState)) {
                 return false;
             }
-            if (this.hasBoxAt(afterNextMoveTilePosition)) {
+            if (this.getBoxAt(afterNextMove, input.mapState)) {
                 return false;
             }
         }
@@ -70,33 +72,45 @@ export class MovementCoordinator {
         return true;
     }
 
-    public moveBox(box: Phaser.GameObjects.Sprite, movingIntention: MovingIntention) {
-        const tween = {
-            ...getTweenFromDirection(movingIntention.direction),
-            targets: box,
-            onComplete: () => this.gameScene.onMovementComplete(),
-            onCompleteScope: this
-        };
-        this.gameScene.addTween(tween);
-    }
-
-    public getMovesCount() {
-        return this.movesCount;
-    }
-
-    public hasFeatureAt(features: Phaser.GameObjects.Sprite[], point: Point): Phaser.GameObjects.Sprite {
+    private hasFeatureAt(features: Point[], point: Point): Point | undefined {
         return features
-            .find(item => {
-                const itemTilePosition = this.mapLayer.worldToTileXY(item.x, item.y);
-                return itemTilePosition.x == point.x && itemTilePosition.y == point.y;
+            .find(feature => {
+                return feature.x == point.x && feature.y == point.y;
             });
     }
 
-    public hasWallAt(offsetTilePosition: Phaser.Math.Vector2): Phaser.GameObjects.Sprite {
-        return this.hasFeatureAt(this.featuresMap.get(TileCode.wall), offsetTilePosition);
+    private getWallAt(offsetTilePosition: Point, mapState: Map<TileCode, Point[]>): Point | undefined {
+        return this.hasFeatureAt(mapState.get(TileCode.wall), offsetTilePosition);
     }
 
-    public hasBoxAt(offsetTilePosition: Phaser.Math.Vector2): Phaser.GameObjects.Sprite {
-        return this.hasFeatureAt(this.featuresMap.get(TileCode.box), offsetTilePosition);
+    private getBoxAt(offsetTilePosition: Point, mapState: Map<TileCode, Point[]>): Point | undefined {
+        return this.hasFeatureAt(mapState.get(TileCode.box), offsetTilePosition);
+    }
+
+    private calculateOffset(direction: Direction, currentPosition: Point): Point {
+        const offset: Point = {
+            x: currentPosition.x,
+            y: currentPosition.y
+        };
+
+        switch (direction) {
+            case Direction.LEFT:
+                offset.x -= 1;
+                break;
+            case Direction.RIGHT:
+                offset.x += 1;
+                break;
+            case Direction.UP:
+                offset.y -= 1;
+                break;
+            case Direction.DOWN:
+                offset.y += 1;
+                break;
+        }
+        return offset;
+    }
+
+    private generateNextState(movementMap: Map<TileCode, Movement[]>) {
+        return undefined;
     }
 }

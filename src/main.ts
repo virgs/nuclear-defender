@@ -5,7 +5,8 @@ import {UrlQueryHandler} from './url-query-handler';
 import {configuration} from './constants/configuration';
 import {NextLevelScene} from './scenes/next-level-scene';
 import {SplashScreenScene} from './scenes/splash-screen-scene';
-import {MapBuilder} from './tiles/map-builder';
+import {StandardSokobanCharactersMapper} from './tiles/standard-sokoban-characters-mapper';
+import {Scenes} from './scenes/scenes';
 
 const config = {
     type: Phaser.AUTO,
@@ -24,13 +25,12 @@ const config = {
 
 window.addEventListener('load', async () => {
     const urlQueryHandler = new UrlQueryHandler();
-    const playerEnabled: boolean = urlQueryHandler.getParameterByName('playerEnabled', 'false') === 'true';
     const mapString: string = urlQueryHandler.getParameterByName('map', '');
     if (mapString.length) {
-        const mapBuilder = new MapBuilder();
+        const standardSokobanCharactersMapper = new StandardSokobanCharactersMapper();
         const levelRows = decodeURI(mapString).split('\n');
-        config.levelMap = mapBuilder.build(levelRows);
+        config.levelMap = standardSokobanCharactersMapper.map(levelRows);
     }
     const game = new Phaser.Game(config);
-    game.scene.start('splash-screen', {map: config.levelMap});
+    game.scene.start(Scenes[Scenes.SPLASH_SCREEN], {map: config.levelMap});
 });

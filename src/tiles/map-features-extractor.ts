@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import {TileCode} from './tile-code';
 import {configuration} from '../constants/configuration';
 
+//TODO extract each to its specific GameActor receiving its sprite in the constructor (to better handle future interactions)
 type SearchMapType = { tile: TileCode, keys: TileCode[], replacement?: TileCode };
 const searchMap: SearchMapType[] = [
     {

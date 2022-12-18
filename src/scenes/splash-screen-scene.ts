@@ -6,12 +6,14 @@ import {configuration} from '../constants/configuration';
 import {FileLevelExtractor} from '../levels/file-level-extractor';
 import WebFontFileLoader from '../file-loaders/web-font-file-loader';
 import {levels} from '../levels/levels';
+import {MapBuilder} from '../tiles/map-builder';
+import {Scenes} from './scenes';
 
 export class SplashScreenScene extends Phaser.Scene {
     private readonly fileLevelExtractor: FileLevelExtractor;
 
     constructor() {
-        super('splash-screen');
+        super(Scenes[Scenes.SPLASH_SCREEN]);
 
         this.fileLevelExtractor = new FileLevelExtractor();
     }
@@ -31,17 +33,16 @@ export class SplashScreenScene extends Phaser.Scene {
 
     create(data: { map: TileCode[][] }) {
         const tileMap = this.make.tilemap({key: configuration.tilemapKey});
-        const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap);
-        // const map = levels[0];
-        // const map = data.map;
-        // console.log(map);
+        // const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap); // from file
+        // const map = new MapBuilder().build(data.map); // from url
+        const map = new MapBuilder().build(levels[0]); // from code
         const gameSceneConfiguration: GameSceneConfiguration = {
             map: map,
             currentLevel: 0,
             hero: new Hero(),
             bestMoves: 0
         };
-        this.scene.start('game', gameSceneConfiguration);
+        this.scene.start(Scenes[Scenes.GAME], gameSceneConfiguration);
     }
 
 }

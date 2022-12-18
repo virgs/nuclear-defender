@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
+import {Scenes} from './scenes';
 import {Hero} from '../actors/hero';
+import {Point} from '../math/points';
 import {TileCode} from '../tiles/tile-code';
+import {Direction} from '../constants/direction';
+import {getTweenFromDirection} from '../actors/tween';
 import {configuration} from '../constants/configuration';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
@@ -22,9 +26,11 @@ export class GameScene extends Phaser.Scene {
     private hero: Hero;
     private featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
     private gameSceneConfiguration: GameSceneConfiguration;
+    private movesCounter: number = 0;
+    private levelComplete: boolean = false;
 
     constructor() {
-        super('game');
+        super(Scenes[Scenes.GAME]);
         this.mapFeaturesExtractor = new MapFeaturesExtractor();
     }
 
@@ -52,8 +58,9 @@ export class GameScene extends Phaser.Scene {
         const mapFeaturesExtractor = new MapFeaturesExtractor();
         this.featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);
         //TODO check if map is valid. number of heroes = 1, number of box = targets, if it's solvable?...
-        console.log(this.featuresMap);
+        // console.log(this.featuresMap);
 
+        //TODO move this to its own specific GameActor class
         [...this.featuresMap.get(TileCode.target),
             ...this.featuresMap.get(TileCode.empty),
             ...this.featuresMap.get(TileCode.floor)]
@@ -64,13 +71,7 @@ export class GameScene extends Phaser.Scene {
             scene: this,
             sprite: this.featuresMap.get(TileCode.hero)[0]
         });
-        this.movementCoordinator =
-            new MovementCoordinator({
-                gameScene: this,
-                featuresMap: this.featuresMap,
-                mapLayer: this.mapLayer,
-                hero: this.hero
-            });
+        this.movementCoordinator = new MovementCoordinator();
         this.movesCountLabel = this.add.text(540, 10, `Moves: 0`, {
             fontFamily: 'Poppins',
             fontSize: '30px'
@@ -79,20 +80,54 @@ export class GameScene extends Phaser.Scene {
     }
 
     public update(time: number, delta: number) {
-        this.hero.update();
-        const movingIntention = this.hero.checkMovingIntention();
-        if (movingIntention !== null) {
-            if (this.movementCoordinator.moveHero(movingIntention)) {
-                this.movesCountLabel.text = `Moves: ${this.movementCoordinator.getMovesCount()}`;
-            }
+        if (this.levelComplete) {
+            return;
         }
+        this.hero.update();
+        const movingIntentionDirection: Direction = this.hero.checkMovingIntentionDirection();
+
+        const mapState = this.createMapState();
+        const mapMovementUpdate = this.movementCoordinator.update({heroMovingIntentionDirection: movingIntentionDirection, mapState: mapState});
+        mapMovementUpdate.movementMap.get(TileCode.hero)
+            .forEach(heroMovement => {
+                ++this.movesCounter;
+                this.movesCountLabel.text = `Moves: ${this.movesCounter}`;
+                this.hero.move(heroMovement.direction);
+            });
+
+        // console.log(mapMovementUpdate.boxesMovements)
+        mapMovementUpdate.movementMap.get(TileCode.box)
+            .forEach(movedBox => {
+                const worldXY = this.mapLayer.tileToWorldXY(movedBox.currentPosition.x, movedBox.currentPosition.y);
+                const boxToMove = this.featuresMap
+                    .get(TileCode.box)
+                    .find(worldBox => worldBox.x === worldXY.x && worldBox.y === worldXY.y);
+                this.moveBox(boxToMove, movedBox.direction);
+            });
     }
 
-    public onMovementComplete(): void {
+    private createMapState(): Map<TileCode, Point[]> {
+        const mapState: Map<TileCode, Point[]> = new Map<TileCode, Point[]>();
+        for (let [key, value] of this.featuresMap) {
+            mapState.set(key, value
+                .map(sprite => this.mapLayer.worldToTileXY(sprite.x, sprite.y)));
+        }
+        return mapState;
+    }
+
+    public moveBox(box: Phaser.GameObjects.Sprite, direction: Direction) {
+        const tween = {
+            ...getTweenFromDirection(direction),
+            targets: box,
+            onComplete: () => this.onMovementComplete(),
+            onCompleteScope: this
+        };
+        this.addTween(tween);
+    }
+
+    private onMovementComplete(): void {
         this.updateBoxesColor();
         this.checkLevelComplete();
-        console.log(this.featuresMap);
-
     }
 
     private updateBoxesColor() {
@@ -124,13 +159,14 @@ export class GameScene extends Phaser.Scene {
                             targetTilePosition.y === boxTilePosition.y;
                     });
             })) {
+            this.levelComplete = true;
             console.log('currentLevel complete');
             setTimeout(() => {
-                this.scene.start('next-level', {
+                this.scene.start(Scenes[Scenes.NEXT_LEVEL], {
                     gameSceneConfiguration: this.gameSceneConfiguration,
-                    numMoves: this.movementCoordinator.getMovesCount()
+                    numMoves: this.movesCounter
                 });
-            }, 1000);
+            }, 1500);
         }
     }
 

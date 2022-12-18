@@ -18,18 +18,18 @@ export function getTweenFromDirection(direction: Direction) {
 const tween = {
     DOWN: {
         y: '+=' + configuration.verticalTileSize,
-        duration: configuration.walkingDuration * TimeController.getTimeFactor()
+        duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     },
     LEFT: {
         x: '-=' + configuration.horizontalTileSize,
-        duration: configuration.walkingDuration * TimeController.getTimeFactor()
+        duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     },
     RIGHT: {
         x: '+=' + configuration.horizontalTileSize,
-        duration: configuration.walkingDuration * TimeController.getTimeFactor()
+        duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     },
     UP: {
         y: '-=' + configuration.verticalTileSize,
-        duration: configuration.walkingDuration * TimeController.getTimeFactor()
+        duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     }
 };

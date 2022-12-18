@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
+import {Scenes} from './scenes';
 import {levels} from '../levels/levels';
 import {GameSceneConfiguration} from './game-scene';
 import {defaultButton, primaryButton} from '../ui/button';
 
 export class NextLevelScene extends Phaser.Scene {
     constructor() {
-        super('next-level');
+        super(Scenes[Scenes.NEXT_LEVEL]);
     }
 
     public create(data: { gameSceneConfiguration: GameSceneConfiguration, numMoves: number }) {
@@ -37,7 +38,7 @@ export class NextLevelScene extends Phaser.Scene {
         const retry = this.add.dom(width * 0.5, height * 0.7, retryButton)
             .addListener('click')
             .once('click', () => {
-                this.scene.start('game', data.gameSceneConfiguration);
+                this.scene.start(Scenes[Scenes.GAME], data.gameSceneConfiguration);
             });
 
         const nextLevelButton = primaryButton('Next Level');
@@ -50,7 +51,7 @@ export class NextLevelScene extends Phaser.Scene {
                     currentLevel: data.gameSceneConfiguration.currentLevel + 1,
                     hero: data.gameSceneConfiguration.hero
                 };
-                this.scene.start('game', nextLevelConfiguration);
+                this.scene.start(Scenes[Scenes.GAME], nextLevelConfiguration);
             });
     }
 }
