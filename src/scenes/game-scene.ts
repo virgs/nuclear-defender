@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
 import {Hero} from '../actors/hero';
-import {Point} from '../math/points';
+import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Direction} from '../constants/direction';
 import {getTweenFromDirection} from '../actors/tween';
 import {configuration} from '../constants/configuration';
-import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {MovementCoordinator, MovementCoordinatorOutput} from '../actors/movement-coordinator';
 
 export type GameSceneConfiguration = {
     map: TileCode[][],
@@ -87,16 +87,25 @@ export class GameScene extends Phaser.Scene {
         const movingIntentionDirection: Direction = this.hero.checkMovingIntentionDirection();
 
         const mapState = this.createMapState();
-        const mapMovementUpdate = this.movementCoordinator.update({heroMovingIntentionDirection: movingIntentionDirection, mapState: mapState});
-        mapMovementUpdate.movementMap.get(TileCode.hero)
+        const movementCoordinatorOutput = this.movementCoordinator.update({
+            heroMovingIntentionDirection: movingIntentionDirection,
+            mapState: mapState
+        });
+        if (movementCoordinatorOutput.mapChanged) {
+            this.moveMapFeatures(movementCoordinatorOutput);
+        }
+    }
+
+    private moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
+        movementCoordinatorOutput.movementMap.get(TileCode.hero)
             .forEach(heroMovement => {
                 ++this.movesCounter;
                 this.movesCountLabel.text = `Moves: ${this.movesCounter}`;
                 this.hero.move(heroMovement.direction);
             });
 
-        // console.log(mapMovementUpdate.boxesMovements)
-        mapMovementUpdate.movementMap.get(TileCode.box)
+        // console.log(movementCoordinatorOutput.boxesMovements)
+        movementCoordinatorOutput.movementMap.get(TileCode.box)
             .forEach(movedBox => {
                 const worldXY = this.mapLayer.tileToWorldXY(movedBox.currentPosition.x, movedBox.currentPosition.y);
                 const boxToMove = this.featuresMap

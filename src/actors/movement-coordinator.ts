@@ -1,4 +1,4 @@
-import {Point} from '../math/points';
+import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Direction} from '../constants/direction';
 
@@ -8,6 +8,7 @@ type Movement = {
     direction: Direction
 };
 export type MovementCoordinatorOutput = {
+    mapChanged: boolean,
     newState: Map<TileCode, Point[]>,
     movementMap: Map<TileCode, Movement[]>
 };
@@ -17,13 +18,14 @@ export type MovementCoordinatorInput = { mapState: Map<TileCode, Point[]>; heroM
 export class MovementCoordinator {
 
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
-        const result = this.initializeOutput();
+        const result = this.initializeOutput(input);
         const heroMovingIntentionDirection = input.heroMovingIntentionDirection;
         if (heroMovingIntentionDirection !== null) {
             const heroPosition = input.mapState.get(TileCode.hero)[0];
             const newHeroPosition = this.calculateOffset(heroMovingIntentionDirection, heroPosition);
 
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
+                result.mapChanged = true;
                 result.movementMap.set(TileCode.hero, [{
                     currentPosition: heroPosition,
                     newPosition: newHeroPosition,
@@ -40,14 +42,18 @@ export class MovementCoordinator {
                 }
             }
         }
-        result.newState = this.generateNextState(result.movementMap);
+
+        if (result.mapChanged) {
+            result.newState = this.generateNextState(input, result.movementMap);
+        }
         return result;
     }
 
-    private initializeOutput() {
+    private initializeOutput(input: MovementCoordinatorInput) {
         const result: MovementCoordinatorOutput = {
+            mapChanged: false,
             movementMap: new Map<TileCode, Movement[]>(),
-            newState: undefined
+            newState: input.mapState
         };
         result.movementMap.set(TileCode.hero, []);
         result.movementMap.set(TileCode.box, []);
@@ -110,7 +116,19 @@ export class MovementCoordinator {
         return offset;
     }
 
-    private generateNextState(movementMap: Map<TileCode, Movement[]>) {
-        return undefined;
+    private generateNextState(input: MovementCoordinatorInput, movementMap: Map<TileCode, Movement[]>) {
+        const baseState: Map<TileCode, Point[]> = new Map(JSON.parse(JSON.stringify(Array.from(input.mapState))));
+        for (let [tileCode, movementList] of movementMap.entries()) {
+            movementList
+                .forEach(move => {
+                    baseState.get(tileCode)
+                        .filter(tile => tile.x === move.currentPosition.x && tile.y === move.currentPosition.y)
+                        .forEach(tile => {
+                            tile.x = move.newPosition.x;
+                            tile.y = move.newPosition.y;
+                        });
+                });
+        }
+        return baseState;
     }
 }

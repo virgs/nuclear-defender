@@ -34,8 +34,8 @@ export class SplashScreenScene extends Phaser.Scene {
     create(data: { map: TileCode[][] }) {
         const tileMap = this.make.tilemap({key: configuration.tilemapKey});
         // const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap); // from file
-        // const map = new MapBuilder().build(data.map); // from url
-        const map = new MapBuilder().build(levels[0]); // from code
+        const map = new MapBuilder().build(data.map); // from url
+        // const map = new MapBuilder().build(levels[0]); // from code
         const gameSceneConfiguration: GameSceneConfiguration = {
             map: map,
             currentLevel: 0,
