@@ -13,3 +13,13 @@ export const levels = [[
     .map(level => level
         .map(line => line
             .map(tile => tile + 1))); // to match the values generated from Tiled Software
+//
+// export const levels = [[
+//     [TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall],
+//     [TileCode.wall, TileCode.floor, TileCode.hero, TileCode.floor, TileCode.floor, TileCode.floor, TileCode.wall],
+//     [TileCode.wall, TileCode.floor, TileCode.floor, TileCode.target, TileCode.box, TileCode.floor, TileCode.wall],
+//     [TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall, TileCode.wall]
+// ]]
+//     .map(level => level
+//         .map(line => line
+//             .map(tile => tile + 1))); // to match the values generated from Tiled Software

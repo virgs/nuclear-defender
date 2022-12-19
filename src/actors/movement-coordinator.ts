@@ -7,13 +7,17 @@ type Movement = {
     newPosition: Point,
     direction: Direction
 };
-export type MovementCoordinatorOutput = {
-    mapChanged: boolean,
-    newState: Map<TileCode, Point[]>,
-    movementMap: Map<TileCode, Movement[]>
+
+export type MovementCoordinatorInput = {
+    mapState: Map<TileCode, Point[]>;
+    heroMovingIntentionDirection: Direction
 };
 
-export type MovementCoordinatorInput = { mapState: Map<TileCode, Point[]>; heroMovingIntentionDirection: Direction };
+export type MovementCoordinatorOutput = {
+    mapChanged: boolean,
+    newMapState: Map<TileCode, Point[]>,
+    featuresMovementMap: Map<TileCode, Movement[]>
+};
 
 export class MovementCoordinator {
 
@@ -26,7 +30,7 @@ export class MovementCoordinator {
 
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
                 result.mapChanged = true;
-                result.movementMap.set(TileCode.hero, [{
+                result.featuresMovementMap.set(TileCode.hero, [{
                     currentPosition: heroPosition,
                     newPosition: newHeroPosition,
                     direction: heroMovingIntentionDirection
@@ -34,7 +38,7 @@ export class MovementCoordinator {
 
                 const boxAhead = this.getBoxAt(newHeroPosition, input.mapState);
                 if (boxAhead) {
-                    result.movementMap.set(TileCode.box, [{
+                    result.featuresMovementMap.set(TileCode.box, [{
                         currentPosition: boxAhead,
                         newPosition: this.calculateOffset(input.heroMovingIntentionDirection, boxAhead),
                         direction: heroMovingIntentionDirection
@@ -44,7 +48,7 @@ export class MovementCoordinator {
         }
 
         if (result.mapChanged) {
-            result.newState = this.generateNextState(input, result.movementMap);
+            result.newMapState = this.generateNextState(input, result.featuresMovementMap);
         }
         return result;
     }
@@ -52,11 +56,11 @@ export class MovementCoordinator {
     private initializeOutput(input: MovementCoordinatorInput) {
         const result: MovementCoordinatorOutput = {
             mapChanged: false,
-            movementMap: new Map<TileCode, Movement[]>(),
-            newState: input.mapState
+            featuresMovementMap: new Map<TileCode, Movement[]>(),
+            newMapState: input.mapState
         };
-        result.movementMap.set(TileCode.hero, []);
-        result.movementMap.set(TileCode.box, []);
+        result.featuresMovementMap.set(TileCode.hero, []);
+        result.featuresMovementMap.set(TileCode.box, []);
         return result;
     }
 

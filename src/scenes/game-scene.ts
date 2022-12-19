@@ -4,6 +4,7 @@ import {Hero} from '../actors/hero';
 import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Direction} from '../constants/direction';
+import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
 import {configuration} from '../constants/configuration';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
@@ -12,7 +13,6 @@ import {MovementCoordinator, MovementCoordinatorOutput} from '../actors/movement
 export type GameSceneConfiguration = {
     map: TileCode[][],
     currentLevel: number,
-    hero: Hero,
     bestMoves: number
 };
 
@@ -26,8 +26,10 @@ export class GameScene extends Phaser.Scene {
     private hero: Hero;
     private featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
     private gameSceneConfiguration: GameSceneConfiguration;
-    private movesCounter: number = 0;
-    private levelComplete: boolean = false;
+    private movesCounter: number;
+    private levelComplete: boolean;
+    private solution: Direction[];
+    private heroMovementIsOver: boolean;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -35,6 +37,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     public init(gameSceneConfiguration: GameSceneConfiguration) {
+        this.movesCounter = 0;
+        this.levelComplete = false;
+        this.heroMovementIsOver = true;
         this.gameSceneConfiguration = gameSceneConfiguration;
     }
 
@@ -66,7 +71,7 @@ export class GameScene extends Phaser.Scene {
             ...this.featuresMap.get(TileCode.floor)]
             .forEach(item => item.setDepth(0));
 
-        this.hero = gameSceneConfiguration.hero;
+        this.hero = new Hero();
         this.hero.init({
             scene: this,
             sprite: this.featuresMap.get(TileCode.hero)[0]
@@ -76,43 +81,50 @@ export class GameScene extends Phaser.Scene {
             fontFamily: 'Poppins',
             fontSize: '30px'
         });
-
+        this.solution = new SokobanSolver().solve(this.createMapState());
     }
 
-    public update(time: number, delta: number) {
+    public async update(time: number, delta: number) {
         if (this.levelComplete) {
             return;
         }
-        this.hero.update();
-        const movingIntentionDirection: Direction = this.hero.checkMovingIntentionDirection();
+        if (this.heroMovementIsOver) {
+            let movingIntentionDirection: Direction = this.hero.checkMovingIntentionDirection();
 
-        const mapState = this.createMapState();
-        const movementCoordinatorOutput = this.movementCoordinator.update({
-            heroMovingIntentionDirection: movingIntentionDirection,
-            mapState: mapState
-        });
-        if (movementCoordinatorOutput.mapChanged) {
-            this.moveMapFeatures(movementCoordinatorOutput);
+            if (this.solution && this.solution.length > 0) {
+                movingIntentionDirection = this.solution.shift();
+            }
+
+            const mapState = this.createMapState();
+            const movementCoordinatorOutput = this.movementCoordinator.update({
+                heroMovingIntentionDirection: movingIntentionDirection,
+                mapState: mapState
+            });
+            if (movementCoordinatorOutput.mapChanged) {
+                this.heroMovementIsOver = false;
+                await this.moveMapFeatures(movementCoordinatorOutput);
+            }
         }
     }
 
-    private moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
-        movementCoordinatorOutput.movementMap.get(TileCode.hero)
-            .forEach(heroMovement => {
-                ++this.movesCounter;
-                this.movesCountLabel.text = `Moves: ${this.movesCounter}`;
-                this.hero.move(heroMovement.direction);
-            });
-
-        // console.log(movementCoordinatorOutput.boxesMovements)
-        movementCoordinatorOutput.movementMap.get(TileCode.box)
-            .forEach(movedBox => {
+    private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
+        const boxMovements = movementCoordinatorOutput.featuresMovementMap.get(TileCode.box)
+            .map(async movedBox => {
                 const worldXY = this.mapLayer.tileToWorldXY(movedBox.currentPosition.x, movedBox.currentPosition.y);
                 const boxToMove = this.featuresMap
                     .get(TileCode.box)
                     .find(worldBox => worldBox.x === worldXY.x && worldBox.y === worldXY.y);
-                this.moveBox(boxToMove, movedBox.direction);
+                await this.moveBox(boxToMove, movedBox.direction);
+                this.onBoxesMovementComplete();
             });
+        const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCode.hero)
+            .map(async heroMovement => {
+                ++this.movesCounter;
+                this.movesCountLabel.text = `Moves: ${this.movesCounter}`;
+                await this.hero.move(heroMovement.direction);
+                this.heroMovementIsOver = true;
+            });
+        await Promise.all([playerMovement, boxMovements]);
     }
 
     private createMapState(): Map<TileCode, Point[]> {
@@ -124,17 +136,19 @@ export class GameScene extends Phaser.Scene {
         return mapState;
     }
 
-    public moveBox(box: Phaser.GameObjects.Sprite, direction: Direction) {
-        const tween = {
-            ...getTweenFromDirection(direction),
-            targets: box,
-            onComplete: () => this.onMovementComplete(),
-            onCompleteScope: this
-        };
-        this.addTween(tween);
+    public async moveBox(box: Phaser.GameObjects.Sprite, direction: Direction): Promise<void> {
+        return new Promise<void>(resolve => {
+            const tween = {
+                ...getTweenFromDirection(direction),
+                targets: box,
+                onComplete: () => resolve(),
+                onCompleteScope: this
+            };
+            this.addTween(tween);
+        });
     }
 
-    private onMovementComplete(): void {
+    private onBoxesMovementComplete(): void {
         this.updateBoxesColor();
         this.checkLevelComplete();
     }

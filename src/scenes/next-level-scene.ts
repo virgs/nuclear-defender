@@ -48,8 +48,7 @@ export class NextLevelScene extends Phaser.Scene {
                 const nextLevelConfiguration: GameSceneConfiguration = {
                     map: levels[0],
                     bestMoves: data.gameSceneConfiguration.bestMoves,
-                    currentLevel: data.gameSceneConfiguration.currentLevel + 1,
-                    hero: data.gameSceneConfiguration.hero
+                    currentLevel: data.gameSceneConfiguration.currentLevel + 1
                 };
                 this.scene.start(Scenes[Scenes.GAME], nextLevelConfiguration);
             });

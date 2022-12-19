@@ -5,7 +5,7 @@ import {UrlQueryHandler} from './url-query-handler';
 import {configuration} from './constants/configuration';
 import {NextLevelScene} from './scenes/next-level-scene';
 import {SplashScreenScene} from './scenes/splash-screen-scene';
-import {StandardSokobanCharactersMapper} from './tiles/standard-sokoban-characters-mapper';
+import {StandardSokobanAnnotationMapper} from './tiles/standard-sokoban-annotation-mapper';
 import {Scenes} from './scenes/scenes';
 
 const config = {
@@ -27,7 +27,7 @@ window.addEventListener('load', async () => {
     const urlQueryHandler = new UrlQueryHandler();
     const mapString: string = urlQueryHandler.getParameterByName('map', '');
     if (mapString.length) {
-        const standardSokobanCharactersMapper = new StandardSokobanCharactersMapper();
+        const standardSokobanCharactersMapper = new StandardSokobanAnnotationMapper();
         const levelRows = decodeURI(mapString).split('\n');
         config.levelMap = standardSokobanCharactersMapper.map(levelRows);
     }

@@ -1,10 +1,10 @@
 import {TileCode} from './tile-code';
 
-export class StandardSokobanCharactersMapper {
+export class StandardSokobanAnnotationMapper {
     public map(levelRows: string[]): TileCode[][] {
         return levelRows
             .map(row => row.split('')
-                .map(char => StandardSokobanCharactersMapper.getTileTypeFromString(char) + 1)); // to match the values generated from Tiled Software
+                .map(char => StandardSokobanAnnotationMapper.getTileTypeFromString(char) + 1)); // to match the values generated from Tiled Software
     }
 
     private static getTileTypeFromString(char: string): TileCode {

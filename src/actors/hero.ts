@@ -36,11 +36,6 @@ export class Hero {
             .forEach(item => this.sprite.anims.create(item));
     }
 
-    //TODO extract this to interface
-    public update() {
-        this.sprite.setDepth(this.sprite.y - configuration.verticalTileSize / 2);
-    }
-
     public checkMovingIntentionDirection(): Direction {
         if (!this.isMoving) {
             for (let [direction, directionCheckFunction] of this.inputMap.entries()) {
@@ -53,20 +48,26 @@ export class Hero {
     }
 
     //TODO extract this to interface
-    public move(direction: Direction) {
-        this.isMoving = true;
-        const heroMovement = this.heroAnimator.map(direction);
+    public async move(direction: Direction): Promise<void> {
+        return new Promise<void>((resolve) => {
+            this.isMoving = true;
+            const heroMovement = this.heroAnimator.map(direction);
 
-        this.sprite.anims.play(heroMovement.walking, true);
+            this.sprite.anims.play(heroMovement.walking, true);
 
-        this.tweens.add({
-            ...heroMovement.tween,
-            targets: this.sprite,
-            onComplete: () => {
-                this.sprite.anims.play(heroMovement.idle, true);
-                this.isMoving = false;
-            },
-            onCompleteScope: this
+            this.tweens.add({
+                ...heroMovement.tween,
+                targets: this.sprite,
+                onUpdate: () => {
+                    this.sprite.setDepth(this.sprite.y - configuration.verticalTileSize / 2);
+                },
+                onComplete: () => {
+                    this.sprite.anims.play(heroMovement.idle, true);
+                    this.isMoving = false;
+                    resolve();
+                },
+                onCompleteScope: this
+            });
         });
     }
 
