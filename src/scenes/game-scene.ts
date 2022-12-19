@@ -4,8 +4,10 @@ import {Hero} from '../actors/hero';
 import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Direction} from '../constants/direction';
+import {loadingElement} from '../ui/dom-elements';
 import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
+import {NextLevelSceneInput} from './next-level-scene';
 import {configuration} from '../constants/configuration';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import {MovementCoordinator, MovementCoordinatorOutput} from '../actors/movement-coordinator';
@@ -26,10 +28,10 @@ export class GameScene extends Phaser.Scene {
     private hero: Hero;
     private featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
     private gameSceneConfiguration: GameSceneConfiguration;
-    private movesCounter: number;
     private levelComplete: boolean;
     private solution: Direction[];
-    private heroMovementIsOver: boolean;
+    private allowHeroMovement: boolean;
+    private playerMovesSoFar: Direction[];
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -37,10 +39,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     public init(gameSceneConfiguration: GameSceneConfiguration) {
-        this.movesCounter = 0;
         this.levelComplete = false;
-        this.heroMovementIsOver = true;
         this.gameSceneConfiguration = gameSceneConfiguration;
+        this.playerMovesSoFar = [];
     }
 
     public preload() {
@@ -50,7 +51,7 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    public create(gameSceneConfiguration: GameSceneConfiguration) {
+    public async create(gameSceneConfiguration: GameSceneConfiguration) {
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
         const map = this.make.tilemap({
             data: gameSceneConfiguration.map,
@@ -81,14 +82,19 @@ export class GameScene extends Phaser.Scene {
             fontFamily: 'Poppins',
             fontSize: '30px'
         });
-        // this.solution = new SokobanSolver().solve(this.createMapState());
+
+        const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, loadingElement())
+            .setOrigin(0.5);
+        // this.solution = await new SokobanSolver().solve(this.createMapState());
+        loading.removeElement();
+        this.allowHeroMovement = true;
     }
 
     public async update(time: number, delta: number) {
         if (this.levelComplete) {
             return;
         }
-        if (this.heroMovementIsOver) {
+        if (this.allowHeroMovement) {
             let movingIntentionDirection: Direction = this.hero.checkMovingIntentionDirection();
 
             if (this.solution && this.solution.length > 0) {
@@ -101,7 +107,7 @@ export class GameScene extends Phaser.Scene {
                 mapState: mapState
             });
             if (movementCoordinatorOutput.mapChanged) {
-                this.heroMovementIsOver = false;
+                this.allowHeroMovement = false;
                 await this.moveMapFeatures(movementCoordinatorOutput);
             }
         }
@@ -119,10 +125,10 @@ export class GameScene extends Phaser.Scene {
             });
         const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCode.hero)
             .map(async heroMovement => {
-                ++this.movesCounter;
-                this.movesCountLabel.text = `Moves: ${this.movesCounter}`;
+                this.playerMovesSoFar.push(heroMovement.direction);
+                this.movesCountLabel.text = `Moves: ${this.playerMovesSoFar.length}`;
                 await this.hero.move(heroMovement.direction);
-                this.heroMovementIsOver = true;
+                this.allowHeroMovement = true;
             });
         await Promise.all([playerMovement, boxMovements]);
     }
@@ -185,10 +191,11 @@ export class GameScene extends Phaser.Scene {
             this.levelComplete = true;
             console.log('currentLevel complete');
             setTimeout(() => {
-                this.scene.start(Scenes[Scenes.NEXT_LEVEL], {
-                    gameSceneConfiguration: this.gameSceneConfiguration,
-                    numMoves: this.movesCounter
-                });
+                const input: NextLevelSceneInput = {
+                    currentLevel: this.gameSceneConfiguration.currentLevel,
+                    moves: this.playerMovesSoFar
+                };
+                this.scene.start(Scenes[Scenes.NEXT_LEVEL], input);
             }, 1500);
         }
     }

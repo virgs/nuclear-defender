@@ -5,21 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>AI Sokoban</title>
     <!-- CSS only -->
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"-->
-<!--          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">-->
+    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"-->
+    <!--          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
 </head>
 <style>
-    .game-canvas {
-        text-align: center;
-        background-color: black;
-        margin-top: 20px;
-        margin-left: 20px
+    .fadeout {
+        /*visibility: hidden;*/
+        /*opacity: 0;*/
+        filter: opacity(0);
+        transition: all 1000ms;
     }
 </style>
 
 <body>
-<div class="game-canvas" id="app"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                <div id="app"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <script type="module" src="src/main.ts"></script>
 </body>
 

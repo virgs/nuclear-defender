@@ -28,7 +28,7 @@ export class SokobanSolver {
         this.movementCoordinator = new MovementCoordinator();
     }
 
-    public solve(initialMapState: Map<TileCode, Point[]>): Direction[] {
+    public async solve(initialMapState: Map<TileCode, Point[]>): Promise<Direction[]> {
         console.log('Solving it');
         this.solutionCandidates.push({
             path: [],
@@ -36,13 +36,22 @@ export class SokobanSolver {
             score: 0
         });
 
+        let cpuBreath = 0;
         let iterationCounter = 0;
         let solution: Solution = undefined;
+        const breathingValue = 200;
         while (this.solutionCandidates.size() > 0) {
             ++iterationCounter;
+            ++cpuBreath;
+            // console.log(iterationCounter, cpuBreath)
             solution = this.iterate();
             if (solution) {
                 break;
+            }
+            if (cpuBreath > breathingValue) {
+                cpuBreath -= breathingValue;
+                console.log('breathing', iterationCounter);
+                await new Promise(r => setTimeout(r, 200));
             }
         }
 
