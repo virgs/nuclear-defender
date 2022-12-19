@@ -81,7 +81,7 @@ export class GameScene extends Phaser.Scene {
             fontFamily: 'Poppins',
             fontSize: '30px'
         });
-        this.solution = new SokobanSolver().solve(this.createMapState());
+        // this.solution = new SokobanSolver().solve(this.createMapState());
     }
 
     public async update(time: number, delta: number) {

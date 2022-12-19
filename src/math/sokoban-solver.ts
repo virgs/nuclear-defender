@@ -1,5 +1,6 @@
 import {Point} from './point';
 import {TileCode} from '../tiles/tile-code';
+import {PriorityQueue} from './priority-queue';
 import {Direction} from '../constants/direction';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 
@@ -9,14 +10,18 @@ type Solution = {
     score: number
 };
 
+enum ScoreBonus {
+    PLAYER_MOVED = 1,
+    BOX_MOVED = 0
+}
+
 const actions = Object.keys(Direction)
     .filter(key => !isNaN(Number(key)))
     .map(key => Number(key) as Direction);
 
 export class SokobanSolver {
     private movementCoordinator: MovementCoordinator;
-    // private solutionCandidates: PriorityQueue<Solution> = new PriorityQueue((a: Solution, b: Solution) => a.score >= b.score);
-    private solutionCandidates: Solution[] = [];
+    private solutionCandidates: PriorityQueue<Solution> = new PriorityQueue((a: Solution, b: Solution) => a.score >= b.score);
     private visitedSolutions: string[] = [];
 
     public constructor() {
@@ -33,7 +38,7 @@ export class SokobanSolver {
 
         let iterationCounter = 0;
         let solution: Solution = undefined;
-        while (this.solutionCandidates.length > 0) {
+        while (this.solutionCandidates.size() > 0) {
             ++iterationCounter;
             solution = this.iterate();
             if (solution) {
@@ -42,12 +47,13 @@ export class SokobanSolver {
         }
 
         if (solution) {
+            console.log('solution found. Steps: ' + solution.path.length + '. Iterations: ' + iterationCounter);
             return solution.path;
         }
     }
 
     private iterate(): Solution {
-        const currentCandidate = this.solutionCandidates.shift();
+        const currentCandidate = this.solutionCandidates.pop();
         const hashOfCurrentSolution = this.calculateHashOfSolution(currentCandidate);
         if (this.wasSolutionVisitedBefore(hashOfCurrentSolution)) {
             return;
@@ -64,7 +70,7 @@ export class SokobanSolver {
             });
 
             const newCandidate: Solution = {
-                score: currentSolution.score + 1,
+                score: currentSolution.score + ScoreBonus.PLAYER_MOVED,
                 path: currentSolution.path.concat(direction),
                 state: movementCoordinatorOutput.newMapState
             };
@@ -72,9 +78,10 @@ export class SokobanSolver {
             if (movementCoordinatorOutput.mapChanged) {
                 if (this.solutionSolvesMap(movementCoordinatorOutput.newMapState)) {
                     return newCandidate;
-                } else {
-                    this.solutionCandidates.push(newCandidate);
+                } else if (movementCoordinatorOutput.featuresMovementMap.get(TileCode.box).length > 0) {
+                    newCandidate.score += ScoreBonus.BOX_MOVED;
                 }
+                this.solutionCandidates.push(newCandidate);
             }
         }
     }
