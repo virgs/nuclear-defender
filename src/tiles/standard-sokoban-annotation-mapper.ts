@@ -9,6 +9,10 @@ export class StandardSokobanAnnotationMapper {
 
     private static getTileTypeFromString(char: string): TileCode {
         switch (char) {
+            case '-':
+                return TileCode.empty;
+            case ' ':
+                return TileCode.floor;
             case '#':
                 return TileCode.wall;
             case '.':

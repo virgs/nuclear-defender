@@ -10,6 +10,7 @@ type Movement = {
 };
 
 export type MovementCoordinatorInput = {
+    //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
     mapState: Map<TileCode, Point[]>;
     heroAction: Actions
 };
@@ -17,11 +18,11 @@ export type MovementCoordinatorInput = {
 export type MovementCoordinatorOutput = {
     mapChanged: boolean,
     newMapState: Map<TileCode, Point[]>,
+    //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
     featuresMovementMap: Map<TileCode, Movement[]>
 };
 
 export class MovementCoordinator {
-
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
         const result = this.initializeOutput(input);
         if (input.heroAction !== Actions.STAND) {

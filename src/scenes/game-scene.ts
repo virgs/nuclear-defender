@@ -5,7 +5,6 @@ import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Actions} from '../constants/actions';
 import {Directions} from '../constants/directions';
-import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
 import {NextLevelSceneInput} from './next-level-scene';
 import {configuration} from '../constants/configuration';
@@ -20,6 +19,7 @@ export type GameSceneConfiguration = {
     bestMoves: number
 };
 
+//TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
 export class GameScene extends Phaser.Scene {
     private readonly mapFeaturesExtractor: MapFeaturesExtractor;
 
@@ -66,7 +66,7 @@ export class GameScene extends Phaser.Scene {
         this.mapLayer = map.createLayer(0, tilesetImage);
 
         const mapFeaturesExtractor = new MapFeaturesExtractor();
-        this.featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer);
+        this.featuresMap = mapFeaturesExtractor.extractFeatures(this, this.mapLayer);
         //TODO check if map is valid. number of heroes = 1, number of box = targets, if it's solvable?...
         // console.log(this.featuresMap);
 
@@ -90,7 +90,6 @@ export class GameScene extends Phaser.Scene {
         const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, createIndefiniteProgressBar())
             .setOrigin(0.5);
         this.solution = input.moves;
-        console.log(input.currentLevel)
         // this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
