@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
 import * as lzString from 'lz-string';
-import * as domElements from '../ui/dom-elements';
+import * as domElements from '../ui/htmlElements';
 import {configuration} from '../constants/configuration';
 import {Actions, mapActionToString} from '../constants/actions';
 
@@ -37,30 +37,29 @@ export class NextLevelScene extends Phaser.Scene {
 
         this.showMovesCode(data, horizontalCenterPosition, height * 0.4);
 
-        const retryButton = domElements.retryButtonElement('Retry', () => {
+        const retryButton = domElements.createButton('Retry', () => {
             console.log('retry');
             // this.scene.start(Scenes[Scenes.GAME], data.gameSceneConfiguration);
         });
-        const nextLevelButton = domElements.nextButtonElement('Next Level', () => {
+        const nextLevelButton = domElements.createHighlightButton('Next Level', () => {
             console.log('next');
             // this.scene.start(Scenes[Scenes.GAME], data.gameSceneConfiguration)
         });
 
         const buttonsGroup = domElements.groupButtonsElement(retryButton, nextLevelButton);
         this.add.dom(horizontalCenterPosition, height * 0.64, buttonsGroup);
-
     }
 
     private showMovesCode(data: NextLevelSceneInput, x: number, y: number) {
         const mapText = data.moves.map(action => mapActionToString(action)).join('');
         const compressed = lzString.compressToEncodedURIComponent(mapText);
-        const showMovesCode = domElements.createInputWithLabel('Moves code', compressed, true);
+        const showMovesCode = domElements.createInputWithLabel('Moves code', compressed, true, null);
         this.add.dom(x, y, showMovesCode)
             .addListener('click')
             .once('click', async () => {
                 await navigator.clipboard.writeText(compressed);
 
-                const showMovesText = domElements.alertElement('Moves code to clipboard. Share it!');
+                const showMovesText = domElements.createAlert('Moves code to clipboard. Share it!');
                 this.add.dom(x, y * 0.1, showMovesText).setOrigin(0.5);
             }).setOrigin(0.5);
     }

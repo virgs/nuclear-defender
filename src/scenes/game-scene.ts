@@ -4,7 +4,7 @@ import {Hero} from '../actors/hero';
 import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Actions} from '../constants/actions';
-import {loadingElement} from '../ui/dom-elements';
+import {createIndefiniteProgressBar} from '../ui/htmlElements';
 import {Directions} from '../constants/directions';
 import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
@@ -87,7 +87,7 @@ export class GameScene extends Phaser.Scene {
             fontSize: '30px'
         });
 
-        const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, loadingElement())
+        const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, createIndefiniteProgressBar())
             .setOrigin(0.5);
         this.solution = input.moves;
         // this.solution = await new SokobanSolver().solve(this.createMapState());

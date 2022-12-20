@@ -1,14 +1,14 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
 import * as lzString from 'lz-string';
-import {levels} from '../levels/levels';
 import {TileCode} from '../tiles/tile-code';
-import {Actions, mapStringToAction} from '../constants/actions';
 import {MapBuilder} from '../tiles/map-builder';
 import {GameSceneConfiguration} from './game-scene';
 import {configuration} from '../constants/configuration';
+import {Actions, mapStringToAction} from '../constants/actions';
 import {FileLevelExtractor} from '../levels/file-level-extractor';
 import WebFontFileLoader from '../file-loaders/web-font-file-loader';
+import {splashScreenHtml, SplashScreenOnPlayClickCallback} from '../ui/splash-screen-html';
 import {StandardSokobanAnnotationMapper} from '../tiles/standard-sokoban-annotation-mapper';
 
 export type SplashScreenInput = {};
@@ -25,7 +25,8 @@ export class SplashScreenScene extends Phaser.Scene {
     preload() {
         const fonts = new WebFontFileLoader(this.load, 'google', [
             'Poppins',
-            'Righteous'
+            'Righteous',
+            'Martian Mono'
         ]);
         this.load.addFile(fonts);
 
@@ -37,30 +38,45 @@ export class SplashScreenScene extends Phaser.Scene {
     }
 
     private parseMap(map: string): TileCode[][] {
-        const annotationMap: string[] = map.split('\n');
-        const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);
-        return new MapBuilder().build(tileMap);
+        if (map.length > 0) {
+            const annotationMap: string[] = map.split('\n');
+            const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);
+            return new MapBuilder().build(tileMap);
+        }
+        return [];
     }
 
     private parseMoves(compressedMoves: string): Actions[] {
-        const movesText: string = lzString.decompressFromEncodedURIComponent(compressedMoves);
-        return movesText.split('')
-            .map(char => mapStringToAction(char));
+        if (compressedMoves) {
+            const movesText: string = lzString.decompressFromEncodedURIComponent(compressedMoves);
+            return movesText.split('')
+                .map(char => mapStringToAction(char));
+        }
+        return [];
     }
 
     create(data: SplashScreenInput) {
         const tileMap = this.make.tilemap({key: configuration.tilemapKey});
         // const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap); // from file
-        const map = new MapBuilder().build(levels[0]); // from code
-        // const map = this.parseMap(``)
-        // const moves = this.parseMoves('M418ZXTBOYFcExcANqAJkA');
-        const gameSceneConfiguration: GameSceneConfiguration = {
-            map: map,
-            moves: [],
-            currentLevel: 0,
-            bestMoves: 0
-        };
-        this.scene.start(Scenes[Scenes.GAME], gameSceneConfiguration);
+
+        const htmlElementInput = splashScreenHtml({
+            onPlayClick: (data: SplashScreenOnPlayClickCallback) => {
+                const map = this.parseMap(data.map);
+                const moves = this.parseMoves(data.moves);
+                console.log(map, moves);
+                const gameSceneConfiguration: GameSceneConfiguration = {
+                    map: map,
+                    moves: moves,
+                    currentLevel: 0,
+                    bestMoves: 0
+                };
+                this.scene.start(Scenes[Scenes.GAME], gameSceneConfiguration);
+            }
+        });
+        this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.5, htmlElementInput, {
+            width: '50%'
+        })
+            .setOrigin(0.5);
     }
 
 }
