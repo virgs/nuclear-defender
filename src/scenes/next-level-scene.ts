@@ -1,10 +1,15 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
+import * as lzString from 'lz-string';
 import * as domElements from '../ui/dom-elements';
 import {configuration} from '../constants/configuration';
 import {Actions, mapActionToString} from '../constants/actions';
 
-export type NextLevelSceneInput = { currentLevel: number, moves: Actions[] };
+export type NextLevelSceneInput = {
+    currentLevel: number,
+    moves: Actions[],
+    totalTime: number
+};
 
 export class NextLevelScene extends Phaser.Scene {
     constructor() {
@@ -16,30 +21,21 @@ export class NextLevelScene extends Phaser.Scene {
         const height = configuration.gameHeight;
         const horizontalCenterPosition = width * 0.5;
 
-        this.add.text(horizontalCenterPosition, height * 0.1, 'Level Complete!', {
+        this.add.text(horizontalCenterPosition, height * 0.1, `Level ${data.currentLevel} Complete!`, {
             fontFamily: 'Righteous',
-            color: '#d4fa00',
+            color: configuration.colors.highlight,
             fontSize: '60px'
         })
             .setOrigin(0.5);
 
-        this.add.text(horizontalCenterPosition, height * 0.3, `Moves: ${data.moves.length}`, {
-            fontFamily: 'Poppins',
-            color: '#dddddd',
+        this.add.text(horizontalCenterPosition, height * 0.175, `Total time: ${Math.trunc(data.totalTime / 100) / 10}s`, {
+            fontFamily: 'Righteous',
+            color: configuration.colors.background,
             fontSize: '30px'
         })
             .setOrigin(0.5);
 
-        const mapText = data.moves.map(action => mapActionToString(action)).join(',');
-        const showMovesText = domElements.readOnlyInputElement(mapText);
-        this.add.dom(horizontalCenterPosition, height * 0.4, showMovesText)
-            .addListener('click')
-            .once('click', async () => {
-                await navigator.clipboard.writeText(mapText);
-
-                const showMovesText = domElements.alertElement('Text copied to clipboard');
-                this.add.dom(horizontalCenterPosition, height * 0.1, showMovesText).setOrigin(0.5);
-            }).setOrigin(0.5);
+        this.showMovesCode(data, horizontalCenterPosition, height * 0.4);
 
         const retryButton = domElements.retryButtonElement('Retry', () => {
             console.log('retry');
@@ -51,7 +47,21 @@ export class NextLevelScene extends Phaser.Scene {
         });
 
         const buttonsGroup = domElements.groupButtonsElement(retryButton, nextLevelButton);
-        this.add.dom(horizontalCenterPosition, height * 0.64, buttonsGroup).setOrigin(0.5);
+        this.add.dom(horizontalCenterPosition, height * 0.64, buttonsGroup);
 
+    }
+
+    private showMovesCode(data: NextLevelSceneInput, x: number, y: number) {
+        const mapText = data.moves.map(action => mapActionToString(action)).join('');
+        const compressed = lzString.compressToEncodedURIComponent(mapText);
+        const showMovesCode = domElements.createInputWithLabel('Moves code', compressed, true);
+        this.add.dom(x, y, showMovesCode)
+            .addListener('click')
+            .once('click', async () => {
+                await navigator.clipboard.writeText(compressed);
+
+                const showMovesText = domElements.alertElement('Moves code to clipboard. Share it!');
+                this.add.dom(x, y * 0.1, showMovesText).setOrigin(0.5);
+            }).setOrigin(0.5);
     }
 }

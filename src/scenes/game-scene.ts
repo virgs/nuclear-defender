@@ -24,7 +24,7 @@ export class GameScene extends Phaser.Scene {
     private readonly mapFeaturesExtractor: MapFeaturesExtractor;
 
     private mapLayer: Phaser.Tilemaps.TilemapLayer;
-    private movesCountLabel: Phaser.GameObjects.Text;
+    private timeLabel: Phaser.GameObjects.Text;
     private movementCoordinator: MovementCoordinator;
 
     private hero: Hero;
@@ -34,6 +34,7 @@ export class GameScene extends Phaser.Scene {
     private solution: Actions[];
     private allowHeroMovement: boolean;
     private playerMovesSoFar: Actions[];
+    private elapsedTime: number;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -44,6 +45,7 @@ export class GameScene extends Phaser.Scene {
         this.levelComplete = false;
         this.gameSceneConfiguration = gameSceneConfiguration;
         this.playerMovesSoFar = [];
+        this.elapsedTime = 0;
     }
 
     public preload() {
@@ -80,7 +82,7 @@ export class GameScene extends Phaser.Scene {
             sprite: this.featuresMap.get(TileCode.hero)[0]
         });
         this.movementCoordinator = new MovementCoordinator();
-        this.movesCountLabel = this.add.text(540, 10, `Moves: 0`, {
+        this.timeLabel = this.add.text(540, 10, `Time: ${this.elapsedTime}s`, {
             fontFamily: 'Poppins',
             fontSize: '30px'
         });
@@ -88,7 +90,7 @@ export class GameScene extends Phaser.Scene {
         const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, loadingElement())
             .setOrigin(0.5);
         this.solution = input.moves;
-        this.solution = await new SokobanSolver().solve(this.createMapState());
+        // this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
     }
@@ -97,6 +99,9 @@ export class GameScene extends Phaser.Scene {
         if (this.levelComplete) {
             return;
         }
+        this.elapsedTime += delta;
+        this.timeLabel.text = `Time: ${Math.trunc(this.elapsedTime / 100) / 10}s`;
+
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero.checkAction();
             if (this.solution && this.solution.length > 0) {
@@ -129,7 +134,6 @@ export class GameScene extends Phaser.Scene {
             });
         const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCode.hero)
             .map(async heroMovement => {
-                this.movesCountLabel.text = `Moves: ${this.playerMovesSoFar.length}`;
                 await this.hero.move(heroMovement.direction);
                 this.allowHeroMovement = true;
             });
@@ -196,7 +200,8 @@ export class GameScene extends Phaser.Scene {
             setTimeout(() => {
                 const input: NextLevelSceneInput = {
                     currentLevel: this.gameSceneConfiguration.currentLevel,
-                    moves: this.playerMovesSoFar
+                    moves: this.playerMovesSoFar,
+                    totalTime: this.elapsedTime
                 };
                 this.scene.start(Scenes[Scenes.NEXT_LEVEL], input);
             }, 1500);

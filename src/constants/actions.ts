@@ -23,6 +23,8 @@ export const mapActionToDirection = (action: Actions): Directions | undefined =>
 
 export const mapStringToAction = (char: string): Actions => {
     switch (char) {
+        case 's':
+            return Actions.STAND;
         case 'l':
             return Actions.LEFT;
         case 'u':

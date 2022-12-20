@@ -3,29 +3,48 @@ import {configuration} from '../constants/configuration';
 export const retryButtonElement = (text: string, onClick: () => any): HTMLElement => {
     const documentElement = document.createElement('button');
     documentElement.textContent = text;
-    documentElement.style.width = configuration.gameWidth * 0.15 + 'px';
     documentElement.className = 'button is-medium is-outlined';
-    documentElement
-        .addEventListener('click', () => onClick());
+    documentElement.addEventListener('click', () => onClick());
     return documentElement;
 };
 
 export const nextButtonElement = (text, onClick: () => any): HTMLElement => {
     const documentElement = document.createElement('button');
     documentElement.textContent = text;
-    documentElement.style.width = configuration.gameWidth * 0.34 + 'px';
-    documentElement.className = 'button is-medium is-primary';
-    documentElement
-        .addEventListener('click', () => onClick());
+    documentElement.className = 'button is-medium';
+    documentElement.style.backgroundColor = configuration.colors.highlight
+    documentElement.addEventListener('click', () => onClick());
     return documentElement;
 
 };
 
-export const readOnlyInputElement = (text: string): HTMLElement => {
+export const createInputWithLabel = (labelText: string, compressed: string, readOnly: boolean): HTMLElement => {
+    const root = document.createElement('div');
+    const field = document.createElement('div');
+    field.className = 'field';
+    root.appendChild(field);
+
+    const label = document.createElement('label');
+    label.className = 'label is-large';
+    label.style.fontFamily = 'Righteous';
+    label.style.color = configuration.colors.background;
+    label.textContent = labelText;
+    field.appendChild(label);
+
+    const control = document.createElement('div');
+    control.className = 'control';
+    field.appendChild(control);
+    const inputText = readOnlyInputElement(compressed, readOnly);
+    field.appendChild(inputText);
+
+    return root;
+};
+
+export const readOnlyInputElement = (text: string, readOnly: boolean): HTMLElement => {
     const documentElement = document.createElement('input');
     documentElement.setAttribute('value', text);
     documentElement.setAttribute('type', 'text');
-    documentElement.setAttribute('readonly', 'true');
+    documentElement.setAttribute('readonly', Boolean(readOnly).toString());
     documentElement.style.fontFamily = 'Righteous';
     documentElement.className = 'input is-primary is-medium is-success';
     documentElement.style.width = configuration.gameWidth / 2 + 'px';
@@ -49,27 +68,30 @@ export const alertElement = (content: string): HTMLElement => {
 
     setTimeout(() => {
         documentElement.classList.add('fadeout');
-        setTimeout(() => removeAlert(), 1500);
+        setTimeout(() => removeAlert(), 2000);
     }, 1500);
 
     return documentElement;
 };
 
 export const groupButtonsElement = (retry: HTMLElement, next: HTMLElement): HTMLElement => {
-    const phaserElement = document.createElement('div');
-    const parentElement = document.createElement('div');
-    parentElement.className = 'field is-grouped';
+    const root = document.createElement('div');
+    root.style.width = configuration.gameWidth * .5 + 'px';
+    const parentElement = document.createElement('columns');
+    parentElement.className = 'columns';
 
-    const controlRetryElement = document.createElement('p');
-    controlRetryElement.appendChild(retry);
-    controlRetryElement.className = 'control';
+    const retryColumns = document.createElement('div');
+    retryColumns.className = 'column is-one-quarter';
+    retryColumns.appendChild(retry);
 
-    const controlNextElement = document.createElement('p');
-    controlNextElement.className = 'control';
-    controlNextElement.appendChild(next);
+    const nextColumns = document.createElement('div');
+    nextColumns.className = 'column';
+    next.classList.add('is-fullwidth');
+    nextColumns.appendChild(next);
 
-    parentElement.appendChild(controlRetryElement);
-    parentElement.appendChild(controlNextElement);
-    phaserElement.appendChild(parentElement);
-    return phaserElement;
+    parentElement.appendChild(retryColumns);
+    parentElement.appendChild(nextColumns);
+
+    root.appendChild(parentElement);
+    return root;
 };

@@ -1,15 +1,17 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
+import * as lzString from 'lz-string';
+import {levels} from '../levels/levels';
 import {TileCode} from '../tiles/tile-code';
-import {Actions} from '../constants/actions';
+import {Actions, mapStringToAction} from '../constants/actions';
 import {MapBuilder} from '../tiles/map-builder';
 import {GameSceneConfiguration} from './game-scene';
 import {configuration} from '../constants/configuration';
 import {FileLevelExtractor} from '../levels/file-level-extractor';
 import WebFontFileLoader from '../file-loaders/web-font-file-loader';
-import {levels} from '../levels/levels';
+import {StandardSokobanAnnotationMapper} from '../tiles/standard-sokoban-annotation-mapper';
 
-export type SplashScreenInput = { map: TileCode[][], moves: Actions[] };
+export type SplashScreenInput = {};
 
 export class SplashScreenScene extends Phaser.Scene {
     private readonly fileLevelExtractor: FileLevelExtractor;
@@ -34,14 +36,27 @@ export class SplashScreenScene extends Phaser.Scene {
         });
     }
 
+    private parseMap(map: string): TileCode[][] {
+        const annotationMap: string[] = map.split('\n');
+        const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);
+        return new MapBuilder().build(tileMap);
+    }
+
+    private parseMoves(compressedMoves: string): Actions[] {
+        const movesText: string = lzString.decompressFromEncodedURIComponent(compressedMoves);
+        return movesText.split('')
+            .map(char => mapStringToAction(char));
+    }
+
     create(data: SplashScreenInput) {
         const tileMap = this.make.tilemap({key: configuration.tilemapKey});
         // const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap); // from file
-        const map = new MapBuilder().build(data.map); // from url
-        // const map = new MapBuilder().build(levels[0]); // from code
+        const map = new MapBuilder().build(levels[0]); // from code
+        // const map = this.parseMap(``)
+        // const moves = this.parseMoves('M418ZXTBOYFcExcANqAJkA');
         const gameSceneConfiguration: GameSceneConfiguration = {
-            moves: data.moves,
             map: map,
+            moves: [],
             currentLevel: 0,
             bestMoves: 0
         };

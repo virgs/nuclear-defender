@@ -10,5 +10,10 @@ export const configuration = {
     layerName: 'Level',
     tilesetName: 'sokoban',
     gameWidth: 1000,
-    gameHeight: 800
+    gameHeight: 800,
+    colors: {
+        highlight: '#d4fa00',
+        background: '#dddddd'
+    }
+
 };
