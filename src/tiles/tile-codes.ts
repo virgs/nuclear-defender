@@ -1,4 +1,4 @@
-export enum TileCode {
+export enum TileCodes {
     empty = 0,
     box = 9,
     target = 64,

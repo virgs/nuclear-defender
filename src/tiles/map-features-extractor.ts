@@ -1,49 +1,49 @@
 import Phaser from 'phaser';
 import {Point} from '../math/point';
-import {TileCode} from './tile-code';
+import {TileCodes} from './tile-codes';
 import {configuration} from '../constants/configuration';
 
 //TODO extract each to its specific GameActor receiving its sprite in the constructor (to better handle future interactions)
-type SearchMapType = { tile: TileCode, keys: TileCode[], replacement?: TileCode };
+type SearchMapType = { tile: TileCodes, keys: TileCodes[], replacement?: TileCodes };
 const searchMap: SearchMapType[] = [
     {
-        tile: TileCode.empty,
-        keys: [TileCode.empty]
+        tile: TileCodes.empty,
+        keys: [TileCodes.empty]
     },
     {
-        tile: TileCode.floor,
-        keys: [TileCode.floor]
+        tile: TileCodes.floor,
+        keys: [TileCodes.floor]
     },
     {
-        tile: TileCode.wall,
-        keys: [TileCode.wall]
+        tile: TileCodes.wall,
+        keys: [TileCodes.wall]
     },
     {
-        tile: TileCode.box,
-        keys: [TileCode.box]
+        tile: TileCodes.box,
+        keys: [TileCodes.box]
     },
     {
-        tile: TileCode.boxOnTarget,
-        keys: [TileCode.box, TileCode.target],
-        replacement: TileCode.target
+        tile: TileCodes.boxOnTarget,
+        keys: [TileCodes.box, TileCodes.target],
+        replacement: TileCodes.target
     },
     {
-        tile: TileCode.target,
-        keys: [TileCode.target]
+        tile: TileCodes.target,
+        keys: [TileCodes.target]
     },
     {
-        tile: TileCode.hero,
-        keys: [TileCode.hero]
+        tile: TileCodes.hero,
+        keys: [TileCodes.hero]
     },
     {
-        tile: TileCode.heroOnTarget,
-        keys: [TileCode.hero, TileCode.target],
-        replacement: TileCode.target
+        tile: TileCodes.heroOnTarget,
+        keys: [TileCodes.hero, TileCodes.target],
+        replacement: TileCodes.target
     }
 ];
 
 export class MapFeaturesExtractor {
-    public extractFeatures(scene: Phaser.Scene, mapLayer: Phaser.Tilemaps.TilemapLayer): Map<TileCode, Phaser.GameObjects.Sprite[]> {
+    public extractFeatures(scene: Phaser.Scene, mapLayer: Phaser.Tilemaps.TilemapLayer): Map<TileCodes, Phaser.GameObjects.Sprite[]> {
         return searchMap
             .reduce((acc, item) => {
                 for (let [index, tileCode] of item.keys.entries()) {
@@ -51,9 +51,6 @@ export class MapFeaturesExtractor {
                     const features: Phaser.GameObjects.Sprite[] =
                         this.searchFeature(mapLayer, item.tile, replacements, frame)
                             .reduce((acc, item) => acc.concat(item), []);
-                    if (tileCode === TileCode.empty) {
-                        console.log(features.length, index, item);
-                    }
                     if (acc.get(tileCode)) {
                         acc.set(tileCode, acc.get(tileCode).concat(features));
                     } else {
@@ -61,15 +58,15 @@ export class MapFeaturesExtractor {
                     }
                 }
                 return acc;
-            }, new Map<TileCode, Phaser.GameObjects.Sprite[]>());
+            }, new Map<TileCodes, Phaser.GameObjects.Sprite[]>());
     }
 
     private getFrames(index: number, item: SearchMapType) {
         const lastIndex = index === item.keys.length - 1;
-        let replacements: TileCode = null;
-        let frame: TileCode = item.tile;
+        let replacements: TileCodes = null;
+        let frame: TileCodes = item.tile;
         if (lastIndex) {
-            replacements = item.tile === TileCode.empty ? TileCode.empty : TileCode.floor;
+            replacements = item.tile === TileCodes.empty ? TileCodes.empty : TileCodes.floor;
             if (item.keys.length > 1) {
                 frame = item.replacement;
             }
@@ -77,7 +74,7 @@ export class MapFeaturesExtractor {
         return {replacements, frame};
     }
 
-    private searchFeature(mapLayer: Phaser.Tilemaps.TilemapLayer, tile: TileCode, replacements: TileCode, frame: number):
+    private searchFeature(mapLayer: Phaser.Tilemaps.TilemapLayer, tile: TileCodes, replacements: TileCodes, frame: number):
         Phaser.GameObjects.Sprite[] {
         return mapLayer.createFromTiles(tile + 1, replacements, {
             key: configuration.spriteSheetKey,
@@ -90,7 +87,7 @@ export class MapFeaturesExtractor {
             });
     }
 
-    private getTileOfPosition(position: Point, map: Map<TileCode, Phaser.GameObjects.Sprite[]>): TileCode {
+    private getTileOfPosition(position: Point, map: Map<TileCodes, Phaser.GameObjects.Sprite[]>): TileCodes {
         for (let [key, value] of map.entries()) {
             if (value.some(sprite => position.x === sprite.x && position.y === sprite.y)) {
                 return key;

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import {Scenes} from './scenes';
 import {Hero} from '../actors/hero';
 import {Point} from '../math/point';
-import {TileCode} from '../tiles/tile-code';
+import {TileCodes} from '../tiles/tile-codes';
 import {Actions} from '../constants/actions';
 import {Directions} from '../constants/directions';
 import {getTweenFromDirection} from '../actors/tween';
@@ -11,9 +11,10 @@ import {configuration} from '../constants/configuration';
 import {createIndefiniteProgressBar} from '../ui/htmlElements';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import {MovementCoordinator, MovementCoordinatorOutput} from '../actors/movement-coordinator';
+import {SokobanSolver} from '../math/sokoban-solver';
 
 export type GameSceneConfiguration = {
-    map: TileCode[][],
+    map: TileCodes[][],
     moves: Actions[]
     currentLevel: number,
     bestMoves: number
@@ -28,7 +29,7 @@ export class GameScene extends Phaser.Scene {
     private movementCoordinator: MovementCoordinator;
 
     private hero: Hero;
-    private featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
+    private featuresMap: Map<TileCodes, Phaser.GameObjects.Sprite[]>;
     private gameSceneConfiguration: GameSceneConfiguration;
     private levelComplete: boolean;
     private solution: Actions[];
@@ -49,6 +50,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     public preload() {
+        this.load.html(configuration.html.gameScene.key, configuration.html.gameScene.file);
+
         this.load.spritesheet(configuration.spriteSheetKey, configuration.tileSheetAsset, {
             frameWidth: configuration.horizontalTileSize,
             startFrame: 0
@@ -71,15 +74,15 @@ export class GameScene extends Phaser.Scene {
         // console.log(this.featuresMap);
 
         //TODO move this to its own specific GameActor class
-        [...this.featuresMap.get(TileCode.target),
-            ...this.featuresMap.get(TileCode.empty),
-            ...this.featuresMap.get(TileCode.floor)]
+        [...this.featuresMap.get(TileCodes.target),
+            ...this.featuresMap.get(TileCodes.empty),
+            ...this.featuresMap.get(TileCodes.floor)]
             .forEach(item => item.setDepth(0));
 
         this.hero = new Hero();
         this.hero.init({
             scene: this,
-            sprite: this.featuresMap.get(TileCode.hero)[0]
+            sprite: this.featuresMap.get(TileCodes.hero)[0]
         });
         this.movementCoordinator = new MovementCoordinator();
         this.timeLabel = this.add.text(540, 10, `Time: ${this.elapsedTime}s`, {
@@ -89,10 +92,11 @@ export class GameScene extends Phaser.Scene {
 
         const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, createIndefiniteProgressBar())
             .setOrigin(0.5);
-        this.solution = input.moves;
-        // this.solution = await new SokobanSolver().solve(this.createMapState());
+        // this.solution = input.moves;
+        this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
+        this.createFormButtons();
     }
 
     public async update(time: number, delta: number) {
@@ -123,16 +127,16 @@ export class GameScene extends Phaser.Scene {
     }
 
     private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
-        const boxMovements = movementCoordinatorOutput.featuresMovementMap.get(TileCode.box)
+        const boxMovements = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.box)
             .map(async movedBox => {
                 const worldXY = this.mapLayer.tileToWorldXY(movedBox.currentPosition.x, movedBox.currentPosition.y);
                 const boxToMove = this.featuresMap
-                    .get(TileCode.box)
+                    .get(TileCodes.box)
                     .find(worldBox => worldBox.x === worldXY.x && worldBox.y === worldXY.y);
                 await this.moveBox(boxToMove, movedBox.direction);
                 this.onBoxesMovementComplete();
             });
-        const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCode.hero)
+        const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.hero)
             .map(async heroMovement => {
                 await this.hero.move(heroMovement.direction);
                 this.allowHeroMovement = true;
@@ -140,8 +144,8 @@ export class GameScene extends Phaser.Scene {
         await Promise.all([playerMovement, boxMovements]);
     }
 
-    private createMapState(): Map<TileCode, Point[]> {
-        const mapState: Map<TileCode, Point[]> = new Map<TileCode, Point[]>();
+    private createMapState(): Map<TileCodes, Point[]> {
+        const mapState: Map<TileCodes, Point[]> = new Map<TileCodes, Point[]>();
         for (let [key, value] of this.featuresMap) {
             mapState.set(key, value
                 .map(sprite => this.mapLayer.worldToTileXY(sprite.x, sprite.y)));
@@ -168,27 +172,27 @@ export class GameScene extends Phaser.Scene {
 
     private updateBoxesColor() {
         this.featuresMap
-            .get(TileCode.box)
+            .get(TileCodes.box)
             .forEach(box => {
                 const boxPosition = this.mapLayer.worldToTileXY(box.x, box.y);
                 if (this.featuresMap
-                    .get(TileCode.target)
+                    .get(TileCodes.target)
                     .some(target => {
                         const targetPosition = this.mapLayer.worldToTileXY(target.x, target.y);
                         return boxPosition.x === targetPosition.x && boxPosition.y === targetPosition.y;
                     })) {
-                    box.setFrame(TileCode.boxOnTarget);
+                    box.setFrame(TileCodes.boxOnTarget);
                 } else {
-                    box.setFrame(TileCode.box);
+                    box.setFrame(TileCodes.box);
                 }
             });
     }
 
     private checkLevelComplete() {
-        if (this.featuresMap.get(TileCode.box)
+        if (this.featuresMap.get(TileCodes.box)
             .every(box => {
                 const boxTilePosition = this.mapLayer.worldToTileXY(box.x, box.y);
-                return this.featuresMap.get(TileCode.target)
+                return this.featuresMap.get(TileCodes.target)
                     .some(target => {
                         const targetTilePosition = this.mapLayer.worldToTileXY(target.x, target.y);
                         return targetTilePosition.x === boxTilePosition.x &&
@@ -210,5 +214,23 @@ export class GameScene extends Phaser.Scene {
 
     public addTween(tween: Phaser.Types.Tweens.TweenBuilderConfig) {
         this.tweens.add(tween);
+    }
+
+    private createFormButtons() {
+        // let text = this.add.text(10, 10, 'Please login to play', {color: 'white', fontFamily: 'Arial', fontSize: '32px '});
+        const element = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * .9)
+            .createFromCache(configuration.html.gameScene.key);
+        // element.setPerspective(800);
+        element.addListener('click');
+
+        element.on('click', event => {
+            if (event.target.id === 'game-scene-undo-button') {
+                console.log('undo');
+            }
+            if (event.target.id === 'game-scene-retry-button') {
+                console.log('retry');
+            }
+        });
+
     }
 }

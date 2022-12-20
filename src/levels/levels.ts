@@ -8,8 +8,8 @@ type Level = { password: string, map: string };
 export const levels: Level[] = [{
     map:
 `
--###
-## #
+####
+#  #
 #  ######
 #   $@. #
 # $#$#. #

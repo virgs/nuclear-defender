@@ -1,32 +1,32 @@
-import {TileCode} from './tile-code';
+import {TileCodes} from './tile-codes';
 
 export class StandardSokobanAnnotationMapper {
-    public map(levelRows: string[]): TileCode[][] {
+    public map(levelRows: string[]): TileCodes[][] {
         return levelRows
             .map(row => row.split('')
                 .map(char => StandardSokobanAnnotationMapper.getTileTypeFromString(char) + 1)); // to match the values generated from Tiled Software
     }
 
-    private static getTileTypeFromString(char: string): TileCode {
+    private static getTileTypeFromString(char: string): TileCodes {
         switch (char) {
             case '-':
-                return TileCode.empty;
+                return TileCodes.empty;
             case ' ':
-                return TileCode.floor;
+                return TileCodes.floor;
             case '#':
-                return TileCode.wall;
+                return TileCodes.wall;
             case '.':
-                return TileCode.target;
+                return TileCodes.target;
             case '$':
-                return TileCode.box;
+                return TileCodes.box;
             case '*':
-                return TileCode.boxOnTarget;
+                return TileCodes.boxOnTarget;
             case '@':
-                return TileCode.hero;
+                return TileCodes.hero;
             case '+':
-                return TileCode.heroOnTarget;
+                return TileCodes.heroOnTarget;
             default:
-                return TileCode.empty;
+                return TileCodes.empty;
         }
     }
 }

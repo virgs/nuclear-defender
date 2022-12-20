@@ -1,12 +1,12 @@
 import {Point} from './point';
-import {TileCode} from '../tiles/tile-code';
+import {TileCodes} from '../tiles/tile-codes';
 import {Actions} from '../constants/actions';
 import {PriorityQueue} from './priority-queue';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 
 type Solution = {
     path: Actions[],
-    state: Map<TileCode, Point[]>,
+    state: Map<TileCodes, Point[]>,
     score: number
 };
 
@@ -29,7 +29,7 @@ export class SokobanSolver {
         this.movementCoordinator = new MovementCoordinator();
     }
 
-    public async solve(initialMapState: Map<TileCode, Point[]>): Promise<Actions[]> {
+    public async solve(initialMapState: Map<TileCodes, Point[]>): Promise<Actions[]> {
         console.log('Solving it');
         this.solutionCandidates.push({
             path: [],
@@ -87,7 +87,7 @@ export class SokobanSolver {
             if (movementCoordinatorOutput.mapChanged) {
                 if (this.solutionSolvesMap(movementCoordinatorOutput.newMapState)) {
                     return newCandidate;
-                } else if (movementCoordinatorOutput.featuresMovementMap.get(TileCode.box).length > 0) {
+                } else if (movementCoordinatorOutput.featuresMovementMap.get(TileCodes.box).length > 0) {
                     newCandidate.score += ScoreBonus.BOX_MOVED;
                 }
                 this.solutionCandidates.push(newCandidate);
@@ -95,10 +95,10 @@ export class SokobanSolver {
         }
     }
 
-    private solutionSolvesMap(state: Map<TileCode, Point[]>): boolean {
-        return state.get(TileCode.box)
+    private solutionSolvesMap(state: Map<TileCodes, Point[]>): boolean {
+        return state.get(TileCodes.box)
             .every(box => state
-                .get(TileCode.target)
+                .get(TileCodes.target)
                 .some(target => target.x === box.x &&
                     target.y === box.y));
     }
@@ -109,9 +109,9 @@ export class SokobanSolver {
     }
 
     private calculateHashOfSolution(newCandidate: Solution) {
-        return `${newCandidate.state.get(TileCode.box)
+        return `${newCandidate.state.get(TileCodes.box)
             .sort()
-            .map(box => `(${box.x}, ${box.y})`).toString()}|${newCandidate.state.get(TileCode.hero)
+            .map(box => `(${box.x}, ${box.y})`).toString()}|${newCandidate.state.get(TileCodes.hero)
             .map(hero => `(${hero.x}, ${hero.y})`).toString()}`;
     }
 }

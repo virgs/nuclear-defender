@@ -56,11 +56,11 @@ export const splashScreenHtml = (input: SplashScreenHtmlInput): HTMLElement => {
         input.scene.add.dom(configuration.gameWidth * .5, configuration.gameHeight * 0.1, showMovesText).setOrigin(0.5);
     }),
         createLevelsDropDown(input.furthestLevel, selected => selectedLevel = selected),
-        // createMapTextArea(text => mapValue = text),
+        createMapTextArea(text => mapValue = text),
         createMoveTextInput(text => movesValue = text)]
         .map(htmlElement => {
             root.append(htmlElement);
-            htmlElement.style.marginBottom = '45px';
+            htmlElement.style.marginBottom = '35px';
         });
 
     root.appendChild(domElements.createHighlightButton('Play', () => input.onPlayClick({

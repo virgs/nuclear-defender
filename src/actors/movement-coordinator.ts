@@ -1,5 +1,5 @@
 import {Point} from '../math/point';
-import {TileCode} from '../tiles/tile-code';
+import {TileCodes} from '../tiles/tile-codes';
 import {Actions, mapActionToDirection} from '../constants/actions';
 import {Directions} from '../constants/directions';
 
@@ -11,15 +11,15 @@ type Movement = {
 
 export type MovementCoordinatorInput = {
     //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
-    mapState: Map<TileCode, Point[]>;
+    mapState: Map<TileCodes, Point[]>;
     heroAction: Actions
 };
 
 export type MovementCoordinatorOutput = {
     mapChanged: boolean,
-    newMapState: Map<TileCode, Point[]>,
+    newMapState: Map<TileCodes, Point[]>,
     //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
-    featuresMovementMap: Map<TileCode, Movement[]>
+    featuresMovementMap: Map<TileCodes, Movement[]>
 };
 
 export class MovementCoordinator {
@@ -27,12 +27,12 @@ export class MovementCoordinator {
         const result = this.initializeOutput(input);
         if (input.heroAction !== Actions.STAND) {
             const heroDirection = mapActionToDirection(input.heroAction);
-            const heroPosition = input.mapState.get(TileCode.hero)[0];
+            const heroPosition = input.mapState.get(TileCodes.hero)[0];
             const newHeroPosition = this.calculateOffset(heroDirection, heroPosition);
 
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
                 result.mapChanged = true;
-                result.featuresMovementMap.set(TileCode.hero, [{
+                result.featuresMovementMap.set(TileCodes.hero, [{
                     currentPosition: heroPosition,
                     newPosition: newHeroPosition,
                     direction: heroDirection
@@ -40,7 +40,7 @@ export class MovementCoordinator {
 
                 const boxAhead = this.getBoxAt(newHeroPosition, input.mapState);
                 if (boxAhead) {
-                    result.featuresMovementMap.set(TileCode.box, [{
+                    result.featuresMovementMap.set(TileCodes.box, [{
                         currentPosition: boxAhead,
                         newPosition: this.calculateOffset(heroDirection, boxAhead),
                         direction: heroDirection
@@ -58,11 +58,11 @@ export class MovementCoordinator {
     private initializeOutput(input: MovementCoordinatorInput) {
         const result: MovementCoordinatorOutput = {
             mapChanged: false,
-            featuresMovementMap: new Map<TileCode, Movement[]>(),
+            featuresMovementMap: new Map<TileCodes, Movement[]>(),
             newMapState: input.mapState
         };
-        result.featuresMovementMap.set(TileCode.hero, []);
-        result.featuresMovementMap.set(TileCode.box, []);
+        result.featuresMovementMap.set(TileCodes.hero, []);
+        result.featuresMovementMap.set(TileCodes.box, []);
         return result;
     }
 
@@ -92,12 +92,12 @@ export class MovementCoordinator {
             });
     }
 
-    private getWallAt(offsetTilePosition: Point, mapState: Map<TileCode, Point[]>): Point | undefined {
-        return this.hasFeatureAt(mapState.get(TileCode.wall), offsetTilePosition);
+    private getWallAt(offsetTilePosition: Point, mapState: Map<TileCodes, Point[]>): Point | undefined {
+        return this.hasFeatureAt(mapState.get(TileCodes.wall), offsetTilePosition);
     }
 
-    private getBoxAt(offsetTilePosition: Point, mapState: Map<TileCode, Point[]>): Point | undefined {
-        return this.hasFeatureAt(mapState.get(TileCode.box), offsetTilePosition);
+    private getBoxAt(offsetTilePosition: Point, mapState: Map<TileCodes, Point[]>): Point | undefined {
+        return this.hasFeatureAt(mapState.get(TileCodes.box), offsetTilePosition);
     }
 
     private calculateOffset(direction: Directions, currentPosition: Point): Point {
@@ -123,8 +123,8 @@ export class MovementCoordinator {
         return offset;
     }
 
-    private generateNextState(input: MovementCoordinatorInput, movementMap: Map<TileCode, Movement[]>) {
-        const baseState: Map<TileCode, Point[]> = new Map(JSON.parse(JSON.stringify(Array.from(input.mapState))));
+    private generateNextState(input: MovementCoordinatorInput, movementMap: Map<TileCodes, Movement[]>) {
+        const baseState: Map<TileCodes, Point[]> = new Map(JSON.parse(JSON.stringify(Array.from(input.mapState))));
         for (let [tileCode, movementList] of movementMap.entries()) {
             movementList
                 .forEach(move => {

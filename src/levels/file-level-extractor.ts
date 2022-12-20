@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import {TileCode} from '../tiles/tile-code';
+import {TileCodes} from '../tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 
 export class FileLevelExtractor {
@@ -8,17 +8,17 @@ export class FileLevelExtractor {
         const mapLayer = map.createLayer(configuration.layerName, tileset);
 
         const dimension = mapLayer.worldToTileXY(mapLayer.width, mapLayer.height);
-        const dimensionArray: TileCode[][] = new Array(dimension.y)
+        const dimensionArray: TileCodes[][] = new Array(dimension.y)
             .fill(new Array(dimension.x)
                 .fill(dimension.y));
-        const tileCodeMap: TileCode[][] = dimensionArray
+        const tileCodeMap: TileCodes[][] = dimensionArray
             .map((line, y) => line
                 .map((_, x) => {
                     const tileAt = mapLayer.getTileAt(x, y);
                     if (tileAt) {
                         return mapLayer.getTileAt(x, y).index;
                     }
-                    return TileCode.empty;
+                    return TileCodes.empty;
                 }));
         return tileCodeMap;
     }

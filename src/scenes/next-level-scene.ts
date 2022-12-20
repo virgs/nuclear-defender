@@ -54,7 +54,6 @@ export class NextLevelScene extends Phaser.Scene {
     private showMovesCode(data: NextLevelSceneInput, x: number, y: number) {
         const mapText = data.moves.map(action => mapActionToString(action)).join('');
         const compressed = lzString.compressToEncodedURIComponent(mapText);
-        // const showMovesCode = domElements.createInputWithLabel('Moves code', compressed, true, null);
         const showMovesCode = domElements.createSubmitInput({
             labelText: 'Moves',
             buttonText: 'Copy!',
@@ -67,12 +66,5 @@ export class NextLevelScene extends Phaser.Scene {
         });
 
         this.add.dom(x, y, showMovesCode);
-        //     .addListener('click')
-        //     .once('click', async () => {
-        //         await navigator.clipboard.writeText(compressed);
-        //
-        //         const showMovesText = domElements.createAlert('Moves code to clipboard. Share it!');
-        //         this.add.dom(x, y * 0.1, showMovesText).setOrigin(0.5);
-        //     }).setOrigin(0.5);
     }
 }

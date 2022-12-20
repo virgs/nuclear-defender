@@ -58,6 +58,7 @@ export class HeroAnimator {
         return [
             {
                 key: HeroAnimation.IDLE_DOWN,
+                //TODO frames by animation
                 frames: this.generateFrames(52)
             },
             {

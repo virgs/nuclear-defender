@@ -33,7 +33,7 @@ export function createDropDownWithLabel(data: {
     const triggerElement = document.createElement('div');
     triggerElement.classList.add('dropdown-trigger');
     triggerElement.innerHTML = `
-     <button class="button" aria-controls="dropdown-menu" aria-haspopup="true">
+     <button class="button is-small" aria-controls="dropdown-menu" aria-haspopup="true">
        <span id="dropdown-selected-title">${data.selectedIndex + 1}: ${data.items[data.selectedIndex]}</span>
        <span class="icon">
          <i class="fa-solid fa-angle-down"></i>
@@ -80,7 +80,7 @@ export function createDropDownWithLabel(data: {
 export const createButton = (text, onClick: () => any): HTMLElement => {
     const documentElement = document.createElement('button');
     documentElement.textContent = text;
-    documentElement.className = 'button';
+    documentElement.className = 'button is-small';
     documentElement.addEventListener('click', () => onClick());
     return documentElement;
 };
@@ -133,7 +133,7 @@ export const createInput = (text: string, readOnly: boolean, events: {
         inputElement.setAttribute('readonly', 'true');
     }
     inputElement.style.fontFamily = 'Righteous';
-    inputElement.className = 'input is-primary';
+    inputElement.className = 'input is-primary is-small';
     inputElement.style.width = configuration.gameWidth / 2 + 'px';
 
     inputElement.addEventListener('change', (event: any) => events.onChange(event.target.value));
@@ -176,7 +176,7 @@ export const createSubmitInput = (data: {
         inputElement.setAttribute('value', data.text);
     }
     inputElement.style.fontFamily = 'Righteous';
-    inputElement.className = 'input is-primary';
+    inputElement.className = 'input is-primary is-small';
     groupFieldElement.appendChild(inputElement);
 
     const controlButtonElement = document.createElement('p');
@@ -184,7 +184,7 @@ export const createSubmitInput = (data: {
     groupFieldElement.appendChild(controlButtonElement);
 
     const buttonElement = document.createElement('a');
-    buttonElement.classList.add('button');
+    buttonElement.classList.add('button', 'is-small');
     buttonElement.style.backgroundColor = configuration.colors.highlight;
     buttonElement.text = data.buttonText;
     buttonElement.addEventListener('click', () => data.onClick(inputElement.value));
@@ -207,7 +207,7 @@ export const createTextAreaWithLabel = (labelText: string, text: string, events:
     field.appendChild(label);
 
     const textAreaElement = document.createElement('textarea');
-    textAreaElement.classList.add('textarea', 'is-primary');
+    textAreaElement.classList.add('textarea', 'is-primary', 'is-small');
     textAreaElement.setAttribute('placeholder', '');
     textAreaElement.setAttribute('rows', '10');
     textAreaElement.style.fontFamily = 'Martian Mono';

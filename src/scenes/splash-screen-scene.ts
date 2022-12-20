@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
 import * as lzString from 'lz-string';
-import {TileCode} from '../tiles/tile-code';
+import {TileCodes} from '../tiles/tile-codes';
 import {createAlert} from '../ui/htmlElements';
 import {MapBuilder} from '../tiles/map-builder';
 import {GameSceneConfiguration} from './game-scene';
@@ -41,7 +41,7 @@ export class SplashScreenScene extends Phaser.Scene {
         });
     }
 
-    private parseMap(map: string): TileCode[][] {
+    private parseMap(map: string): TileCodes[][] {
         if (map.length > 0) {
             const annotationMap: string[] = map.split('\n');
             const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);
@@ -66,7 +66,7 @@ export class SplashScreenScene extends Phaser.Scene {
         const tileMap = this.make.tilemap({key: configuration.tilemapKey});
         const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap); // from file
 
-        this.add.text(configuration.gameWidth * .5, configuration.gameHeight * 0.1, `Sokoban`, {
+        const title = this.add.text(configuration.gameWidth * .5, configuration.gameHeight * 0.05, `Sokoban`, {
             fontFamily: 'Righteous',
             color: configuration.colors.highlight,
             fontSize: '60px'
@@ -77,6 +77,8 @@ export class SplashScreenScene extends Phaser.Scene {
             furthestLevel: data.furthestLevel,
             scene: this,
             onValidPassword: newFurthestLevel => {
+                console.log(newFurthestLevel)
+
                 const input: SplashScreenInput = {
                     furthestLevel: newFurthestLevel
                 };
@@ -89,7 +91,7 @@ export class SplashScreenScene extends Phaser.Scene {
                 if (moves === undefined) {
                     const alert = createAlert(`Invalid moves code`, true);
                     this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.15, alert)
-                        .setOrigin(0.5);
+                        .setOrigin(0.5, 0.5);
                 } else {
                     const gameSceneConfiguration: GameSceneConfiguration = {
                         map: map,
@@ -101,10 +103,13 @@ export class SplashScreenScene extends Phaser.Scene {
                 }
             }
         });
-        this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.5, htmlElementInput, {
+        this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.4, htmlElementInput, {
             width: '50%'
         })
             .setOrigin(0.5);
-    }
+        htmlElementInput.style.top = (title.height * 2.5) + 'px';
+        htmlElementInput.style.maxHeight = (configuration.gameHeight / 1.5) + 'px';
+        htmlElementInput.style.overflow = 'scroll';
 
+    }
 }
