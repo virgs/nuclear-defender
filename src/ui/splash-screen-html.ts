@@ -1,48 +1,71 @@
+import {levels} from '../levels/levels';
 import * as domElements from './htmlElements';
+import {createSubmitInput} from './htmlElements';
+import {configuration} from '../constants/configuration';
 
 export type SplashScreenOnPlayClickCallback = { map: string, moves: string };
 export type SplashScreenHtmlInput = {
+    scene: Phaser.Scene,
+    furthestLevel: number,
+    onValidPassword: (furthestLevel: number) => void
     onPlayClick: (data: SplashScreenOnPlayClickCallback) => void
 };
 
 function createMapTextArea(onChange: (text) => any) {
-    const labelText = 'Map';
-    const mapText = domElements.createTextAreaWithLabel(labelText,
-        `##########
-#        #
-###$#$#$ #
-# ...... #
-#  ##### #
-#        #
-#  $#$#$##
-#@       #
-##########`, {onChange: onChange});
-    mapText.style.marginBottom = '75px';
-    return mapText;
+    return domElements.createTextAreaWithLabel('Map', levels[0].map, {onChange: onChange});
 }
 
 function createMoveTextInput(onChange: (text) => any) {
-    const movesTextElement = domElements.createInputWithLabel('Moves', 'M418ZXTt-DEwE7KaArhhAbT30QM0QTTwyLJLQATYe9PSHZiNwzr7n3mDvpEbABkAoImSp01DVJypqacpWrB48BsRbpG0Wt7D0O-vvBGi0GguByjw++w6sRIAWewnboMiRtwNDGdoC0tvMEpInxBQwwYYqGYXVzcwYLCtXwiqflSUg0lGWPCYLRwNfygyLzhQnFoihOoc6MxBOrzwcoJxYiwWkvJsn0a6BtzO9IKkMybQWena1oHBoeb16DZ+7iN3SfnNMDLAmr8oHo21qNW6W7uwWKncTumyC1o8BZr57+A9Ajs92KEGQxWsvRY9W6QA',
-        false, {
-            onChange: onChange
-        });
-    movesTextElement.style.marginBottom = '75px';
-    return movesTextElement;
+    return domElements.createInputWithLabel('Moves', '', false, {
+        onChange: onChange
+    });
+}
+
+function createLevelsDropDown(furthestLevel: number, onSelect: (selected) => any) {
+    return domElements.createDropDownWithLabel({
+        labelText: 'Select level',
+        selectedIndex: furthestLevel,
+        items: levels
+            .filter((level, index) => index <= furthestLevel)
+            .map(level => level.password), onSelect
+    });
+}
+
+function createCodePasswordCheckInput(data: (string) => void) {
+    return createSubmitInput({
+        labelText: 'Password',
+        buttonText: 'Check',
+        placeholder: 'Put the level code here',
+        onClick: data
+    });
 }
 
 export const splashScreenHtml = (input: SplashScreenHtmlInput): HTMLElement => {
     const root = document.createElement('div');
+    let selectedLevel = 0;
     let mapValue = '';
     let movesValue = '';
 
-    // const map = new MapBuilder().build(levels[0]); // from code
+    [createCodePasswordCheckInput(text => {
+        const index = levels.findIndex(level => level.password.toLowerCase() === text.toLowerCase());
+        let showMovesText = domElements.createAlert('Wrong code!', true);
+        if (index > input.furthestLevel) {
+            showMovesText = domElements.createAlert('Good job');
+            setTimeout(() => input.onValidPassword(index), 3000);
+        }
+        input.scene.add.dom(configuration.gameWidth * .5, configuration.gameHeight * 0.1, showMovesText).setOrigin(0.5);
+    }),
+        createLevelsDropDown(input.furthestLevel, selected => selectedLevel = selected),
+        // createMapTextArea(text => mapValue = text),
+        createMoveTextInput(text => movesValue = text)]
+        .map(htmlElement => {
+            root.append(htmlElement);
+            htmlElement.style.marginBottom = '45px';
+        });
 
-    root.appendChild(createMapTextArea(text => mapValue = text));
-    root.appendChild(createMoveTextInput(text => movesValue = text));
-    const onClick = () => input.onPlayClick({
-        map: mapValue,
+    root.appendChild(domElements.createHighlightButton('Play', () => input.onPlayClick({
+        map: levels[selectedLevel].map,
         moves: movesValue
-    });
-    root.appendChild(domElements.createHighlightButton('Play', onClick));
+    })));
     return root;
 };

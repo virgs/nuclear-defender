@@ -19,6 +19,8 @@ const config = {
 
 window.addEventListener('load', async () => {
     const game = new Phaser.Game(config);
-    const input: SplashScreenInput = {};
+    const input: SplashScreenInput = {
+        furthestLevel: 0
+    };
     game.scene.start(Scenes[Scenes.SPLASH_SCREEN], input);
 });

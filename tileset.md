@@ -3,10 +3,15 @@
 - Player walking (4 directions)
 - Player pushing (4 directions)
 - Box
-- Box On target
+- Box on target
 - Target
-- Floor
+- Floors
+  - 1 | 2
+  - 3 | 4
 - Wall
+  - 1 | 2 | 3
+  - 4 | 5 | 6
+  - 7 | 8 | 9
 - Treadmill
 - Spring (3x directions)(3 states: compressed, 50% compressed, relaxed)
 - Sliding floor

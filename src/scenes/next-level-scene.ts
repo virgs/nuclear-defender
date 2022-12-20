@@ -4,6 +4,7 @@ import * as lzString from 'lz-string';
 import * as domElements from '../ui/htmlElements';
 import {configuration} from '../constants/configuration';
 import {Actions, mapActionToString} from '../constants/actions';
+import {levels} from '../levels/levels';
 
 export type NextLevelSceneInput = {
     currentLevel: number,
@@ -21,7 +22,7 @@ export class NextLevelScene extends Phaser.Scene {
         const height = configuration.gameHeight;
         const horizontalCenterPosition = width * 0.5;
 
-        this.add.text(horizontalCenterPosition, height * 0.1, `Level ${data.currentLevel} Complete!`, {
+        this.add.text(horizontalCenterPosition, height * 0.1, `Level '${levels[data.currentLevel].password}' Complete!`, {
             fontFamily: 'Righteous',
             color: configuration.colors.highlight,
             fontSize: '60px'
@@ -53,14 +54,25 @@ export class NextLevelScene extends Phaser.Scene {
     private showMovesCode(data: NextLevelSceneInput, x: number, y: number) {
         const mapText = data.moves.map(action => mapActionToString(action)).join('');
         const compressed = lzString.compressToEncodedURIComponent(mapText);
-        const showMovesCode = domElements.createInputWithLabel('Moves code', compressed, true, null);
-        this.add.dom(x, y, showMovesCode)
-            .addListener('click')
-            .once('click', async () => {
+        // const showMovesCode = domElements.createInputWithLabel('Moves code', compressed, true, null);
+        const showMovesCode = domElements.createSubmitInput({
+            labelText: 'Moves',
+            buttonText: 'Copy!',
+            text: compressed,
+            onClick: async (text: string) => {
                 await navigator.clipboard.writeText(compressed);
-
                 const showMovesText = domElements.createAlert('Moves code to clipboard. Share it!');
                 this.add.dom(x, y * 0.1, showMovesText).setOrigin(0.5);
-            }).setOrigin(0.5);
+            }
+        });
+
+        this.add.dom(x, y, showMovesCode);
+        //     .addListener('click')
+        //     .once('click', async () => {
+        //         await navigator.clipboard.writeText(compressed);
+        //
+        //         const showMovesText = domElements.createAlert('Moves code to clipboard. Share it!');
+        //         this.add.dom(x, y * 0.1, showMovesText).setOrigin(0.5);
+        //     }).setOrigin(0.5);
     }
 }

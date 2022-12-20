@@ -4,12 +4,12 @@ import {Hero} from '../actors/hero';
 import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
 import {Actions} from '../constants/actions';
-import {createIndefiniteProgressBar} from '../ui/htmlElements';
 import {Directions} from '../constants/directions';
 import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
 import {NextLevelSceneInput} from './next-level-scene';
 import {configuration} from '../constants/configuration';
+import {createIndefiniteProgressBar} from '../ui/htmlElements';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import {MovementCoordinator, MovementCoordinatorOutput} from '../actors/movement-coordinator';
 
@@ -90,6 +90,7 @@ export class GameScene extends Phaser.Scene {
         const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, createIndefiniteProgressBar())
             .setOrigin(0.5);
         this.solution = input.moves;
+        console.log(input.currentLevel)
         // this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
