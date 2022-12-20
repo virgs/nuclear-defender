@@ -1,16 +1,17 @@
 import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
-import {Direction} from '../constants/direction';
+import {Actions, mapActionToDirection} from '../constants/actions';
+import {Directions} from '../constants/directions';
 
 type Movement = {
     currentPosition: Point,
     newPosition: Point,
-    direction: Direction
+    direction: Directions
 };
 
 export type MovementCoordinatorInput = {
     mapState: Map<TileCode, Point[]>;
-    heroMovingIntentionDirection: Direction
+    heroAction: Actions
 };
 
 export type MovementCoordinatorOutput = {
@@ -23,25 +24,25 @@ export class MovementCoordinator {
 
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
         const result = this.initializeOutput(input);
-        const heroMovingIntentionDirection = input.heroMovingIntentionDirection;
-        if (heroMovingIntentionDirection !== null) {
+        if (input.heroAction !== Actions.STAND) {
+            const heroDirection = mapActionToDirection(input.heroAction);
             const heroPosition = input.mapState.get(TileCode.hero)[0];
-            const newHeroPosition = this.calculateOffset(heroMovingIntentionDirection, heroPosition);
+            const newHeroPosition = this.calculateOffset(heroDirection, heroPosition);
 
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
                 result.mapChanged = true;
                 result.featuresMovementMap.set(TileCode.hero, [{
                     currentPosition: heroPosition,
                     newPosition: newHeroPosition,
-                    direction: heroMovingIntentionDirection
+                    direction: heroDirection
                 }]);
 
                 const boxAhead = this.getBoxAt(newHeroPosition, input.mapState);
                 if (boxAhead) {
                     result.featuresMovementMap.set(TileCode.box, [{
                         currentPosition: boxAhead,
-                        newPosition: this.calculateOffset(input.heroMovingIntentionDirection, boxAhead),
-                        direction: heroMovingIntentionDirection
+                        newPosition: this.calculateOffset(heroDirection, boxAhead),
+                        direction: heroDirection
                     }]);
                 }
             }
@@ -70,7 +71,8 @@ export class MovementCoordinator {
         }
 
         if (this.getBoxAt(newHeroPosition, input.mapState)) {
-            const afterNextMove = this.calculateOffset(input.heroMovingIntentionDirection, newHeroPosition);
+            const heroDirection = mapActionToDirection(input.heroAction);
+            const afterNextMove = this.calculateOffset(heroDirection, newHeroPosition);
             if (this.getWallAt(afterNextMove, input.mapState)) {
                 return false;
             }
@@ -97,23 +99,23 @@ export class MovementCoordinator {
         return this.hasFeatureAt(mapState.get(TileCode.box), offsetTilePosition);
     }
 
-    private calculateOffset(direction: Direction, currentPosition: Point): Point {
+    private calculateOffset(direction: Directions, currentPosition: Point): Point {
         const offset: Point = {
             x: currentPosition.x,
             y: currentPosition.y
         };
 
         switch (direction) {
-            case Direction.LEFT:
+            case Directions.LEFT:
                 offset.x -= 1;
                 break;
-            case Direction.RIGHT:
+            case Directions.RIGHT:
                 offset.x += 1;
                 break;
-            case Direction.UP:
+            case Directions.UP:
                 offset.y -= 1;
                 break;
-            case Direction.DOWN:
+            case Directions.DOWN:
                 offset.y += 1;
                 break;
         }

@@ -1,5 +1,5 @@
 import {getTweenFromDirection} from './tween';
-import {Direction} from '../constants/direction';
+import {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 
 export type HeroMovement = {
@@ -24,31 +24,31 @@ enum HeroAnimation {
 }
 
 export class HeroAnimator {
-    public map(direction: Direction): HeroMovement {
+    public map(direction: Directions): HeroMovement {
         switch (direction) {
-            case Direction.DOWN:
+            case Directions.DOWN:
                 return {
                     walking: HeroAnimation.DOWN,
                     idle: HeroAnimation.IDLE_DOWN,
-                    tween: getTweenFromDirection(Direction.DOWN)
+                    tween: getTweenFromDirection(Directions.DOWN)
                 };
-            case Direction.LEFT:
+            case Directions.LEFT:
                 return {
                     walking: HeroAnimation.LEFT,
                     idle: HeroAnimation.IDLE_LEFT,
-                    tween: getTweenFromDirection(Direction.LEFT)
+                    tween: getTweenFromDirection(Directions.LEFT)
                 };
-            case Direction.RIGHT:
+            case Directions.RIGHT:
                 return {
                     walking: HeroAnimation.RIGHT,
                     idle: HeroAnimation.IDLE_RIGHT,
-                    tween: getTweenFromDirection(Direction.RIGHT)
+                    tween: getTweenFromDirection(Directions.RIGHT)
                 };
-            case Direction.UP:
+            case Directions.UP:
                 return {
                     walking: HeroAnimation.UP,
                     idle: HeroAnimation.IDLE_UP,
-                    tween: getTweenFromDirection(Direction.UP)
+                    tween: getTweenFromDirection(Directions.UP)
                 };
         }
 

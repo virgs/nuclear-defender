@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import {Scenes} from './scenes';
-import {retryButtonElement, nextButtonElement, readOnlyInputElement, groupButtonsElement, alertElement} from '../ui/dom-elements';
-import {Direction} from '../constants/direction';
+import * as domElements from '../ui/dom-elements';
 import {configuration} from '../constants/configuration';
+import {Actions, mapActionToString} from '../constants/actions';
 
-export type NextLevelSceneInput = { currentLevel: number, moves: Direction[] };
+export type NextLevelSceneInput = { currentLevel: number, moves: Actions[] };
 
 export class NextLevelScene extends Phaser.Scene {
     constructor() {
@@ -30,27 +30,27 @@ export class NextLevelScene extends Phaser.Scene {
         })
             .setOrigin(0.5);
 
-        const mapText = data.moves.map(move => Direction[move].toString().charAt(0).toLowerCase()).join(',');
-        const showMovesText = readOnlyInputElement(mapText);
+        const mapText = data.moves.map(action => mapActionToString(action)).join(',');
+        const showMovesText = domElements.readOnlyInputElement(mapText);
         this.add.dom(horizontalCenterPosition, height * 0.4, showMovesText)
             .addListener('click')
             .once('click', async () => {
                 await navigator.clipboard.writeText(mapText);
 
-                const showMovesText = alertElement('Text copied to clipboard');
+                const showMovesText = domElements.alertElement('Text copied to clipboard');
                 this.add.dom(horizontalCenterPosition, height * 0.1, showMovesText).setOrigin(0.5);
             }).setOrigin(0.5);
 
-        const retryButton = retryButtonElement('Retry', () => {
+        const retryButton = domElements.retryButtonElement('Retry', () => {
             console.log('retry');
             // this.scene.start(Scenes[Scenes.GAME], data.gameSceneConfiguration);
         });
-        const nextLevelButton = nextButtonElement('Next Level', () => {
+        const nextLevelButton = domElements.nextButtonElement('Next Level', () => {
             console.log('next');
             // this.scene.start(Scenes[Scenes.GAME], data.gameSceneConfiguration)
         });
 
-        const buttonsGroup = groupButtonsElement(retryButton, nextLevelButton);
+        const buttonsGroup = domElements.groupButtonsElement(retryButton, nextLevelButton);
         this.add.dom(horizontalCenterPosition, height * 0.64, buttonsGroup).setOrigin(0.5);
 
     }

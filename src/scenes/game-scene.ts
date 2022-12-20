@@ -3,8 +3,9 @@ import {Scenes} from './scenes';
 import {Hero} from '../actors/hero';
 import {Point} from '../math/point';
 import {TileCode} from '../tiles/tile-code';
-import {Direction} from '../constants/direction';
+import {Actions} from '../constants/actions';
 import {loadingElement} from '../ui/dom-elements';
+import {Directions} from '../constants/directions';
 import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
 import {NextLevelSceneInput} from './next-level-scene';
@@ -14,6 +15,7 @@ import {MovementCoordinator, MovementCoordinatorOutput} from '../actors/movement
 
 export type GameSceneConfiguration = {
     map: TileCode[][],
+    moves: Actions[]
     currentLevel: number,
     bestMoves: number
 };
@@ -29,9 +31,9 @@ export class GameScene extends Phaser.Scene {
     private featuresMap: Map<TileCode, Phaser.GameObjects.Sprite[]>;
     private gameSceneConfiguration: GameSceneConfiguration;
     private levelComplete: boolean;
-    private solution: Direction[];
+    private solution: Actions[];
     private allowHeroMovement: boolean;
-    private playerMovesSoFar: Direction[];
+    private playerMovesSoFar: Actions[];
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -51,10 +53,10 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    public async create(gameSceneConfiguration: GameSceneConfiguration) {
+    public async create(input: GameSceneConfiguration) {
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
         const map = this.make.tilemap({
-            data: gameSceneConfiguration.map,
+            data: input.map,
             tileWidth: configuration.horizontalTileSize,
             tileHeight: configuration.verticalTileSize
         });
@@ -85,7 +87,8 @@ export class GameScene extends Phaser.Scene {
 
         const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, loadingElement())
             .setOrigin(0.5);
-        // this.solution = await new SokobanSolver().solve(this.createMapState());
+        this.solution = input.moves;
+        this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
     }
@@ -95,15 +98,16 @@ export class GameScene extends Phaser.Scene {
             return;
         }
         if (this.allowHeroMovement) {
-            let movingIntentionDirection: Direction = this.hero.checkMovingIntentionDirection();
-
+            let heroAction: Actions = this.hero.checkAction();
             if (this.solution && this.solution.length > 0) {
-                movingIntentionDirection = this.solution.shift();
+                heroAction = this.solution.shift();
+
             }
+            this.playerMovesSoFar.push(heroAction);
 
             const mapState = this.createMapState();
             const movementCoordinatorOutput = this.movementCoordinator.update({
-                heroMovingIntentionDirection: movingIntentionDirection,
+                heroAction: heroAction,
                 mapState: mapState
             });
             if (movementCoordinatorOutput.mapChanged) {
@@ -125,7 +129,6 @@ export class GameScene extends Phaser.Scene {
             });
         const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCode.hero)
             .map(async heroMovement => {
-                this.playerMovesSoFar.push(heroMovement.direction);
                 this.movesCountLabel.text = `Moves: ${this.playerMovesSoFar.length}`;
                 await this.hero.move(heroMovement.direction);
                 this.allowHeroMovement = true;
@@ -142,7 +145,7 @@ export class GameScene extends Phaser.Scene {
         return mapState;
     }
 
-    public async moveBox(box: Phaser.GameObjects.Sprite, direction: Direction): Promise<void> {
+    public async moveBox(box: Phaser.GameObjects.Sprite, direction: Directions): Promise<void> {
         return new Promise<void>(resolve => {
             const tween = {
                 ...getTweenFromDirection(direction),

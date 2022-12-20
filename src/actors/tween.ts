@@ -1,16 +1,16 @@
-import {Direction} from '../constants/direction';
+import {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 import {TimeController} from '../constants/time-controller';
 
-export function getTweenFromDirection(direction: Direction) {
+export function getTweenFromDirection(direction: Directions) {
     switch (direction) {
-        case Direction.DOWN:
+        case Directions.DOWN:
             return tween.DOWN;
-        case Direction.UP:
+        case Directions.UP:
             return tween.UP;
-        case Direction.LEFT:
+        case Directions.LEFT:
             return tween.LEFT;
-        case Direction.RIGHT:
+        case Directions.RIGHT:
             return tween.RIGHT;
     }
 }

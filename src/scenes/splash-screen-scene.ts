@@ -1,13 +1,15 @@
 import Phaser from 'phaser';
-import {Hero} from '../actors/hero';
+import {Scenes} from './scenes';
 import {TileCode} from '../tiles/tile-code';
+import {Actions} from '../constants/actions';
+import {MapBuilder} from '../tiles/map-builder';
 import {GameSceneConfiguration} from './game-scene';
 import {configuration} from '../constants/configuration';
 import {FileLevelExtractor} from '../levels/file-level-extractor';
 import WebFontFileLoader from '../file-loaders/web-font-file-loader';
 import {levels} from '../levels/levels';
-import {MapBuilder} from '../tiles/map-builder';
-import {Scenes} from './scenes';
+
+export type SplashScreenInput = { map: TileCode[][], moves: Actions[] };
 
 export class SplashScreenScene extends Phaser.Scene {
     private readonly fileLevelExtractor: FileLevelExtractor;
@@ -32,12 +34,13 @@ export class SplashScreenScene extends Phaser.Scene {
         });
     }
 
-    create(data: { map: TileCode[][] }) {
+    create(data: SplashScreenInput) {
         const tileMap = this.make.tilemap({key: configuration.tilemapKey});
         // const map = this.fileLevelExtractor.extractToTileCodeMap(tileMap); // from file
         const map = new MapBuilder().build(data.map); // from url
         // const map = new MapBuilder().build(levels[0]); // from code
         const gameSceneConfiguration: GameSceneConfiguration = {
+            moves: data.moves,
             map: map,
             currentLevel: 0,
             bestMoves: 0

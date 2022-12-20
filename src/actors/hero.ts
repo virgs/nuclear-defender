@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import {HeroAnimator} from './hero-animator';
-import {Direction} from '../constants/direction';
 import {configuration} from '../constants/configuration';
+import {Actions} from '../constants/actions';
+import {Directions} from '../constants/directions';
 
 export class Hero {
     private readonly heroAnimator: HeroAnimator;
-    private readonly inputMap: Map<Direction, () => boolean>;
+    private readonly inputMap: Map<Actions, () => boolean>;
 
     private isMoving: boolean = false;
     private sprite: Phaser.GameObjects.Sprite;
@@ -13,11 +14,11 @@ export class Hero {
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
     public constructor() {
-        this.inputMap = new Map<Direction, () => boolean>();
-        this.inputMap.set(Direction.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors.right));
-        this.inputMap.set(Direction.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors.left));
-        this.inputMap.set(Direction.DOWN, () => Phaser.Input.Keyboard.JustDown(this.cursors.down));
-        this.inputMap.set(Direction.UP, () => Phaser.Input.Keyboard.JustDown(this.cursors.up));
+        this.inputMap = new Map<Actions, () => boolean>();
+        this.inputMap.set(Actions.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors.right));
+        this.inputMap.set(Actions.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors.left));
+        this.inputMap.set(Actions.DOWN, () => Phaser.Input.Keyboard.JustDown(this.cursors.down));
+        this.inputMap.set(Actions.UP, () => Phaser.Input.Keyboard.JustDown(this.cursors.up));
 
         this.heroAnimator = new HeroAnimator();
     }
@@ -36,19 +37,19 @@ export class Hero {
             .forEach(item => this.sprite.anims.create(item));
     }
 
-    public checkMovingIntentionDirection(): Direction {
+    public checkAction(): Actions {
         if (!this.isMoving) {
-            for (let [direction, directionCheckFunction] of this.inputMap.entries()) {
-                if (directionCheckFunction()) {
-                    return direction;
+            for (let [action, actionCheckFunction] of this.inputMap.entries()) {
+                if (actionCheckFunction()) {
+                    return action;
                 }
             }
         }
-        return null;
+        return Actions.STAND;
     }
 
     //TODO extract this to interface
-    public async move(direction: Direction): Promise<void> {
+    public async move(direction: Directions): Promise<void> {
         return new Promise<void>((resolve) => {
             this.isMoving = true;
             const heroMovement = this.heroAnimator.map(direction);

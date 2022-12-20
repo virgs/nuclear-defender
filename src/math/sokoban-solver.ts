@@ -1,11 +1,11 @@
 import {Point} from './point';
 import {TileCode} from '../tiles/tile-code';
+import {Actions} from '../constants/actions';
 import {PriorityQueue} from './priority-queue';
-import {Direction} from '../constants/direction';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 
 type Solution = {
-    path: Direction[],
+    path: Actions[],
     state: Map<TileCode, Point[]>,
     score: number
 };
@@ -15,9 +15,10 @@ enum ScoreBonus {
     BOX_MOVED = 0
 }
 
-const actions = Object.keys(Direction)
+const actions = Object.keys(Actions)
     .filter(key => !isNaN(Number(key)))
-    .map(key => Number(key) as Direction);
+    .map(key => Number(key) as Actions)
+    .filter(action => action !== Actions.STAND);
 
 export class SokobanSolver {
     private movementCoordinator: MovementCoordinator;
@@ -28,7 +29,7 @@ export class SokobanSolver {
         this.movementCoordinator = new MovementCoordinator();
     }
 
-    public async solve(initialMapState: Map<TileCode, Point[]>): Promise<Direction[]> {
+    public async solve(initialMapState: Map<TileCode, Point[]>): Promise<Actions[]> {
         console.log('Solving it');
         this.solutionCandidates.push({
             path: [],
@@ -39,11 +40,10 @@ export class SokobanSolver {
         let cpuBreath = 0;
         let iterationCounter = 0;
         let solution: Solution = undefined;
-        const breathingValue = 200;
+        const breathingValue = 250;
         while (this.solutionCandidates.size() > 0) {
             ++iterationCounter;
             ++cpuBreath;
-            // console.log(iterationCounter, cpuBreath)
             solution = this.iterate();
             if (solution) {
                 break;
@@ -72,15 +72,15 @@ export class SokobanSolver {
     }
 
     private applyActionsToCandidate(currentSolution: Solution) {
-        for (let direction of actions) {
+        for (let action of actions) {
             const movementCoordinatorOutput = this.movementCoordinator.update({
-                heroMovingIntentionDirection: direction,
+                heroAction: action,
                 mapState: currentSolution.state
             });
 
             const newCandidate: Solution = {
                 score: currentSolution.score + ScoreBonus.PLAYER_MOVED,
-                path: currentSolution.path.concat(direction),
+                path: currentSolution.path.concat(action),
                 state: movementCoordinatorOutput.newMapState
             };
 
