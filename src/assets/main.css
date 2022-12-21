@@ -1,0 +1,79 @@
+@import './base.css';
+
+#app {
+    max-height: 100vh;
+    height: 100vh;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+
+    font-weight: normal;
+}
+
+body {
+    background-color: black
+}
+
+@media (hover: hover) {
+    a:hover {
+        background-color: hsla(160, 100%, 37%, 0.2);
+    }
+}
+
+@media (min-width: 1024px) {
+    body {
+        /*display: flex;*/
+        /*place-items: center;*/
+    }
+
+    #app {
+        /*display: grid;*/
+        /*grid-template-columns: 1fr 1fr;*/
+        padding: 0 2rem;
+    }
+}
+
+.fadeout {
+    filter: opacity(0);
+    transition: all 2000ms;
+}
+
+
+.splash-view {
+    height: 100vh;
+    font-family: Martian Mono, monospace;
+}
+
+.sokoban-label {
+    float: left;
+    user-select: none;
+    font-family: 'Righteous', serif;
+    color: var(--background-color);
+    font-size: 20px;
+}
+
+.sokoban-display {
+    font-family: 'Poppins', serif;
+    color: var(--highlight-color);
+}
+
+.sokoban-tooltip {
+    float: left;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    text-decoration: none;
+    background-color: var(--highlight-color);
+}
+
+.map-text-area {
+    font-family: Martian Mono, monospace;
+    font-weight: bold;
+}
+
+:root {
+    --highlight-color: #d4fa00;
+    --background-color: #d6d6d6;
+    --foreground-color: #2c3e50;
+    --danger-color: #502c3e;
+}

@@ -1,5 +1,8 @@
 # sokoban-ai
 
+https://github.com/Sun0fABeach/vue-phaser3
+https://github.com/sominator/devtools/tree/master/client
+
 ## Loading your own map
 1. Generate it using the [sokoban standard annotation](https://sokoban.dk) or just copy it from somewhere:
     - [sokoban.dk](https://sokoban.dk/wp-content/uploads/2019/02/DrFogh-It-Is-All-Greek-Publish.txt)

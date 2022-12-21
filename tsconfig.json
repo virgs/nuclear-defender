@@ -1,9 +1,26 @@
 {
-	"compilerOptions": {
-		"target": "es6",
-		"moduleResolution": "node",
-		"allowJs": true,
-		"checkJs": true,
-		"esModuleInterop": true
-	}
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "references": [
+    {
+      "path": "./tsconfig.config.json"
+    }
+  ],
+  "typeRoots": [
+    "./node_modules/@types",
+    "./node_modules/phaser-ce/typescript/"
+  ],
+  "importsNotUsedAsValues": "remove"
 }
