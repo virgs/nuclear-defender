@@ -60,7 +60,7 @@ export class Hero {
                 ...heroMovement.tween,
                 targets: this.sprite,
                 onUpdate: () => {
-                    this.sprite!.setDepth(this.sprite!.y - configuration.verticalTileSize / 2);
+                    this.sprite!.setDepth(this.sprite!.y - configuration.tiles.verticalSize / 2);
                 },
                 onComplete: () => {
                     this.sprite!.anims.play(heroMovement.idle, true);

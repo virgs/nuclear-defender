@@ -1,4 +1,5 @@
 import GameView from '../views/GameView.vue';
+import NextSceneView from '../views/NextSceneView.vue';
 import SplashScreenView from '../views/SplashScreenView.vue';
 import {createRouter, createWebHistory} from 'vue-router';
 
@@ -12,8 +13,13 @@ const router = createRouter({
         },
         {
             path: '/game',
-            name: 'game',
             component: GameView,
+            meta: {transition: 'slide-left'},
+        }
+        ,
+        {
+            path: '/next-scene',
+            component: NextSceneView,
             meta: {transition: 'slide-left'},
         }
     ],

@@ -40,6 +40,13 @@ body {
 
 
 .splash-view {
+    max-width: 720px;
+    height: 100vh;
+    font-family: Martian Mono, monospace;
+}
+
+.game-view {
+    max-width: 720px;
     height: 100vh;
     font-family: Martian Mono, monospace;
 }

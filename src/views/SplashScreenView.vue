@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {computed, onMounted, reactive, ref} from "vue";
-import {levels} from '@/game/levels/levels';
-import {useRouter} from 'vue-router';
 import {Store} from '@/store';
-import {Actions, mapStringToAction} from '@/game/constants/actions';
-import {TileCodes} from '@/game/tiles/tile-codes';
+import {useRouter} from 'vue-router';
 import * as lzString from 'lz-string';
-import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {levels} from '@/game/levels/levels';
+import {TileCodes} from '@/game/tiles/tile-codes';
 import {MapBuilder} from '@/game/tiles/map-builder';
+import {computed, onMounted, reactive, ref} from "vue";
+import {Actions, mapStringToAction} from '@/game/constants/actions';
+import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
 const router = useRouter();
 
@@ -72,7 +72,8 @@ function playButtonClick() {
     bestMoves: 30,
     currentLevel: data.currentSelectedIndex,
     map: [[TileCodes.empty]],
-    moves: [Actions.RIGHT]
+    moves: [Actions.RIGHT],
+    router: router
   });
   router.push('/game');
 }
@@ -109,12 +110,12 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  <div class="splash-view container text-center">
-    <div class="row justify-content-center gy-3">
-      <div class="col-12">
+  <div class="container splash-view text-center">
+    <div class="row row-cols-1 justify-content-center gy-3">
+      <div class="col">
         <h1 class="sokoban-display display-2 fw-normal" style="user-select: none">Sokoban</h1>
       </div>
-      <div class="col-12 col-lg-6">
+      <div class="col">
         <label class="form-label sokoban-label">Check level password</label>
         <div class="input-group">
           <input type="text" class="form-control" placeholder="Level password" aria-label="Level password"
@@ -125,8 +126,7 @@ onMounted(() => {
           </button>
         </div>
       </div>
-      <div class="w-100"></div>
-      <div class="col-12 col-lg-6">
+      <div class="col">
         <label class="form-label sokoban-label">
           Design your own map
           <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip"
@@ -139,7 +139,7 @@ onMounted(() => {
         <textarea class="form-control map-text-area" rows="10" v-model="data.codedMapText"></textarea>
       </div>
       <div class="w-100"></div>
-      <div class="col-12 col-lg-6">
+      <div class="col">
         <span style="display: flex">
           <label class="form-label sokoban-label">Select your level</label>
         </span>
@@ -161,7 +161,7 @@ onMounted(() => {
 
 
       <div class="w-100"></div>
-      <div class="col-12 col-lg-6">
+      <div class="col">
         <div class="d-grid">
           <button class="btn btn-primary"
                   style="background-color: var(--highlight-color); color: var(--foreground-color)"

@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import {GameScene} from './scenes/game-scene';
 import {configuration} from './constants/configuration';
 import {NextLevelScene} from './scenes/next-level-scene';
-import {SplashScreenScene} from './scenes/splash-screen-scene';
 
 const launch = (containerId: string) => {
     return new Phaser.Game({
@@ -13,7 +12,7 @@ const launch = (containerId: string) => {
         dom: {
             createContainer: true
         },
-        scene: [SplashScreenScene, NextLevelScene, GameScene]
+        scene: [GameScene, NextLevelScene]
     });
 };
 

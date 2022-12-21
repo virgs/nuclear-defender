@@ -58,7 +58,7 @@ export class HeroAnimator {
         return [
             {
                 key: HeroAnimation.IDLE_DOWN,
-                //TODO frames by animation
+                //TODO replace this magic number with frame enum codes
                 frames: this.generateFrames(52)
             },
             {

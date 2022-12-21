@@ -1,24 +1,26 @@
 import Phaser from 'phaser';
+import {Store} from '@/store';
 import {Scenes} from './scenes';
 import {Hero} from '../actors/hero';
 import type {Point} from '../math/point';
 import {TileCodes} from '../tiles/tile-codes';
 import type {Actions} from '../constants/actions';
-import {SokobanSolver} from '../math/sokoban-solver';
 import {getTweenFromDirection} from '../actors/tween';
 import type {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
-import type {NextLevelSceneInput} from './next-level-scene';
 import {createIndefiniteProgressBar} from '../ui/htmlElements';
-import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {FileLevelExtractor} from '@/game/levels/file-level-extractor';
+import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
+
 
 export type GameSceneConfiguration = {
     map: TileCodes[][],
     moves: Actions[]
     currentLevel: number,
-    bestMoves: number
+    bestMoves: number,
+    router: any
 };
 
 //TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
@@ -51,7 +53,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     public preload() {
-        // this.load.html(configuration.html.gameScene.key, configuration.html.gameScene.file);
+        this.load.html(configuration.html.gameScene.key, configuration.html.gameScene.file);
+        this.load.tilemapTiledJSON(configuration.tiles.tilemapKey, configuration.tiles.tilesheets[0]);
+        this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.cache.tilemap.remove(configuration.tiles.tilemapKey);
+        });
 
         this.load.spritesheet(configuration.spriteSheetKey, configuration.tiles.sheetAsset, {
             frameWidth: configuration.tiles.horizontalSize,
@@ -60,9 +66,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create(input: GameSceneConfiguration) {
+        const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
+        const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
+
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
         const map = this.make.tilemap({
-            data: input.map,
+            data: extracted,
             tileWidth: configuration.tiles.horizontalSize,
             tileHeight: configuration.tiles.verticalSize
         });
@@ -201,13 +210,14 @@ export class GameScene extends Phaser.Scene {
             })) {
             this.levelComplete = true;
             console.log('currentLevel complete');
-            setTimeout(() => {
-                const input: NextLevelSceneInput = {
-                    currentLevel: this.gameSceneConfiguration!.currentLevel,
-                    moves: this.playerMovesSoFar!,
-                    totalTime: this.elapsedTime!
-                };
-                this.scene.start(Scenes[Scenes.NEXT_LEVEL], input);
+            setTimeout(async () => {
+                Store.getGameSceneConfiguration()!.router.push('/next-scene');
+                // const input: NextLevelSceneInput = {
+                //     currentLevel: this.gameSceneConfiguration!.currentLevel,
+                //     moves: this.playerMovesSoFar!,
+                //     totalTime: this.elapsedTime!
+                // };
+                // this.scene.start(Scenes[Scenes.NEXT_LEVEL], input);
             }, 1500);
         }
     }
@@ -220,6 +230,7 @@ export class GameScene extends Phaser.Scene {
         // let text = this.add.text(10, 10, 'Please login to play', {color: 'white', fontFamily: 'Arial', fontSize: '32px '});
         const element = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * .9)
             .createFromCache(configuration.html.gameScene.key);
+        console.log(element)
         // element.setPerspective(800);
         element.addListener('click');
 
