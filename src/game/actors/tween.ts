@@ -2,34 +2,34 @@ import {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 import {TimeController} from '../constants/time-controller';
 
-export function getTweenFromDirection(direction: Directions) {
+export function getTweenFromDirection(direction: Directions, multiplier: number = 1) {
     switch (direction) {
         case Directions.DOWN:
-            return tween.DOWN;
+            return tween.DOWN(multiplier);
         case Directions.UP:
-            return tween.UP;
+            return tween.UP(multiplier);
         case Directions.LEFT:
-            return tween.LEFT;
+            return tween.LEFT(multiplier);
         case Directions.RIGHT:
-            return tween.RIGHT;
+            return tween.RIGHT(multiplier);
     }
 }
 
 const tween = {
-    DOWN: {
-        y: '+=' + configuration.tiles.verticalSize,
+    DOWN: (multiplier: number) => ({
+        y: '+=' + (configuration.tiles.verticalSize * multiplier),
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
-    },
-    LEFT: {
-        x: '-=' + configuration.tiles.horizontalSize,
+    }),
+    LEFT: (multiplier: number) => ({
+        x: '-=' + (configuration.tiles.horizontalSize * multiplier),
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
-    },
-    RIGHT: {
-        x: '+=' + configuration.tiles.horizontalSize,
+    }),
+    RIGHT: (multiplier: number) => ({
+        x: '+=' + (configuration.tiles.horizontalSize * multiplier),
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
-    },
-    UP: {
-        y: '-=' + configuration.tiles.verticalSize,
+    }),
+    UP: (multiplier: number) => ({
+        y: '-=' + (configuration.tiles.verticalSize * multiplier),
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
-    }
+    })
 };

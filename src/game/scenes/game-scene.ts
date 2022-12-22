@@ -9,17 +9,18 @@ import {getTweenFromDirection} from '../actors/tween';
 import type {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 import {createIndefiniteProgressBar} from '../ui/htmlElements';
+import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {MapBuilder} from '@/game/tiles/map-builder';
 import {FileLevelExtractor} from '@/game/levels/file-level-extractor';
-import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
-
 
 export type GameSceneConfiguration = {
-    map: TileCodes[][],
-    moves: Actions[]
+    map: string,
+    moves?: Actions[]
     currentLevel: number,
-    bestMoves: number,
+    bestMoves?: number,
     router: any
 };
 
@@ -65,13 +66,15 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    public async create(input: GameSceneConfiguration) {
-        const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
-        const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
+    public async create() {
+        const input = Store.getGameSceneConfiguration()!;
 
+        // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
+        // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
+        const data = new StandardSokobanAnnotationMapper().map(input.map);
         const map = this.make.tilemap({
-            data: extracted,
+            data: data, //extracted, //data,
             tileWidth: configuration.tiles.horizontalSize,
             tileHeight: configuration.tiles.verticalSize
         });
@@ -80,8 +83,6 @@ export class GameScene extends Phaser.Scene {
 
         const mapFeaturesExtractor = new MapFeaturesExtractor();
         this.featuresMap = mapFeaturesExtractor.extractFeatures(this, this.mapLayer);
-        //TODO check if map is valid. number of heroes = 1, number of box = targets, if it's solvable?...
-        // console.log(this.featuresMap);
 
         //TODO move this to its own specific GameActor class
         [...this.featuresMap.get(TileCodes.target)!,
@@ -230,7 +231,7 @@ export class GameScene extends Phaser.Scene {
         // let text = this.add.text(10, 10, 'Please login to play', {color: 'white', fontFamily: 'Arial', fontSize: '32px '});
         const element = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * .9)
             .createFromCache(configuration.html.gameScene.key);
-        console.log(element)
+        console.log(element);
         // element.setPerspective(800);
         element.addListener('click');
 

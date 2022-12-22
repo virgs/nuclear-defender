@@ -76,7 +76,7 @@ export class MapFeaturesExtractor {
 
     private searchFeature(mapLayer: Phaser.Tilemaps.TilemapLayer, tile: TileCodes, replacements: null | TileCodes.empty | TileCodes.floor, frame: TileCodes | undefined):
         Phaser.GameObjects.Sprite[] {
-        return mapLayer.createFromTiles(tile + 1, replacements as any, {
+        return mapLayer.createFromTiles(tile, replacements as any, {
             key: configuration.spriteSheetKey,
             frame: frame
         })

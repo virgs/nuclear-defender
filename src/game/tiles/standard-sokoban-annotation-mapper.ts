@@ -1,15 +1,38 @@
 import {TileCodes} from './tile-codes';
 
 export class StandardSokobanAnnotationMapper {
-    public map(levelRows: string[]): TileCodes[][] {
-        return levelRows
-            .map(row => row.split('')
-                .map(char => StandardSokobanAnnotationMapper.getTileTypeFromString(char) + 1)); // to match the values generated from Tiled Software
+    public map(encodedLevel: string): TileCodes[][] {
+        const encodedMatrix = this.transformToMatrix(encodedLevel);
+        const dimensionArray = this.createEmptyDecodedMap(encodedMatrix);
+        return dimensionArray
+            .map((line, y) => line
+                .map((_, x: number): TileCodes => {
+                    const char = encodedMatrix[y][x];
+                    return char ? StandardSokobanAnnotationMapper.getTileTypeFromString(char) : TileCodes.empty;
+                }));
+    }
+
+    private createEmptyDecodedMap(encodedMatrix: string[][]) {
+        const longestLine = encodedMatrix
+            .reduce((acc, item) => item.length > acc ? item.length : acc, 0);
+
+        const dimensionArray: TileCodes[][] = new Array(encodedMatrix.length)
+            .fill(new Array(longestLine)
+                .fill(encodedMatrix.length));
+        return dimensionArray;
+    }
+
+    private transformToMatrix(encodedLevel: string) {
+        const encodedMatrix: string[][] = encodedLevel
+            .split('\n')
+            .filter(line => line.length > 0)
+            .map(row => row.split(''));
+        return encodedMatrix;
     }
 
     private static getTileTypeFromString(char: string): TileCodes {
         switch (char) {
-            case '-':
+            case '-' :
                 return TileCodes.empty;
             case ' ':
                 return TileCodes.floor;

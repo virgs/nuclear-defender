@@ -4,10 +4,14 @@
 // Author: Eric F Tchong
 // Email: serenata@setarnet.aw
 
-type Level = { title: string, map: string };
-export const levels: Level[] = [{
-    map:
-`
+type Level = {
+    title: string,
+    map: string,
+    movesSolution?: string
+};
+export const levels: Level[] = [
+    {
+        map: `
 ####
 #  #
 #  ######
@@ -18,10 +22,11 @@ export const levels: Level[] = [{
 # ..    #
 #########
 `,
-    title: 'Small world'
-}, {
-    map:
-`
+        title: 'Small world',
+        movesSolution: ''
+    },
+    {
+        map: `
 -####
 ##  ##
 # $  ####
@@ -33,10 +38,12 @@ export const levels: Level[] = [{
 ## # $..#
 -# ..####
 -#####
-`, title: 'Go gack'
-}, {
-    map:
-`
+`,
+        title: 'Go gack',
+        movesSolution: ''
+    },
+    {
+        map: `
 -#######
 ###    #
 # $ $$ ##
@@ -46,10 +53,12 @@ export const levels: Level[] = [{
 ###  ...#
 --##..###
 ---####
-`, title: 'Go back 2'
-}, {
-    map:
-`
+`,
+        title: 'Go back 2',
+        movesSolution: ''
+    },
+    {
+        map: `
 --######
 ###....#
 #   ...#
@@ -59,10 +68,12 @@ export const levels: Level[] = [{
 #  $@$   #
 #######  #
 ------####
-`, title: 'Small is beautiful'
-}, {
-    map:
-`
+`,
+        title: 'Small is beautiful',
+        movesSolution: ''
+    },
+    {
+        map: `
 -#######
 ###....#
 #  ....###
@@ -72,10 +83,12 @@ export const levels: Level[] = [{
 #  $@$   #
 #######  #
 ------####
-`, title: 'Little 8'
-}, {
-    map:
-`
+`,
+        title: 'Little 8',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##########
 #        #
 ###$#$#$ #
@@ -85,10 +98,12 @@ export const levels: Level[] = [{
 #  $#$#$##
 #@       #
 ##########
-`, title: 'Sixes'
-}, {
-    map:
-`
+`,
+        title: 'Sixes',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##########
 #        #
 # $$$$$ ##
@@ -98,10 +113,12 @@ export const levels: Level[] = [{
 # $$$ $  #
 #@       #
 ##########
-`, title: 'Crap it is'
-}, {
-    map:
-`
+`,
+        title: 'Crap it is',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##########
 #        #
 # $#$... #
@@ -111,10 +128,12 @@ export const levels: Level[] = [{
 # $ $ ## #
 #@       #
 ##########
-`, title: 'Small craps'
-}, {
-    map:
-`
+`,
+        title: 'Small craps',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##########
 #        #
 # ###..  #
@@ -124,10 +143,12 @@ export const levels: Level[] = [{
 # $$*##* #
 #        #
 ##########
-`, title: 'Casino'
-}, {
-    map:
-`
+`,
+        title: 'Casino',
+        movesSolution: ''
+    },
+    {
+        map: `
 ----#####
 --###   ####
 ### ..  $  #
@@ -138,10 +159,12 @@ export const levels: Level[] = [{
 #   $  $ #
 #### @####
 ---####
-`, title: 'Casino 2'
-}, {
-    map:
-`
+`,
+        title: 'Casino 2',
+        movesSolution: ''
+    },
+    {
+        map: `
 ------####
 #######  ###
 # $..##..$ #
@@ -152,10 +175,12 @@ export const levels: Level[] = [{
 #   $    #  #
 # #  @#######
 #######
-`, title: 'Slippery road'
-}, {
-    map:
-`
+`,
+        title: 'Slippery road',
+        movesSolution: ''
+    },
+    {
+        map: `
 --##########
 -###       ##
 ##  $ $ $# $#
@@ -167,10 +192,12 @@ export const levels: Level[] = [{
 #   $... #  #
 # #  @#######
 #######
-`, title: 'Savaneta'
-}, {
-    map:
-`
+`,
+        title: 'Savaneta',
+        movesSolution: ''
+    },
+    {
+        map: `
 ###########-
 #  #      ##
 #  ###   $ #
@@ -187,10 +214,12 @@ export const levels: Level[] = [{
 #   $@#####
 ###  ##
 --####
-`, title: 'San Nicolas'
-}, {
-    map:
-`
+`,
+        title: 'San Nicolas',
+        movesSolution: ''
+    },
+    {
+        map: `
 ####
 #  #----####
 #  ######  #
@@ -207,10 +236,12 @@ export const levels: Level[] = [{
 #   $@#####
 ###  ##
 --####
-`, title: 'Oranjestad'
-}, {
-    map:
-`
+`,
+        title: 'Oranjestad',
+        movesSolution: ''
+    },
+    {
+        map: `
 ####
 #  #----####
 #  ######  #
@@ -226,10 +257,12 @@ export const levels: Level[] = [{
 # $$@###  #
 #    #-####
 ######
-`, title: 'Playa'
-}, {
-    map:
-`
+`,
+        title: 'Playa',
+        movesSolution: ''
+    },
+    {
+        map: `
 -#############
 0#    #      #
 ##    ##   # #
@@ -245,10 +278,12 @@ export const levels: Level[] = [{
 #  $@##   #
 #    ######
 ######
-`, title: 'Otro Playa'
-}, {
-    map:
-`
+`,
+        title: 'Otro Playa',
+        movesSolution: ''
+    },
+    {
+        map: `
 ######
 #    ##
 #     ####
@@ -259,10 +294,12 @@ export const levels: Level[] = [{
 # $#  $  #
 #    ##  #
 ##########
-`, title: 'Sweet Maria'
-}, {
-    map:
-`
+`,
+        title: 'Sweet Maria',
+        movesSolution: '',
+    },
+    {
+        map: `
 #######
 #     ##
 # # $  #
@@ -273,10 +310,12 @@ export const levels: Level[] = [{
 # ...   #
 #   #####
 #####
-`, title: 'Love Tammy'
-}, {
-    map:
-`
+`,
+        title: 'Love Tammy',
+        movesSolution: ''
+    },
+    {
+        map: `
 #######
 #     ##
 #$# $  #
@@ -287,10 +326,12 @@ export const levels: Level[] = [{
 #   ...   #
 #     #####
 #######
-`, title: '6 of a kind'
-}, {
-    map:
-`
+`,
+        title: '6 of a kind',
+        movesSolution: ''
+    },
+    {
+        map: `
 #######
 #     ##
 #$# $  ##
@@ -302,10 +343,12 @@ export const levels: Level[] = [{
 #   # #####
 #      #
 ########
-`, title: 'Till 6 oclock'
-}, {
-    map:
-`
+`,
+        title: 'Till 6 oclock',
+        movesSolution: ''
+    },
+    {
+        map: `
 #######
 #     ####
 ###$#    #
@@ -317,10 +360,12 @@ export const levels: Level[] = [{
 # . #$#####
 # .   @#
 ########
-`, title: 'Nasty field'
-}, {
-    map:
-`
+`,
+        title: 'Nasty field',
+        movesSolution: ''
+    },
+    {
+        map: `
 #######
 #     ####
 ### #    #
@@ -332,10 +377,12 @@ export const levels: Level[] = [{
 # .$#$######
 # .   @#
 ########
-`, title: 'Nasty field 2'
-}, {
-    map:
-`
+`,
+        title: 'Nasty field 2',
+        movesSolution: ''
+    },
+    {
+        map: `
 ######--#####
 ##   ####   ##
 # $   $  $   #
@@ -350,10 +397,12 @@ export const levels: Level[] = [{
 #   #####   #
 #####---##  #
 ####-----####
-`, title: 'Bigger and bigger'
-}, {
-    map:
-`
+`,
+        title: 'Bigger and bigger',
+        movesSolution: ''
+    },
+    {
+        map: `
 ----#####
 ---##   ####
 ####  $ $ $ #
@@ -367,10 +416,12 @@ export const levels: Level[] = [{
 #####......#
 ----#..#####
 ----####
-`, title: 'Waw'
-}, {
-    map:
-`
+`,
+        title: 'Waw',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##########
 #        ##
 # $$$$ $  ##
@@ -383,10 +434,12 @@ export const levels: Level[] = [{
 # $ $ ####
 #     #
 #######
-`, title: 'Fill the tunnel'
-}, {
-    map:
-`
+`,
+        title: 'Fill the tunnel',
+        movesSolution: ''
+    },
+    {
+        map: `
 #########
 #       ##
 #$#   $  #
@@ -398,10 +451,12 @@ export const levels: Level[] = [{
 # *.  $ $ #
 #.  . .   #
 ###########
-`, title: 'Brasil'
-}, {
-    map:
-`
+`,
+        title: 'Brasil',
+        movesSolution: ''
+    },
+    {
+        map: `
 ###########
 #         #
 # $$  #   #
@@ -414,10 +469,12 @@ export const levels: Level[] = [{
 #      .... #
 #    ## ....#
 #############
-`, title: 'Festival of soko'
-}, {
-    map:
-`
+`,
+        title: 'Festival of soko',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##############
 #. #  #      #
 #  #  + $ $ $#
@@ -435,10 +492,12 @@ export const levels: Level[] = [{
 #  #  #
 #  #  #
 #######
-`, title: 'Long road'
-}, {
-    map:
-`
+`,
+        title: 'Long road',
+        movesSolution: ''
+    },
+    {
+        map: `
 ############
 #          #
 # ##$$ $##$###
@@ -453,10 +512,12 @@ export const levels: Level[] = [{
 #  ##     #
 #  ## ### #
 #######-###
-`, title: 'Hi Jane'
-}, {
-    map:
-`
+`,
+        title: 'Hi Jane',
+        movesSolution: ''
+    },
+    {
+        map: `
 #####----#####
 ##########   #
 #       ###$ #
@@ -474,10 +535,12 @@ export const levels: Level[] = [{
 # #  #$#..# $  #
 #    #  .#     #
 ################
-`, title: 'True Love'
-}, {
-    map:
-`
+`,
+        title: 'True Love',
+        movesSolution: ''
+    },
+    {
+        map: `
 ################
 #              #
 # $#$ $ $ $ $ $#
@@ -495,10 +558,12 @@ export const levels: Level[] = [{
 ##$$ $$$ $  ##
 #         ###
 ###########
-`, title: 'Soko likes to walk'
-}, {
-    map:
-`
+`,
+        title: 'Soko likes to walk',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##################
 #                #
 # $####$ $ ####  #
@@ -516,10 +581,12 @@ export const levels: Level[] = [{
 #        $ $  $  #
 #######          #
 ------############
-`, title: 'Fall thru'
-}, {
-    map:
-`
+`,
+        title: 'Fall thru',
+        movesSolution: ''
+    },
+    {
+        map: `
 ###################
 #                 #
 #. #.$.$# #$$.$# .#
@@ -537,10 +604,12 @@ export const levels: Level[] = [{
 #. # .  # # . .# .#
 #                 #
 ###################
-`, title: 'Paradise'
-}, {
-    map:
-`
+`,
+        title: 'Paradise',
+        movesSolution: ''
+    },
+    {
+        map: `
 ###################
 #                 #
 #  $ $ $ $ $ $  $ #
@@ -558,10 +627,12 @@ export const levels: Level[] = [{
 # $  $$#    $ $ #
 #@#      #####  #
 ##########---####
-`, title: 'Santa Martha'
-}, {
-    map:
-`
+`,
+        title: 'Santa Martha',
+        movesSolution: ''
+    },
+    {
+        map: `
 ---------------####
 ################  #
 #                 #####
@@ -577,10 +648,12 @@ export const levels: Level[] = [{
 #                 #
 ##  ###  ####  ####
 -####-####--####
-`, title: 'Tunnel of light'
-}, {
-    map:
-`
+`,
+        title: 'Tunnel of light',
+        movesSolution: ''
+    },
+    {
+        map: `
 ##########
 #        #
 # $#$#$#$#
@@ -594,10 +667,12 @@ export const levels: Level[] = [{
 #  ###### $##
 ####----#  #
 --------####
-`, title: 'In the dark'
-}, {
-    map:
-`
+`,
+        title: 'In the dark',
+        movesSolution: ''
+    },
+    {
+        map: `
 #########-#########
 #.....# ### ##    #
 #.##..         #$ #
@@ -615,10 +690,12 @@ export const levels: Level[] = [{
 # $$#$ $ $   #... #
 #   #@$     ..... #
 ###################
-`, title: 'Two blocks away'
-}, {
-    map:
-`
+`,
+        title: 'Two blocks away',
+        movesSolution: ''
+    },
+    {
+        map: `
 ###################
 #                 #
 # $ $$$ # #$$# ## #
@@ -636,5 +713,8 @@ export const levels: Level[] = [{
 #....# $ $ $    $ #
 #....#       ####@#
 ##############--###
-`, title: 'Easy to do'
-}];
+`,
+        title: 'Easy to do',
+        movesSolution: ''
+    }
+];

@@ -3,11 +3,8 @@ import {Store} from '@/store';
 import {useRouter} from 'vue-router';
 import * as lzString from 'lz-string';
 import {levels} from '@/game/levels/levels';
-import {TileCodes} from '@/game/tiles/tile-codes';
-import {MapBuilder} from '@/game/tiles/map-builder';
 import {computed, onMounted, reactive, ref} from "vue";
 import {Actions, mapStringToAction} from '@/game/constants/actions';
-import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
 const router = useRouter();
 
@@ -25,7 +22,9 @@ const data = reactive({
   currentSelectedIndex: 10,
   levelPassword: '',
   validLevelPassword: false,
-  codedMapText: ''
+  codedMapText: '',
+  moves: '',
+  bestMoves: 0 //create from chrome.storage
 });
 
 const furthestLevel = 30;
@@ -58,21 +57,27 @@ function parseMoves(compressedMoves: string): Actions[] | undefined {
   return [];
 }
 
-function parseMap(map: string): TileCodes[][] {
-  if (map.length > 0) {
-    const annotationMap: string[] = map.split('\n');
-    const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);
-    return new MapBuilder().build(tileMap);
-  }
-  return [];
+function validateMap(map: string): boolean {
+  //TODO create a specific class for that
+  //TODO check if map is valid. number of heroes = 1, number of box = targets, if it's solvable?...
+
+  return map.length > 0;
+
 }
 
 function playButtonClick() {
+  let moves = parseMoves(data.moves);
+  // if (moves === undefined) {
+  // const alert = createAlert(`Invalid moves code`, true);
+  // this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.15, alert)
+  //     .setOrigin(0.5, 0.5);
+  // } else {
+
   Store.setGameSceneConfiguration({
-    bestMoves: 30,
+    bestMoves: data.bestMoves,
     currentLevel: data.currentSelectedIndex,
-    map: [[TileCodes.empty]],
-    moves: [Actions.RIGHT],
+    map: levels[data.currentSelectedIndex].map,
+    moves: moves,
     router: router
   });
   router.push('/game');
@@ -125,6 +130,11 @@ onMounted(() => {
                   :disabled="data.levelPassword.length === 0">Check
           </button>
         </div>
+      </div>
+      <div class="col">
+        <label class="form-label sokoban-label">Moves code</label>
+        <input type="text" class="form-control" placeholder="Level password" aria-label="Moves code"
+               v-model="data.moves">
       </div>
       <div class="col">
         <label class="form-label sokoban-label">
