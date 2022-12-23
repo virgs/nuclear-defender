@@ -13,8 +13,6 @@ import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {MapBuilder} from '@/game/tiles/map-builder';
-import {FileLevelExtractor} from '@/game/levels/file-level-extractor';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -67,12 +65,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create() {
-        const input = Store.getGameSceneConfiguration()!;
+        const codedMap: string = Store.getInstance().map;
 
         // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
         // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
         //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
-        const data = new StandardSokobanAnnotationMapper().map(input.map);
+        const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const map = this.make.tilemap({
             data: data, //extracted, //data,
             tileWidth: configuration.tiles.horizontalSize,
@@ -212,7 +210,7 @@ export class GameScene extends Phaser.Scene {
             this.levelComplete = true;
             console.log('currentLevel complete');
             setTimeout(async () => {
-                Store.getGameSceneConfiguration()!.router.push('/next-scene');
+                Store.getInstance().router.push('/next-scene');
                 // const input: NextLevelSceneInput = {
                 //     currentLevel: this.gameSceneConfiguration!.currentLevel,
                 //     moves: this.playerMovesSoFar!,
