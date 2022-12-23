@@ -3,7 +3,7 @@ import type {Actions} from '@/game/constants/actions';
 export class Store {
     private _movesCode?: Actions[] = [];
     private _map: string = '';
-    private _currentLevel: number = -1;
+    private _currentLevelIndex: number = -1;
     private _bestMoves: number[] = [];
     private _router: any;
 
@@ -20,8 +20,8 @@ export class Store {
         this._movesCode = value;
     }
 
-    set currentLevel(value: number) {
-        this._currentLevel = value;
+    set currentLevelIndex(value: number) {
+        this._currentLevelIndex = value;
     }
 
     set bestMoves(value: number[]) {

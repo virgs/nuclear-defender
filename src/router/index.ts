@@ -1,5 +1,5 @@
 import GameView from '../views/GameView.vue';
-import NextSceneView from '../views/NextSceneView.vue';
+import NextLevelView from '../views/NextLevelView.vue';
 import SplashScreenView from '../views/SplashScreenView.vue';
 import {createRouter, createWebHistory} from 'vue-router';
 
@@ -18,8 +18,8 @@ const router = createRouter({
         }
         ,
         {
-            path: '/next-scene',
-            component: NextSceneView,
+            path: '/next-level',
+            component: NextLevelView,
             meta: {transition: 'slide-left'},
         }
     ],

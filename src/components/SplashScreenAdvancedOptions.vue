@@ -1,8 +1,9 @@
 <template>
   <div class="toast-container position-fixed top-0 end-0 p-3">
     <div id="toast" class="toast" role="alert"
+         style="background-color: transparent"
          aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
-      <div class="d-flex" :style="toastStyle">
+      <div class="d-flex sokoban-toast" :style="toastStyle">
         <div class="toast-body">
           {{ toastBodyTextName }}
         </div>
@@ -73,7 +74,7 @@ export default {
 '*': boxOnTarget<br>
 '@': hero<br>
 '+': heroOnTarget`,
-      furthestLevelEnabled: false,
+      furthestLevelEnabled: 0,
       validLevelPassword: false,
       levelPassword: '',
       codedMapText: '',

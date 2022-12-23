@@ -105,7 +105,7 @@ export class GameScene extends Phaser.Scene {
         // this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
-        this.createFormButtons();
+        // this.createFormButtons();
     }
 
     public async update(time: number, delta: number) {
@@ -210,7 +210,7 @@ export class GameScene extends Phaser.Scene {
             this.levelComplete = true;
             console.log('currentLevel complete');
             setTimeout(async () => {
-                Store.getInstance().router.push('/next-scene');
+                Store.getInstance().router.push('/next-level');
                 // const input: NextLevelSceneInput = {
                 //     currentLevel: this.gameSceneConfiguration!.currentLevel,
                 //     moves: this.playerMovesSoFar!,
@@ -225,22 +225,22 @@ export class GameScene extends Phaser.Scene {
         this.tweens.add(tween);
     }
 
-    private createFormButtons() {
-        // let text = this.add.text(10, 10, 'Please login to play', {color: 'white', fontFamily: 'Arial', fontSize: '32px '});
-        const element = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * .9)
-            .createFromCache(configuration.html.gameScene.key);
-        console.log(element);
-        // element.setPerspective(800);
-        element.addListener('click');
-
-        element.on('click', (event: any) => {
-            if (event.target.id === 'game-scene-undo-button') {
-                console.log('undo');
-            }
-            if (event.target.id === 'game-scene-retry-button') {
-                console.log('retry');
-            }
-        });
-
-    }
+    // private createFormButtons() {
+    //     // let text = this.add.text(10, 10, 'Please login to play', {color: 'white', fontFamily: 'Arial', fontSize: '32px '});
+    //     const element = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * .9)
+    //         .createFromCache(configuration.html.gameScene.key);
+    //     console.log(element);
+    //     // element.setPerspective(800);
+    //     element.addListener('click');
+    //
+    //     element.on('click', (event: any) => {
+    //         if (event.target.id === 'game-scene-undo-button') {
+    //             console.log('undo');
+    //         }
+    //         if (event.target.id === 'game-scene-retry-button') {
+    //             console.log('retry');
+    //         }
+    //     });
+    //
+    // }
 }

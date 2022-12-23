@@ -10,9 +10,10 @@ import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvan
 const router = useRouter();
 
 const data = reactive({
-  currentSelectedIndex: 10
+  currentSelectedIndex: 0
 });
 
+//TODO get it from OptionsComponent
 const furthestLevel = 30;
 
 const currentLevelName = computed(() => levels[data.currentSelectedIndex].title);
@@ -25,7 +26,7 @@ function optionsChanged(valid: boolean) {
 }
 
 function playButtonClick() {
-  Store.getInstance().currentLevel = data.currentSelectedIndex;
+  Store.getInstance().currentLevelIndex = data.currentSelectedIndex;
   Store.getInstance().map = levels[data.currentSelectedIndex].map;
   router.push('/game');
 }
@@ -34,15 +35,7 @@ onMounted(() => {
   [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
       // @ts-ignore
       .map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
-  const toastTrigger = document.getElementById('toastBtn');
-  const toastLiveExample = document.getElementById('toast');
-  if (toastTrigger) {
-    // @ts-ignore
-    toastTrigger.addEventListener('click', () => new bootstrap.Toast(toastLiveExample).show());
-  }
 });
-
 
 </script>
 

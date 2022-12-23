@@ -78,6 +78,40 @@ body {
     font-weight: bold;
 }
 
+.sokoban-toast {
+    filter: opacity(.75);
+    border-radius: 5px;
+    border-color: transparent;
+    background-color: var(--highlight-color);
+    color: var(--foreground-color);
+}
+
+.sokoban-outlined-button {
+    background-color: transparent;
+    color: var(--highlight-color);
+    border-color: var(--highlight-color)
+}
+
+.sokoban-call-for-action-button {
+    background-color: var(--highlight-color);
+    color: var(--foreground-color);
+    border-color: var(--highlight-color)
+}
+
+.sokoban-outlined-button:active, .sokoban-outlined-button:focus {
+    background-color: var(--foreground-color);
+}
+
+.sokoban-call-for-action-button:active, .sokoban-call-for-action-button:focus {
+    background-color: var(--background-color);
+}
+
+.sokoban-outlined-button:hover, .sokoban-call-for-action-button:hover,
+.sokoban-outlined-button:focus-visible, .sokoban-call-for-action-button:focus-visible,
+.sokoban-outlined-button:active, .sokoban-call-for-action-button:active {
+    background-color: unset !important;
+}
+
 :root {
     --highlight-color: #d4fa00;
     --background-color: #d6d6d6;
