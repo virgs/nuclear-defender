@@ -22,10 +22,14 @@ const availableLevels = computed(() => levels
     .map(level => level.title));
 
 function optionsChanged(valid: boolean) {
-
+  console.log()
 }
 
 function playButtonClick() {
+  // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
+  // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
+  //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
+
   Store.getInstance().currentLevelIndex = data.currentSelectedIndex;
   Store.getInstance().map = levels[data.currentSelectedIndex].map;
   router.push('/game');
@@ -40,7 +44,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container splash-view text-center">
+  <div class="container splash-view text-center pt-3 pt-lg-5">
     <div class="row row-cols-1 justify-content-center gy-3">
       <div class="col">
         <h1 class="sokoban-display display-2 fw-normal" style="user-select: none">Sokoban</h1>

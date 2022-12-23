@@ -40,4 +40,8 @@ export class Store {
         this._router = value;
     }
 
+    public update(x: number): void {
+        console.log(x)
+    }
+
 }

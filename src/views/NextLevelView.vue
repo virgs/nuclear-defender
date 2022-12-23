@@ -42,7 +42,7 @@ onMounted(() => {
 
 <template>
   <main>
-    <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast-container position-fixed top-0 end-0 pt-3">
       <div id="copy-toast" class="toast" role="alert" style="background-color: transparent"
            aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
         <div class="d-flex sokoban-toast">

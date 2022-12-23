@@ -7,7 +7,7 @@ import gameSceneHtml from '@/game/assets/html/game-scene.html';
 export const configuration = {
     frameRate: 10,
     spriteSheetKey: 'tiles',
-    updateCycleInMs: 250,
+    updateCycleInMs: 200,
     tiles: {
         verticalSize: 40,
         horizontalSize: 40,
@@ -17,8 +17,8 @@ export const configuration = {
         layerName: 'Level',
         tilesetName: 'sokoban',
     },
-    gameWidth: 1000,
-    gameHeight: 750,
+    gameWidth: 800,
+    gameHeight: 600,
     colors: {
         foregroundColor: '#d6d6d6',
         highlight: '#d4fa00',

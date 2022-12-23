@@ -18,18 +18,22 @@ export function getTweenFromDirection(direction: Directions, multiplier: number 
 const tween = {
     DOWN: (multiplier: number) => ({
         y: '+=' + (configuration.tiles.verticalSize * multiplier),
+        ease: 'Circular.Out',
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     }),
     LEFT: (multiplier: number) => ({
         x: '-=' + (configuration.tiles.horizontalSize * multiplier),
+        ease: 'Circular.Out',
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     }),
     RIGHT: (multiplier: number) => ({
         x: '+=' + (configuration.tiles.horizontalSize * multiplier),
+        ease: 'Circular.Out',
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     }),
     UP: (multiplier: number) => ({
         y: '-=' + (configuration.tiles.verticalSize * multiplier),
+        ease: 'Circular.Out',
         duration: configuration.updateCycleInMs * TimeController.getTimeFactor()
     })
 };

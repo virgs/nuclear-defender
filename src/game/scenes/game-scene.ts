@@ -9,9 +9,9 @@ import {getTweenFromDirection} from '../actors/tween';
 import type {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 import {createIndefiniteProgressBar} from '../ui/htmlElements';
-import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
 export type GameSceneConfiguration = {
@@ -27,7 +27,6 @@ export class GameScene extends Phaser.Scene {
     private readonly mapFeaturesExtractor: MapFeaturesExtractor;
 
     private mapLayer?: Phaser.Tilemaps.TilemapLayer;
-    private timeLabel?: Phaser.GameObjects.Text;
     private movementCoordinator?: MovementCoordinator;
 
     private hero?: Hero;
@@ -37,7 +36,6 @@ export class GameScene extends Phaser.Scene {
     private solution?: Actions[];
     private allowHeroMovement?: boolean;
     private playerMovesSoFar?: Actions[];
-    private elapsedTime?: number;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -48,7 +46,6 @@ export class GameScene extends Phaser.Scene {
         this.levelComplete = false;
         this.gameSceneConfiguration = gameSceneConfiguration;
         this.playerMovesSoFar = [];
-        this.elapsedTime = 0;
     }
 
     public preload() {
@@ -67,12 +64,9 @@ export class GameScene extends Phaser.Scene {
     public async create() {
         const codedMap: string = Store.getInstance().map;
 
-        // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
-        // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
-        //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const map = this.make.tilemap({
-            data: data, //extracted, //data,
+            data: data,
             tileWidth: configuration.tiles.horizontalSize,
             tileHeight: configuration.tiles.verticalSize
         });
@@ -94,26 +88,18 @@ export class GameScene extends Phaser.Scene {
             sprite: this.featuresMap.get(TileCodes.hero)![0]
         });
         this.movementCoordinator = new MovementCoordinator();
-        this.timeLabel = this.add.text(540, 10, `Time: ${this.elapsedTime}s`, {
-            fontFamily: 'Poppins',
-            fontSize: '30px'
-        });
 
         const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, createIndefiniteProgressBar())
             .setOrigin(0.5);
         // this.solution = input.moves;
-        // this.solution = await new SokobanSolver().solve(this.createMapState());
         loading.removeElement();
         this.allowHeroMovement = true;
-        // this.createFormButtons();
     }
 
     public async update(time: number, delta: number) {
         if (this.levelComplete) {
             return;
         }
-        this.elapsedTime! += delta;
-        this.timeLabel!.text = `Time: ${Math.trunc(this.elapsedTime! / 100) / 10}s`;
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
