@@ -2,7 +2,9 @@ import {TileCodes} from './tile-codes';
 
 export class StandardSokobanAnnotationMapper {
     public map(encodedLevel: string): TileCodes[][] {
-        const encodedMatrix = this.transformToMatrix(encodedLevel);
+        const noPipeMap = encodedLevel.replace('|', '\n');
+        const noNumberMap = this.removeNumbers(noPipeMap);
+        const encodedMatrix = this.transformToMatrix(noNumberMap);
         const dimensionArray = this.createEmptyDecodedMap(encodedMatrix);
         return dimensionArray
             .map((line, y) => line
@@ -30,9 +32,30 @@ export class StandardSokobanAnnotationMapper {
         return encodedMatrix;
     }
 
+    private removeNumbers(numberedMap: string): string {
+        let result = '';
+        const chars = numberedMap.split('');
+        for (let index = 0; index < chars.length; ++index) {
+            if (/\d/.test(chars[index])) {
+                let value = chars[index];
+                while (/\d/.test(chars[++index])) {
+                    value += chars[index];
+                }
+                result += new Array(Number(value))
+                    .fill(chars[index]).join('');
+            } else {
+                result += chars[index];
+            }
+        }
+        return result;
+
+    }
+
     private static getTileTypeFromString(char: string): TileCodes {
         switch (char) {
             case '-' :
+                return TileCodes.empty;
+            case '_' :
                 return TileCodes.empty;
             case ' ':
                 return TileCodes.floor;
