@@ -16,16 +16,12 @@ export class Store {
         return Store._instance;
     }
 
-    set movesCode(value: Actions[]) {
+    get movesCode(): Actions[] | undefined {
+        return this._movesCode;
+    }
+
+    set movesCode(value: Actions[] | undefined) {
         this._movesCode = value;
-    }
-
-    set currentLevelIndex(value: number) {
-        this._currentLevelIndex = value;
-    }
-
-    set bestMoves(value: number[]) {
-        this._bestMoves = value;
     }
 
     get map(): string {
@@ -36,12 +32,40 @@ export class Store {
         this._map = value;
     }
 
+    get currentLevelIndex(): number {
+        return this._currentLevelIndex;
+    }
+
+    set currentLevelIndex(value: number) {
+        this._currentLevelIndex = value;
+    }
+
+    get bestMoves(): number[] {
+        return this._bestMoves;
+    }
+
+    set bestMoves(value: number[]) {
+        this._bestMoves = value;
+    }
+
+    get router(): any {
+        return this._router;
+    }
+
     set router(value: any) {
         this._router = value;
     }
 
+    static get instance(): Store {
+        return this._instance;
+    }
+
+    static set instance(value: Store) {
+        this._instance = value;
+    }
+
     public update(x: number): void {
-        console.log(x)
+        console.log(x);
     }
 
 }

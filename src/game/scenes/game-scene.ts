@@ -7,12 +7,13 @@ import {TileCodes} from '../tiles/tile-codes';
 import type {Actions} from '../constants/actions';
 import {getTweenFromDirection} from '../actors/tween';
 import type {Directions} from '../constants/directions';
+import {calculateOffset} from '../constants/directions';
 import {configuration} from '../constants/configuration';
-import {createIndefiniteProgressBar} from '../ui/htmlElements';
+import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
-import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -36,6 +37,8 @@ export class GameScene extends Phaser.Scene {
     private solution?: Actions[];
     private allowHeroMovement?: boolean;
     private playerMovesSoFar?: Actions[];
+    private heroPosition: Point | undefined;
+    private boxesPositions?: Point[];
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -62,26 +65,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create() {
-        const codedMap: string = Store.getInstance().map;
-
-        const data = new StandardSokobanAnnotationMapper().map(codedMap);
-        const map = this.make.tilemap({
-            data: data,
-            tileWidth: configuration.tiles.horizontalSize,
-            tileHeight: configuration.tiles.verticalSize
-        });
-        const tilesetImage = map.addTilesetImage(configuration.spriteSheetKey);
-        this.mapLayer = map.createLayer(0, tilesetImage);
-
-        const mapFeaturesExtractor = new MapFeaturesExtractor();
-        this.featuresMap = mapFeaturesExtractor.extractFeatures(this, this.mapLayer);
-
-        //TODO move this to its own specific GameActor class
-        [...this.featuresMap.get(TileCodes.target)!,
-            ...this.featuresMap.get(TileCodes.empty)!,
-            ...this.featuresMap.get(TileCodes.floor)!]
-            .forEach(item => item.setDepth(0));
-
+        this.featuresMap = this.createFeatureMap();
         this.hero = new Hero();
         this.hero.init({
             scene: this,
@@ -89,11 +73,37 @@ export class GameScene extends Phaser.Scene {
         });
         this.movementCoordinator = new MovementCoordinator();
 
-        const loading = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * 0.25, createIndefiniteProgressBar())
-            .setOrigin(0.5);
         // this.solution = input.moves;
-        loading.removeElement();
         this.allowHeroMovement = true;
+    }
+
+    private createFeatureMap() {
+        const codedMap: string = Store.getInstance().map;
+        const data = new StandardSokobanAnnotationMapper().map(codedMap);
+        this.heroPosition = data.hero;
+        this.boxesPositions = data.boxes;
+        const output = new ScreenPropertiesCalculator().calculate(data.fullMatrix);
+        const map = this.make.tilemap({
+            data: data.fullMatrix,
+            tileWidth: Math.trunc(configuration.world.tileSize.horizontal * output.scale),
+            tileHeight: Math.trunc(configuration.world.tileSize.vertical * output.scale),
+        });
+        configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
+        configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
+
+        const tilesetImage = map.addTilesetImage(configuration.spriteSheetKey);
+        this.mapLayer = map.createLayer(0, tilesetImage);
+        this.mapLayer.x = output.center.x;
+
+        const mapFeaturesExtractor = new MapFeaturesExtractor();
+        const featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer, output.scale);
+
+        //TODO move this to its own specific GameActor class
+        [...featuresMap.get(TileCodes.target)!,
+            ...featuresMap.get(TileCodes.empty)!,
+            ...featuresMap.get(TileCodes.floor)!]
+            .forEach(item => item.setDepth(0));
+        return featuresMap;
     }
 
     public async update(time: number, delta: number) {
@@ -121,8 +131,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
-        const boxMovements = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.box)!
+        const boxMovementPromises = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.box)!
             .map(async movedBox => {
+                const tileBoxToMove = this.boxesPositions!
+                    .find(tileBox => movedBox.currentPosition.x === tileBox.x && movedBox.currentPosition.y === tileBox.y);
+                tileBoxToMove!.x = movedBox.newPosition.x;
+                tileBoxToMove!.y = movedBox.newPosition.y;
+
                 const worldXY = this.mapLayer!.tileToWorldXY(movedBox.currentPosition.x, movedBox.currentPosition.y);
                 const boxToMove = this.featuresMap!
                     .get(TileCodes.box)!
@@ -130,12 +145,13 @@ export class GameScene extends Phaser.Scene {
                 await this.moveBox(boxToMove!, movedBox.direction!);
                 this.onBoxesMovementComplete();
             });
-        const playerMovement = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.hero)!
+        const playerMovementPromise = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.hero)!
             .map(async heroMovement => {
                 await this.hero!.move(heroMovement.direction!);
+                this.heroPosition = calculateOffset(this.heroPosition!, heroMovement.direction!);
                 this.allowHeroMovement = true;
             });
-        await Promise.all([playerMovement, boxMovements]);
+        await Promise.all([playerMovementPromise, boxMovementPromises]);
     }
 
     private createMapState(): Map<TileCodes, Point[]> {
@@ -152,6 +168,9 @@ export class GameScene extends Phaser.Scene {
             const tween = {
                 ...getTweenFromDirection(direction),
                 targets: box,
+                onUpdate: () => {
+                    box.setDepth(box.y);
+                },
                 onComplete: () => resolve(),
                 onCompleteScope: this
             };
@@ -210,23 +229,4 @@ export class GameScene extends Phaser.Scene {
     public addTween(tween: Phaser.Types.Tweens.TweenBuilderConfig) {
         this.tweens.add(tween);
     }
-
-    // private createFormButtons() {
-    //     // let text = this.add.text(10, 10, 'Please login to play', {color: 'white', fontFamily: 'Arial', fontSize: '32px '});
-    //     const element = this.add.dom(configuration.gameWidth * 0.5, configuration.gameHeight * .9)
-    //         .createFromCache(configuration.html.gameScene.key);
-    //     console.log(element);
-    //     // element.setPerspective(800);
-    //     element.addListener('click');
-    //
-    //     element.on('click', (event: any) => {
-    //         if (event.target.id === 'game-scene-undo-button') {
-    //             console.log('undo');
-    //         }
-    //         if (event.target.id === 'game-scene-retry-button') {
-    //             console.log('retry');
-    //         }
-    //     });
-    //
-    // }
 }

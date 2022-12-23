@@ -20,7 +20,8 @@ const searchMap: SearchMapType[] = [
     },
     {
         tile: TileCodes.box,
-        keys: [TileCodes.box]
+        keys: [TileCodes.box, TileCodes.floor],
+        replacement: TileCodes.floor
     },
     {
         tile: TileCodes.boxOnTarget,
@@ -29,11 +30,13 @@ const searchMap: SearchMapType[] = [
     },
     {
         tile: TileCodes.target,
-        keys: [TileCodes.target]
+        keys: [TileCodes.target],
+        replacement: TileCodes.floor
     },
     {
         tile: TileCodes.hero,
-        keys: [TileCodes.hero]
+        keys: [TileCodes.hero, TileCodes.floor],
+        replacement: TileCodes.floor
     },
     {
         tile: TileCodes.heroOnTarget,
@@ -43,14 +46,18 @@ const searchMap: SearchMapType[] = [
 ];
 
 export class MapFeaturesExtractor {
-    public extractFeatures(scene: Phaser.Scene, mapLayer: Phaser.Tilemaps.TilemapLayer): Map<TileCodes, Phaser.GameObjects.Sprite[]> {
+    public extractFeatures(mapLayer: Phaser.Tilemaps.TilemapLayer, scale: number): Map<TileCodes, Phaser.GameObjects.Sprite[]> {
         return searchMap
             .reduce((acc, item) => {
                 for (let [index, tileCode] of item.keys.entries()) {
                     const {replacements, frame} = this.getFrames(index, item);
                     const features: Phaser.GameObjects.Sprite[] =
                         this.searchFeature(mapLayer, item.tile, replacements, frame)
-                            .reduce((acc, item) => acc.concat(item), [] as Phaser.GameObjects.Sprite[]);
+                            .reduce((acc, item) => acc.concat(item), [] as Phaser.GameObjects.Sprite[])
+                            .map(feature => {
+                                feature.scale = scale
+                                return feature;
+                            });
                     if (acc.get(tileCode)) {
                         acc.set(tileCode, acc.get(tileCode)!.concat(features));
                     } else {

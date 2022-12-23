@@ -4,19 +4,30 @@ import tileSheetAsset from '@/game/assets/sokoban_tilesheet.png';
 // @ts-ignore
 import gameSceneHtml from '@/game/assets/html/game-scene.html';
 
+const verticalPerspective = .8;
+const tileHeight = 40;
+const tileWidth = 40;
 export const configuration = {
     frameRate: 10,
     spriteSheetKey: 'tiles',
     updateCycleInMs: 200,
     tiles: {
-        verticalSize: 40,
-        horizontalSize: 40,
+        verticalPerspective: verticalPerspective,
+        verticalSize: tileHeight,
+        horizontalSize: tileWidth,
         tilesheets: [tilesheet0, tilesheet1],
         sheetAsset: tileSheetAsset,
         tilemapKey: 'tilemap',
         layerName: 'Level',
         tilesetName: 'sokoban',
     },
+    world: {
+        tileSize: {
+            vertical: Math.trunc(tileHeight * verticalPerspective),
+            horizontal: tileWidth
+        }
+    },
+    screenRatio: .75,
     gameWidth: 800,
     gameHeight: 600,
     colors: {

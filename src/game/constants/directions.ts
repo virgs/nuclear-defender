@@ -1,3 +1,5 @@
+import type {Point} from '@/game/math/point';
+
 export enum Directions {
     LEFT,
     UP,
@@ -29,6 +31,21 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
         case Directions.LEFT:
             return Directions.RIGHT;
     }
+};
+
+export const calculateOffset = (point: Point, direction: Directions): Point => {
+    const result = point;
+    if (direction === Directions.LEFT) {
+        result.x -= 1;
+    } else if (direction === Directions.RIGHT) {
+        result.x += 1;
+    }
+    if (direction === Directions.UP) {
+        result.y -= 1;
+    } else if (direction === Directions.DOWN) {
+        result.y += 1;
+    }
+    return result;
 };
 
 export const sumDirections = (...directions: Directions[]): Directions[] => {

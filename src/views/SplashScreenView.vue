@@ -10,7 +10,7 @@ import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvan
 const router = useRouter();
 
 const data = reactive({
-  currentSelectedIndex: 0
+  currentSelectedIndex: 10
 });
 
 //TODO get it from OptionsComponent
@@ -30,8 +30,9 @@ function playButtonClick() {
   // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
   //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 
-  Store.getInstance().currentLevelIndex = data.currentSelectedIndex;
-  Store.getInstance().map = levels[data.currentSelectedIndex].map;
+  const store = Store.getInstance();
+  store.currentLevelIndex = data.currentSelectedIndex;
+  store.map = levels[data.currentSelectedIndex].map;
   router.push('/game');
 }
 

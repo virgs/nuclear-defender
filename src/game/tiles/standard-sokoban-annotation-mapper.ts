@@ -1,17 +1,37 @@
 import {TileCodes} from './tile-codes';
+import type {Point} from '@/game/math/point';
+
+type Mapped = { fullMatrix: TileCodes[][], hero?: Point, boxes: Point[] };
 
 export class StandardSokobanAnnotationMapper {
-    public map(encodedLevel: string): TileCodes[][] {
+    public map(encodedLevel: string): Mapped {
         const noPipeMap = encodedLevel.replace('|', '\n');
         const noNumberMap = this.removeNumbers(noPipeMap);
         const encodedMatrix = this.transformToMatrix(noNumberMap);
         const dimensionArray = this.createEmptyDecodedMap(encodedMatrix);
-        return dimensionArray
+        const result: Mapped = {
+            fullMatrix: [],
+            hero: undefined,
+            boxes: []
+        };
+        result.fullMatrix = dimensionArray
             .map((line, y) => line
                 .map((_, x: number): TileCodes => {
                     const char = encodedMatrix[y][x];
-                    return char ? StandardSokobanAnnotationMapper.getTileTypeFromString(char) : TileCodes.empty;
+                    if (char) {
+                        const tile = StandardSokobanAnnotationMapper.getTileTypeFromString(char);
+                        if (tile === TileCodes.hero) {
+                            result.hero = {x, y};
+                        } else if (tile === TileCodes.box) {
+                            result.boxes.push({x, y});
+                        }
+                        return tile;
+                    } else {
+                        return TileCodes.empty;
+                    }
                 }));
+
+        return result;
     }
 
     private createEmptyDecodedMap(encodedMatrix: string[][]) {
