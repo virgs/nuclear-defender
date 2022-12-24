@@ -36,7 +36,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="container game-view text-center mt-4">
+  <div class="container game-view text-center mt-4 px-0">
     <div class="row align-items-center">
       <div class="col-12 my-1">
         <div class="row align-items-end">

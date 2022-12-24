@@ -1,6 +1,6 @@
 import tilesheet0 from '@/game/assets/levels/level-0.json';
 import tilesheet1 from '@/game/assets/levels/level-0.json';
-import tileSheetAsset from '@/game/assets/sokoban_tilesheet.png';
+import tileSheetAsset from '@/game/assets/tiles/sokoban_tilesheet.png';
 // @ts-ignore
 import gameSceneHtml from '@/game/assets/html/game-scene.html';
 
@@ -11,7 +11,7 @@ export const configuration = {
     frameRate: 10,
     spriteSheetKey: 'tiles',
     updateCycleInMs: 200,
-    tiles: {
+    tiles: { //in tile sheet
         verticalPerspective: verticalPerspective,
         verticalSize: tileHeight,
         horizontalSize: tileWidth,
@@ -22,7 +22,7 @@ export const configuration = {
         tilesetName: 'sokoban',
     },
     world: {
-        tileSize: {
+        tileSize: { //after rescaling...
             vertical: Math.trunc(tileHeight * verticalPerspective),
             horizontal: tileWidth
         }

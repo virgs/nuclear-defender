@@ -1,37 +1,37 @@
 import {TileCodes} from './tile-codes';
 import type {Point} from '@/game/math/point';
 
-type Mapped = { fullMatrix: TileCodes[][], hero?: Point, boxes: Point[] };
+export type Mapped = { staticMap: { width: number, height: number, tiles: TileCodes[][] }, hero?: Point, boxes: Point[] };
 
 export class StandardSokobanAnnotationMapper {
+    private hero?: Point = undefined;
+    private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
+    private boxes: Point[] = [];
+
     public map(encodedLevel: string): Mapped {
         const noPipeMap = encodedLevel.replace('|', '\n');
         const noNumberMap = this.removeNumbers(noPipeMap);
         const encodedMatrix = this.transformToMatrix(noNumberMap);
         const dimensionArray = this.createEmptyDecodedMap(encodedMatrix);
-        const result: Mapped = {
-            fullMatrix: [],
-            hero: undefined,
-            boxes: []
-        };
-        result.fullMatrix = dimensionArray
-            .map((line, y) => line
-                .map((_, x: number): TileCodes => {
-                    const char = encodedMatrix[y][x];
-                    if (char) {
-                        const tile = StandardSokobanAnnotationMapper.getTileTypeFromString(char);
-                        if (tile === TileCodes.hero) {
-                            result.hero = {x, y};
-                        } else if (tile === TileCodes.box) {
-                            result.boxes.push({x, y});
+        this.staticMap = {
+            height: dimensionArray.length,
+            width: dimensionArray[0].length,
+            tiles: dimensionArray
+                .map((line, y) => line
+                    .map((_, x: number): TileCodes => {
+                        const char = encodedMatrix[y][x];
+                        if (char) {
+                            return this.getStaticTileTypeFromString(char, {x, y});
+                        } else {
+                            return TileCodes.empty;
                         }
-                        return tile;
-                    } else {
-                        return TileCodes.empty;
-                    }
-                }));
-
-        return result;
+                    }))
+        };
+        return {
+            staticMap: this.staticMap,
+            boxes: this.boxes!,
+            hero: this.hero
+        };
     }
 
     private createEmptyDecodedMap(encodedMatrix: string[][]) {
@@ -71,7 +71,7 @@ export class StandardSokobanAnnotationMapper {
 
     }
 
-    private static getTileTypeFromString(char: string): TileCodes {
+    private getStaticTileTypeFromString(char: string, point: Point): TileCodes {
         switch (char) {
             case ' ':
                 return TileCodes.floor;
@@ -80,13 +80,17 @@ export class StandardSokobanAnnotationMapper {
             case '.':
                 return TileCodes.target;
             case '$':
-                return TileCodes.box;
+                this.boxes.push(point);
+                return TileCodes.floor;
             case '*':
-                return TileCodes.boxOnTarget;
+                this.boxes.push(point);
+                return TileCodes.target;
             case '@':
-                return TileCodes.hero;
+                this.hero = point;
+                return TileCodes.floor;
             case '+':
-                return TileCodes.heroOnTarget;
+                this.hero = point;
+                return TileCodes.target;
             default:
                 return TileCodes.empty;
         }

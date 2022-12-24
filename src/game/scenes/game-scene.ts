@@ -1,13 +1,10 @@
 import Phaser from 'phaser';
 import {Store} from '@/store';
 import {Scenes} from './scenes';
-import {Hero} from '../actors/hero';
-import type {Point} from '../math/point';
+import type {Box} from '@/game/actors/box';
+import type {Hero} from '@/game/actors/hero';
 import {TileCodes} from '../tiles/tile-codes';
 import type {Actions} from '../constants/actions';
-import {getTweenFromDirection} from '../actors/tween';
-import type {Directions} from '../constants/directions';
-import {calculateOffset} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
@@ -25,29 +22,21 @@ export type GameSceneConfiguration = {
 
 //TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
 export class GameScene extends Phaser.Scene {
-    private readonly mapFeaturesExtractor: MapFeaturesExtractor;
-
-    private mapLayer?: Phaser.Tilemaps.TilemapLayer;
     private movementCoordinator?: MovementCoordinator;
-
-    private hero?: Hero;
-    private featuresMap?: Map<TileCodes, Phaser.GameObjects.Sprite[]>;
-    private gameSceneConfiguration?: GameSceneConfiguration;
     private levelComplete?: boolean;
-    private solution?: Actions[];
     private allowHeroMovement?: boolean;
     private playerMovesSoFar?: Actions[];
-    private heroPosition: Point | undefined;
-    private boxesPositions?: Point[];
+
+    private hero?: Hero;
+    private boxes: Box[] = [];
+    private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
 
     constructor() {
         super(Scenes[Scenes.GAME]);
-        this.mapFeaturesExtractor = new MapFeaturesExtractor();
     }
 
-    public init(gameSceneConfiguration: GameSceneConfiguration) {
+    public init() {
         this.levelComplete = false;
-        this.gameSceneConfiguration = gameSceneConfiguration;
         this.playerMovesSoFar = [];
     }
 
@@ -65,45 +54,20 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create() {
-        this.featuresMap = this.createFeatureMap();
-        this.hero = new Hero();
-        this.hero.init({
-            scene: this,
-            sprite: this.featuresMap.get(TileCodes.hero)![0]
-        });
-        this.movementCoordinator = new MovementCoordinator();
-
-        // this.solution = input.moves;
-        this.allowHeroMovement = true;
-    }
-
-    private createFeatureMap() {
         const codedMap: string = Store.getInstance().map;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
-        this.heroPosition = data.hero;
-        this.boxesPositions = data.boxes;
-        const output = new ScreenPropertiesCalculator().calculate(data.fullMatrix);
-        const map = this.make.tilemap({
-            data: data.fullMatrix,
-            tileWidth: Math.trunc(configuration.world.tileSize.horizontal * output.scale),
-            tileHeight: Math.trunc(configuration.world.tileSize.vertical * output.scale),
-        });
+        const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
         configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
         configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
 
-        const tilesetImage = map.addTilesetImage(configuration.spriteSheetKey);
-        this.mapLayer = map.createLayer(0, tilesetImage);
-        this.mapLayer.x = output.center.x;
+        const mapFeaturesExtractor = new MapFeaturesExtractor(this, output.scale);
+        const featuresMap = mapFeaturesExtractor.extractFeatures(data, output);
+        this.hero = featuresMap.hero;
+        this.boxes = featuresMap.boxes;
 
-        const mapFeaturesExtractor = new MapFeaturesExtractor();
-        const featuresMap = mapFeaturesExtractor.extractFeatures(this.mapLayer, output.scale);
-
-        //TODO move this to its own specific GameActor class
-        [...featuresMap.get(TileCodes.target)!,
-            ...featuresMap.get(TileCodes.empty)!,
-            ...featuresMap.get(TileCodes.floor)!]
-            .forEach(item => item.setDepth(0));
-        return featuresMap;
+        this.staticMap = data.staticMap;
+        this.movementCoordinator = new MovementCoordinator(data.staticMap);
+        this.allowHeroMovement = true;
     }
 
     public async update(time: number, delta: number) {
@@ -113,19 +77,22 @@ export class GameScene extends Phaser.Scene {
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
-            if (this.solution && this.solution.length > 0) {
-                heroAction = this.solution.shift()!;
-            }
+            // if (this.solution && this.solution.length > 0) {
+            //     heroAction = this.solution.shift()!;
+            // }
             this.playerMovesSoFar!.push(heroAction);
 
-            const mapState = this.createMapState();
+            // const mapState = this.createMapState();
             const movementCoordinatorOutput = this.movementCoordinator!.update({
                 heroAction: heroAction,
-                mapState: mapState
+                staticMap: this.staticMap!,
+                hero: this.hero!.getTilePosition(),
+                boxes: this.boxes!.map(box => box.getTilePosition())
             });
             if (movementCoordinatorOutput.mapChanged) {
                 this.allowHeroMovement = false;
                 await this.moveMapFeatures(movementCoordinatorOutput);
+                this.onMovementsComplete();
             }
         }
     }
@@ -133,100 +100,34 @@ export class GameScene extends Phaser.Scene {
     private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
         const boxMovementPromises = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.box)!
             .map(async movedBox => {
-                const tileBoxToMove = this.boxesPositions!
-                    .find(tileBox => movedBox.currentPosition.x === tileBox.x && movedBox.currentPosition.y === tileBox.y);
-                tileBoxToMove!.x = movedBox.newPosition.x;
-                tileBoxToMove!.y = movedBox.newPosition.y;
-
-                const worldXY = this.mapLayer!.tileToWorldXY(movedBox.currentPosition.x, movedBox.currentPosition.y);
-                const boxToMove = this.featuresMap!
-                    .get(TileCodes.box)!
-                    .find(worldBox => worldBox.x === worldXY.x && worldBox.y === worldXY.y);
-                await this.moveBox(boxToMove!, movedBox.direction!);
-                this.onBoxesMovementComplete();
+                const tileBoxToMove = this.boxes
+                    .find(tileBox => movedBox.currentPosition.x === tileBox.getTilePosition().x &&
+                        movedBox.currentPosition.y === tileBox.getTilePosition().y);
+                await tileBoxToMove!.move(movedBox.direction!);
+                const onTarget = this.staticMap?.tiles[movedBox.newPosition.y][movedBox.newPosition.x] === TileCodes.target;
+                tileBoxToMove!.setIsOnTarget(onTarget);
             });
         const playerMovementPromise = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.hero)!
             .map(async heroMovement => {
                 await this.hero!.move(heroMovement.direction!);
-                this.heroPosition = calculateOffset(this.heroPosition!, heroMovement.direction!);
                 this.allowHeroMovement = true;
             });
         await Promise.all([playerMovementPromise, boxMovementPromises]);
     }
 
-    private createMapState(): Map<TileCodes, Point[]> {
-        const mapState: Map<TileCodes, Point[]> = new Map<TileCodes, Point[]>();
-        for (let [key, value] of this.featuresMap!) {
-            mapState.set(key, value
-                .map(sprite => this.mapLayer!.worldToTileXY(sprite.x, sprite.y)));
-        }
-        return mapState;
-    }
-
-    public async moveBox(box: Phaser.GameObjects.Sprite, direction: Directions): Promise<void> {
-        return new Promise<void>(resolve => {
-            const tween = {
-                ...getTweenFromDirection(direction),
-                targets: box,
-                onUpdate: () => {
-                    box.setDepth(box.y);
-                },
-                onComplete: () => resolve(),
-                onCompleteScope: this
-            };
-            this.addTween(tween);
-        });
-    }
-
-    private onBoxesMovementComplete(): void {
-        this.updateBoxesColor();
+    private onMovementsComplete(): void {
         this.checkLevelComplete();
     }
 
-    private updateBoxesColor() {
-        this.featuresMap!
-            .get(TileCodes.box)!
-            .forEach(box => {
-                const boxPosition = this.mapLayer!.worldToTileXY(box.x, box.y);
-                if (this.featuresMap!
-                    .get(TileCodes.target)!
-                    .some(target => {
-                        const targetPosition = this.mapLayer!.worldToTileXY(target.x, target.y);
-                        return boxPosition.x === targetPosition.x && boxPosition.y === targetPosition.y;
-                    })) {
-                    box.setFrame(TileCodes.boxOnTarget);
-                } else {
-                    box.setFrame(TileCodes.box);
-                }
-            });
-    }
-
     private checkLevelComplete() {
-        if (this.featuresMap!.get(TileCodes.box)!
-            .every(box => {
-                const boxTilePosition = this.mapLayer!.worldToTileXY(box.x, box.y);
-                return this.featuresMap!.get(TileCodes.target)!
-                    .some(target => {
-                        const targetTilePosition = this.mapLayer!.worldToTileXY(target.x, target.y);
-                        return targetTilePosition.x === boxTilePosition.x &&
-                            targetTilePosition.y === boxTilePosition.y;
-                    });
-            })) {
+        if (this.boxes.every(box => box.getIsOnTarget())) {
             this.levelComplete = true;
             console.log('currentLevel complete');
             setTimeout(async () => {
                 Store.getInstance().router.push('/next-level');
-                // const input: NextLevelSceneInput = {
-                //     currentLevel: this.gameSceneConfiguration!.currentLevel,
-                //     moves: this.playerMovesSoFar!,
-                //     totalTime: this.elapsedTime!
-                // };
-                // this.scene.start(Scenes[Scenes.NEXT_LEVEL], input);
             }, 1500);
+            // }
         }
     }
 
-    public addTween(tween: Phaser.Types.Tweens.TweenBuilderConfig) {
-        this.tweens.add(tween);
-    }
 }

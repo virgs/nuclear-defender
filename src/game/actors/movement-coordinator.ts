@@ -1,65 +1,74 @@
 import type {Point} from '../math/point';
 import {TileCodes} from '../tiles/tile-codes';
-import {Directions} from '../constants/directions';
+import {calculateOffset, Directions} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
+import Sprite = Phaser.GameObjects.Sprite;
 
 type Movement = {
+    sprite?: Sprite,
     currentPosition: Point,
     newPosition: Point,
     direction: Directions | undefined
 };
 
-export type MovementCoordinatorInput = {
-    //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
-    mapState: Map<TileCodes, Point[]>;
-    heroAction: Actions
-};
-
 export type MovementCoordinatorOutput = {
     mapChanged: boolean,
-    newMapState: Map<TileCodes, Point[]>,
     //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
     featuresMovementMap: Map<TileCodes, Movement[]>
 };
 
+export type MovementCoordinatorInput = {
+    boxes: Point[];
+    heroAction: Actions;
+    staticMap: {
+        width: number;
+        height: number;
+        tiles: TileCodes[][]
+    };
+    hero: Point;
+};
+
 export class MovementCoordinator {
+    private readonly staticMap: TileCodes[][];
+
+    constructor(data: { width: number; height: number; tiles: TileCodes[][] }) {
+        this.staticMap = data.tiles;
+    }
+
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
-        const result = this.initializeOutput(input);
+        const result = this.initializeOutput();
         if (input.heroAction !== Actions.STAND) {
-            const heroDirection = mapActionToDirection(input.heroAction);
-            const heroPosition = input.mapState.get(TileCodes.hero)![0];
-            const newHeroPosition = this.calculateOffset(heroDirection, heroPosition);
+            const heroDirection = mapActionToDirection(input.heroAction)!;
+            const newHeroPosition = calculateOffset(input.hero, heroDirection);
 
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
+
                 result.mapChanged = true;
                 result.featuresMovementMap.set(TileCodes.hero, [{
-                    currentPosition: heroPosition,
+                    currentPosition: input.hero,
                     newPosition: newHeroPosition,
                     direction: heroDirection
                 }]);
 
-                const boxAhead = this.getBoxAt(newHeroPosition, input.mapState);
+                const boxAhead = input.boxes
+                    .find(box => box.x === newHeroPosition.x && box.y === newHeroPosition.y);
                 if (boxAhead) {
                     result.featuresMovementMap.set(TileCodes.box, [{
                         currentPosition: boxAhead,
-                        newPosition: this.calculateOffset(heroDirection, boxAhead),
+                        newPosition: calculateOffset(boxAhead, heroDirection),
                         direction: heroDirection
                     }]);
                 }
             }
         }
 
-        if (result.mapChanged) {
-            result.newMapState = this.generateNextState(input, result.featuresMovementMap);
-        }
         return result;
     }
 
-    private initializeOutput(input: MovementCoordinatorInput) {
+    private initializeOutput() {
         const result: MovementCoordinatorOutput = {
             mapChanged: false,
-            featuresMovementMap: new Map<TileCodes, Movement[]>(),
-            newMapState: input.mapState
+            featuresMovementMap: new Map<TileCodes, Movement[]>()
         };
         result.featuresMovementMap.set(TileCodes.hero, []);
         result.featuresMovementMap.set(TileCodes.box, []);
@@ -67,17 +76,22 @@ export class MovementCoordinator {
     }
 
     private heroMovementIsAvailable(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
-        if (this.getWallAt(newHeroPosition, input.mapState)) {
+        const featureAhead = this.getFeatureAtPosition(newHeroPosition);
+        if (featureAhead === undefined || featureAhead === TileCodes.wall) {
             return false;
         }
 
-        if (this.getBoxAt(newHeroPosition, input.mapState)) {
-            const heroDirection = mapActionToDirection(input.heroAction);
-            const afterNextMove = this.calculateOffset(heroDirection, newHeroPosition);
-            if (this.getWallAt(afterNextMove, input.mapState)) {
+        const boxAhead = input.boxes
+            .find(box => box.x === newHeroPosition.x && box.y === newHeroPosition.y);
+        if (boxAhead) {
+            const heroDirection = mapActionToDirection(input.heroAction)!;
+            const afterNextMove = calculateOffset(newHeroPosition, heroDirection);
+            const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove);
+            if (afterNextMoveFeature === undefined || afterNextMoveFeature === TileCodes.wall) {
                 return false;
             }
-            if (this.getBoxAt(afterNextMove, input.mapState)) {
+            if (input.boxes
+                .find(box => box.x === afterNextMove.x && box.y === afterNextMove.y)) {
                 return false;
             }
         }
@@ -85,57 +99,12 @@ export class MovementCoordinator {
         return true;
     }
 
-    private hasFeatureAt(features: Point[], point: Point): Point | undefined {
-        return features
-            .find(feature => {
-                return feature.x == point.x && feature.y == point.y;
-            });
-    }
-
-    private getWallAt(offsetTilePosition: Point, mapState: Map<TileCodes, Point[]>): Point | undefined {
-        return this.hasFeatureAt(mapState.get(TileCodes.wall)!, offsetTilePosition);
-    }
-
-    private getBoxAt(offsetTilePosition: Point, mapState: Map<TileCodes, Point[]>): Point | undefined {
-        return this.hasFeatureAt(mapState.get(TileCodes.box)!, offsetTilePosition);
-    }
-
-    private calculateOffset(direction: Directions | undefined, currentPosition: Point): Point {
-        const offset: Point = {
-            x: currentPosition.x,
-            y: currentPosition.y
-        };
-
-        switch (direction) {
-            case Directions.LEFT:
-                offset.x -= 1;
-                break;
-            case Directions.RIGHT:
-                offset.x += 1;
-                break;
-            case Directions.UP:
-                offset.y -= 1;
-                break;
-            case Directions.DOWN:
-                offset.y += 1;
-                break;
+    private getFeatureAtPosition(position: Point): TileCodes | undefined {
+        if (position.x >= this.staticMap[0].length || position.y >= this.staticMap.length
+            || position.x < 0 || position.y < 0) {
+            return undefined;
         }
-        return offset;
+        return this.staticMap[position.y][position.x];
     }
 
-    private generateNextState(input: MovementCoordinatorInput, movementMap: Map<TileCodes, Movement[]>) {
-        const baseState: Map<TileCodes, Point[]> = new Map(JSON.parse(JSON.stringify(Array.from(input.mapState))));
-        for (let [tileCode, movementList] of movementMap.entries()) {
-            movementList
-                .forEach(move => {
-                    baseState.get(tileCode)!
-                        .filter(tile => tile.x === move.currentPosition.x && tile.y === move.currentPosition.y)
-                        .forEach(tile => {
-                            tile.x = move.newPosition.x;
-                            tile.y = move.newPosition.y;
-                        });
-                });
-        }
-        return baseState;
-    }
 }

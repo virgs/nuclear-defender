@@ -2,19 +2,17 @@ import type {TileCodes} from '@/game/tiles/tile-codes';
 import type {Point} from '@/game/math/point';
 import {configuration} from '@/game/constants/configuration';
 
-type ScaleOutput = { scale: number, center: Point };
+export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
     max: 1.15,
     min: .66
 };
 
 export class ScreenPropertiesCalculator {
-    public calculate(data: TileCodes[][]): ScaleOutput {
-        const cols = data[0].length;
-        const lines = data.length;
+    public calculate(data: { width: number; height: number; tiles: TileCodes[][] }): ScaleOutput {
         const map = {
-            width: cols * configuration.tiles.horizontalSize,
-            height: lines * configuration.tiles.verticalSize * configuration.tiles.verticalPerspective
+            width: data.width * configuration.tiles.horizontalSize,
+            height: data.height * configuration.tiles.verticalSize * configuration.tiles.verticalPerspective
         };
         const xFactor = configuration.gameWidth / map.width;
         const yFactor = configuration.gameHeight / map.height;

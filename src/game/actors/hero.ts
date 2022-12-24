@@ -1,19 +1,21 @@
 import Phaser from 'phaser';
 import {HeroAnimator} from './hero-animator';
 import {Actions} from '../constants/actions';
+import type {Point} from '@/game/math/point';
 import type {Directions} from '../constants/directions';
-import {configuration} from '../constants/configuration';
+import {calculateOffset} from '../constants/directions';
 
 export class Hero {
     private readonly heroAnimator: HeroAnimator;
     private readonly inputMap: Map<Actions, () => boolean>;
+    private readonly sprite?: Phaser.GameObjects.Sprite;
 
     private isMoving: boolean = false;
-    private sprite?: Phaser.GameObjects.Sprite;
-    private tweens?: Phaser.Tweens.TweenManager;
-    private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
+    private tweens: Phaser.Tweens.TweenManager;
+    private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    private tilePosition: Point;
 
-    public constructor() {
+    public constructor(heroConfig: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite, tilePosition: Point }) {
         this.inputMap = new Map<Actions, () => boolean>();
         this.inputMap.set(Actions.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors!.right));
         this.inputMap.set(Actions.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors!.left));
@@ -21,20 +23,18 @@ export class Hero {
         this.inputMap.set(Actions.UP, () => Phaser.Input.Keyboard.JustDown(this.cursors!.up));
 
         this.heroAnimator = new HeroAnimator();
-    }
 
-    //TODO extract this to interface
-    public init(data: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite }) {
-        this.tweens = data.scene.tweens;
-        this.cursors = data.scene.input.keyboard.createCursorKeys();
+        this.tweens = heroConfig.scene.tweens;
+        this.cursors = heroConfig.scene.input.keyboard.createCursorKeys();
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
-        this.sprite = data.sprite;
-
-        // this.sprite.setOrigin(0, 0.5)
-        this.sprite.setOrigin(0);
-
+        this.sprite = heroConfig.sprite;
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));
+        this.tilePosition = heroConfig.tilePosition;
+    }
+
+    public getTilePosition(): Point {
+        return this.tilePosition;
     }
 
     public checkAction(): Actions {
@@ -48,7 +48,6 @@ export class Hero {
         return Actions.STAND;
     }
 
-    //TODO extract this to interface
     public async move(direction: Directions): Promise<void> {
         return new Promise<void>((resolve) => {
             this.isMoving = true;
@@ -60,9 +59,10 @@ export class Hero {
                 ...heroMovement.tween,
                 targets: this.sprite,
                 onUpdate: () => {
-                    this.sprite!.setDepth(this.sprite!.y - configuration.tiles.verticalSize / 2);
                 },
                 onComplete: () => {
+                    this.sprite!.setDepth(this.sprite!.y);
+                    this.tilePosition = calculateOffset(this.tilePosition, direction);
                     this.sprite!.anims.play(heroMovement.idle, true);
                     this.isMoving = false;
                     resolve();

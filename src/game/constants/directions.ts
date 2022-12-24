@@ -34,7 +34,10 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
 };
 
 export const calculateOffset = (point: Point, direction: Directions): Point => {
-    const result = point;
+    const result = {
+        x: point.x,
+        y: point.y
+    };
     if (direction === Directions.LEFT) {
         result.x -= 1;
     } else if (direction === Directions.RIGHT) {
