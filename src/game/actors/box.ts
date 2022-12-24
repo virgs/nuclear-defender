@@ -41,11 +41,13 @@ export class Box {
             const tween = {
                 ...getTweenFromDirection(direction),
                 targets: this.sprite,
+                onInit: () => {
+                    this.tilePosition = calculateOffset(this.tilePosition, direction);
+                },
                 onUpdate: () => {
+                    this.sprite!.setDepth(this.sprite!.y + 1);
                 },
                 onComplete: () => {
-                    this.sprite.setDepth(this.sprite!.y);
-                    this.tilePosition = calculateOffset(this.tilePosition, direction);
                     resolve();
                 },
                 onCompleteScope: this

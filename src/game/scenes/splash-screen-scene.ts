@@ -35,7 +35,7 @@ export class SplashScreenScene extends Phaser.Scene {
         ]);
         this.load.addFile(fonts);
 
-        //TODO only needed when loading from file
+        //NOTE only needed when loading from file
         this.load.tilemapTiledJSON(configuration.tiles.tilemapKey, configuration.tiles.tilesheets[0]);
         this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.cache.tilemap.remove(configuration.tiles.tilemapKey);

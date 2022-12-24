@@ -7,6 +7,9 @@ import {configuration} from '../constants/configuration';
 import type {ScaleOutput} from '@/game/math/screen-properties-calculator';
 import type {Mapped} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
+const floorDepth = -1000;
+const targetDepth = 0;
+
 export class MapFeaturesExtractor {
     private readonly scale: number;
     private readonly scene: Phaser.Scene;
@@ -17,15 +20,18 @@ export class MapFeaturesExtractor {
     }
 
     public extractFeatures(map: Mapped, scale: ScaleOutput): { staticMap: Phaser.GameObjects.Sprite[][], hero: Hero, boxes: Box[] } {
+        const tiles = map.staticMap.tiles;
         return {
-            staticMap: map.staticMap.tiles.map((line, y) => line
+            staticMap: tiles.map((line, y) => line
                 .map((tile: TileCodes, x: number) => {
                     const sprite = this.createSprite({x, y}, tile, scale.scale);
                     if (tile === TileCodes.floor) {
-                        sprite.setDepth(0);
+                        sprite.setDepth(floorDepth);
+                        //needed because target is not dynamic like a box (that creates its floor at the annotation extractor)
                     } else if (tile === TileCodes.target) {
                         const floorBehind = this.createSprite({x, y}, TileCodes.floor, scale.scale);
-                        floorBehind.setDepth(0);
+                        floorBehind.setDepth(floorDepth);
+                        sprite.setDepth(targetDepth);
                     }
                     return sprite;
                 })),
@@ -33,7 +39,7 @@ export class MapFeaturesExtractor {
             boxes: map.boxes
                 .map(box => {
                     const boxActor = new Box({scene: this.scene, sprite: this.createSprite(box, TileCodes.box, scale.scale), tilePosition: box});
-                    boxActor.setIsOnTarget(map.staticMap.tiles[box.y][box.x] === TileCodes.target);
+                    boxActor.setIsOnTarget(tiles[box.y][box.x] === TileCodes.target);
                     return boxActor;
                 })
         };

@@ -1,8 +1,5 @@
 import {configuration} from '../constants/configuration';
 
-//TODO clean this mess
-// at least the args
-
 export function createDropDownWithLabel(data: {
     labelText: string,
     selectedIndex: number,

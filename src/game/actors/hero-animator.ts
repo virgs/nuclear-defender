@@ -58,54 +58,53 @@ export class HeroAnimator {
         return [
             {
                 key: HeroAnimation.IDLE_DOWN,
-                //TODO replace this magic number with frame enum codes
-                frames: this.generateFrames(52)
+                //TODO replace magic values with enum codes
+                frames: this.generateFrames(52, 1)
             },
             {
                 key: HeroAnimation.IDLE_LEFT,
-                frames: this.generateFrames(81)
+                frames: this.generateFrames(81, 1)
             },
             {
                 key: HeroAnimation.IDLE_UP,
-                frames: this.generateFrames(55)
+                frames: this.generateFrames(55, 1)
             },
             {
                 key: HeroAnimation.IDLE_RIGHT,
-                frames: this.generateFrames(78)
+                frames: this.generateFrames(78, 1)
             },
             {
                 key: HeroAnimation.DOWN,
-                frames: this.generateFrames(52, 53, 54),
+                frames: this.generateFrames(52, 3),
                 frameRate: configuration.frameRate,
                 repeat: -1
             },
             {
                 key: HeroAnimation.LEFT,
-                frames: this.generateFrames(81, 82, 83),
+                frames: this.generateFrames(81, 3),
                 frameRate: configuration.frameRate,
                 repeat: -1
             },
             {
                 key: HeroAnimation.UP,
-                frames: this.generateFrames(55, 56, 57),
+                frames: this.generateFrames(55, 3),
                 frameRate: configuration.frameRate,
                 repeat: -1
             },
             {
                 key: HeroAnimation.RIGHT,
-                frames: this.generateFrames(78, 79, 80),
+                frames: this.generateFrames(78, 3),
                 frameRate: configuration.frameRate,
                 repeat: -1
             },
         ];
     }
 
-    private generateFrames(...frames: number[]) {
-        return frames.map(item => {
-            return {
+    private generateFrames(initialFrame: number, numOfFrames: number) {
+        return Array.from(new Array(numOfFrames))
+            .map((_, index) => ({
                 key: configuration.spriteSheetKey,
-                frame: item
-            };
-        });
+                frame: initialFrame + index
+            }));
     }
 }

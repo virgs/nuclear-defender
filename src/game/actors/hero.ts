@@ -58,11 +58,13 @@ export class Hero {
             this.tweens!.add({
                 ...heroMovement.tween,
                 targets: this.sprite,
+                onInit: () => {
+                    this.tilePosition = calculateOffset(this.tilePosition, direction);
+                },
                 onUpdate: () => {
+                    this.sprite!.setDepth(this.sprite!.y + 1);
                 },
                 onComplete: () => {
-                    this.sprite!.setDepth(this.sprite!.y);
-                    this.tilePosition = calculateOffset(this.tilePosition, direction);
                     this.sprite!.anims.play(heroMovement.idle, true);
                     this.isMoving = false;
                     resolve();
