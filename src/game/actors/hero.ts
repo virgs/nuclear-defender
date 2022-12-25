@@ -3,7 +3,6 @@ import {HeroAnimator} from './hero-animator';
 import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '../constants/directions';
-import {calculateOffset} from '../constants/directions';
 
 export class Hero {
     private readonly heroAnimator: HeroAnimator;
@@ -59,7 +58,7 @@ export class Hero {
                 ...heroMovement.tween,
                 targets: this.sprite,
                 onInit: () => {
-                    this.tilePosition = calculateOffset(this.tilePosition, direction);
+                    this.tilePosition = this.tilePosition.calculateOffset(direction);
                 },
                 onUpdate: () => {
                     this.sprite!.setDepth(this.sprite!.y + 1);

@@ -1,5 +1,5 @@
 import {TileCodes} from './tile-codes';
-import type {Point} from '@/game/math/point';
+import {Point} from '@/game/math/point';
 
 export type Mapped = { staticMap: { width: number, height: number, tiles: TileCodes[][] }, hero?: Point, boxes: Point[] };
 
@@ -21,7 +21,7 @@ export class StandardSokobanAnnotationMapper {
                     .map((_, x: number): TileCodes => {
                         const char = encodedMatrix[y][x];
                         if (char) {
-                            return this.getStaticTileTypeFromString(char, {x, y});
+                            return this.getStaticTileTypeFromString(char, new Point(x, y));
                         } else {
                             return TileCodes.empty;
                         }

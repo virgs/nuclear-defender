@@ -1,20 +1,18 @@
 import type {Point} from '../math/point';
 import {TileCodes} from '../tiles/tile-codes';
-import {calculateOffset, Directions} from '../constants/directions';
+import type {Directions} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
-import Sprite = Phaser.GameObjects.Sprite;
 
 type Movement = {
-    sprite?: Sprite,
+    previousPosition: Point,
     currentPosition: Point,
-    newPosition: Point,
     direction: Directions | undefined
 };
 
 export type MovementCoordinatorOutput = {
-    mapChanged: boolean,
-    //TODO split it in (dynamicFeatures (boxes, hero) and staticMatrix(walls, treadmills, targets)
-    featuresMovementMap: Map<TileCodes, Movement[]>
+    mapChanged: boolean;
+    boxes: Movement[];
+    hero: Movement;
 };
 
 export type MovementCoordinatorInput = {
@@ -36,43 +34,40 @@ export class MovementCoordinator {
     }
 
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
-        const result = this.initializeOutput();
+        let mapChanged = false;
+        let hero: Movement = {
+            previousPosition: input.hero,
+            currentPosition: input.hero,
+            direction: undefined
+        };
+        let boxes: Movement[] = input.boxes.map(box => ({
+            previousPosition: box,
+            currentPosition: box,
+            direction: undefined
+        }));
         if (input.heroAction !== Actions.STAND) {
             const heroDirection = mapActionToDirection(input.heroAction)!;
-            const newHeroPosition = calculateOffset(input.hero, heroDirection);
+            hero.direction = heroDirection;
+            const newHeroPosition = input.hero.calculateOffset(heroDirection);
 
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
+                mapChanged = true;
+                hero.currentPosition = newHeroPosition;
 
-                result.mapChanged = true;
-                result.featuresMovementMap.set(TileCodes.hero, [{
-                    currentPosition: input.hero,
-                    newPosition: newHeroPosition,
-                    direction: heroDirection
-                }]);
-
-                const boxAhead = input.boxes
-                    .find(box => box.x === newHeroPosition.x && box.y === newHeroPosition.y);
-                if (boxAhead) {
-                    result.featuresMovementMap.set(TileCodes.box, [{
-                        currentPosition: boxAhead,
-                        newPosition: calculateOffset(boxAhead, heroDirection),
-                        direction: heroDirection
-                    }]);
+                //box moved
+                const movedBox = boxes
+                    .find(box => box.previousPosition.equal(newHeroPosition));
+                if (movedBox) {
+                    movedBox.direction = heroDirection;
+                    movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
                 }
             }
         }
-
-        return result;
-    }
-
-    private initializeOutput() {
-        const result: MovementCoordinatorOutput = {
-            mapChanged: false,
-            featuresMovementMap: new Map<TileCodes, Movement[]>()
+        return {
+            hero: hero,
+            boxes: boxes,
+            mapChanged: mapChanged
         };
-        result.featuresMovementMap.set(TileCodes.hero, []);
-        result.featuresMovementMap.set(TileCodes.box, []);
-        return result;
     }
 
     private heroMovementIsAvailable(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
@@ -82,16 +77,16 @@ export class MovementCoordinator {
         }
 
         const boxAhead = input.boxes
-            .find(box => box.x === newHeroPosition.x && box.y === newHeroPosition.y);
+            .find(box => box.equal(newHeroPosition));
         if (boxAhead) {
             const heroDirection = mapActionToDirection(input.heroAction)!;
-            const afterNextMove = calculateOffset(newHeroPosition, heroDirection);
+            const afterNextMove = newHeroPosition.calculateOffset(heroDirection);
             const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove);
             if (afterNextMoveFeature === undefined || afterNextMoveFeature === TileCodes.wall) {
                 return false;
             }
             if (input.boxes
-                .find(box => box.x === afterNextMove.x && box.y === afterNextMove.y)) {
+                .find(box => box.equal(afterNextMove))) {
                 return false;
             }
         }

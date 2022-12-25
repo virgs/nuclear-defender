@@ -1,19 +1,51 @@
-export interface Point {
-    x: number;
-    y: number;
-}
+import {Directions} from '@/game/constants/directions';
 
-export function getPointsAround(point: Point, offset: Point = {x: 1, y: 1}): Point[] {
-    const result = [];
-    for (let horizontal = -1; horizontal < 1; ++horizontal) {
-        for (let vertical = -1; vertical < 1; ++vertical) {
-            if (horizontal !== 0 || vertical !== 0) {
-                result.push({
-                    x: point.x -= horizontal * offset.x,
-                    y: point.y -= vertical * offset.y,
-                });
-            }
-        }
+export class Point {
+    private _x: number = 0;
+    private _y: number = 0;
+
+    constructor(x: number, y: number) {
+        this._x = x;
+        this._y = y;
     }
-    return result;
+
+    get x(): number {
+        return this._x;
+    }
+
+    set x(value: number) {
+        this._x = value;
+    }
+
+    get y(): number {
+        return this._y;
+    }
+
+    set y(value: number) {
+        this._y = value;
+    }
+
+    public clone(): Point {
+        return new Point(this._x, this._y);
+    }
+
+    public equal(other: Point): boolean {
+        return this.x === other.x && this.y === other.y;
+    }
+
+    public calculateOffset(direction: Directions): Point {
+        const result = this.clone();
+        if (direction === Directions.LEFT) {
+            result.x -= 1;
+        } else if (direction === Directions.RIGHT) {
+            result.x += 1;
+        }
+        if (direction === Directions.UP) {
+            result.y -= 1;
+        } else if (direction === Directions.DOWN) {
+            result.y += 1;
+        }
+        return result;
+    };
+
 }

@@ -3,7 +3,6 @@ import type {Point} from '@/game/math/point';
 import {TileCodes} from '@/game/tiles/tile-codes';
 import {getTweenFromDirection} from '@/game/actors/tween';
 import type {Directions} from '@/game/constants/directions';
-import {calculateOffset} from '@/game/constants/directions';
 
 export class Box {
     private tilePosition: Point;
@@ -42,7 +41,7 @@ export class Box {
                 ...getTweenFromDirection(direction),
                 targets: this.sprite,
                 onInit: () => {
-                    this.tilePosition = calculateOffset(this.tilePosition, direction);
+                    this.tilePosition = this.tilePosition.calculateOffset(direction);
                 },
                 onUpdate: () => {
                     this.sprite!.setDepth(this.sprite!.y + 1);

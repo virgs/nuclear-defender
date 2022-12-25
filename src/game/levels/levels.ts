@@ -12,6 +12,20 @@ type Level = {
 export const levels: Level[] = [
     {
         map: `
+2-3#
+2-#.#
+2-# 4#
+3#$ $.#
+#. $@3#
+4#$#
+3-#.#
+3-3#
+`,
+        title: 'Welcome',
+        movesSolution: ''
+    },
+    {
+        map: `
 4#|#  #
 #  ######
 #   $@. #

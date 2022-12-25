@@ -4,13 +4,14 @@ import {Scenes} from './scenes';
 import type {Box} from '@/game/actors/box';
 import type {Hero} from '@/game/actors/hero';
 import {TileCodes} from '../tiles/tile-codes';
-import type {Actions} from '../constants/actions';
+import {Actions} from '../constants/actions';
 import {configuration} from '../constants/configuration';
 import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
 import {MovementCoordinator} from '../actors/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
-import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {SokobanSolver} from '@/game/math/sokoban-solver';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -30,6 +31,7 @@ export class GameScene extends Phaser.Scene {
     private hero?: Hero;
     private boxes: Box[] = [];
     private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
+    private solution?: Actions[];
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -67,6 +69,8 @@ export class GameScene extends Phaser.Scene {
 
         this.staticMap = data.staticMap;
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
+        this.solution =  await new SokobanSolver(data.staticMap).solve(data.hero!, data.boxes);
+        console.log(this.solution);
         this.allowHeroMovement = true;
     }
 
@@ -77,12 +81,11 @@ export class GameScene extends Phaser.Scene {
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
-            // if (this.solution && this.solution.length > 0) {
-            //     heroAction = this.solution.shift()!;
-            // }
+            if (this.solution && this.solution.length > 0) {
+                heroAction = this.solution.shift()!;
+            }
             this.playerMovesSoFar!.push(heroAction);
 
-            // const mapState = this.createMapState();
             const movementCoordinatorOutput = this.movementCoordinator!.update({
                 heroAction: heroAction,
                 staticMap: this.staticMap!,
@@ -98,21 +101,20 @@ export class GameScene extends Phaser.Scene {
     }
 
     private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
-        const boxMovementPromises = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.box)!
+        const promises: Promise<any>[] = [];
+        promises.push(...movementCoordinatorOutput.boxes
+            .filter(box => !box.previousPosition.equal(box.currentPosition))
             .map(async movedBox => {
                 const tileBoxToMove = this.boxes
-                    .find(tileBox => movedBox.currentPosition.x === tileBox.getTilePosition().x &&
-                        movedBox.currentPosition.y === tileBox.getTilePosition().y);
+                    .find(tileBox => movedBox.previousPosition.equal(tileBox.getTilePosition()));
+
                 await tileBoxToMove!.move(movedBox.direction!);
-                const onTarget = this.staticMap?.tiles[movedBox.newPosition.y][movedBox.newPosition.x] === TileCodes.target;
+                const onTarget = this.staticMap?.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x] === TileCodes.target;
                 tileBoxToMove!.setIsOnTarget(onTarget);
-            });
-        const playerMovementPromise = movementCoordinatorOutput.featuresMovementMap.get(TileCodes.hero)!
-            .map(async heroMovement => {
-                await this.hero!.move(heroMovement.direction!);
-                this.allowHeroMovement = true;
-            });
-        await Promise.all([playerMovementPromise, boxMovementPromises]);
+            }));
+        promises.push(this.hero!.move(movementCoordinatorOutput.hero.direction!));
+        await Promise.all(promises);
+        this.allowHeroMovement = true;
     }
 
     private onMovementsComplete(): void {
@@ -122,9 +124,9 @@ export class GameScene extends Phaser.Scene {
     private checkLevelComplete() {
         if (this.boxes.every(box => box.getIsOnTarget())) {
             this.levelComplete = true;
-            console.log('currentLevel complete');
+            console.log('currentLevel complete', this.playerMovesSoFar?.filter(action => action !== Actions.STAND));
             setTimeout(async () => {
-                Store.getInstance().router.push('/next-level');
+                // Store.getInstance().router.push('/next-level');
             }, 1500);
             // }
         }

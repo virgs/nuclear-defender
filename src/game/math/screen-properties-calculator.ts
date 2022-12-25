@@ -1,6 +1,6 @@
 import type {TileCodes} from '@/game/tiles/tile-codes';
-import type {Point} from '@/game/math/point';
 import {configuration} from '@/game/constants/configuration';
+import {Point} from '@/game/math/point';
 
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
@@ -19,12 +19,11 @@ export class ScreenPropertiesCalculator {
         const scale = Math.min(this.limitValue(xFactor), this.limitValue(yFactor));
         return {
             scale: scale,
-            center: {
-                x: (configuration.gameWidth - map.width * scale) / 2,
-                y: (configuration.gameHeight - map.height * scale) / 2,
-            }
+            center: new Point(
+                (configuration.gameWidth - map.width * scale) / 2,
+                (configuration.gameHeight - map.height * scale) / 2)
         };
-    }
+    };
 
     private limitValue(value: number): number {
         return Math.min(Math.max(value, scaleLimits.min), scaleLimits.max);
