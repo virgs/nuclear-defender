@@ -11,6 +11,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@types/heap": "0.2.31",
+    "heap": "0.2.7",
     "lz-string": "1.4.4",
     "phaser": "3.55.2",
     "vue": "^3.2.45",

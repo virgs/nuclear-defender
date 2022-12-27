@@ -3,15 +3,16 @@ import {Store} from '@/store';
 import {Scenes} from './scenes';
 import type {Box} from '@/game/actors/box';
 import type {Hero} from '@/game/actors/hero';
-import {TileCodes} from '../tiles/tile-codes';
 import {Actions} from '../constants/actions';
+import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
-import type {MovementCoordinatorOutput} from '../actors/movement-coordinator';
-import {MovementCoordinator} from '../actors/movement-coordinator';
+import {SokobanSolver} from '@/game/solver/sokoban-solver';
+import {MovementCoordinator} from '../solver/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import type {MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {SokobanSolver} from '@/game/math/sokoban-solver';
+import {MovementAnalyser, MovementAnalyses} from '@/game/solver/movement-analyser';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -69,7 +70,8 @@ export class GameScene extends Phaser.Scene {
 
         this.staticMap = data.staticMap;
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
-        this.solution =  await new SokobanSolver(data.staticMap).solve(data.hero!, data.boxes);
+        this.solution = await new SokobanSolver(data.staticMap).solve(data.hero!, data.boxes);
+
         console.log(this.solution);
         this.allowHeroMovement = true;
     }
@@ -92,6 +94,12 @@ export class GameScene extends Phaser.Scene {
                 hero: this.hero!.getTilePosition(),
                 boxes: this.boxes!.map(box => box.getTilePosition())
             });
+
+            const analyse = new MovementAnalyser().analyse(movementCoordinatorOutput);
+            if (analyse.length > 0) {
+                console.log(analyse.map(move => MovementAnalyses[move]))
+            }
+
             if (movementCoordinatorOutput.mapChanged) {
                 this.allowHeroMovement = false;
                 await this.moveMapFeatures(movementCoordinatorOutput);
@@ -109,8 +117,7 @@ export class GameScene extends Phaser.Scene {
                     .find(tileBox => movedBox.previousPosition.equal(tileBox.getTilePosition()));
 
                 await tileBoxToMove!.move(movedBox.direction!);
-                const onTarget = this.staticMap?.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x] === TileCodes.target;
-                tileBoxToMove!.setIsOnTarget(onTarget);
+                tileBoxToMove!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
             }));
         promises.push(this.hero!.move(movementCoordinatorOutput.hero.direction!));
         await Promise.all(promises);

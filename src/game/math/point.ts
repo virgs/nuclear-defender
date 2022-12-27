@@ -48,4 +48,7 @@ export class Point {
         return result;
     };
 
+    public manhattanDistanceTo(point: Point): number {
+        return Math.abs(this.x - point.x) + Math.abs(this.y - point.y);
+    }
 }

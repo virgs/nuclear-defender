@@ -10,6 +10,7 @@ export class StandardSokobanAnnotationMapper {
 
     public map(encodedLevel: string): Mapped {
         const noPipeMap = encodedLevel.replace('|', '\n');
+        //TODO change it to allow multiple characters code (the first to describe the orientation and the second to tell what it is)
         const noNumberMap = this.removeNumbers(noPipeMap);
         const encodedMatrix = this.transformToMatrix(noNumberMap);
         const dimensionArray = this.createEmptyDecodedMap(encodedMatrix);

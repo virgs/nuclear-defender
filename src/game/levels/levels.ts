@@ -4,6 +4,10 @@
 // Author: Eric F Tchong
 // Email: serenata@setarnet.aw
 
+
+//TODO add thumbnail?
+//show tem as a carrousel instead of a dropdown?
+
 type Level = {
     title: string,
     map: string,
@@ -26,6 +30,19 @@ export const levels: Level[] = [
     },
     {
         map: `
+-7#
+-#5 3#
+2#$3#3 #
+#3 $2 $ #
+# +.# $ 2#
+2#..#3 #
+-8#
+`,
+        title: 'Are you familiar',
+        movesSolution: ''
+    },
+    {
+        map: `
 4#|#  #
 #  ######
 #   $@. #
@@ -36,6 +53,19 @@ export const levels: Level[] = [
 #########
 `,
         title: 'Small world',
+        movesSolution: ''
+    },
+{
+        map: `
+-6#
+##  @ ##
+# $ $$ #
+#......#
+# $$ $ #
+3#  3#
+--4#
+`,
+        title: 'Memories',
         movesSolution: ''
     },
     {

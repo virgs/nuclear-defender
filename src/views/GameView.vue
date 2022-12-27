@@ -4,7 +4,7 @@ import {computed, onMounted, onUnmounted, ref} from 'vue';
 import PhaserContainer from "@/components/PhaserContainer.vue";
 import {levels} from '@/game/levels/levels';
 
-function restartClick() {
+function resetClick() {
   console.log('restart');
 }
 
@@ -62,7 +62,7 @@ onUnmounted(() => {
           </div>
           <div class="col-2 d-grid gap-2">
             <button class="btn btn-primary sokoban-call-for-action-button"
-                    @click="restartClick"
+                    @click="resetClick"
                     type="button">
               <i class="fa-solid fa-arrow-rotate-left"></i>
             </button>

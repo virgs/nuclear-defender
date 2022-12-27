@@ -6,17 +6,18 @@ import {Actions, mapActionToDirection} from '../constants/actions';
 type Movement = {
     previousPosition: Point,
     currentPosition: Point,
+    isCurrentlyOnTarget: boolean,
     direction: Directions | undefined
 };
 
 export type MovementCoordinatorOutput = {
     mapChanged: boolean;
-    boxes: Movement[];
+    boxes: Movement[]; //TODO add id to every box
     hero: Movement;
 };
 
 export type MovementCoordinatorInput = {
-    boxes: Point[];
+    boxes: Point[]; //TODO add id to every box
     heroAction: Actions;
     staticMap: {
         width: number;
@@ -38,11 +39,13 @@ export class MovementCoordinator {
         let hero: Movement = {
             previousPosition: input.hero,
             currentPosition: input.hero,
+            isCurrentlyOnTarget: false,
             direction: undefined
         };
         let boxes: Movement[] = input.boxes.map(box => ({
             previousPosition: box,
             currentPosition: box,
+            isCurrentlyOnTarget: false,
             direction: undefined
         }));
         if (input.heroAction !== Actions.STAND) {
@@ -53,16 +56,18 @@ export class MovementCoordinator {
             if (this.heroMovementIsAvailable(newHeroPosition, input)) {
                 mapChanged = true;
                 hero.currentPosition = newHeroPosition;
-
+                hero.isCurrentlyOnTarget = this.staticMap[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
                 //box moved
                 const movedBox = boxes
                     .find(box => box.previousPosition.equal(newHeroPosition));
                 if (movedBox) {
                     movedBox.direction = heroDirection;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
+                    movedBox.isCurrentlyOnTarget = this.staticMap[movedBox.currentPosition.y][movedBox.currentPosition.x] === TileCodes.target;
                 }
             }
         }
+
         return {
             hero: hero,
             boxes: boxes,

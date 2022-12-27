@@ -10,7 +10,7 @@ import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvan
 const router = useRouter();
 
 const data = reactive({
-  currentSelectedIndex: 4
+  currentSelectedIndex: 0
 });
 
 //TODO get it from OptionsComponent
