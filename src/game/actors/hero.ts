@@ -3,8 +3,9 @@ import {HeroAnimator} from './hero-animator';
 import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '../constants/directions';
+import type {GameActor} from '@/game/actors/game-actor';
 
-export class Hero {
+export class Hero implements GameActor {
     private readonly heroAnimator: HeroAnimator;
     private readonly inputMap: Map<Actions, () => boolean>;
     private readonly sprite?: Phaser.GameObjects.Sprite;

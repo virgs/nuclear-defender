@@ -9,12 +9,12 @@ const tileHeight = 40;
 const tileWidth = 40;
 export const configuration = {
     frameRate: 10,
-    spriteSheetKey: 'tiles',
     updateCycleInMs: 200,
     tiles: { //in tile sheet
         verticalPerspective: verticalPerspective,
         verticalSize: tileHeight,
         horizontalSize: tileWidth,
+        spriteSheetKey: 'tiles',
         tilesheets: [tilesheet0, tilesheet1],
         sheetAsset: tileSheetAsset,
         tilemapKey: 'tilemap',

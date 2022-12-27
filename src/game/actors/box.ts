@@ -1,10 +1,11 @@
 import type Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
 import {TileCodes} from '@/game/tiles/tile-codes';
+import type {GameActor} from '@/game/actors/game-actor';
 import {getTweenFromDirection} from '@/game/actors/tween';
 import type {Directions} from '@/game/constants/directions';
 
-export class Box {
+export class Box implements GameActor {
     private tilePosition: Point;
     private isOnTarget: boolean;
     private readonly tweens: Phaser.Tweens.TweenManager;

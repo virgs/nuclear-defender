@@ -3,7 +3,7 @@ import {TileCodes} from '../tiles/tile-codes';
 import type {Directions} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
 
-type Movement = {
+export type Movement = {
     previousPosition: Point,
     currentPosition: Point,
     isCurrentlyOnTarget: boolean,
@@ -36,24 +36,14 @@ export class MovementCoordinator {
 
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
         let mapChanged = false;
-        let hero: Movement = {
-            previousPosition: input.hero,
-            currentPosition: input.hero,
-            isCurrentlyOnTarget: false,
-            direction: undefined
-        };
-        let boxes: Movement[] = input.boxes.map(box => ({
-            previousPosition: box,
-            currentPosition: box,
-            isCurrentlyOnTarget: false,
-            direction: undefined
-        }));
+        let hero: Movement = this.initializeHero(input);
+        let boxes: Movement[] = this.initializeBoxes(input);
         if (input.heroAction !== Actions.STAND) {
             const heroDirection = mapActionToDirection(input.heroAction)!;
             hero.direction = heroDirection;
-            const newHeroPosition = input.hero.calculateOffset(heroDirection);
 
-            if (this.heroMovementIsAvailable(newHeroPosition, input)) {
+            const newHeroPosition = input.hero.calculateOffset(heroDirection);
+            if (this.willPlayerMove(newHeroPosition, input)) {
                 mapChanged = true;
                 hero.currentPosition = newHeroPosition;
                 hero.isCurrentlyOnTarget = this.staticMap[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
@@ -75,7 +65,25 @@ export class MovementCoordinator {
         };
     }
 
-    private heroMovementIsAvailable(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
+    private initializeBoxes(input: MovementCoordinatorInput) {
+        return input.boxes.map(box => ({
+            previousPosition: box,
+            currentPosition: box,
+            isCurrentlyOnTarget: false,
+            direction: undefined
+        }));
+    }
+
+    private initializeHero(input: MovementCoordinatorInput) {
+        return {
+            previousPosition: input.hero,
+            currentPosition: input.hero,
+            isCurrentlyOnTarget: false,
+            direction: undefined
+        };
+    }
+
+    private willPlayerMove(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
         const featureAhead = this.getFeatureAtPosition(newHeroPosition);
         if (featureAhead === undefined || featureAhead === TileCodes.wall) {
             return false;

@@ -4,7 +4,7 @@ import {configuration} from '../constants/configuration';
 
 export class FileLevelExtractor {
     public extractToTileCodeMap(map: Phaser.Tilemaps.Tilemap) {
-        const tileset = map.addTilesetImage(configuration.tiles.tilesetName, configuration.spriteSheetKey);
+        const tileset = map.addTilesetImage(configuration.tiles.tilesetName, configuration.tiles.spriteSheetKey);
         const mapLayer = map.createLayer(configuration.tiles.layerName, tileset);
 
         const dimension = mapLayer.worldToTileXY(mapLayer.width, mapLayer.height);

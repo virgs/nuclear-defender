@@ -103,7 +103,7 @@ export class HeroAnimator {
     private generateFrames(initialFrame: number, numOfFrames: number) {
         return Array.from(new Array(numOfFrames))
             .map((_, index) => ({
-                key: configuration.spriteSheetKey,
+                key: configuration.tiles.spriteSheetKey,
                 frame: initialFrame + index
             }));
     }

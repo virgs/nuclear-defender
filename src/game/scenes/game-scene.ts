@@ -7,12 +7,12 @@ import {Actions} from '../constants/actions';
 import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
+import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import type {MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {MovementAnalyser, MovementAnalyses} from '@/game/solver/movement-analyser';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -32,7 +32,7 @@ export class GameScene extends Phaser.Scene {
     private hero?: Hero;
     private boxes: Box[] = [];
     private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
-    private solution?: Actions[];
+    private solution?: SolutionOutput;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -50,13 +50,15 @@ export class GameScene extends Phaser.Scene {
             this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         });
 
-        this.load.spritesheet(configuration.spriteSheetKey, configuration.tiles.sheetAsset, {
+        this.load.spritesheet(configuration.tiles.spriteSheetKey, configuration.tiles.sheetAsset, {
             frameWidth: configuration.tiles.horizontalSize,
             startFrame: 0
         });
     }
 
     public async create() {
+        this.lights.enable();
+
         const codedMap: string = Store.getInstance().map;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
@@ -70,9 +72,10 @@ export class GameScene extends Phaser.Scene {
 
         this.staticMap = data.staticMap;
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
-        this.solution = await new SokobanSolver(data.staticMap).solve(data.hero!, data.boxes);
+        // const breathingPeriod = 3000;
+        // const breathTime = 50;
+        this.solution = await new SokobanSolver({staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50}}).solve(data.hero!, data.boxes);
 
-        console.log(this.solution);
         this.allowHeroMovement = true;
     }
 
@@ -83,26 +86,21 @@ export class GameScene extends Phaser.Scene {
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
-            if (this.solution && this.solution.length > 0) {
-                heroAction = this.solution.shift()!;
+            if (this.solution?.actions?.length! > 0) {
+                heroAction = this.solution?.actions?.shift()!;
             }
             this.playerMovesSoFar!.push(heroAction);
 
-            const movementCoordinatorOutput = this.movementCoordinator!.update({
+            const movement = this.movementCoordinator!.update({
                 heroAction: heroAction,
                 staticMap: this.staticMap!,
                 hero: this.hero!.getTilePosition(),
                 boxes: this.boxes!.map(box => box.getTilePosition())
             });
 
-            const analyse = new MovementAnalyser().analyse(movementCoordinatorOutput);
-            if (analyse.length > 0) {
-                console.log(analyse.map(move => MovementAnalyses[move]))
-            }
-
-            if (movementCoordinatorOutput.mapChanged) {
+            if (movement.mapChanged) {
                 this.allowHeroMovement = false;
-                await this.moveMapFeatures(movementCoordinatorOutput);
+                await this.moveMapFeatures(movement);
                 this.onMovementsComplete();
             }
         }
@@ -111,6 +109,7 @@ export class GameScene extends Phaser.Scene {
     private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
         const promises: Promise<any>[] = [];
         promises.push(...movementCoordinatorOutput.boxes
+            //TODO filter by box id
             .filter(box => !box.previousPosition.equal(box.currentPosition))
             .map(async movedBox => {
                 const tileBoxToMove = this.boxes
