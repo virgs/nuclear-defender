@@ -53,12 +53,11 @@ export class Hero implements GameActor {
             this.isMoving = true;
             const heroMovement = this.heroAnimator.map(direction);
 
-            this.sprite!.anims.play(heroMovement.walking, true);
-
             this.tweens!.add({
                 ...heroMovement.tween,
                 targets: this.sprite,
                 onInit: () => {
+                    this.sprite!.anims.play(heroMovement.walking, true);
                     this.tilePosition = this.tilePosition.calculateOffset(direction);
                 },
                 onUpdate: () => {
@@ -69,7 +68,7 @@ export class Hero implements GameActor {
                     this.isMoving = false;
                     resolve();
                 },
-                onCompleteScope: this
+                onCompleteScope: this //doc purposes
             });
         });
     }

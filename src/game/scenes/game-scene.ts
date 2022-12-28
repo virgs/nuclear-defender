@@ -4,13 +4,14 @@ import {Scenes} from './scenes';
 import type {Box} from '@/game/actors/box';
 import type {Hero} from '@/game/actors/hero';
 import {Actions} from '../constants/actions';
+import type {Target} from '@/game/actors/target';
 import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
-import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
+import type {MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
-import type {MovementCoordinatorOutput} from '../solver/movement-coordinator';
+import {LightSystemManager} from '@/game/lights/light-system-manager';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
@@ -24,6 +25,7 @@ export type GameSceneConfiguration = {
 
 //TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
 export class GameScene extends Phaser.Scene {
+
     private movementCoordinator?: MovementCoordinator;
     private levelComplete?: boolean;
     private allowHeroMovement?: boolean;
@@ -31,8 +33,10 @@ export class GameScene extends Phaser.Scene {
 
     private hero?: Hero;
     private boxes: Box[] = [];
+    private target: Target[] = [];
     private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
     private solution?: SolutionOutput;
+    private lightSystemManager?: LightSystemManager;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -44,21 +48,26 @@ export class GameScene extends Phaser.Scene {
     }
 
     public preload() {
-        this.load.html(configuration.html.gameScene.key, configuration.html.gameScene.file);
-        this.load.tilemapTiledJSON(configuration.tiles.tilemapKey, configuration.tiles.tilesheets[0]);
-        this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-            this.cache.tilemap.remove(configuration.tiles.tilemapKey);
-        });
+        //Note needed only when loading from file
 
-        this.load.spritesheet(configuration.tiles.spriteSheetKey, configuration.tiles.sheetAsset, {
-            frameWidth: configuration.tiles.horizontalSize,
-            startFrame: 0
+        // this.load.html(configuration.html.gameScene.key, configuration.html.gameScene.file);
+        // this.load.tilemapTiledJSON(configuration.tiles.tilemapKey, configuration.tiles.tilesheets[0]);
+        // this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+        //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
+        // });
+
+        this.load.spritesheet({
+            key: configuration.tiles.spriteSheetKey,
+            url: configuration.tiles.sheetAsset,
+            normalMap: configuration.tiles.sheetAssetNormal,
+            frameConfig: {
+                frameWidth: configuration.tiles.horizontalSize,
+                frameHeight: configuration.tiles.verticalSize
+            }
         });
     }
 
     public async create() {
-        this.lights.enable();
-
         const codedMap: string = Store.getInstance().map;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
@@ -69,12 +78,15 @@ export class GameScene extends Phaser.Scene {
         const featuresMap = mapFeaturesExtractor.extractFeatures(data, output);
         this.hero = featuresMap.hero;
         this.boxes = featuresMap.boxes;
-
+        this.target = featuresMap.targets;
         this.staticMap = data.staticMap;
+
+        this.lightSystemManager = new LightSystemManager({scene: this, featuresMap: featuresMap});
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
-        // const breathingPeriod = 3000;
-        // const breathTime = 50;
-        this.solution = await new SokobanSolver({staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50}}).solve(data.hero!, data.boxes);
+        // this.solution = await new SokobanSolver({
+        //     staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
+        //     distanceCalculator: new QuadracticEuclidianDistanceCalculator()
+        // }).solve(data.hero!, data.boxes);
 
         this.allowHeroMovement = true;
     }
@@ -83,6 +95,7 @@ export class GameScene extends Phaser.Scene {
         if (this.levelComplete) {
             return;
         }
+        this.lightSystemManager!.update();
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
@@ -100,6 +113,7 @@ export class GameScene extends Phaser.Scene {
 
             if (movement.mapChanged) {
                 this.allowHeroMovement = false;
+                this.lightSystemManager!.startMovementDetection();
                 await this.moveMapFeatures(movement);
                 this.onMovementsComplete();
             }
@@ -117,6 +131,14 @@ export class GameScene extends Phaser.Scene {
 
                 await tileBoxToMove!.move(movedBox.direction!);
                 tileBoxToMove!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
+
+                this.target
+                    .find(target => target.getTilePosition().equal(movedBox.currentPosition))
+                    ?.cover();
+
+                this.target
+                    .find(target => target.getTilePosition().equal(movedBox.previousPosition))
+                    ?.uncover();
             }));
         promises.push(this.hero!.move(movementCoordinatorOutput.hero.direction!));
         await Promise.all(promises);
@@ -124,14 +146,18 @@ export class GameScene extends Phaser.Scene {
     }
 
     private onMovementsComplete(): void {
+        this.lightSystemManager!.stopMovementDetection();
         this.checkLevelComplete();
     }
 
     private checkLevelComplete() {
-        if (this.boxes.every(box => box.getIsOnTarget())) {
-            this.levelComplete = true;
+        if (this.boxes
+            .every(box => box.getIsOnTarget())) {
+            // this.levelComplete = true;
             console.log('currentLevel complete', this.playerMovesSoFar?.filter(action => action !== Actions.STAND));
             setTimeout(async () => {
+                // this.lights.destroy();
+
                 // Store.getInstance().router.push('/next-level');
             }, 1500);
             // }

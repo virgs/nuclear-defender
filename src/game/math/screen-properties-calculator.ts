@@ -26,6 +26,6 @@ export class ScreenPropertiesCalculator {
     };
 
     private limitValue(value: number): number {
-        return Math.min(Math.max(value, scaleLimits.min), scaleLimits.max);
+        return Phaser.Math.Clamp(value, scaleLimits.min, scaleLimits.max);
     }
 }

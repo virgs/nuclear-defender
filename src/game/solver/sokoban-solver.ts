@@ -5,6 +5,7 @@ import {TileCodes} from '../tiles/tile-codes';
 import {MovementCoordinator} from './movement-coordinator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import type {DistanceCalculator} from '@/game/math/distance-calculator';
 
 type Solution = {
     actions: Actions[],
@@ -26,7 +27,8 @@ export class SokobanSolver {
 
     private static SmartActions = Object.keys(Actions)
         .filter(key => !isNaN(Number(key)))
-        .map(key => Number(key) as Actions);
+        .map(key => Number(key) as Actions)
+        .filter(action => action !== Actions.STAND)
 
     private movementCoordinator: MovementCoordinator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
@@ -38,15 +40,19 @@ export class SokobanSolver {
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
 
-    public constructor(config: { staticMap: { width: number; height: number; tiles: TileCodes[][] }, cpu: { sleepForInMs: number, sleepingCycle: number } }) {
-        this.sleepForInMs = config.cpu.sleepForInMs;
-        this.sleepingCycle = config.cpu.sleepingCycle;
+    public constructor(input: {
+        staticMap: { width: number; height: number; tiles: TileCodes[][] },
+        cpu: { sleepForInMs: number, sleepingCycle: number }
+        distanceCalculator: DistanceCalculator
+    }) {
+        this.sleepForInMs = input.cpu.sleepForInMs;
+        this.sleepingCycle = input.cpu.sleepingCycle;
 
-        this.staticMap = config.staticMap;
+        this.staticMap = input.staticMap;
         this.movementCoordinator = new MovementCoordinator(this.staticMap);
         this.movementAnalyser = new MovementAnalyser({
             staticMap: this.staticMap,
-            distanceCalculator: new ManhattanDistanceCalculator()
+            distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
         this.movementBonusMap.set(MovementEvents.HERO_MOVED, -1);
@@ -64,9 +70,7 @@ export class SokobanSolver {
             totalTime: new Date().getTime() - startTime
         };
 
-        if (actions) {
-            console.log('solution found. Steps: ' + actions.length + '. Total time: ' + solutionOutput.totalTime + '; iterations: ' + solutionOutput.iterations);
-        }
+        console.log('solution found. Steps: ' + actions?.length + '. Total time: ' + solutionOutput.totalTime + '; iterations: ' + solutionOutput.iterations);
         return solutionOutput;
     }
 
@@ -134,7 +138,7 @@ export class SokobanSolver {
                         actions: candidate.actions.concat(action),
                         score: candidate.score + heroMovementCost + analysis.shortestDistanceFromEveryBoxToTheClosestTarget
                     };
-                    newCandidate.hash =  this.calculateHashOfSolution(newCandidate);
+                    newCandidate.hash = this.calculateHashOfSolution(newCandidate);
                     if (!analysis.isDeadLocked) {
                         this.candidatesToVisit.push(newCandidate);
                     }

@@ -36,6 +36,10 @@ export class Box implements GameActor {
         return this.isOnTarget;
     }
 
+    public getSprite(): Phaser.GameObjects.Sprite {
+        return this.sprite;
+    }
+
     public async move(direction: Directions) {
         return new Promise<void>(resolve => {
             const tween = {
@@ -49,8 +53,7 @@ export class Box implements GameActor {
                 },
                 onComplete: () => {
                     resolve();
-                },
-                onCompleteScope: this
+                }
             };
             this.tweens.add(tween);
         });

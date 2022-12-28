@@ -34,18 +34,30 @@ export class Point {
     }
 
     public calculateOffset(direction: Directions): Point {
-        const result = this.clone();
+        const offset = new Point(0, 0);
         if (direction === Directions.LEFT) {
-            result.x -= 1;
+            offset.x -= 1;
         } else if (direction === Directions.RIGHT) {
-            result.x += 1;
+            offset.x += 1;
         }
         if (direction === Directions.UP) {
-            result.y -= 1;
+            offset.y -= 1;
         } else if (direction === Directions.DOWN) {
-            result.y += 1;
+            offset.y += 1;
         }
-        return result;
+
+        return this.sum(offset);
     };
 
+    public subtract(other: Point): Point {
+        return new Point(this.x - other.x, this.y - other.y);
+    }
+
+    public sum(other: Point): Point {
+        return new Point(this.x + other.x, this.y + other.y);
+    }
+
+    multiply(number: number): Point {
+        return new Point(this.x * number, this.y * number);
+    }
 }

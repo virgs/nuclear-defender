@@ -18,11 +18,24 @@ type Level = {
 export const levels: Level[] = [
     {
         map: `
-2-3#
-2-#.#
+12#
+#10 #
+#10 #
+#3 #6 #
+#2 $.      #
+#10 #
+#6 @3 #
+#10 #
+#10 #
+12#
+`,
+        title: 'Test',
+    }, {
+        map: `
+2-3#|2-#.#
 2-# 4#
 3#$ $.#
-#. $@3#
+#*  @3#
 4#$#
 3-#.#
 3-3#
@@ -64,5 +77,5 @@ export const levels: Level[] = [
 3#  3#
 --4#
 `,
-        title: 'Memories', //euclidian: 2935297, manhattan: 4217810
+        title: 'Memories', //euclidian: {Steps: 66. Total time: 228998; iterations: 216575}, manhattan: {Steps: 66. Total time: 227213; iterations: 216575}
     }];

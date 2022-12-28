@@ -1,8 +1,7 @@
 import tilesheet0 from '@/game/assets/levels/level-0.json';
 import tilesheet1 from '@/game/assets/levels/level-0.json';
 import tileSheetAsset from '@/game/assets/tiles/sokoban_tilesheet.png';
-// @ts-ignore
-import gameSceneHtml from '@/game/assets/html/game-scene.html';
+import tileSheetAssetNormal from '@/game/assets/tiles/sokoban_tilessheet_normal.png';
 
 const verticalPerspective = .8;
 const tileHeight = 40;
@@ -17,6 +16,7 @@ export const configuration = {
         spriteSheetKey: 'tiles',
         tilesheets: [tilesheet0, tilesheet1],
         sheetAsset: tileSheetAsset,
+        sheetAssetNormal: tileSheetAssetNormal,
         tilemapKey: 'tilemap',
         layerName: 'Level',
         tilesetName: 'sokoban',
@@ -37,8 +37,6 @@ export const configuration = {
     },
     html: {
         gameScene: {
-            key: 'gameSceneKey',
-            file: gameSceneHtml
         }
     }
 

@@ -9,9 +9,8 @@ export class StandardSokobanAnnotationMapper {
     private boxes: Point[] = [];
 
     public map(encodedLevel: string): Mapped {
-        const noPipeMap = encodedLevel.replace('|', '\n');
         //TODO change it to allow multiple characters code (the first to describe the orientation and the second to tell what it is)
-        const noNumberMap = this.removeNumbers(noPipeMap);
+        const noNumberMap = this.removeNumbers(encodedLevel);
         const encodedMatrix = this.transformToMatrix(noNumberMap);
         const dimensionArray = this.createEmptyDecodedMap(encodedMatrix);
         this.staticMap = {
@@ -47,7 +46,7 @@ export class StandardSokobanAnnotationMapper {
 
     private transformToMatrix(encodedLevel: string) {
         const encodedMatrix: string[][] = encodedLevel
-            .split('\n')
+            .split(/[\n|]/)
             .filter(line => line.length > 0)
             .map(row => row.split(''));
         return encodedMatrix;
