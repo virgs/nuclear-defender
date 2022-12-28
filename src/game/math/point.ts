@@ -29,6 +29,11 @@ export class Point {
         return new Point(this._x, this._y);
     }
 
+    public normalize(): Point {
+        const size = this.size();
+        return new Point(this._x / size, this._y / size);
+    }
+
     public equal(other: Point): boolean {
         return this.x === other.x && this.y === other.y;
     }
@@ -57,7 +62,11 @@ export class Point {
         return new Point(this.x + other.x, this.y + other.y);
     }
 
-    multiply(number: number): Point {
+    public multiply(number: number): Point {
         return new Point(this.x * number, this.y * number);
+    }
+
+    public size(): number {
+        return Math.sqrt(this.x * this.x + this.y + this.y);
     }
 }

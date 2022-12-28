@@ -20,12 +20,13 @@ export class MapFeaturesExtractor {
         this.scale = scale;
     }
 
-    public extractFeatures(map: Mapped, scale: ScaleOutput): { staticMap: Phaser.GameObjects.Sprite[][], hero: Hero, boxes: Box[], targets: Target[] } {
+    public extractFeatures(map: Mapped, scale: ScaleOutput): { boxes: Box[]; walls: Phaser.GameObjects.Sprite[]; floors: Phaser.GameObjects.Sprite[]; staticMap: Phaser.GameObjects.Sprite[][]; hero: Hero; targets: Target[] } {
         const tiles = map.staticMap.tiles;
         const targets: Target[] = [];
         const hero = this.getHero(map, scale);
         const boxes = this.getBoxes(map, scale, tiles);
         const walls: Phaser.GameObjects.Sprite[] = [];
+        const floors: Phaser.GameObjects.Sprite[] = [];
 
         const staticMap = tiles.map((line, y) => line
             .map((tile: TileCodes, x: number) => {
@@ -33,6 +34,7 @@ export class MapFeaturesExtractor {
                 const sprite = this.createSprite(position, tile, scale.scale);
                 if (tile === TileCodes.floor) {
                     sprite.setDepth(floorDepth);
+                    floors.push(sprite);
                     //needed because target is not dynamic like a box (that creates its floor at the annotation extractor)
                 } else if (tile === TileCodes.target) {
                     const target = new Target({scene: this.scene, sprite: sprite, tilePosition: position});
@@ -44,18 +46,19 @@ export class MapFeaturesExtractor {
 
                     const floorBehind = this.createSprite(position, TileCodes.floor, scale.scale);
                     floorBehind.setDepth(floorDepth);
+                    floors.push(floorBehind);
                     sprite.setDepth(targetDepth);
                 } else if (tile === TileCodes.wall) {
                     walls.push(sprite);
                 }
                 return sprite;
             }));
-        targets
-            .forEach(target => target.setShadowCasters([...walls as Phaser.GameObjects.Sprite[], ...boxes.map(box => box.getSprite())]));
         return {
             staticMap: staticMap,
             targets: targets,
             hero: hero,
+            walls: walls,
+            floors: floors,
             boxes: boxes
         };
 
@@ -76,10 +79,10 @@ export class MapFeaturesExtractor {
     }
 
     private createSprite(point: Point, tile: TileCodes, scale: number): Phaser.GameObjects.Sprite {
-        const sprite = this.scene.add.sprite(point.x * configuration.world.tileSize.horizontal,
-            point.y * configuration.world.tileSize.vertical, configuration.tiles.spriteSheetKey, tile);
+        const sprite = this.scene.add.sprite((point.x + 1) * configuration.world.tileSize.horizontal,
+            (point.y + 1) * configuration.world.tileSize.vertical, configuration.tiles.spriteSheetKey, tile);
         sprite.scale = scale;
-        sprite.setOrigin(0);
+        sprite.setOrigin(0.5);
         sprite.setDepth(sprite.y);
         sprite.setPipeline('Light2D');
         return sprite;

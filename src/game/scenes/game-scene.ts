@@ -14,6 +14,9 @@ import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
 import {LightSystemManager} from '@/game/lights/light-system-manager';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {MovementAnalyser} from '@/game/solver/movement-analyser';
+import {QuadracticEuclidianDistanceCalculator} from '@/game/math/quadractic-euclidian-distance-calculator';
+import {SokobanSolver} from '@/game/solver/sokoban-solver';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -33,10 +36,11 @@ export class GameScene extends Phaser.Scene {
 
     private hero?: Hero;
     private boxes: Box[] = [];
-    private target: Target[] = [];
+    private targets: Target[] = [];
     private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
     private solution?: SolutionOutput;
     private lightSystemManager?: LightSystemManager;
+    private movementAnalyser?: MovementAnalyser;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -56,6 +60,8 @@ export class GameScene extends Phaser.Scene {
         //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         // });
 
+        this.load.image('blur', configuration.blurMask)
+
         this.load.spritesheet({
             key: configuration.tiles.spriteSheetKey,
             url: configuration.tiles.sheetAsset,
@@ -67,10 +73,11 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    public async create() {
+    public async create(floors: Phaser.GameObjects.Sprite[]) {
         const codedMap: string = Store.getInstance().map;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
+        this.movementAnalyser = new MovementAnalyser({staticMap: data.staticMap, distanceCalculator: new QuadracticEuclidianDistanceCalculator()});
         configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
         configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
 
@@ -78,15 +85,16 @@ export class GameScene extends Phaser.Scene {
         const featuresMap = mapFeaturesExtractor.extractFeatures(data, output);
         this.hero = featuresMap.hero;
         this.boxes = featuresMap.boxes;
-        this.target = featuresMap.targets;
+        this.targets = featuresMap.targets;
         this.staticMap = data.staticMap;
+
 
         this.lightSystemManager = new LightSystemManager({scene: this, featuresMap: featuresMap});
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
-        // this.solution = await new SokobanSolver({
-        //     staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
-        //     distanceCalculator: new QuadracticEuclidianDistanceCalculator()
-        // }).solve(data.hero!, data.boxes);
+        /*this.solution = */await new SokobanSolver({
+            staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
+            distanceCalculator: new QuadracticEuclidianDistanceCalculator()
+        });//.solve(data.hero!, data.boxes);
 
         this.allowHeroMovement = true;
     }
@@ -112,6 +120,7 @@ export class GameScene extends Phaser.Scene {
             });
 
             if (movement.mapChanged) {
+                // console.log(this.movementAnalyser?.analyse(movement))
                 this.allowHeroMovement = false;
                 this.lightSystemManager!.startMovementDetection();
                 await this.moveMapFeatures(movement);
@@ -132,11 +141,11 @@ export class GameScene extends Phaser.Scene {
                 await tileBoxToMove!.move(movedBox.direction!);
                 tileBoxToMove!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
 
-                this.target
+                this.targets
                     .find(target => target.getTilePosition().equal(movedBox.currentPosition))
                     ?.cover();
 
-                this.target
+                this.targets
                     .find(target => target.getTilePosition().equal(movedBox.previousPosition))
                     ?.uncover();
             }));

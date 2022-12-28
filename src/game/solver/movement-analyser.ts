@@ -96,30 +96,38 @@ export class MovementAnalyser {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
         if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x] === TileCodes.wall) {
-
             if (direction === Directions.DOWN || direction === Directions.UP) {
-                return this.verticalDeadLock(nextTilePosition);
+                return this.verticalDeadLock(movedBox.currentPosition, nextTilePosition);
             } else {
-                return this.horizontalDeadLock(nextTilePosition);
+                return this.horizontalDeadLock(movedBox.currentPosition, nextTilePosition);
             }
         }
         return false;
     }
 
-    private verticalDeadLock(nextTilePosition: Point): boolean {
+    private verticalDeadLock(tilePosition: Point, nextTilePosition: Point): boolean {
         for (let x = 0; x < this.staticMap.width; ++x) {
-            const tile = this.staticMap.tiles[nextTilePosition.y][x];
-            if (tile !== TileCodes.wall && tile !== TileCodes.empty) {
+            const currentLineTile = this.staticMap.tiles[tilePosition.y][x];
+            if (currentLineTile === TileCodes.target) {
+                return false;
+            }
+            const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x];
+            if (nextLineTile !== TileCodes.wall && nextLineTile !== TileCodes.empty) {
                 return false;
             }
         }
         return true;
     }
 
-    private horizontalDeadLock(nextTilePosition: Point): boolean {
+    private horizontalDeadLock(tilePosition: Point, nextTilePosition: Point): boolean {
         for (let y = 0; y < this.staticMap.height; ++y) {
-            const tile = this.staticMap.tiles[y][nextTilePosition.x];
-            if (tile !== TileCodes.wall && tile !== TileCodes.empty) {
+            const currentColumnTile = this.staticMap.tiles[y][tilePosition.x];
+            if (currentColumnTile === TileCodes.target) {
+                return false;
+            }
+
+            const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x];
+            if (nextColumnTile !== TileCodes.wall && nextColumnTile !== TileCodes.empty) {
                 return false;
             }
         }

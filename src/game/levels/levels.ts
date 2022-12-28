@@ -21,10 +21,12 @@ export const levels: Level[] = [
 12#
 #10 #
 #10 #
-#3 #6 #
 #2 $.      #
+#3  #5 #
 #10 #
 #6 @3 #
+#10 #
+#2 $.      #
 #10 #
 #10 #
 12#
@@ -65,7 +67,7 @@ export const levels: Level[] = [
 # ..    #
 #########
 `,
-        title: 'Small world', //euclidian: 2409610, manhattan: 2511931
+        title: 'Small world', //euclidian: {Steps: 126. Total time: 242789; iterations: 231330}, manhattan: 2511931
     },
     {
         map: `
