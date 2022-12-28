@@ -2,37 +2,51 @@ import {Point} from '@/game/math/point';
 import type {Box} from '@/game/actors/box';
 import {Target} from '@/game/actors/target';
 import type {Hero} from '@/game/actors/hero';
+import type {FeatureMap} from '@/game/tiles/feature-map-extractor';
+
+type AngleRange = {
+    min: {
+        value: number,
+        point: Point
+    },
+    max: {
+        value: number,
+        point: Point
+    }
+};
 
 export class LightSystemManager {
-    private readonly featuresMap: { staticMap: Phaser.GameObjects.Sprite[][]; hero: Hero; boxes: Box[]; targets: Target[] };
+    private readonly featureMap: { staticMap: Phaser.GameObjects.Sprite[][]; hero: Hero; boxes: Box[]; targets: Target[] };
     private readonly shadowCasters: Phaser.GameObjects.Sprite[];
     private readonly graphics: Phaser.GameObjects.Graphics;
     private movementDetectionEnabled: boolean;
     private scene: Phaser.Scene;
-    private targets: Target[];
 
-    constructor(input: { featuresMap: { staticMap: Phaser.GameObjects.Sprite[][]; hero: Hero; boxes: Box[]; targets: Target[], walls: Phaser.GameObjects.Sprite[] }; scene: Phaser.Scene }) {
-        this.featuresMap = input.featuresMap;
+    constructor(input: { featureMap: FeatureMap; scene: Phaser.Scene }) {
+        this.featureMap = input.featureMap;
         this.graphics = input.scene.add.graphics();
         this.scene = input.scene;
-        this.targets = input.featuresMap.targets
 
         input.scene.lights.enable();
         input.scene.lights.enable().setAmbientColor(0x555555);
         this.movementDetectionEnabled = false;
-        this.shadowCasters = [...input.featuresMap.walls as Phaser.GameObjects.Sprite[], ...this.featuresMap.boxes.map(box => box.getSprite(), input.featuresMap.hero)];
+        this.shadowCasters = [
+            // ...input.featureMap.walls as Phaser.GameObjects.Sprite[],
+            ...this.featureMap.boxes.map(box => box.getSprite()),
+            input.featureMap.hero.getSprite()
+        ];
     }
 
     public update() {
-        return
+        // return;
         this.graphics.clear();
         this.graphics.fillStyle(0x9aff26, .15);
-        this.graphics.setBlendMode(Phaser.BlendModes.LUMINOSITY);
-        this.targets.forEach(target => {
-            this.createLightPolygon(target);
-        });
+        this.graphics.setBlendMode(Phaser.BlendModes.NORMAL);
+        const lightPolygons = this.featureMap.targets
+            .filter((_, index) => index === 1)
+            .filter(target => !target.isCovered())
+            .map(target => this.createLightPolygon(target));
         // this.light.getPoint(10)
-
 
         // const mask = this.scene.make.image({
         //     x: this.sprite.x,
@@ -70,50 +84,6 @@ export class LightSystemManager {
         });
     }
 
-    private drawBresenham(start: Point, end: Point): void {
-        const save = start.clone();
-        const current = start.clone();
-        const direction: Point = end.subtract(start);
-        // var dx = Math.abs(x1 - x0);
-        // var sx = -1;
-        // if(x0 < x1){
-        //     var sx = 1
-        // }
-        // var dy = Math.abs(y1 - y0);
-        // var sy = -1;
-        // if(y0 < y1){
-        //     var sy = 1;
-        // }
-        // var err = -dy / 2;
-        // if(dx > dy){
-        //     err = dx / 2;
-        // }
-
-        // const quadracticEuclidianDistanceCalculator = new QuadracticEuclidianDistanceCalculator();
-        // do {
-        //     const dist = quadracticEuclidianDistanceCalculator.distance(current, start);
-        //     if (current.x < 0 || current.y < 0 || current.x >= this.featuresMap.staticMap || y0 >= Dungeon.map_size || Dungeon.map[y0][x0] != 1 || dist > sightRadius / 2) {
-        //         break;
-        //     }
-        //     if (this.visited.indexOf(x0 + "," + y0) == -1) {
-        //         var tile = game.add.sprite(x0 * tileSize, y0 * tileSize, "tile");
-        //         tile.tint = 0xffff00;
-        //         tile.alpha = 1 - dist / (sightRadius / 2);
-        //         this.visited.push(x0 + "," + y0);
-        //         this.lineGroup.add(tile);
-        //     }
-        //     var e2 = err;
-        //     if (e2 > -dx) {
-        //         err -= dy;
-        //         x0 += sx;
-        //     }
-        //     if (e2 < dy) {
-        //         err += dx;
-        //         y0 += sy;
-        //     }
-        // } while (x0 != x1 || y0 != y1);
-    }
-
     public startMovementDetection(): void {
         this.movementDetectionEnabled = true;
     }
@@ -123,86 +93,136 @@ export class LightSystemManager {
     }
 
     private createLightPolygon(target: Target) {
-        let values: any[] = [];
         const targetPosition = target.getPosition();
-        this.shadowCasters
-            .filter(shadowCaster =>
-                shadowCaster.getCenter()
-                    .distance(targetPosition) < Target.radius)
-            .forEach(shadowCaster => {
-                const bottomLeft = shadowCaster.getBottomLeft();
-                const bottomRight = shadowCaster.getBottomRight();
-                const topLeft = shadowCaster.getTopLeft();
-                const topRight = shadowCaster.getTopRight();
-                const corners = [bottomRight, bottomLeft, topRight, topLeft];
-                const reduce = corners.reduce((acc, item) => {
-                    let angle = Phaser.Math.RadToDeg(
-                        Phaser.Math.Angle.Between(
-                            targetPosition.x, targetPosition.y,
-                            item.x, item.y));
-                    angle = (angle + 360) % 360;
-                    if (angle > acc.max.value) {
-                        acc.max.value = angle;
-                        acc.max.point = new Point(item.x, item.y);
-                    }
-                    if (angle < acc.min.value) {
-                        acc.min.value = angle;
-                        acc.min.point = new Point(item.x, item.y);
-                    }
+        const shadowCastedPoints: AngleRange[] = this.shadowCasters
+            .filter(shadowCaster => shadowCaster.getCenter().distance(targetPosition) < Target.radius)
+            .map(shadowCaster => this.getAngleRangeOfShadowCaster(targetPosition, shadowCaster));
+        const combinedCastedRanges = this.combineShadowAngleRanges(shadowCastedPoints);
 
-                    return acc;
-                }, {min: {value: Infinity, point: new Point(0, 0)}, max: {value: -Infinity, point: new Point(0, 0)}});
+        this.drawTriangles(combinedCastedRanges, targetPosition);
+        this.drawArcs(combinedCastedRanges, targetPosition);
+    }
 
-                values.push(reduce);
-
+    private drawTriangles(combinedCastedRanges: AngleRange[], targetPosition: Point) {
+        combinedCastedRanges
+            .forEach(angleRange => {
                 // ---- triangles
+                console.log(`triangle: ${angleRange.min.value} -> ${angleRange.max.value}`);
+
                 this.graphics.beginPath();
+                this.graphics.fillCircle(angleRange.min.point.x, angleRange.min.point.y, 10);
+                this.graphics.fillCircle(angleRange.max.point.x, angleRange.max.point.y, 10);
                 this.graphics.moveTo(targetPosition.x, targetPosition.y);
-                this.graphics.lineTo(reduce.min.point.x, reduce.min.point.y);
-                this.graphics.lineTo(reduce.max.point.x, reduce.max.point.y);
+                this.graphics.lineTo(angleRange.min.point.x, angleRange.min.point.y);
+                this.graphics.lineTo(angleRange.max.point.x, angleRange.max.point.y);
                 this.graphics.lineTo(targetPosition.x, targetPosition.y);
                 this.graphics.fillPath();
                 this.graphics.closePath();
-
             });
-        // return
-        values = values.sort((a, b) => a.min.value - b.min.value);
+    }
 
-        // --- arcos
+    private drawArcs(combinedCastedRanges: AngleRange[], targetPosition: Point) {
         this.graphics.beginPath();
-        this.graphics.moveTo(targetPosition.x, targetPosition.y);
-        this.graphics.arc(targetPosition.x, targetPosition.y, Target.radius,
-            Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(values[0].min.value), false);
-        let maxAngle = values[0].min.value;
-        // console.log(values.length)
-        // console.log(0, values[0].min.value);
-        for (let index = 1; index < values.length; ++index) {
-            let min = values[index - 1].max.value;
-            let max = values[index].min.value;
-            if (min >= max) {
-                const swap = max;
-                max = min;
-                min = swap;
-            }
-            if (max <= maxAngle) {
-                // continue
-            }
-            if (min <= maxAngle) {
-                // min = maxAngle
-                // continue
-            }
+        if (combinedCastedRanges.length <= 0) {
             this.graphics.moveTo(targetPosition.x, targetPosition.y);
             this.graphics.arc(targetPosition.x, targetPosition.y, Target.radius,
-                Phaser.Math.DegToRad(min),
-                Phaser.Math.DegToRad(max), false);
-            maxAngle = max;
-            // console.log(min, max);
+                Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(360));
+            this.graphics.closePath();
+            this.graphics.fillPath();
+            return;
         }
-        this.graphics.moveTo(targetPosition.x, targetPosition.y);
-        this.graphics.arc(targetPosition.x, targetPosition.y, Target.radius,
-            Phaser.Math.DegToRad(maxAngle), Phaser.Math.DegToRad(360), false);
+        for (let i = 0; i < combinedCastedRanges.length - 1; ++i) {
+            this.graphics.moveTo(targetPosition.x, targetPosition.y);
+            this.graphics.arc(targetPosition.x, targetPosition.y, Target.radius,
+                Phaser.Math.DegToRad(combinedCastedRanges[i].max.value - 1), Phaser.Math.DegToRad(combinedCastedRanges[i + 1].min.value + 1));
+            console.log(`arc loop: ${combinedCastedRanges[i].max.value} -> ${combinedCastedRanges[i + 1].min.value}`);
+        }
+        this.drawAdjustmentArc(combinedCastedRanges, targetPosition);
+
         this.graphics.closePath();
         this.graphics.fillPath();
+        return;
+    }
 
+    private drawAdjustmentArc(combinedCastedRanges: AngleRange[], targetPosition: Point) {
+        let adjustmentAngle = 0;
+        const shadowCasterContainsAngleOrigin = combinedCastedRanges
+            .find(range => range.max.value < range.min.value);
+        if (shadowCasterContainsAngleOrigin) {
+            console.log('shadowCasterContainsAngleOrigin');
+            // max = shadowCasterContainsAngleOrigin.adjustmentAngle.value;
+            adjustmentAngle = shadowCasterContainsAngleOrigin.max.value;
+        }
+
+        const initialAdjustmentAngle = combinedCastedRanges[0].min.value;
+        const finalAdjustmentAngle = combinedCastedRanges[combinedCastedRanges.length - 1].max.value - 1;
+        if (shadowCasterContainsAngleOrigin) {
+            if (adjustmentAngle < initialAdjustmentAngle) {
+                this.graphics.moveTo(targetPosition.x, targetPosition.y);
+                this.graphics.arc(targetPosition.x, targetPosition.y, Target.radius,
+                    Phaser.Math.DegToRad(adjustmentAngle - 1), Phaser.Math.DegToRad(initialAdjustmentAngle + 1));
+                console.log(`arc inv-adjs: ${adjustmentAngle} -> ${initialAdjustmentAngle}`);
+            }
+        } else {
+            this.graphics.moveTo(targetPosition.x, targetPosition.y);
+            this.graphics.arc(targetPosition.x, targetPosition.y, Target.radius,
+                Phaser.Math.DegToRad(finalAdjustmentAngle), Phaser.Math.DegToRad(initialAdjustmentAngle + 1));
+            console.log(`arc adjs: ${finalAdjustmentAngle} -> ${initialAdjustmentAngle}`);
+        }
+    }
+
+    private getAngleRangeOfShadowCaster(targetPosition: Point, shadowCaster: Phaser.GameObjects.Sprite): AngleRange {
+        const bottomLeft = shadowCaster.getBottomLeft();
+        const bottomRight = shadowCaster.getBottomRight();
+        const topLeft = shadowCaster.getTopLeft();
+        const topRight = shadowCaster.getTopRight();
+        const corners = [topRight, topLeft, bottomRight, bottomLeft];
+
+        const sortedCorners = corners
+            .map(corner => {
+                const angle = Math.trunc(Phaser.Math.RadToDeg(
+                    Phaser.Math.Angle.Between(
+                        targetPosition.x, targetPosition.y,
+                        corner.x, corner.y)));
+                return {angle: (angle + 360) % 360, point: new Point(corner.x, corner.y)};
+            })
+            .sort((a, b) => a.angle - b.angle);
+
+        let min = sortedCorners[0];
+        let max = sortedCorners[3];
+        if (max.angle - min.angle > 180) {
+            min = sortedCorners[2];
+            max = sortedCorners[1];
+        }
+        return {
+            min: {
+                value: min.angle,
+                point: min.point
+            },
+            max: {
+                value: max.angle,
+                point: max.point
+            }
+        };
+    }
+
+    private combineShadowAngleRanges(shadowCastedPoints: AngleRange[]): AngleRange[] {
+        const result: AngleRange[] = [];
+        const sorted = shadowCastedPoints
+            .sort((a, b) => a.min.value - b.min.value);
+        console.log('precombined: ', sorted.map(a => `${a.min.value} - ${a.max.value}`));
+        for (let index = 0; index < sorted.length; ++index) {
+            if (result.length > 0) {
+                if (result[result.length - 1].max.value > sorted[index].min.value) {
+                    result[result.length - 1].max = sorted[index].max;
+                } else {
+                    result.push(sorted[index]);
+                }
+            } else {
+                result.push(sorted[index]);
+            }
+        }
+        console.log('combined: ', result.map(a => `${a.min.value} - ${a.max.value}`));
+        return result;
     }
 }

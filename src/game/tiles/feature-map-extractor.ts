@@ -11,7 +11,16 @@ import {Target} from '@/game/actors/target';
 const floorDepth = -1000;
 const targetDepth = 0;
 
-export class MapFeaturesExtractor {
+export type FeatureMap = {
+    staticMap: Phaser.GameObjects.Sprite[][];
+    boxes: Box[];
+    walls: Phaser.GameObjects.Sprite[];
+    floors: Phaser.GameObjects.Sprite[];
+    hero: Hero;
+    targets: Target[];
+};
+
+export class FeatureMapExtractor {
     private readonly scale: number;
     private readonly scene: Phaser.Scene;
 
@@ -20,7 +29,7 @@ export class MapFeaturesExtractor {
         this.scale = scale;
     }
 
-    public extractFeatures(map: Mapped, scale: ScaleOutput): { boxes: Box[]; walls: Phaser.GameObjects.Sprite[]; floors: Phaser.GameObjects.Sprite[]; staticMap: Phaser.GameObjects.Sprite[][]; hero: Hero; targets: Target[] } {
+    public extractFeatures(map: Mapped, scale: ScaleOutput): FeatureMap {
         const tiles = map.staticMap.tiles;
         const targets: Target[] = [];
         const hero = this.getHero(map, scale);

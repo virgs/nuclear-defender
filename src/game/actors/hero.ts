@@ -8,7 +8,7 @@ import type {GameActor} from '@/game/actors/game-actor';
 export class Hero implements GameActor {
     private readonly heroAnimator: HeroAnimator;
     private readonly inputMap: Map<Actions, () => boolean>;
-    private readonly sprite?: Phaser.GameObjects.Sprite;
+    private readonly sprite: Phaser.GameObjects.Sprite;
 
     private isMoving: boolean = false;
     private tweens: Phaser.Tweens.TweenManager;
@@ -73,4 +73,7 @@ export class Hero implements GameActor {
         });
     }
 
+    public getSprite(): Phaser.GameObjects.Sprite {
+        return this.sprite;
+    }
 }

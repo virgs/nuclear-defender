@@ -10,7 +10,7 @@ import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import type {MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {MovementCoordinator} from '../solver/movement-coordinator';
-import {MapFeaturesExtractor} from '../tiles/map-features-extractor';
+import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
 import {LightSystemManager} from '@/game/lights/light-system-manager';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
@@ -81,15 +81,15 @@ export class GameScene extends Phaser.Scene {
         configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
         configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
 
-        const mapFeaturesExtractor = new MapFeaturesExtractor(this, output.scale);
-        const featuresMap = mapFeaturesExtractor.extractFeatures(data, output);
-        this.hero = featuresMap.hero;
-        this.boxes = featuresMap.boxes;
-        this.targets = featuresMap.targets;
+        const mapfeatureMapExtractorsExtractor = new FeatureMapExtractor(this, output.scale);
+        const featureMap = mapfeatureMapExtractorsExtractor.extractFeatures(data, output);
+        this.hero = featureMap.hero;
+        this.boxes = featureMap.boxes;
+        this.targets = featureMap.targets;
         this.staticMap = data.staticMap;
 
 
-        this.lightSystemManager = new LightSystemManager({scene: this, featuresMap: featuresMap});
+        this.lightSystemManager = new LightSystemManager({scene: this, featureMap: featureMap});
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
         /*this.solution = */await new SokobanSolver({
             staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
@@ -97,13 +97,14 @@ export class GameScene extends Phaser.Scene {
         });//.solve(data.hero!, data.boxes);
 
         this.allowHeroMovement = true;
+        this.lightSystemManager!.update();
     }
 
     public async update(time: number, delta: number) {
         if (this.levelComplete) {
             return;
         }
-        this.lightSystemManager!.update();
+        // this.lightSystemManager!.update();
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
@@ -149,7 +150,19 @@ export class GameScene extends Phaser.Scene {
                     .find(target => target.getTilePosition().equal(movedBox.previousPosition))
                     ?.uncover();
             }));
-        promises.push(this.hero!.move(movementCoordinatorOutput.hero.direction!));
+
+        const heroPromise = async () => {
+            await this.hero!.move(movementCoordinatorOutput.hero.direction!)
+            this.targets
+                .find(target => target.getTilePosition().equal(movementCoordinatorOutput.hero.currentPosition))
+                ?.cover();
+
+            this.targets
+                .find(target => target.getTilePosition().equal(movementCoordinatorOutput.hero.previousPosition))
+                ?.uncover();
+
+        }
+        promises.push(heroPromise());
         await Promise.all(promises);
         this.allowHeroMovement = true;
     }

@@ -3,7 +3,7 @@ import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
 
 export class Target implements GameActor {
-    private static readonly uncoveredIntensity = .75;
+    private static readonly uncoveredIntensity = .25;
     private static readonly coveredIntensity = .25;
     private static readonly rgb: number = Phaser.Display.Color.HexStringToColor(configuration.colors.highlight).color;
     static readonly radius: number = configuration.world.tileSize.horizontal * 3;
@@ -27,7 +27,7 @@ export class Target implements GameActor {
             Target.rgb, Target.uncoveredIntensity);
 
         const path = new Phaser.Curves.Path();
-        this.pathRadius = new Point(configuration.world.tileSize.horizontal * .05, configuration.world.tileSize.horizontal * .05).multiply(2);
+        this.pathRadius = new Point(configuration.world.tileSize.horizontal * .05, configuration.world.tileSize.horizontal * .05);
         path.add(new Phaser.Curves.Ellipse(this.sprite.x, this.sprite.y,
             this.pathRadius.x, this.pathRadius.y));
 
@@ -68,6 +68,14 @@ export class Target implements GameActor {
 
     public uncover(): void {
         this.covered = false;
+    }
+
+    public isCovered(): boolean {
+        return this.covered;
+    }
+
+    public getSprite(): Phaser.GameObjects.Sprite {
+        return this.sprite;
     }
 
 }
