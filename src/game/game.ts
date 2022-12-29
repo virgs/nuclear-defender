@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import {GameScene} from './scenes/game-scene';
 import {configuration} from './constants/configuration';
 import {NextLevelScene} from './scenes/next-level-scene';
-import {ShadowObjectPlugin} from '@/game/lights/shadow-object-plugin';
 
 const gameViewContainer = document.getElementsByClassName('game-view')[0];
 configuration.gameWidth = gameViewContainer.clientWidth;
@@ -20,9 +19,6 @@ const launch = (containerId: string) => {
         backgroundColor: '#000000',
         // Plugin registration
         plugins: {
-            global: [
-                {key: 'ShadowObjectPlugin', plugin: ShadowObjectPlugin, start: true}
-            ]
         },
         dom: {
             createContainer: true

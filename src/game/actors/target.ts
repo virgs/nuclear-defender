@@ -3,8 +3,8 @@ import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
 
 export class Target implements GameActor {
-    private static readonly uncoveredIntensity = .25;
-    private static readonly coveredIntensity = .25;
+    private static readonly uncoveredIntensity = .5;
+    private static readonly coveredIntensity = .125;
     private static readonly rgb: number = Phaser.Display.Color.HexStringToColor(configuration.colors.highlight).color;
     static readonly radius: number = configuration.world.tileSize.horizontal * 3;
 

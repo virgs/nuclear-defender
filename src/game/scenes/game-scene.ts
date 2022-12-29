@@ -5,18 +5,18 @@ import type {Box} from '@/game/actors/box';
 import type {Hero} from '@/game/actors/hero';
 import {Actions} from '../constants/actions';
 import type {Target} from '@/game/actors/target';
+import type PhaserRaycaster from 'phaser-raycaster';
 import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
-import type {MovementCoordinatorOutput} from '../solver/movement-coordinator';
+import {SokobanSolver} from '@/game/solver/sokoban-solver';
+import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
-import {LightSystemManager} from '@/game/lights/light-system-manager';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {QuadracticEuclidianDistanceCalculator} from '@/game/math/quadractic-euclidian-distance-calculator';
-import {SokobanSolver} from '@/game/solver/sokoban-solver';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -28,7 +28,7 @@ export type GameSceneConfiguration = {
 
 //TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
 export class GameScene extends Phaser.Scene {
-
+    private raycasterPlugin?: PhaserRaycaster;
     private movementCoordinator?: MovementCoordinator;
     private levelComplete?: boolean;
     private allowHeroMovement?: boolean;
@@ -39,7 +39,6 @@ export class GameScene extends Phaser.Scene {
     private targets: Target[] = [];
     private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
     private solution?: SolutionOutput;
-    private lightSystemManager?: LightSystemManager;
     private movementAnalyser?: MovementAnalyser;
 
     constructor() {
@@ -60,7 +59,7 @@ export class GameScene extends Phaser.Scene {
         //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         // });
 
-        this.load.image('blur', configuration.blurMask)
+        this.load.image('blur', configuration.blurMask);
 
         this.load.spritesheet({
             key: configuration.tiles.spriteSheetKey,
@@ -88,23 +87,23 @@ export class GameScene extends Phaser.Scene {
         this.targets = featureMap.targets;
         this.staticMap = data.staticMap;
 
+        this.lights.enable();
+        this.lights.enable().setAmbientColor(0x555555);
 
-        this.lightSystemManager = new LightSystemManager({scene: this, featureMap: featureMap});
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
-        /*this.solution = */await new SokobanSolver({
+        /*this.solution = */
+        await new SokobanSolver({
             staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
             distanceCalculator: new QuadracticEuclidianDistanceCalculator()
         });//.solve(data.hero!, data.boxes);
 
         this.allowHeroMovement = true;
-        this.lightSystemManager!.update();
     }
 
     public async update(time: number, delta: number) {
         if (this.levelComplete) {
             return;
         }
-        // this.lightSystemManager!.update();
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
@@ -123,7 +122,6 @@ export class GameScene extends Phaser.Scene {
             if (movement.mapChanged) {
                 // console.log(this.movementAnalyser?.analyse(movement))
                 this.allowHeroMovement = false;
-                this.lightSystemManager!.startMovementDetection();
                 await this.moveMapFeatures(movement);
                 this.onMovementsComplete();
             }
@@ -142,33 +140,31 @@ export class GameScene extends Phaser.Scene {
                 await tileBoxToMove!.move(movedBox.direction!);
                 tileBoxToMove!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
 
-                this.targets
-                    .find(target => target.getTilePosition().equal(movedBox.currentPosition))
-                    ?.cover();
-
-                this.targets
-                    .find(target => target.getTilePosition().equal(movedBox.previousPosition))
-                    ?.uncover();
+                this.updateTargetCoverSituation(movedBox);
             }));
 
         const heroPromise = async () => {
-            await this.hero!.move(movementCoordinatorOutput.hero.direction!)
-            this.targets
-                .find(target => target.getTilePosition().equal(movementCoordinatorOutput.hero.currentPosition))
-                ?.cover();
+            await this.hero!.move(movementCoordinatorOutput.hero.direction!);
+            this.updateTargetCoverSituation(movementCoordinatorOutput.hero);
 
-            this.targets
-                .find(target => target.getTilePosition().equal(movementCoordinatorOutput.hero.previousPosition))
-                ?.uncover();
-
-        }
+        };
         promises.push(heroPromise());
         await Promise.all(promises);
         this.allowHeroMovement = true;
     }
 
+    private updateTargetCoverSituation(move: Movement) {
+        this.targets
+            .filter(target => !target.isCovered())
+            .find(target => target.getTilePosition().equal(move.currentPosition))?.cover();
+
+        this.targets
+            .filter(target => target.isCovered())
+            .find(target => target.getTilePosition().equal(move.previousPosition))
+            ?.uncover();
+    }
+
     private onMovementsComplete(): void {
-        this.lightSystemManager!.stopMovementDetection();
         this.checkLevelComplete();
     }
 

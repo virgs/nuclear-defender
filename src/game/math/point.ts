@@ -67,6 +67,10 @@ export class Point {
     }
 
     public size(): number {
-        return Math.sqrt(this.x * this.x + this.y + this.y);
+        return Math.sqrt(this.quadractricSize());
+    }
+
+    public quadractricSize(): number {
+        return this.x * this.x + this.y + this.y;
     }
 }
