@@ -49,7 +49,7 @@ export class FeatureMapExtractor {
                     const target = new Target({scene: this.scene, sprite: sprite, tilePosition: position});
                     targets.push(target);
                     if (boxes
-                        .some(box => box.getTilePosition().equal(position))) {
+                        .some(box => box.getTilePosition().isEqualTo(position))) {
                         target.cover();
                     }
 

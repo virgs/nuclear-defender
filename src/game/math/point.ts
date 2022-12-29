@@ -34,8 +34,12 @@ export class Point {
         return new Point(this._x / size, this._y / size);
     }
 
-    public equal(other: Point): boolean {
+    public isEqualTo(other: Point): boolean {
         return this.x === other.x && this.y === other.y;
+    }
+
+    public isDifferentOf(other: Point): boolean {
+        return !this.isEqualTo(other);
     }
 
     public calculateOffset(direction: Directions): Point {

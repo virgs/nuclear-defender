@@ -49,7 +49,7 @@ export class MovementCoordinator {
                 hero.isCurrentlyOnTarget = this.staticMap[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
                 //box moved
                 const movedBox = boxes
-                    .find(box => box.previousPosition.equal(newHeroPosition));
+                    .find(box => box.previousPosition.isEqualTo(newHeroPosition));
                 if (movedBox) {
                     movedBox.direction = heroDirection;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
@@ -90,7 +90,7 @@ export class MovementCoordinator {
         }
 
         if (input.boxes
-            .some(box => box.equal(newHeroPosition))) {
+            .some(box => box.isEqualTo(newHeroPosition))) {
             const heroDirection = mapActionToDirection(input.heroAction)!;
             const afterNextMove = newHeroPosition.calculateOffset(heroDirection);
             const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove);
@@ -98,7 +98,7 @@ export class MovementCoordinator {
                 return false;
             }
             if (input.boxes
-                .find(box => box.equal(afterNextMove))) {
+                .find(box => box.isEqualTo(afterNextMove))) {
                 return false;
             }
         }

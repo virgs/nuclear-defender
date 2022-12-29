@@ -66,7 +66,7 @@ async function playButtonClick() {
   // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
   // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
   //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
-  const solutionOutput = await runSolutionsAlgorithm();
+  // const solutionOutput = await runSolutionsAlgorithm();
 
   const store = Store.getInstance();
   store.currentLevelIndex = data.currentSelectedIndex;

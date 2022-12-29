@@ -9,7 +9,7 @@ import type PhaserRaycaster from 'phaser-raycaster';
 import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
-import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
+import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
@@ -37,7 +37,7 @@ export class GameScene extends Phaser.Scene {
     private boxes: Box[] = [];
     private targets: Target[] = [];
     private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
-    private solution?: SolutionOutput;
+    // private solution?: SolutionOutput;
     private movementAnalyser?: MovementAnalyser;
 
     constructor() {
@@ -73,7 +73,7 @@ export class GameScene extends Phaser.Scene {
 
     public async create(floors: Phaser.GameObjects.Sprite[]) {
         const codedMap: string = Store.getInstance().map;
-        this.solution = Store.getInstance().solution;
+        // this.solution = Store.getInstance().solution;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
         this.movementAnalyser = new MovementAnalyser({staticMap: data.staticMap, distanceCalculator: new QuadracticEuclidianDistanceCalculator()});
@@ -102,9 +102,9 @@ export class GameScene extends Phaser.Scene {
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
-            if (this.solution?.actions?.length! > 0) {
-                heroAction = this.solution?.actions?.shift()!;
-            }
+            // if (this.solution?.actions?.length! > 0) {
+            //     heroAction = this.solution?.actions?.shift()!;
+            // }
             this.playerMovesSoFar!.push(heroAction);
 
             const movement = this.movementCoordinator!.update({
@@ -127,10 +127,10 @@ export class GameScene extends Phaser.Scene {
         const promises: Promise<any>[] = [];
         promises.push(...movementCoordinatorOutput.boxes
             //TODO filter by box id
-            .filter(box => !box.previousPosition.equal(box.currentPosition))
+            .filter(box => !box.previousPosition.isEqualTo(box.currentPosition))
             .map(async movedBox => {
                 const tileBoxToMove = this.boxes
-                    .find(tileBox => movedBox.previousPosition.equal(tileBox.getTilePosition()));
+                    .find(tileBox => movedBox.previousPosition.isEqualTo(tileBox.getTilePosition()));
 
                 await tileBoxToMove!.move(movedBox.direction!);
                 tileBoxToMove!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
@@ -151,11 +151,11 @@ export class GameScene extends Phaser.Scene {
     private updateTargetCoverSituation(move: Movement) {
         this.targets
             .filter(target => !target.isCovered())
-            .find(target => target.getTilePosition().equal(move.currentPosition))?.cover();
+            .find(target => target.getTilePosition().isEqualTo(move.currentPosition))?.cover();
 
         this.targets
             .filter(target => target.isCovered())
-            .find(target => target.getTilePosition().equal(move.previousPosition))
+            .find(target => target.getTilePosition().isEqualTo(move.previousPosition))
             ?.uncover();
     }
 
