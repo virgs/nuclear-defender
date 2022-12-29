@@ -1,11 +1,20 @@
 import {TileCodes} from './tile-codes';
 import {Point} from '@/game/math/point';
 
-export type Mapped = { staticMap: { width: number, height: number, tiles: TileCodes[][] }, hero?: Point, boxes: Point[] };
+export type StaticMap = {
+    width: number,
+    height: number,
+    tiles: TileCodes[][]
+};
+export type Mapped = {
+    staticMap: StaticMap,
+    hero: Point,
+    boxes: Point[]
+};
 
 export class StandardSokobanAnnotationMapper {
     private hero?: Point = undefined;
-    private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
+    private staticMap?: StaticMap;
     private boxes: Point[] = [];
 
     public map(encodedLevel: string): Mapped {
@@ -30,7 +39,7 @@ export class StandardSokobanAnnotationMapper {
         return {
             staticMap: this.staticMap,
             boxes: this.boxes!,
-            hero: this.hero
+            hero: this.hero!
         };
     }
 
@@ -79,16 +88,16 @@ export class StandardSokobanAnnotationMapper {
                 return TileCodes.wall;
             case '.':
                 return TileCodes.target;
-            case '$':
+            case '$': //box
                 this.boxes.push(point);
                 return TileCodes.floor;
-            case '*':
+            case '*': //box on target
                 this.boxes.push(point);
                 return TileCodes.target;
-            case '@':
+            case '@': //player
                 this.hero = point;
                 return TileCodes.floor;
-            case '+':
+            case '+': //player on target
                 this.hero = point;
                 return TileCodes.target;
             default:

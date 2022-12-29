@@ -1,7 +1,8 @@
 import {Point} from '@/game/math/point';
 import {TileCodes} from '@/game/tiles/tile-codes';
-import type {Movement, MovementCoordinatorOutput} from './movement-coordinator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {Movement, MovementCoordinatorOutput} from './movement-coordinator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
 export type MovementAnalysis = {
@@ -25,10 +26,10 @@ type SegmentAnalysis = { differentBoxes: number; empties: number; targets: numbe
 export class MovementAnalyser {
     private readonly targets: Point[];
     private readonly distanceCalculator: DistanceCalculator;
-    private readonly staticMap: { width: number; height: number; tiles: TileCodes[][] };
+    private readonly staticMap: StaticMap;
 
     public constructor(data: {
-        staticMap: { width: number; height: number; tiles: TileCodes[][] },
+        staticMap: StaticMap,
         distanceCalculator: DistanceCalculator
     }) {
         this.staticMap = data.staticMap;
@@ -94,6 +95,7 @@ export class MovementAnalyser {
             }, 0);
     }
 
+    //TODO create deadlock detection class
     private isDeadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
@@ -166,7 +168,7 @@ export class MovementAnalyser {
         }
         const differentBoxes = boxes
             .filter(box => box.currentPosition.y === tilePosition.y)
-            .reduce((acc, item) => acc + 1, 0);
+            .reduce((acc, _) => acc + 1, 0);
         return {empties, targets, differentBoxes};
     }
 
@@ -191,7 +193,7 @@ export class MovementAnalyser {
 
         const differentBoxes = boxes
             .filter(box => box.currentPosition.x === tilePosition.x)
-            .reduce((acc, item) => acc + 1, 0);
+            .reduce((acc, _) => acc + 1, 0);
         return {empties, targets, differentBoxes};
     }
 }

@@ -2,6 +2,7 @@ import type {Point} from '../math/point';
 import {TileCodes} from '../tiles/tile-codes';
 import type {Directions} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
 export type Movement = {
     previousPosition: Point,
@@ -19,19 +20,15 @@ export type MovementCoordinatorOutput = {
 export type MovementCoordinatorInput = {
     boxes: Point[]; //TODO add id to every box
     heroAction: Actions;
-    staticMap: {
-        width: number;
-        height: number;
-        tiles: TileCodes[][]
-    };
+    staticMap: StaticMap;
     hero: Point;
 };
 
 export class MovementCoordinator {
-    private readonly staticMap: TileCodes[][];
+    private readonly staticMap: StaticMap;
 
-    constructor(data: { width: number; height: number; tiles: TileCodes[][] }) {
-        this.staticMap = data.tiles;
+    constructor(data: StaticMap) {
+        this.staticMap = data;
     }
 
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
@@ -46,14 +43,14 @@ export class MovementCoordinator {
             if (this.canHeroMove(newHeroPosition, input)) {
                 mapChanged = true;
                 hero.currentPosition = newHeroPosition;
-                hero.isCurrentlyOnTarget = this.staticMap[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
+                hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
                 //box moved
                 const movedBox = boxes
                     .find(box => box.previousPosition.isEqualTo(newHeroPosition));
                 if (movedBox) {
                     movedBox.direction = heroDirection;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
-                    movedBox.isCurrentlyOnTarget = this.staticMap[movedBox.currentPosition.y][movedBox.currentPosition.x] === TileCodes.target;
+                    movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x] === TileCodes.target;
                 }
             }
         }
@@ -66,12 +63,13 @@ export class MovementCoordinator {
     }
 
     private initializeBoxes(input: MovementCoordinatorInput) {
-        return input.boxes.map(box => ({
-            previousPosition: box,
-            currentPosition: box,
-            isCurrentlyOnTarget: false,
-            direction: undefined
-        }));
+        return input.boxes
+            .map(box => ({
+                previousPosition: box,
+                currentPosition: box,
+                isCurrentlyOnTarget: false,
+                direction: undefined
+            }));
     }
 
     private initializeHero(input: MovementCoordinatorInput) {
@@ -107,11 +105,11 @@ export class MovementCoordinator {
     }
 
     private getFeatureAtPosition(position: Point): TileCodes | undefined {
-        if (position.x >= this.staticMap[0].length || position.y >= this.staticMap.length
+        if (position.x >= this.staticMap.width || position.y >= this.staticMap.height
             || position.x < 0 || position.y < 0) {
             return undefined;
         }
-        return this.staticMap[position.y][position.x];
+        return this.staticMap.tiles[position.y][position.x];
     }
 
 }

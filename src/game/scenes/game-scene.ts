@@ -5,13 +5,12 @@ import type {Box} from '@/game/actors/box';
 import type {Hero} from '@/game/actors/hero';
 import {Actions} from '../constants/actions';
 import type {Target} from '@/game/actors/target';
-import type PhaserRaycaster from 'phaser-raycaster';
-import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
@@ -27,7 +26,6 @@ export type GameSceneConfiguration = {
 
 //TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
 export class GameScene extends Phaser.Scene {
-    private raycasterPlugin?: PhaserRaycaster;
     private movementCoordinator?: MovementCoordinator;
     private levelComplete?: boolean;
     private allowHeroMovement?: boolean;
@@ -36,8 +34,8 @@ export class GameScene extends Phaser.Scene {
     private hero?: Hero;
     private boxes: Box[] = [];
     private targets: Target[] = [];
-    private staticMap?: { width: number, height: number, tiles: TileCodes[][] };
-    // private solution?: SolutionOutput;
+    private staticMap?: StaticMap;
+    private solution?: SolutionOutput;
     private movementAnalyser?: MovementAnalyser;
 
     constructor() {
@@ -73,7 +71,7 @@ export class GameScene extends Phaser.Scene {
 
     public async create(floors: Phaser.GameObjects.Sprite[]) {
         const codedMap: string = Store.getInstance().map;
-        // this.solution = Store.getInstance().solution;
+        this.solution = Store.getInstance().solution;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
         this.movementAnalyser = new MovementAnalyser({staticMap: data.staticMap, distanceCalculator: new QuadracticEuclidianDistanceCalculator()});
@@ -102,9 +100,9 @@ export class GameScene extends Phaser.Scene {
 
         if (this.allowHeroMovement) {
             let heroAction: Actions = this.hero!.checkAction();
-            // if (this.solution?.actions?.length! > 0) {
-            //     heroAction = this.solution?.actions?.shift()!;
-            // }
+            if (this.solution?.actions?.length! > 0) {
+                heroAction = this.solution?.actions?.shift()!;
+            }
             this.playerMovesSoFar!.push(heroAction);
 
             const movement = this.movementCoordinator!.update({

@@ -3,8 +3,9 @@ import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
 import {TileCodes} from '../tiles/tile-codes';
 import {MovementCoordinator} from './movement-coordinator';
-import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 
 type Solution = {
     actions: Actions[],
@@ -24,23 +25,22 @@ export type SolutionOutput = {
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
 export class SokobanSolver {
 
-    private static SmartActions = Object.keys(Actions)
+    private static actionsList = Object.keys(Actions)
         .filter(key => !isNaN(Number(key)))
         .map(key => Number(key) as Actions)
-        .filter(action => action !== Actions.STAND);
 
     private movementCoordinator: MovementCoordinator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.score - b.score);
     private candidatesVisitedHash: { [hash: string]: boolean } = {};
-    private readonly staticMap: { width: number; height: number; tiles: TileCodes[][] };
+    private readonly staticMap: StaticMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
 
     public constructor(input: {
-        staticMap: { width: number; height: number; tiles: TileCodes[][] },
+        staticMap: StaticMap,
         cpu: { sleepForInMs: number, sleepingCycle: number }
         distanceCalculator: DistanceCalculator
     }) {
@@ -115,7 +115,7 @@ export class SokobanSolver {
     }
 
     private applyMoreActions(candidate: Solution) {
-        SokobanSolver.SmartActions
+        SokobanSolver.actionsList
             .forEach((action: Actions) => {
                 const afterAction = this.movementCoordinator.update({
                     boxes: candidate.boxes,

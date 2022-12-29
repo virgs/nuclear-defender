@@ -41,7 +41,6 @@ export class Target implements GameActor {
             onUpdate: () => {
                 const intensity = Math.random() * .25;
                 if (this.covered) {
-                    //TODO make it decrease gradually
                     this.light.intensity = Target.coveredIntensity + intensity;
                 } else {
                     this.light.intensity = Target.uncoveredIntensity + intensity;

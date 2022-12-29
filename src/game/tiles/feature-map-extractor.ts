@@ -12,7 +12,7 @@ const floorDepth = -1000;
 const targetDepth = 0;
 
 export type FeatureMap = {
-    staticMap: Phaser.GameObjects.Sprite[][];
+    // staticMap: Phaser.GameObjects.Sprite[][];
     boxes: Box[];
     walls: Phaser.GameObjects.Sprite[];
     floors: Phaser.GameObjects.Sprite[];
@@ -37,33 +37,34 @@ export class FeatureMapExtractor {
         const walls: Phaser.GameObjects.Sprite[] = [];
         const floors: Phaser.GameObjects.Sprite[] = [];
 
-        const staticMap = tiles.map((line, y) => line
-            .map((tile: TileCodes, x: number) => {
-                const position = new Point(x, y);
-                const sprite = this.createSprite(position, tile, scale.scale);
-                if (tile === TileCodes.floor) {
-                    sprite.setDepth(floorDepth);
-                    floors.push(sprite);
-                    //needed because target is not dynamic like a box (that creates its floor at the annotation extractor)
-                } else if (tile === TileCodes.target) {
-                    const target = new Target({scene: this.scene, sprite: sprite, tilePosition: position});
-                    targets.push(target);
-                    if (boxes
-                        .some(box => box.getTilePosition().isEqualTo(position))) {
-                        target.cover();
-                    }
+        tiles
+            .map((line, y) => line
+                .map((tile: TileCodes, x: number) => {
+                    const position = new Point(x, y);
+                    const sprite = this.createSprite(position, tile, scale.scale);
+                    if (tile === TileCodes.floor) {
+                        sprite.setDepth(floorDepth);
+                        floors.push(sprite);
+                        //needed because target is not dynamic like a box (that creates its floor at the annotation extractor)
+                    } else if (tile === TileCodes.target) {
+                        const target = new Target({scene: this.scene, sprite: sprite, tilePosition: position});
+                        targets.push(target);
+                        if (boxes
+                            .some(box => box.getTilePosition().isEqualTo(position))) {
+                            target.cover();
+                        }
 
-                    const floorBehind = this.createSprite(position, TileCodes.floor, scale.scale);
-                    floorBehind.setDepth(floorDepth);
-                    floors.push(floorBehind);
-                    sprite.setDepth(targetDepth);
-                } else if (tile === TileCodes.wall) {
-                    walls.push(sprite);
-                }
-                return sprite;
-            }));
+                        const floorBehind = this.createSprite(position, TileCodes.floor, scale.scale);
+                        floorBehind.setDepth(floorDepth);
+                        floors.push(floorBehind);
+                        sprite.setDepth(targetDepth);
+                    } else if (tile === TileCodes.wall) {
+                        walls.push(sprite);
+                    }
+                    return sprite;
+                }));
         return {
-            staticMap: staticMap,
+            // staticMap: staticMap,
             targets: targets,
             hero: hero,
             walls: walls,
