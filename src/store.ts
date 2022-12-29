@@ -1,4 +1,5 @@
 import type {Actions} from '@/game/constants/actions';
+import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 
 export class Store {
     private _movesCode?: Actions[] = [];
@@ -6,6 +7,7 @@ export class Store {
     private _currentLevelIndex: number = -1;
     private _bestMoves: number[] = [];
     private _router: any;
+    private _solution?: SolutionOutput;
 
     private static _instance: Store = new Store();
 
@@ -54,6 +56,14 @@ export class Store {
 
     set router(value: any) {
         this._router = value;
+    }
+
+    get solution(): SolutionOutput {
+        return this._solution!;
+    }
+
+    set solution(value: SolutionOutput) {
+        this._solution = value;
     }
 
     static get instance(): Store {

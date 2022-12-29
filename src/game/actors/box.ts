@@ -59,4 +59,8 @@ export class Box implements GameActor {
         });
 
     }
+
+    public getTileCode(): TileCodes {
+        return TileCodes.box;
+    }
 }

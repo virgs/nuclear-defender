@@ -1,6 +1,7 @@
 import {Point} from '@/game/math/point';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
+import {TileCodes} from '@/game/tiles/tile-codes';
 
 export class Target implements GameActor {
     private static readonly uncoveredIntensity = .5;
@@ -76,6 +77,10 @@ export class Target implements GameActor {
 
     public getSprite(): Phaser.GameObjects.Sprite {
         return this.sprite;
+    }
+
+    public getTileCode(): TileCodes {
+        return TileCodes.target;
     }
 
 }

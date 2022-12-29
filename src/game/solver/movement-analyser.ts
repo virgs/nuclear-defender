@@ -7,8 +7,6 @@ import {Directions} from '@/game/constants/directions';
 export type MovementAnalysis = {
     events: MovementEvents[],
     boxesMoved: Movement[],
-    boxesMovedOntoTarget: Movement[],
-    boxesMovedOutOfTarget: Movement[],
     shortestDistanceFromEveryBoxToTheClosestTarget: number,
     isDeadLocked: boolean
 }
@@ -17,8 +15,12 @@ export enum MovementEvents {
     HERO_MOVED,
     BOX_MOVED,
     HERO_MOVED_BOX_ONTO_TARGET,
-    HERO_MOVED_BOX_OUT_OF_TARGET
+    HERO_MOVED_BOX_OUT_OF_TARGET,
+    BOX_MOVED_ONTO_TARGET,
+    BOX_MOVED_OUT_OF_TARGET
 }
+
+type SegmentAnalysis = { differentBoxes: number; empties: number; targets: number };
 
 export class MovementAnalyser {
     private readonly targets: Point[];
@@ -44,7 +46,7 @@ export class MovementAnalyser {
     public analyse(movement: MovementCoordinatorOutput): MovementAnalysis {
         const events = this.checkEvents(movement);
         let isDeadLocked = events.boxesMoved
-            .some(movedBox => this.isDeadLocked(movedBox));
+            .some(movedBox => this.isDeadLocked(movedBox, movement.boxes));
         return {
             shortestDistanceFromEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestTarget(movement),
             ...events,
@@ -63,21 +65,24 @@ export class MovementAnalyser {
         boxesMoved
             .forEach(_ => events.push(MovementEvents.BOX_MOVED));
 
-        const boxesMovedOntoTarget = boxesMoved
+        boxesMoved
+            .filter(box => box.isCurrentlyOnTarget)
+            .forEach(_ => events.push(MovementEvents.BOX_MOVED_ONTO_TARGET));
+        boxesMoved
+            .filter(box => !box.isCurrentlyOnTarget && movement.hero.isCurrentlyOnTarget)
+            .forEach(_ => events.push(MovementEvents.BOX_MOVED_OUT_OF_TARGET));
+
+        boxesMoved
             .filter(box => movement.hero.currentPosition.equal(box.previousPosition) &&
-                box.isCurrentlyOnTarget &&
-                movement.hero.direction === box.direction);
-        if (boxesMovedOntoTarget.length > 0) {
-            events.push(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET);
-        }
-        const boxesMovedOutOfTarget = boxesMoved
-            .filter(box => movement.hero.currentPosition.equal(box.previousPosition) &&
-                !box.isCurrentlyOnTarget && movement.hero.isCurrentlyOnTarget &&
-                movement.hero.direction === box.direction);
-        if (boxesMovedOutOfTarget) {
-            events.push(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET);
-        }
-        return {events, boxesMoved, boxesMovedOntoTarget, boxesMovedOutOfTarget};
+                movement.hero.direction === box.direction)
+            .find(box => {
+                if (!box.isCurrentlyOnTarget && movement.hero.isCurrentlyOnTarget) {
+                    events.push(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET);
+                } else if (box.isCurrentlyOnTarget) {
+                    events.push(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET);
+                }
+            });
+        return {events, boxesMoved};
     }
 
     private sumOfEveryBoxToTheClosestTarget(movement: MovementCoordinatorOutput): number {
@@ -89,48 +94,67 @@ export class MovementAnalyser {
             }, 0);
     }
 
-    private isDeadLocked(movedBox: Movement): boolean {
-        if (movedBox.isCurrentlyOnTarget) {
-            return false;
-        }
+    private isDeadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
         if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x] === TileCodes.wall) {
+            let segment: SegmentAnalysis;
             if (direction === Directions.DOWN || direction === Directions.UP) {
-                return this.verticalDeadLock(movedBox.currentPosition, nextTilePosition);
+                segment = this.verifyLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
             } else {
-                return this.horizontalDeadLock(movedBox.currentPosition, nextTilePosition);
+                segment = this.horizontalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
             }
+            // console.log(segment);
+            if (segment.empties > 2) {
+                // console.log('there is a way to pull it back');
+                return false;
+            } else if (segment.differentBoxes <= segment.targets) {
+                // console.log('there are available targets in the segment');
+                return false;
+            }
+            // console.log('deadlocked');
+            return true;
         }
         return false;
     }
 
-    private verticalDeadLock(tilePosition: Point, nextTilePosition: Point): boolean {
+    private verifyLineSegment(tilePosition: Point, nextTilePosition: Point, boxes: Movement[]): SegmentAnalysis {
+        let empties = 0;
+        let targets = 0;
         for (let x = 0; x < this.staticMap.width; ++x) {
             const currentLineTile = this.staticMap.tiles[tilePosition.y][x];
             if (currentLineTile === TileCodes.target) {
-                return false;
+                ++targets;
             }
             const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x];
             if (nextLineTile !== TileCodes.wall && nextLineTile !== TileCodes.empty) {
-                return false;
+                ++empties;
             }
         }
-        return true;
+        const differentBoxes = boxes
+            .filter(box => box.currentPosition.y === tilePosition.y)
+            .reduce((acc, item) => acc + 1, 0);
+        return {empties, targets, differentBoxes};
     }
 
-    private horizontalDeadLock(tilePosition: Point, nextTilePosition: Point): boolean {
+    private horizontalLineSegment(tilePosition: Point, nextTilePosition: Point, boxes: Movement[]): SegmentAnalysis {
+        let empties = 0;
+        let targets = 0;
         for (let y = 0; y < this.staticMap.height; ++y) {
             const currentColumnTile = this.staticMap.tiles[y][tilePosition.x];
             if (currentColumnTile === TileCodes.target) {
-                return false;
+                ++targets;
             }
 
             const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x];
             if (nextColumnTile !== TileCodes.wall && nextColumnTile !== TileCodes.empty) {
-                return false;
+                ++empties;
             }
         }
-        return true;
+
+        const differentBoxes = boxes
+            .filter(box => box.currentPosition.x === tilePosition.x)
+            .reduce((acc, item) => acc + 1, 0);
+        return {empties, targets, differentBoxes};
     }
 }

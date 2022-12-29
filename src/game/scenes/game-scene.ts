@@ -9,13 +9,12 @@ import type PhaserRaycaster from 'phaser-raycaster';
 import type {TileCodes} from '@/game/tiles/tile-codes';
 import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
-import {SokobanSolver} from '@/game/solver/sokoban-solver';
-import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
+import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {QuadracticEuclidianDistanceCalculator} from '@/game/math/quadractic-euclidian-distance-calculator';
 
 export type GameSceneConfiguration = {
@@ -74,6 +73,7 @@ export class GameScene extends Phaser.Scene {
 
     public async create(floors: Phaser.GameObjects.Sprite[]) {
         const codedMap: string = Store.getInstance().map;
+        this.solution = Store.getInstance().solution;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
         this.movementAnalyser = new MovementAnalyser({staticMap: data.staticMap, distanceCalculator: new QuadracticEuclidianDistanceCalculator()});
@@ -91,11 +91,6 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable().setAmbientColor(0x555555);
 
         this.movementCoordinator = new MovementCoordinator(data.staticMap);
-        /*this.solution = */
-        await new SokobanSolver({
-            staticMap: data.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
-            distanceCalculator: new QuadracticEuclidianDistanceCalculator()
-        });//.solve(data.hero!, data.boxes);
 
         this.allowHeroMovement = true;
     }
@@ -120,7 +115,7 @@ export class GameScene extends Phaser.Scene {
             });
 
             if (movement.mapChanged) {
-                // console.log(this.movementAnalyser?.analyse(movement))
+                this.movementAnalyser?.analyse(movement)
                 this.allowHeroMovement = false;
                 await this.moveMapFeatures(movement);
                 this.onMovementsComplete();

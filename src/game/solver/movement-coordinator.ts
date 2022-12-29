@@ -43,7 +43,7 @@ export class MovementCoordinator {
             hero.direction = heroDirection;
 
             const newHeroPosition = input.hero.calculateOffset(heroDirection);
-            if (this.willPlayerMove(newHeroPosition, input)) {
+            if (this.canHeroMove(newHeroPosition, input)) {
                 mapChanged = true;
                 hero.currentPosition = newHeroPosition;
                 hero.isCurrentlyOnTarget = this.staticMap[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
@@ -83,15 +83,14 @@ export class MovementCoordinator {
         };
     }
 
-    private willPlayerMove(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
+    private canHeroMove(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
         const featureAhead = this.getFeatureAtPosition(newHeroPosition);
         if (featureAhead === undefined || featureAhead === TileCodes.wall) {
             return false;
         }
 
-        const boxAhead = input.boxes
-            .find(box => box.equal(newHeroPosition));
-        if (boxAhead) {
+        if (input.boxes
+            .some(box => box.equal(newHeroPosition))) {
             const heroDirection = mapActionToDirection(input.heroAction)!;
             const afterNextMove = newHeroPosition.calculateOffset(heroDirection);
             const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove);

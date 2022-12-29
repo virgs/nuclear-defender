@@ -4,7 +4,6 @@ import {Actions} from '../constants/actions';
 import {TileCodes} from '../tiles/tile-codes';
 import {MovementCoordinator} from './movement-coordinator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
-import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 
 type Solution = {
@@ -28,7 +27,7 @@ export class SokobanSolver {
     private static SmartActions = Object.keys(Actions)
         .filter(key => !isNaN(Number(key)))
         .map(key => Number(key) as Actions)
-        .filter(action => action !== Actions.STAND)
+        .filter(action => action !== Actions.STAND);
 
     private movementCoordinator: MovementCoordinator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
@@ -64,14 +63,11 @@ export class SokobanSolver {
     public async solve(hero: Point, boxes: Point[]): Promise<SolutionOutput> {
         const startTime = new Date().getTime();
         const {actions, iterations} = await this.startAlgorithm(hero, boxes);
-        const solutionOutput: SolutionOutput = {
+        return {
             actions: actions,
             iterations: iterations,
             totalTime: new Date().getTime() - startTime
         };
-
-        console.log('solution found. Steps: ' + actions?.length + '. Total time: ' + solutionOutput.totalTime + '; iterations: ' + solutionOutput.iterations);
-        return solutionOutput;
     }
 
     private async startAlgorithm(hero: Point, boxes: Point[]) {

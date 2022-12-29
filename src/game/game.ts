@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import {GameScene} from './scenes/game-scene';
 import {configuration} from './constants/configuration';
-import {NextLevelScene} from './scenes/next-level-scene';
 
 const gameViewContainer = document.getElementsByClassName('game-view')[0];
 configuration.gameWidth = gameViewContainer.clientWidth;
@@ -23,7 +22,7 @@ const launch = (containerId: string) => {
         dom: {
             createContainer: true
         },
-        scene: [GameScene, NextLevelScene]
+        scene: [GameScene]
     });
 };
 
