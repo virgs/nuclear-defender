@@ -19,9 +19,9 @@ export const levels: Level[] = [
     {
         map: `
 12#
+#5#.5#
 #10 #
 #4  $    #
-#  $       #
 #  @.      #
 #6   $ #
 #10 #

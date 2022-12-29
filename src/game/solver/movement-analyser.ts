@@ -160,7 +160,7 @@ export class MovementAnalyser {
                 ++targets;
             }
             const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x];
-            if (nextLineTile !== TileCodes.wall && nextLineTile !== TileCodes.empty) {
+            if (nextLineTile !== TileCodes.wall) {
                 ++empties;
             }
         }
@@ -184,7 +184,7 @@ export class MovementAnalyser {
             }
 
             const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x];
-            if (nextColumnTile !== TileCodes.wall && nextColumnTile !== TileCodes.empty) {
+            if (nextColumnTile !== TileCodes.wall) {
                 ++empties;
             }
         }
