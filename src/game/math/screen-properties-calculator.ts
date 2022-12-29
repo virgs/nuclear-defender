@@ -1,4 +1,4 @@
-import type {TileCodes} from '@/game/tiles/tile-codes';
+import type {Tiles} from '@/game/tiles/tiles';
 import {configuration} from '@/game/constants/configuration';
 import {Point} from '@/game/math/point';
 
@@ -9,7 +9,7 @@ const scaleLimits = {
 };
 
 export class ScreenPropertiesCalculator {
-    public calculate(data: { width: number; height: number; tiles: TileCodes[][] }): ScaleOutput {
+    public calculate(data: { width: number; height: number; tiles: Tiles[][] }): ScaleOutput {
         const map = {
             width: data.width * configuration.tiles.horizontalSize,
             height: data.height * configuration.tiles.verticalSize * configuration.tiles.verticalPerspective

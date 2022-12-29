@@ -69,10 +69,11 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    public async create(floors: Phaser.GameObjects.Sprite[]) {
+    public async create() {
         const codedMap: string = Store.getInstance().map;
         this.solution = Store.getInstance().solution;
         const data = new StandardSokobanAnnotationMapper().map(codedMap);
+        console.log(data.staticMap)
         const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
         this.movementAnalyser = new MovementAnalyser({staticMap: data.staticMap, distanceCalculator: new QuadracticEuclidianDistanceCalculator()});
         configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);

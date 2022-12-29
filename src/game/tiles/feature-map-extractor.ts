@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import {Box} from '@/game/actors/box';
-import {TileCodes} from './tile-codes';
+import {Tiles} from './tiles';
 import {Point} from '@/game/math/point';
 import {Hero} from '@/game/actors/hero';
 import {configuration} from '../constants/configuration';
@@ -39,14 +39,14 @@ export class FeatureMapExtractor {
 
         tiles
             .map((line, y) => line
-                .map((tile: TileCodes, x: number) => {
+                .map((tile: Tiles, x: number) => {
                     const position = new Point(x, y);
                     const sprite = this.createSprite(position, tile, scale.scale);
-                    if (tile === TileCodes.floor) {
+                    if (tile === Tiles.floor) {
                         sprite.setDepth(floorDepth);
                         floors.push(sprite);
                         //needed because target is not dynamic like a box (that creates its floor at the annotation extractor)
-                    } else if (tile === TileCodes.target) {
+                    } else if (tile === Tiles.target) {
                         const target = new Target({scene: this.scene, sprite: sprite, tilePosition: position});
                         targets.push(target);
                         if (boxes
@@ -54,11 +54,11 @@ export class FeatureMapExtractor {
                             target.cover();
                         }
 
-                        const floorBehind = this.createSprite(position, TileCodes.floor, scale.scale);
+                        const floorBehind = this.createSprite(position, Tiles.floor, scale.scale);
                         floorBehind.setDepth(floorDepth);
                         floors.push(floorBehind);
                         sprite.setDepth(targetDepth);
-                    } else if (tile === TileCodes.wall) {
+                    } else if (tile === Tiles.wall) {
                         walls.push(sprite);
                     }
                     return sprite;
@@ -75,20 +75,20 @@ export class FeatureMapExtractor {
     }
 
     private getHero(map: Mapped, scale: ScaleOutput) {
-        return new Hero({scene: this.scene, sprite: this.createSprite(map.hero!, TileCodes.hero, scale.scale), tilePosition: map.hero!});
+        return new Hero({scene: this.scene, sprite: this.createSprite(map.hero!, Tiles.hero, scale.scale), tilePosition: map.hero!});
     }
 
-    private getBoxes(map: Mapped, scale: ScaleOutput, tiles: TileCodes[][]) {
+    private getBoxes(map: Mapped, scale: ScaleOutput, tiles: Tiles[][]) {
         return map.boxes
             .map(box => {
                 //TODO add an id to each box
-                const boxActor = new Box({scene: this.scene, sprite: this.createSprite(box, TileCodes.box, scale.scale), tilePosition: box});
-                boxActor.setIsOnTarget(tiles[box.y][box.x] === TileCodes.target);
+                const boxActor = new Box({scene: this.scene, sprite: this.createSprite(box, Tiles.box, scale.scale), tilePosition: box});
+                boxActor.setIsOnTarget(tiles[box.y][box.x] === Tiles.target);
                 return boxActor;
             });
     }
 
-    private createSprite(point: Point, tile: TileCodes, scale: number): Phaser.GameObjects.Sprite {
+    private createSprite(point: Point, tile: Tiles, scale: number): Phaser.GameObjects.Sprite {
         const sprite = this.scene.add.sprite((point.x + 1) * configuration.world.tileSize.horizontal,
             (point.y + 1) * configuration.world.tileSize.vertical, configuration.tiles.spriteSheetKey, tile);
         sprite.scale = scale;

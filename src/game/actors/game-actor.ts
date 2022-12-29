@@ -1,10 +1,10 @@
 import type {Point} from '@/game/math/point';
-import type {TileCodes} from '@/game/tiles/tile-codes';
+import type {Tiles} from '@/game/tiles/tiles';
 
 export interface GameActor {
     getTilePosition(): Point;
 
     getSprite(): Phaser.GameObjects.Sprite;
 
-    getTileCode(): TileCodes;
+    getTileCode(): Tiles;
 }

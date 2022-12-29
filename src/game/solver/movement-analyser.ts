@@ -1,5 +1,5 @@
 import {Point} from '@/game/math/point';
-import {TileCodes} from '@/game/tiles/tile-codes';
+import {Tiles} from '@/game/tiles/tiles';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
 import type {Movement, MovementCoordinatorOutput} from './movement-coordinator';
@@ -37,7 +37,7 @@ export class MovementAnalyser {
         this.targets = [];
         for (let y = 0; y < data.staticMap.height; ++y) {
             for (let x = 0; x < data.staticMap.width; ++x) {
-                if (data.staticMap.tiles[y][x] === TileCodes.target) {
+                if (data.staticMap.tiles[y][x] === Tiles.target) {
                     this.targets.push(new Point(x, y));
                 }
             }
@@ -99,7 +99,7 @@ export class MovementAnalyser {
     private isDeadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
-        if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x] === TileCodes.wall) {
+        if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x] === Tiles.wall) {
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
                 return true;
             }
@@ -138,7 +138,7 @@ export class MovementAnalyser {
         const counterClowiseTilePosition = movedBox.currentPosition.calculateOffset(otherSide);
         const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x];
         const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x];
-        if (ccwTile === TileCodes.wall || cwTile === TileCodes.wall) {
+        if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
             // console.log('clockwiseTilePosition: ' + cwTile);
             // console.log('counterClowiseTilePosition: ' + ccwTile);
             console.log('deadlocked: trapped in between walls');
@@ -158,11 +158,11 @@ export class MovementAnalyser {
         let targets = 0;
         for (let x = 0; x < this.staticMap.width; ++x) {
             const currentLineTile = this.staticMap.tiles[tilePosition.y][x];
-            if (currentLineTile === TileCodes.target) {
+            if (currentLineTile === Tiles.target) {
                 ++targets;
             }
             const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x];
-            if (nextLineTile !== TileCodes.wall) {
+            if (nextLineTile !== Tiles.wall) {
                 ++empties;
             }
         }
@@ -181,12 +181,12 @@ export class MovementAnalyser {
         let targets = 0;
         for (let y = 0; y < this.staticMap.height; ++y) {
             const currentColumnTile = this.staticMap.tiles[y][tilePosition.x];
-            if (currentColumnTile === TileCodes.target) {
+            if (currentColumnTile === Tiles.target) {
                 ++targets;
             }
 
             const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x];
-            if (nextColumnTile !== TileCodes.wall) {
+            if (nextColumnTile !== Tiles.wall) {
                 ++empties;
             }
         }

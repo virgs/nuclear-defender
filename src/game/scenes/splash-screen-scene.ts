@@ -4,7 +4,7 @@ import * as lzString from "lz-string";
 import {levels} from '../levels/levels';
 import {createAlert} from '../ui/htmlElements';
 import {MapBuilder} from '../tiles/map-builder';
-import type {TileCodes} from '../tiles/tile-codes';
+import type {Tiles} from '../tiles/tiles';
 import type {GameSceneConfiguration} from './game-scene';
 import {configuration} from '../constants/configuration';
 import {splashScreenHtml} from '../ui/splash-screen-html';
@@ -118,7 +118,7 @@ export class SplashScreenScene extends Phaser.Scene {
         return [];
     }
 
-    private parseMap(map: string): TileCodes[][] {
+    private parseMap(map: string): Tiles[][] {
         if (map.length > 0) {
             const annotationMap: string[] = map.split('\n');
             const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);

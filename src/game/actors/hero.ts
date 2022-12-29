@@ -4,7 +4,7 @@ import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '../constants/directions';
 import type {GameActor} from '@/game/actors/game-actor';
-import {TileCodes} from '@/game/tiles/tile-codes';
+import {Tiles} from '@/game/tiles/tiles';
 
 export class Hero implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -78,8 +78,8 @@ export class Hero implements GameActor {
         return this.sprite;
     }
 
-    public getTileCode(): TileCodes {
-        return TileCodes.hero;
+    public getTileCode(): Tiles {
+        return Tiles.hero;
     }
 
 }

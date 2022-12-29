@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
-import {TileCodes} from '@/game/tiles/tile-codes';
+import {Tiles} from '@/game/tiles/tiles';
 import type {GameActor} from '@/game/actors/game-actor';
 import {getTweenFromDirection} from '@/game/actors/tween';
 import type {Directions} from '@/game/constants/directions';
@@ -24,9 +24,9 @@ export class Box implements GameActor {
 
     public setIsOnTarget(isOnTarget: boolean) {
         if (isOnTarget) {
-            this.sprite.setFrame(TileCodes.boxOnTarget);
+            this.sprite.setFrame(Tiles.boxOnTarget);
         } else {
-            this.sprite.setFrame(TileCodes.box);
+            this.sprite.setFrame(Tiles.box);
         }
 
         return this.isOnTarget = isOnTarget;
@@ -60,7 +60,7 @@ export class Box implements GameActor {
 
     }
 
-    public getTileCode(): TileCodes {
-        return TileCodes.box;
+    public getTileCode(): Tiles {
+        return Tiles.box;
     }
 }

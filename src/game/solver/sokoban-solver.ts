@@ -1,7 +1,7 @@
 import Heap from 'heap';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
-import {TileCodes} from '../tiles/tile-codes';
+import {Tiles} from '../tiles/tiles';
 import {MovementCoordinator} from './movement-coordinator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
@@ -144,7 +144,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: Point[]): boolean {
         return boxesPosition
-            .every(box => this.staticMap.tiles[box.y][box.x] === TileCodes.target);
+            .every(box => this.staticMap.tiles[box.y][box.x] === Tiles.target);
     }
 
     private candidateWasVisitedBefore(newCandidateHash: string): boolean {

@@ -1,5 +1,5 @@
 import type {Point} from '../math/point';
-import {TileCodes} from '../tiles/tile-codes';
+import {Tiles} from '../tiles/tiles';
 import type {Directions} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
@@ -43,14 +43,14 @@ export class MovementCoordinator {
             if (this.canHeroMove(newHeroPosition, input)) {
                 mapChanged = true;
                 hero.currentPosition = newHeroPosition;
-                hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x] === TileCodes.target;
+                hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x] === Tiles.target;
                 //box moved
                 const movedBox = boxes
                     .find(box => box.previousPosition.isEqualTo(newHeroPosition));
                 if (movedBox) {
                     movedBox.direction = heroDirection;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
-                    movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x] === TileCodes.target;
+                    movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x] === Tiles.target;
                 }
             }
         }
@@ -83,7 +83,7 @@ export class MovementCoordinator {
 
     private canHeroMove(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
         const featureAhead = this.getFeatureAtPosition(newHeroPosition);
-        if (featureAhead === undefined || featureAhead === TileCodes.wall) {
+        if (featureAhead === undefined || featureAhead === Tiles.wall) {
             return false;
         }
 
@@ -92,7 +92,7 @@ export class MovementCoordinator {
             const heroDirection = mapActionToDirection(input.heroAction)!;
             const afterNextMove = newHeroPosition.calculateOffset(heroDirection);
             const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove);
-            if (afterNextMoveFeature === undefined || afterNextMoveFeature === TileCodes.wall) {
+            if (afterNextMoveFeature === undefined || afterNextMoveFeature === Tiles.wall) {
                 return false;
             }
             if (input.boxes
@@ -104,7 +104,7 @@ export class MovementCoordinator {
         return true;
     }
 
-    private getFeatureAtPosition(position: Point): TileCodes | undefined {
+    private getFeatureAtPosition(position: Point): Tiles | undefined {
         if (position.x >= this.staticMap.width || position.y >= this.staticMap.height
             || position.x < 0 || position.y < 0) {
             return undefined;

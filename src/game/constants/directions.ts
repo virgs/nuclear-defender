@@ -31,6 +31,19 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
     }
 };
 
+export const getDirectionFromChar = (char: string): Directions | undefined => {
+    switch (char) {
+        case 'u':
+            return Directions.UP;
+        case 'd':
+            return Directions.DOWN;
+        case 'l':
+            return Directions.LEFT;
+        case 'r':
+            return Directions.RIGHT;
+    }
+};
+
 export const sumDirections = (...directions: Directions[]): Directions[] => {
     return directions.reduce((acc, item) => {
         const oposite = getOpositeDirectionOf(item);
