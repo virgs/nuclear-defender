@@ -1,6 +1,6 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
-import type {Movement} from '@/game/solver/movement-coordinator';
+import type {Movement} from '@/game/controllers/movement-coordinator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 

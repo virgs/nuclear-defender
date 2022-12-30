@@ -5,11 +5,12 @@ import type {Box} from '@/game/actors/box';
 import type {Hero} from '@/game/actors/hero';
 import {Actions} from '../constants/actions';
 import type {Target} from '@/game/actors/target';
+import type {Spring} from '@/game/actors/spring';
 import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
-import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
-import {MovementCoordinator} from '../solver/movement-coordinator';
+import type {Movement, MovementCoordinatorOutput} from '../controllers/movement-coordinator';
+import {MovementCoordinator} from '../controllers/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -33,6 +34,7 @@ export class GameScene extends Phaser.Scene {
 
     private hero?: Hero;
     private boxes: Box[] = [];
+    private springs: Spring[] = [];
     private targets: Target[] = [];
     private featurelessMap?: StaticMap;
     private solution?: SolutionOutput;
@@ -69,6 +71,7 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
+    //TODO extract game logic related things to nex class
     public async create() {
         const codedMap: string = Store.getInstance().map;
         this.solution = Store.getInstance().solution;
@@ -84,6 +87,7 @@ export class GameScene extends Phaser.Scene {
         const featureMap = mapfeatureMapExtractorsExtractor.extract();
         this.hero = featureMap.hero;
         this.boxes = featureMap.boxes;
+        this.springs = featureMap.springs;
         this.targets = featureMap.targets;
         this.featurelessMap = featureMap.featurelessMap;
 
@@ -119,26 +123,17 @@ export class GameScene extends Phaser.Scene {
             if (movement.mapChanged) {
                 this.movementAnalyser?.analyse(movement);
                 this.allowHeroMovement = false;
-                await this.moveMapFeatures(movement);
+                await this.updateMapFeatures(movement);
                 this.onMovementsComplete();
             }
         }
     }
 
-    private async moveMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
+    private async updateMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
         const promises: Promise<any>[] = [];
         promises.push(...movementCoordinatorOutput.boxes
-            //TODO filter by box id
-            .filter(box => !box.previousPosition.isEqualTo(box.currentPosition))
-            .map(async movedBox => {
-                const tileBoxToMove = this.boxes
-                    .find(tileBox => movedBox.previousPosition.isEqualTo(tileBox.getTilePosition()));
-
-                await tileBoxToMove!.move(movedBox.direction!);
-                tileBoxToMove!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
-
-                this.updateTargetCoverSituation(movedBox);
-            }));
+            .filter(movementBox => !movementBox.previousPosition.isEqualTo(movementBox.currentPosition))
+            .map(async movedBox => await this.updateBoxMovementRelatedFeatures(movedBox)));
 
         const heroPromise = async () => {
             const hero = movementCoordinatorOutput.hero;
@@ -150,6 +145,22 @@ export class GameScene extends Phaser.Scene {
         promises.push(heroPromise());
         await Promise.all(promises);
         this.allowHeroMovement = true;
+    }
+
+    private async updateBoxMovementRelatedFeatures(movedBox: Movement) {
+        this.springs
+            .find(spring => spring.getTilePosition().isEqualTo(movedBox.previousPosition))
+            ?.push();
+        this.springs
+            .find(spring => spring.getTilePosition().isEqualTo(movedBox.currentPosition))
+            ?.activate();
+
+        const spriteBoxMoved = this.boxes
+            .find(tileBox => movedBox.previousPosition.isEqualTo(tileBox.getTilePosition()));
+
+        await spriteBoxMoved!.move(movedBox.direction!);
+        spriteBoxMoved!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
+        this.updateTargetCoverSituation(movedBox);
     }
 
     private updateTargetCoverSituation(move: Movement) {

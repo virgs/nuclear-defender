@@ -14,6 +14,7 @@ export type FeatureMap = {
     featurelessMap: StaticMap;
     boxes: Box[];
     hero: Hero;
+    springs: Spring[];
     targets: Target[];
 };
 
@@ -48,6 +49,7 @@ export class FeatureMapExtractor {
             featurelessMap: featurelessMap,
             targets: targets,
             hero: hero,
+            springs: springs,
             boxes: boxes
         };
 
