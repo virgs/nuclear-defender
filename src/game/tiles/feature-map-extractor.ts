@@ -11,7 +11,7 @@ import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type FeatureMap = {
-    featurelessMap: StaticMap;
+    staticMap: StaticMap;
     boxes: Box[];
     hero: Hero;
     springs: Spring[];
@@ -46,7 +46,7 @@ export class FeatureMapExtractor {
             height: this.featurelessMap.height
         };
         return {
-            featurelessMap: featurelessMap,
+            staticMap: featurelessMap,
             targets: targets,
             hero: hero,
             springs: springs,
