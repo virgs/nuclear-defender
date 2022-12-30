@@ -32,7 +32,8 @@ async function runSolutionsAlgorithm() {
   let solutionOutput: any = undefined;
 
   // for (let index = 1; index < levels.length - 1; ++index) {
-  let index = 4;
+  // let index = 4;
+  const index = data.currentSelectedIndex;
   const codedMap: string = levels[index].map;
   const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
   const solvers = new Map<string, SokobanSolver>();

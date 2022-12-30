@@ -4,6 +4,7 @@ import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {Movement, MovementCoordinatorOutput} from './movement-coordinator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
+import {DeadlockDetector} from '@/game/solver/deadlock-detector';
 
 export type MovementAnalysis = {
     events: MovementEvents[],
@@ -21,12 +22,11 @@ export enum MovementEvents {
     BOX_MOVED_OUT_OF_TARGET
 }
 
-type SegmentAnalysis = { differentBoxes: number; empties: number; targets: number };
-
 export class MovementAnalyser {
     private readonly targets: Point[];
     private readonly distanceCalculator: DistanceCalculator;
     private readonly staticMap: StaticMap;
+    private readonly deadlockDetector: DeadlockDetector;
 
     public constructor(data: {
         map: StaticMap,
@@ -42,12 +42,13 @@ export class MovementAnalyser {
                 }
             }
         }
+        this.deadlockDetector = new DeadlockDetector({staticMap: this.staticMap});
     }
 
     public analyse(movement: MovementCoordinatorOutput): MovementAnalysis {
         const events = this.checkEvents(movement);
         let isDeadLocked = events.boxesMoved
-            .some(movedBox => this.isDeadLocked(movedBox, movement.boxes));
+            .some(movedBox => this.deadlockDetector.deadLocked(movedBox, movement.boxes));
         return {
             shortestDistanceFromEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestTarget(movement),
             ...events,
@@ -95,105 +96,5 @@ export class MovementAnalyser {
             }, 0);
     }
 
-    //TODO create deadlock detection class
-    private isDeadLocked(movedBox: Movement, boxes: Movement[]): boolean {
-        const direction = movedBox.direction!;
-        const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
-        if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x].code === Tiles.wall) {
-            if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
-                return true;
-            }
 
-            if (!movedBox.isCurrentlyOnTarget) {
-                return this.checkTrappedBoxInCorner(movedBox, direction);
-            }
-
-        }
-        return false;
-    }
-
-    private wallAheadCheck(direction: Directions, movedBox: Movement, nextTilePosition: Point, boxes: Movement[]) {
-        let segment: SegmentAnalysis;
-        if (direction === Directions.DOWN || direction === Directions.UP) {
-            segment = this.verticalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
-        } else {
-            segment = this.horizontalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
-        }
-        if (segment.differentBoxes > segment.targets && segment.empties < 2) {
-            // console.log('deadlocked: no way to get it back and no available targets');
-            console.log('deadlocked');
-            return true;
-        }
-        return false;
-    }
-
-    private checkTrappedBoxInCorner(movedBox: Movement, direction: Directions): boolean {
-        //  ######
-        //  #$@  player pushed left
-        //  #
-        //  #
-
-        const clockwiseSide = rotateDirectionClockwise(direction);
-        const clockwiseTilePosition = movedBox.currentPosition.calculateOffset(clockwiseSide);
-        const otherSide = getOpositeDirectionOf(clockwiseSide);
-        const counterClowiseTilePosition = movedBox.currentPosition.calculateOffset(otherSide);
-        const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
-        const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
-        if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
-            // console.log('deadlocked: trapped in between walls');
-            console.log('deadlocked');
-            return true;
-        }
-        return false;
-    }
-
-    private verticalLineSegment(tilePosition: Point, nextTilePosition: Point, boxes: Movement[]): SegmentAnalysis {
-        //  ###      player pushed left
-        //  #
-        //  #$@
-        //  #
-        //  # ##
-
-        let empties = 0;
-        let targets = 0;
-        for (let x = 0; x < this.staticMap.width; ++x) {
-            const currentLineTile = this.staticMap.tiles[tilePosition.y][x].code;
-            if (currentLineTile === Tiles.target) {
-                ++targets;
-            }
-            const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x].code;
-            if (nextLineTile !== Tiles.wall && nextLineTile !== Tiles.empty) {
-                ++empties;
-            }
-        }
-        const differentBoxes = boxes
-            .filter(box => box.currentPosition.y === tilePosition.y)
-            .reduce((acc, _) => acc + 1, 0);
-        return {empties, targets, differentBoxes};
-    }
-
-    private horizontalLineSegment(tilePosition: Point, nextTilePosition: Point, boxes: Movement[]): SegmentAnalysis {
-        //        player pushed down
-        //  #     @     #
-        //  #     $     #
-        //  #############
-        let empties = 0;
-        let targets = 0;
-        for (let y = 0; y < this.staticMap.height; ++y) {
-            const currentColumnTile = this.staticMap.tiles[y][tilePosition.x].code;
-            if (currentColumnTile === Tiles.target) {
-                ++targets;
-            }
-
-            const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x].code;
-            if (nextColumnTile !== Tiles.wall && nextColumnTile !== Tiles.empty) {
-                ++empties;
-            }
-        }
-
-        const differentBoxes = boxes
-            .filter(box => box.currentPosition.x === tilePosition.x)
-            .reduce((acc, _) => acc + 1, 0);
-        return {empties, targets, differentBoxes};
-    }
 }

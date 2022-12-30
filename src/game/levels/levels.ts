@@ -53,7 +53,7 @@ export const levels: Level[] = [
 -8#
 `,
         title: 'Are you familiar?', //euclidian: 340213, manhattan: {Steps: 117. Total time: 74385; iterations: 66774}
-    },
+    },                              //                   manhattan: {Steps: 117. Total time: 96172; iterations: 88084}
     {
         map: `
 4#|#  #
@@ -66,7 +66,7 @@ export const levels: Level[] = [
 #########
 `,
         title: 'Small world', //euclidian: {Steps: 126. Total time: 242789; iterations: 231330}, manhattan: 2511931
-    },
+    },      //                                          Total time: 272507; iterations: 233424
     {
         map: `
 -6#
