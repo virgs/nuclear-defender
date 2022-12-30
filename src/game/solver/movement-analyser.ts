@@ -119,9 +119,9 @@ export class MovementAnalyser {
         } else {
             segment = this.horizontalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
         }
-        console.log(segment.differentBoxes, segment.targets, segment.empties);
         if (segment.differentBoxes > segment.targets && segment.empties < 2) {
-            console.log('deadlocked: no way to get it back and no available targets');
+            // console.log('deadlocked: no way to get it back and no available targets');
+            console.log('deadlocked');
             return true;
         }
         return false;
@@ -140,8 +140,8 @@ export class MovementAnalyser {
         const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
         const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
         if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
-            console.log(Directions[direction], Directions[clockwiseSide], clockwiseTilePosition, Directions[otherSide], counterClowiseTilePosition);
-            console.log('deadlocked: trapped in between walls');
+            // console.log('deadlocked: trapped in between walls');
+            console.log('deadlocked');
             return true;
         }
         return false;

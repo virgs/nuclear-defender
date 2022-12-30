@@ -78,4 +78,4 @@ export const levels: Level[] = [
 --4#
 `,
         title: 'Memories', //euclidian: {Steps: 66. Total time: 228998; iterations: 216575}, manhattan: {Steps: 66. Total time: 227213; iterations: 216575}
-    }];
+    }];                                                                                                //Steps: 66. Total time:  85661; iterations:  78710;
