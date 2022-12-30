@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
+import {Tiles} from '@/game/tiles/tiles';
 import {HeroAnimator} from './hero-animator';
 import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '../constants/directions';
 import type {GameActor} from '@/game/actors/game-actor';
-import {Tiles} from '@/game/tiles/tiles';
+import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
 export class Hero implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -62,7 +63,7 @@ export class Hero implements GameActor {
                     this.tilePosition = this.tilePosition.calculateOffset(direction);
                 },
                 onUpdate: () => {
-                    this.sprite!.setDepth(this.sprite!.y + 1);
+                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
                 },
                 onComplete: () => {
                     this.sprite!.anims.play(heroMovement.idle, true);

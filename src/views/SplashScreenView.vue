@@ -38,18 +38,6 @@ async function runSolutionsAlgorithm() {
   const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
   const solvers = new Map<string, SokobanSolver>();
   console.log('running algorithm for: ' + levels[index].title);
-  // solvers.set('QuadracticEuclidianDistanceCalculator 2500/50', new SokobanSolver({
-  //   staticMap: map, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
-  //   distanceCalculator: new QuadracticEuclidianDistanceCalculator()
-  // }));
-  // solvers.set('QuadracticEuclidianDistanceCalculator 3000/50', new SokobanSolver({
-  //   staticMap: map, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
-  //   distanceCalculator: new QuadracticEuclidianDistanceCalculator()
-  // }));
-  // solvers.set('ManhattanDistanceCalculator 2500/50', new SokobanSolver({
-  //   staticMap: map, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
-  //   distanceCalculator: new ManhattanDistanceCalculator()
-  // }));
   solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
     staticMap: map, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
     distanceCalculator: new ManhattanDistanceCalculator()
@@ -67,12 +55,11 @@ async function playButtonClick() {
   // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
   // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
   //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
-  const solutionOutput = await runSolutionsAlgorithm();
 
   const store = Store.getInstance();
   store.currentLevelIndex = data.currentSelectedIndex;
   store.map = levels[data.currentSelectedIndex].map;
-  store.solution = solutionOutput;
+  // store.solution = await runSolutionsAlgorithm()
 
   await router.push('/game');
 }

@@ -40,16 +40,20 @@ export class MovementCoordinator {
             hero.direction = heroDirection;
 
             const newHeroPosition = input.hero.calculateOffset(heroDirection);
-            if (this.canHeroMove(newHeroPosition, input)) {
+            if (this.canHeroMove(newHeroPosition, heroDirection, boxes)) {
                 mapChanged = true;
+                //move hero
                 hero.currentPosition = newHeroPosition;
+                //update target status
                 hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x].code === Tiles.target;
                 //box moved
                 const movedBox = boxes
                     .find(box => box.previousPosition.isEqualTo(newHeroPosition));
                 if (movedBox) {
+                    //move box
                     movedBox.direction = heroDirection;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
+                    //update target status
                     movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x].code === Tiles.target;
                 }
             }
@@ -81,22 +85,21 @@ export class MovementCoordinator {
         };
     }
 
-    private canHeroMove(newHeroPosition: Point, input: MovementCoordinatorInput): boolean {
+    private canHeroMove(newHeroPosition: Point, heroDirection: Directions, boxes: Movement[]): boolean {
         const featureAhead = this.getFeatureAtPosition(newHeroPosition);
         if (featureAhead === undefined || featureAhead === Tiles.wall) {
             return false;
         }
 
-        if (input.boxes
-            .some(box => box.isEqualTo(newHeroPosition))) {
-            const heroDirection = mapActionToDirection(input.heroAction)!;
+        if (boxes
+            .some(box => box.currentPosition.isEqualTo(newHeroPosition))) {
             const afterNextMove = newHeroPosition.calculateOffset(heroDirection);
             const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove);
             if (afterNextMoveFeature === undefined || afterNextMoveFeature === Tiles.wall) {
                 return false;
             }
-            if (input.boxes
-                .find(box => box.isEqualTo(afterNextMove))) {
+            if (boxes
+                .find(box => box.currentPosition.isEqualTo(afterNextMove))) {
                 return false;
             }
         }

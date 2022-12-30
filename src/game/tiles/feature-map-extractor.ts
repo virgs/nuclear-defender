@@ -7,9 +7,7 @@ import {Target} from '@/game/actors/target';
 import {configuration} from '../constants/configuration';
 import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {GameActor} from '@/game/actors/game-actor';
-
-const floorDepth = -1000;
-const targetDepth = -100;
+import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
 export type FeatureMap = {
     featurelessMap: StaticMap;
@@ -97,16 +95,7 @@ export class FeatureMapExtractor {
                     if (tile.code === Tiles.target) {
                         const tilePosition = new Point(x, y);
                         const sprite = this.createSprite(tilePosition, Tiles.target);
-                        sprite.setDepth(targetDepth);
-                        const target = new Target({scene: this.scene, sprite: sprite, tilePosition: tilePosition});
-
-                        const boxOnIt = boxes
-                            .find(box => box.getTilePosition().isEqualTo(tilePosition));
-                        if (boxOnIt) {
-                            target.cover();
-                            boxOnIt.setIsOnTarget(true);
-                        }
-
+                        const target = new Target({scene: this.scene, sprite: sprite, tilePosition: tilePosition, boxes: boxes});
                         targets.push(target);
                     }
                     return tile;
@@ -119,24 +108,23 @@ export class FeatureMapExtractor {
             (point.y + 1) * configuration.world.tileSize.vertical, configuration.tiles.spriteSheetKey, tile);
         sprite.scale = this.scale;
         sprite.setOrigin(0.5);
-        sprite.setDepth(sprite.y);
+        sprite.setDepth(new TileDepthCalculator().calculate(tile, sprite.y));
         sprite.setPipeline('Light2D');
         return sprite;
     }
 
-    private addFloors(actors: GameActor[]) {
-        actors
-            .forEach(actor => this.createSprite(actor.getTilePosition(), Tiles.floor).setDepth(floorDepth));
+    private addFloors(staticActors: GameActor[]) {
+        //(targets and stuff).. They hide floors behind them
+        staticActors
+            .forEach(actor => this.createSprite(actor.getTilePosition(), Tiles.floor));
 
+        //Every floor in the map
         this.featurelessMap.tiles
             .forEach((line, y) => line
                 .forEach((tile: TileIdentification, x: number) => {
-                    if (tile.code !== Tiles.target) { //it was previously created
+                    if (tile.code !== Tiles.target) { //it was created in the staticActors loop
                         const tilePosition = new Point(x, y);
-                        const sprite = this.createSprite(tilePosition, tile.code);
-                        if (tile.code === Tiles.floor) {
-                            sprite.setDepth(floorDepth);
-                        }
+                        this.createSprite(tilePosition, tile.code);
                     }
                 }));
     }

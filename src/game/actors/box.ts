@@ -4,6 +4,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {GameActor} from '@/game/actors/game-actor';
 import {getTweenFromDirection} from '@/game/actors/tween';
 import type {Directions} from '@/game/constants/directions';
+import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
 export class Box implements GameActor {
     private tilePosition: Point;
@@ -55,7 +56,7 @@ export class Box implements GameActor {
                     this.tilePosition = this.tilePosition.calculateOffset(direction);
                 },
                 onUpdate: () => {
-                    this.sprite!.setDepth(this.sprite!.y + 1);
+                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.sprite.y + 1));
                 },
                 onComplete: () => {
                     resolve();
