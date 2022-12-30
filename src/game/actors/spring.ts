@@ -34,9 +34,11 @@ export class Spring implements GameActor {
     }
 
     public push(): void {
+        console.log('push')
     }
 
     public activate(): void {
+        console.log('activate')
     }
 
     public getId(): number {

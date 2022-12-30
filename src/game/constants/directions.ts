@@ -32,7 +32,7 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
 };
 
 export const getDirectionFromChar = (char: string): Directions | undefined => {
-    switch (char) {
+    switch (char.toLowerCase()) {
         case 'u':
             return Directions.UP;
         case 'd':

@@ -6,10 +6,10 @@ import type {Actions} from '@/game/constants/actions';
 import type {TileMap} from '@/game/tiles/feature-map-extractor';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
+import type {Movement, MovementCoordinatorOutput} from '@/game/controllers/movement-coordinator';
 import {MovementCoordinator} from '@/game/controllers/movement-coordinator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import type {Movement, MovementCoordinatorOutput} from '@/game/controllers/movement-coordinator';
 
 export class GameController {
     private readonly tileMap: StaticMap;
@@ -72,50 +72,61 @@ export class GameController {
         }
     }
 
-    private async updateMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
+    private async updateMapFeatures(movementOutput: MovementCoordinatorOutput) {
         const promises: Promise<any>[] = [];
-        promises.push(...movementCoordinatorOutput.boxes
+        promises.push(...movementOutput.boxes
             .filter(movementBox => !movementBox.previousPosition.isEqualTo(movementBox.currentPosition))
-            .map(async movedBox => await this.updateBoxMovementRelatedFeatures(movedBox)));
+            .map(async movedBox => {
+                const spriteBoxMoved = this.boxes
+                    .find(tileBox => movedBox.previousPosition.isEqualTo(tileBox.getTilePosition()));
+
+                await spriteBoxMoved!.move(movedBox.direction!);
+                spriteBoxMoved!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
+            }));
 
         const heroPromise = async () => {
-            const hero = movementCoordinatorOutput.hero;
+            const hero = movementOutput.hero;
             if (hero.currentPosition.isDifferentOf(hero.previousPosition)) {
                 await this.hero!.move(hero.direction!);
-                this.updateTargetCoverSituation(hero);
             }
         };
         promises.push(heroPromise());
+
+        const features = [movementOutput.hero, ...movementOutput.boxes];
+        this.updateSpringsSituation(features);
+
         await Promise.all(promises);
+
+        this.updateTargetCoverSituation(features);
         this.movementsAreAllowed = true;
     }
 
-    private async updateBoxMovementRelatedFeatures(movedBox: Movement) {
-        this.springs
-            .find(spring => spring.getTilePosition().isEqualTo(movedBox.previousPosition))
-            ?.push();
-        this.springs
-            .find(spring => spring.getTilePosition().isEqualTo(movedBox.currentPosition))
-            ?.activate();
+    private updateSpringsSituation(features: Movement[]) {
+        features
+            .forEach(feature => {
+                this.springs
+                    .find(spring => spring.getTilePosition().isEqualTo(feature.previousPosition))
+                    ?.push();
+                this.springs
+                    .find(spring => spring.getTilePosition().isEqualTo(feature.currentPosition))
+                    ?.activate();
+            });
 
-        const spriteBoxMoved = this.boxes
-            .find(tileBox => movedBox.previousPosition.isEqualTo(tileBox.getTilePosition()));
-
-        await spriteBoxMoved!.move(movedBox.direction!);
-        spriteBoxMoved!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
-        this.updateTargetCoverSituation(movedBox);
     }
 
-    private updateTargetCoverSituation(move: Movement) {
-        this.targets
-            .filter(target => !target.isCovered())
-            .find(target => target.getTilePosition().isEqualTo(move.currentPosition))
-            ?.cover();
+    private updateTargetCoverSituation(features: Movement[]) {
+        features
+            .forEach(feature => {
+                this.targets
+                    .filter(target => !target.isCovered())
+                    .find(target => target.getTilePosition().isEqualTo(feature.currentPosition))
+                    ?.cover();
 
-        this.targets
-            .filter(target => target.isCovered())
-            .find(target => target.getTilePosition().isEqualTo(move.previousPosition))
-            ?.uncover();
+                this.targets
+                    .filter(target => target.isCovered())
+                    .find(target => target.getTilePosition().isEqualTo(feature.previousPosition))
+                    ?.uncover();
+            });
     }
 
     private checkLevelComplete() {
