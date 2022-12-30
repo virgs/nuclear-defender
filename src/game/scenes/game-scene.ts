@@ -141,9 +141,11 @@ export class GameScene extends Phaser.Scene {
             }));
 
         const heroPromise = async () => {
-            await this.hero!.move(movementCoordinatorOutput.hero.direction!);
-            this.updateTargetCoverSituation(movementCoordinatorOutput.hero);
-
+            const hero = movementCoordinatorOutput.hero;
+            if (hero.currentPosition.isDifferentOf(hero.previousPosition)) {
+                await this.hero!.move(hero.direction!);
+                this.updateTargetCoverSituation(hero);
+            }
         };
         promises.push(heroPromise());
         await Promise.all(promises);

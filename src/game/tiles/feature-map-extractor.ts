@@ -8,7 +8,7 @@ import {Spring} from '@/game/actors/spring';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '../constants/configuration';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type FeatureMap = {
     featurelessMap: StaticMap;
@@ -27,7 +27,7 @@ export class FeatureMapExtractor {
         this.scene = scene;
         this.scale = scale;
         this.featurelessMap = map;
-        this.featurelessMap.tiles = JSON.parse(JSON.stringify(map.tiles)) as TileIdentification[][];
+        this.featurelessMap.tiles = JSON.parse(JSON.stringify(map.tiles)) as OrientedTile[][];
         this.actorCounter = 0;
     }
 
@@ -57,7 +57,7 @@ export class FeatureMapExtractor {
         let hero: Hero | undefined = undefined;
         this.featurelessMap.tiles = this.featurelessMap.tiles
             .map((line, y) => line
-                .map((tile: TileIdentification, x: number) => {
+                .map((tile: OrientedTile, x: number) => {
                     if (tile.code === Tiles.hero || tile.code === Tiles.heroOnTarget) {
                         const tilePosition = new Point(x, y);
                         const heroSprite = this.createSprite(tilePosition, Tiles.hero);
@@ -76,7 +76,7 @@ export class FeatureMapExtractor {
         const boxes: Box[] = [];
         this.featurelessMap.tiles = this.featurelessMap.tiles
             .map((line, y) => line
-                .map((tile: TileIdentification, x: number) => {
+                .map((tile: OrientedTile, x: number) => {
                     if (tile.code === Tiles.box || tile.code === Tiles.boxOnTarget) {
                         const tilePosition = new Point(x, y);
                         const sprite = this.createSprite(tilePosition, Tiles.box);
@@ -95,7 +95,7 @@ export class FeatureMapExtractor {
         const targets: Target[] = [];
         this.featurelessMap.tiles = this.featurelessMap.tiles
             .map((line, y) => line
-                .map((tile: TileIdentification, x: number) => {
+                .map((tile: OrientedTile, x: number) => {
                     if (tile.code === Tiles.target) {
                         const tilePosition = new Point(x, y);
                         const sprite = this.createSprite(tilePosition, Tiles.target);
@@ -117,7 +117,7 @@ export class FeatureMapExtractor {
         const springs: Spring[] = [];
         this.featurelessMap.tiles = this.featurelessMap.tiles
             .map((line, y) => line
-                .map((tile: TileIdentification, x: number) => {
+                .map((tile: OrientedTile, x: number) => {
                     if (tile.code === Tiles.spring) {
                         const tilePosition = new Point(x, y);
                         const sprite = this.createSprite(tilePosition, Tiles.spring);
@@ -146,18 +146,27 @@ export class FeatureMapExtractor {
     }
 
     private addFloors(staticActors: GameActor[]) {
-        //(targets and stuff).. They hide floors behind them
-        staticActors
-            .forEach(actor => this.createSprite(actor.getTilePosition(), Tiles.floor));
+        const staticActorsCode = this.addRemainingFloors(staticActors);
 
         //Every floor in the map
         this.featurelessMap.tiles
             .forEach((line, y) => line
-                .forEach((tile: TileIdentification, x: number) => {
-                    if (tile.code !== Tiles.target && tile.code !== Tiles.spring) { //it was created in the staticActors loop
+                .forEach((tile: OrientedTile, x: number) => {
+                    if (!staticActorsCode.has(tile.code)) {//it was created in the staticActors loop
                         const tilePosition = new Point(x, y);
                         this.createSprite(tilePosition, tile.code);
                     }
                 }));
+    }
+
+    private addRemainingFloors(staticActors: GameActor[]): Set<Tiles> {
+        const staticActorsCode: Set<Tiles> = new Set<Tiles>();
+        //(targets and stuff).. They hide floors behind them
+        staticActors
+            .forEach(actor => {
+                staticActorsCode.add(actor.getTileCode());
+                this.createSprite(actor.getTilePosition(), Tiles.floor);
+            });
+        return staticActorsCode;
     }
 }

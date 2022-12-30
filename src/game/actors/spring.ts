@@ -22,13 +22,13 @@ export class Spring implements GameActor {
 
         switch (this.orientation) {
             case Directions.LEFT:
-                this.sprite.setRotation(-Math.PI / 2);
+                this.sprite.setRotation(Math.PI / 2);
                 break;
             case Directions.UP:
                 this.sprite.setRotation(Math.PI);
                 break;
             case Directions.RIGHT:
-                this.sprite.setRotation(Math.PI / 2);
+                this.sprite.setRotation(-Math.PI / 2);
                 break;
         }
     }

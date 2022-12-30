@@ -56,24 +56,27 @@ export class Hero implements GameActor {
         return new Promise<void>((resolve) => {
             this.isMoving = true;
             const heroMovement = this.heroAnimator.map(direction);
-
-            this.tweens!.add({
-                ...heroMovement.tween,
-                targets: this.sprite,
-                onInit: () => {
-                    this.sprite!.anims.play(heroMovement.walking, true);
-                    this.tilePosition = this.tilePosition.calculateOffset(direction);
-                },
-                onUpdate: () => {
-                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
-                },
-                onComplete: () => {
-                    this.sprite!.anims.play(heroMovement.idle, true);
-                    this.isMoving = false;
-                    resolve();
-                },
-                onCompleteScope: this //doc purposes
-            });
+            if (heroMovement) {
+                this.tweens!.add({
+                    ...heroMovement.tween,
+                    targets: this.sprite,
+                    onInit: () => {
+                        this.sprite!.anims.play(heroMovement.walking, true);
+                        this.tilePosition = this.tilePosition.calculateOffset(direction);
+                    },
+                    onUpdate: () => {
+                        this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
+                    },
+                    onComplete: () => {
+                        this.sprite!.anims.play(heroMovement.idle, true);
+                        this.isMoving = false;
+                        resolve();
+                    },
+                    onCompleteScope: this //doc purposes
+                });
+            } else {
+                resolve()
+            }
         });
     }
 

@@ -37,15 +37,16 @@ export class DeadlockDetector {
             segment = this.horizontalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
         }
         if (segment.differentBoxes > segment.targets && segment.empties < 2) {
-            // console.log('deadlocked: no way to get it back and no available targets');
-            console.log('deadlocked');
+            console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
+            console.log(segment.differentBoxes, segment.targets, segment.empties);
+            console.log('deadlocked: no way to get it back and no available targets');
             return true;
         }
         return false;
     }
 
     private checkTrappedBoxInCorner(movedBox: Movement, direction: Directions): boolean {
-        if (movedBox.isCurrentlyOnTarget) {
+        if (movedBox.isCurrentlyOnTarget || movedBox.isCurrentlyOnSpring) {
             return false;
         }
         //  ######
@@ -60,8 +61,8 @@ export class DeadlockDetector {
         const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
         const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
         if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
-            // console.log('deadlocked: trapped in between walls');
-            console.log('deadlocked');
+            console.log(cwTile, ccwTile);
+            console.log('deadlocked: trapped in between walls');
             return true;
         }
         return false;

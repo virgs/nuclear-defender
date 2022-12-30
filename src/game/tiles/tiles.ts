@@ -11,7 +11,7 @@ export enum Tiles {
     oily,
     spring,
     treadmil,
-    door,
+    oneWayDoor,
 }
 
 export const getTileFromChar = (char: string): Tiles => {
@@ -21,7 +21,7 @@ export const getTileFromChar = (char: string): Tiles => {
         case 't':
             return Tiles.treadmil;
         case 'd':
-            return Tiles.door;
+            return Tiles.oneWayDoor;
         case 'o':
             return Tiles.oily;
         case 's':

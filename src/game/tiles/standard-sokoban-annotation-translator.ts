@@ -1,7 +1,7 @@
 import {getTileFromChar, Tiles} from './tiles';
 import {Directions, getDirectionFromChar} from '@/game/constants/directions';
 
-export type TileIdentification = {
+export type OrientedTile = {
     code: Tiles
     orientation: Directions | undefined
 };
@@ -9,7 +9,7 @@ export type TileIdentification = {
 export type StaticMap = {
     width: number,
     height: number,
-    tiles: TileIdentification[][]
+    tiles: OrientedTile[][]
 };
 
 export class StandardSokobanAnnotationTranslator {
@@ -30,7 +30,7 @@ export class StandardSokobanAnnotationTranslator {
         };
     }
 
-    private createRectangularMatrix(height: number, width: number, baseMatrix: TileIdentification[][]): TileIdentification[][] {
+    private createRectangularMatrix(height: number, width: number, baseMatrix: OrientedTile[][]): OrientedTile[][] {
         return new Array(height)
             .fill(new Array(width)
                 .fill(null))
@@ -50,12 +50,12 @@ export class StandardSokobanAnnotationTranslator {
                 }));
     }
 
-    private removeMetaChars(metamap: string[][]): TileIdentification[][] {
+    private removeMetaChars(metamap: string[][]): OrientedTile[][] {
         const directionRegex = /[udlr]/;
         const numberRegex = /\d/;
         const result = [];
         for (let line = 0; line < metamap.length; ++line) {
-            let resultLine: TileIdentification[] = [];
+            let resultLine: OrientedTile[] = [];
             for (let col = 0; col < metamap[line].length; ++col) {
                 let char = metamap[line][col];
                 let orientation = undefined;

@@ -5,7 +5,7 @@ import {Actions} from '../constants/actions';
 import {MovementCoordinator} from './movement-coordinator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
-import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 type Solution = {
     actions: Actions[],
@@ -50,9 +50,9 @@ export class SokobanSolver {
         this.sleepingCycle = input.cpu.sleepingCycle;
 
         this.staticMap = input.staticMap;
-        this.staticMap.tiles = (JSON.parse(JSON.stringify(input.staticMap.tiles)) as TileIdentification[][])
-            .map((tile: TileIdentification[], y: number) => {
-                return tile.map((tile: TileIdentification, x: number) => {
+        this.staticMap.tiles = (JSON.parse(JSON.stringify(input.staticMap.tiles)) as OrientedTile[][])
+            .map((tile: OrientedTile[], y: number) => {
+                return tile.map((tile: OrientedTile, x: number) => {
                     if (tile.code === Tiles.heroOnTarget) {
                         tile.code = Tiles.target;
                         this.hero = new Point(x, y);
