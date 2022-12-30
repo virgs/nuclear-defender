@@ -50,7 +50,7 @@ export class SokobanSolver {
         this.staticMap = input.staticMap;
         this.movementCoordinator = new MovementCoordinator(this.staticMap);
         this.movementAnalyser = new MovementAnalyser({
-            staticMap: this.staticMap,
+            map: this.staticMap,
             distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
@@ -120,7 +120,7 @@ export class SokobanSolver {
                 const afterAction = this.movementCoordinator.update({
                     boxes: candidate.boxes,
                     hero: candidate.hero,
-                    staticMap: this.staticMap,
+                    map: this.staticMap,
                     heroAction: action
                 });
 
@@ -144,7 +144,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: Point[]): boolean {
         return boxesPosition
-            .every(box => this.staticMap.tiles[box.y][box.x] === Tiles.target);
+            .every(box => this.staticMap.tiles[box.y][box.x].code === Tiles.target);
     }
 
     private candidateWasVisitedBefore(newCandidateHash: string): boolean {

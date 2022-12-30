@@ -29,15 +29,15 @@ export class MovementAnalyser {
     private readonly staticMap: StaticMap;
 
     public constructor(data: {
-        staticMap: StaticMap,
+        map: StaticMap,
         distanceCalculator: DistanceCalculator
     }) {
-        this.staticMap = data.staticMap;
+        this.staticMap = data.map;
         this.distanceCalculator = data.distanceCalculator;
         this.targets = [];
-        for (let y = 0; y < data.staticMap.height; ++y) {
-            for (let x = 0; x < data.staticMap.width; ++x) {
-                if (data.staticMap.tiles[y][x] === Tiles.target) {
+        for (let y = 0; y < data.map.height; ++y) {
+            for (let x = 0; x < data.map.width; ++x) {
+                if (data.map.tiles[y][x].code === Tiles.target) {
                     this.targets.push(new Point(x, y));
                 }
             }
@@ -99,7 +99,7 @@ export class MovementAnalyser {
     private isDeadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
-        if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x] === Tiles.wall) {
+        if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x].code === Tiles.wall) {
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
                 return true;
             }
@@ -136,8 +136,8 @@ export class MovementAnalyser {
         const clockwiseTilePosition = movedBox.currentPosition.calculateOffset(sideDirection);
         const otherSide = getOpositeDirectionOf(sideDirection);
         const counterClowiseTilePosition = movedBox.currentPosition.calculateOffset(otherSide);
-        const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x];
-        const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x];
+        const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
+        const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
         if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
             // console.log('clockwiseTilePosition: ' + cwTile);
             // console.log('counterClowiseTilePosition: ' + ccwTile);
@@ -157,11 +157,11 @@ export class MovementAnalyser {
         let empties = 0;
         let targets = 0;
         for (let x = 0; x < this.staticMap.width; ++x) {
-            const currentLineTile = this.staticMap.tiles[tilePosition.y][x];
+            const currentLineTile = this.staticMap.tiles[tilePosition.y][x].code;
             if (currentLineTile === Tiles.target) {
                 ++targets;
             }
-            const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x];
+            const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x].code;
             if (nextLineTile !== Tiles.wall) {
                 ++empties;
             }
@@ -180,12 +180,12 @@ export class MovementAnalyser {
         let empties = 0;
         let targets = 0;
         for (let y = 0; y < this.staticMap.height; ++y) {
-            const currentColumnTile = this.staticMap.tiles[y][tilePosition.x];
+            const currentColumnTile = this.staticMap.tiles[y][tilePosition.x].code;
             if (currentColumnTile === Tiles.target) {
                 ++targets;
             }
 
-            const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x];
+            const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x].code;
             if (nextColumnTile !== Tiles.wall) {
                 ++empties;
             }

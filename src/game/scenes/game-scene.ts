@@ -8,13 +8,13 @@ import type {Target} from '@/game/actors/target';
 import {configuration} from '../constants/configuration';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
+import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {QuadracticEuclidianDistanceCalculator} from '@/game/math/quadractic-euclidian-distance-calculator';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -34,7 +34,7 @@ export class GameScene extends Phaser.Scene {
     private hero?: Hero;
     private boxes: Box[] = [];
     private targets: Target[] = [];
-    private staticMap?: StaticMap;
+    private featurelessMap?: StaticMap;
     private solution?: SolutionOutput;
     private movementAnalyser?: MovementAnalyser;
 
@@ -72,24 +72,26 @@ export class GameScene extends Phaser.Scene {
     public async create() {
         const codedMap: string = Store.getInstance().map;
         this.solution = Store.getInstance().solution;
-        const data = new StandardSokobanAnnotationMapper().map(codedMap);
-        console.log(data.staticMap)
-        const output = new ScreenPropertiesCalculator().calculate(data.staticMap);
-        this.movementAnalyser = new MovementAnalyser({staticMap: data.staticMap, distanceCalculator: new QuadracticEuclidianDistanceCalculator()});
+
+        //TODO move this section to scene before this one
+        const map = new StandardSokobanAnnotationMapper().map(codedMap);
+        const output = new ScreenPropertiesCalculator().calculate(map);
         configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
         configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
+        //TODO end of section
 
-        const mapfeatureMapExtractorsExtractor = new FeatureMapExtractor(this, output.scale);
-        const featureMap = mapfeatureMapExtractorsExtractor.extractFeatures(data, output);
+        const mapfeatureMapExtractorsExtractor = new FeatureMapExtractor(this, output.scale, map);
+        const featureMap = mapfeatureMapExtractorsExtractor.extract();
         this.hero = featureMap.hero;
         this.boxes = featureMap.boxes;
         this.targets = featureMap.targets;
-        this.staticMap = data.staticMap;
+        this.featurelessMap = featureMap.featurelessMap;
 
         this.lights.enable();
         this.lights.enable().setAmbientColor(0x555555);
 
-        this.movementCoordinator = new MovementCoordinator(data.staticMap);
+        this.movementAnalyser = new MovementAnalyser({map: this.featurelessMap, distanceCalculator: new ManhattanDistanceCalculator()});
+        this.movementCoordinator = new MovementCoordinator(this.featurelessMap);
 
         this.allowHeroMovement = true;
     }
@@ -108,13 +110,13 @@ export class GameScene extends Phaser.Scene {
 
             const movement = this.movementCoordinator!.update({
                 heroAction: heroAction,
-                staticMap: this.staticMap!,
+                map: this.featurelessMap!,
                 hero: this.hero!.getTilePosition(),
                 boxes: this.boxes!.map(box => box.getTilePosition())
             });
 
             if (movement.mapChanged) {
-                this.movementAnalyser?.analyse(movement)
+                this.movementAnalyser?.analyse(movement);
                 this.allowHeroMovement = false;
                 await this.moveMapFeatures(movement);
                 this.onMovementsComplete();
@@ -150,7 +152,8 @@ export class GameScene extends Phaser.Scene {
     private updateTargetCoverSituation(move: Movement) {
         this.targets
             .filter(target => !target.isCovered())
-            .find(target => target.getTilePosition().isEqualTo(move.currentPosition))?.cover();
+            .find(target => target.getTilePosition().isEqualTo(move.currentPosition))
+            ?.cover();
 
         this.targets
             .filter(target => target.isCovered())

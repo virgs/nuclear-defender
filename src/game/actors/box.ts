@@ -10,8 +10,10 @@ export class Box implements GameActor {
     private isOnTarget: boolean;
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly sprite: Phaser.GameObjects.Sprite;
+    private readonly id: number;
 
-    constructor(boxConfig: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite, tilePosition: Point }) {
+    constructor(boxConfig: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite, tilePosition: Point, id: number }) {
+        this.id = boxConfig.id;
         this.tilePosition = boxConfig.tilePosition;
         this.tweens = boxConfig.scene.tweens;
         this.sprite = boxConfig.sprite;
@@ -38,6 +40,10 @@ export class Box implements GameActor {
 
     public getSprite(): Phaser.GameObjects.Sprite {
         return this.sprite;
+    }
+
+    public getId(): number {
+        return this.id;
     }
 
     public async move(direction: Directions) {

@@ -20,15 +20,15 @@ export type MovementCoordinatorOutput = {
 export type MovementCoordinatorInput = {
     boxes: Point[]; //TODO add id to every box
     heroAction: Actions;
-    staticMap: StaticMap;
+    map: StaticMap;
     hero: Point;
 };
 
 export class MovementCoordinator {
     private readonly staticMap: StaticMap;
 
-    constructor(data: StaticMap) {
-        this.staticMap = data;
+    constructor(map: StaticMap) {
+        this.staticMap = map;
     }
 
     public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
@@ -43,14 +43,14 @@ export class MovementCoordinator {
             if (this.canHeroMove(newHeroPosition, input)) {
                 mapChanged = true;
                 hero.currentPosition = newHeroPosition;
-                hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x] === Tiles.target;
+                hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x].code === Tiles.target;
                 //box moved
                 const movedBox = boxes
                     .find(box => box.previousPosition.isEqualTo(newHeroPosition));
                 if (movedBox) {
                     movedBox.direction = heroDirection;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
-                    movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x] === Tiles.target;
+                    movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x].code === Tiles.target;
                 }
             }
         }
@@ -109,7 +109,7 @@ export class MovementCoordinator {
             || position.x < 0 || position.y < 0) {
             return undefined;
         }
-        return this.staticMap.tiles[position.y][position.x];
+        return this.staticMap.tiles[position.y][position.x].code;
     }
 
 }

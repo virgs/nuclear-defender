@@ -1,15 +1,15 @@
-import type {Tiles} from '@/game/tiles/tiles';
-import {configuration} from '@/game/constants/configuration';
 import {Point} from '@/game/math/point';
+import {configuration} from '@/game/constants/configuration';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
 
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
     max: 1.15,
-    min: .66
+    min: .6
 };
 
 export class ScreenPropertiesCalculator {
-    public calculate(data: { width: number; height: number; tiles: Tiles[][] }): ScaleOutput {
+    public calculate(data: StaticMap): ScaleOutput {
         const map = {
             width: data.width * configuration.tiles.horizontalSize,
             height: data.height * configuration.tiles.verticalSize * configuration.tiles.verticalPerspective

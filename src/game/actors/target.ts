@@ -27,8 +27,9 @@ export class Target implements GameActor {
         this.light = config.scene.lights.addLight(this.sprite.x, this.sprite.y, Target.radius,
             Target.rgb, Target.uncoveredIntensity);
 
+        this.pathRadius = new Point(configuration.world.tileSize.horizontal * 0.2, configuration.world.tileSize.horizontal * 0.2);
+
         const path = new Phaser.Curves.Path();
-        this.pathRadius = new Point(configuration.world.tileSize.horizontal * .05, configuration.world.tileSize.horizontal * .05);
         path.add(new Phaser.Curves.Ellipse(this.sprite.x, this.sprite.y,
             this.pathRadius.x, this.pathRadius.y));
 

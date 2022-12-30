@@ -1,69 +1,64 @@
 import {getTileFromChar, Tiles} from './tiles';
-import {Point} from '@/game/math/point';
 import {Directions, getDirectionFromChar} from '@/game/constants/directions';
+
+export type TileIdentification = {
+    code: Tiles
+    orientation: Directions | undefined
+};
 
 export type StaticMap = {
     width: number,
     height: number,
-    tiles: Tiles[][]
-    directions: (Directions | undefined)[][]
-};
-export type Mapped = {
-    staticMap: StaticMap,
-    hero: Point,
-    boxes: Point[]
+    tiles: TileIdentification[][]
 };
 
 export class StandardSokobanAnnotationMapper {
-    public map(encodedLevel: string): Mapped {
+    public map(encodedLevel: string): StaticMap {
         const irregularMatrix: string[][] = this.splitInIrregularMatrix(encodedLevel);
         const irregularTokenizedMatrix = this.removeMetaChars(irregularMatrix);
 
-        const height = irregularTokenizedMatrix.tiles.length;
-        const width = irregularTokenizedMatrix.tiles
+        const height = irregularTokenizedMatrix.length;
+        const width = irregularTokenizedMatrix
             .reduce((acc, item) => item.length > acc ? item.length : acc, 0);
 
-        const tileMap = this.createRectangularMatrix(height, width, irregularTokenizedMatrix.tiles, Tiles.empty) as Tiles[][];
-        const directionMap = this.createRectangularMatrix(height, width, irregularTokenizedMatrix.directions, undefined) as Directions[][];
-
-        const boxes: Point[] = this.extractBoxes(tileMap);
-        const hero: Point = this.extractHero(tileMap)!;
+        const tileMap = this.createRectangularMatrix(height, width, irregularTokenizedMatrix);
 
         return {
-            staticMap: {
-                directions: directionMap,
-                height: height,
-                width: width,
-                tiles: tileMap
-            },
-            boxes: boxes,
-            hero: hero
+            height: height,
+            width: width,
+            tiles: tileMap
         };
     }
 
-    private createRectangularMatrix(height: number, width: number, baseMatrix: (Tiles | Directions | undefined)[][], defaultValue: Tiles | Directions | undefined):
-        (Tiles | Directions | undefined)[][] {
+    private createRectangularMatrix(height: number, width: number, baseMatrix: TileIdentification[][]): TileIdentification[][] {
         return new Array(height)
             .fill(new Array(width)
                 .fill(null))
             .map((line, y) => line
                 .map((_: any, x: number) => {
-                    const value = baseMatrix[y][x];
-                    return value !== undefined ? value : defaultValue;
+                    const item = baseMatrix[y][x];
+                    if (item === undefined) {
+                        return {
+                            code: Tiles.empty,
+                            orientation: undefined
+                        };
+                    }
+                    return {
+                        code: item.code,
+                        orientation: item.orientation
+                    };
                 }));
     }
 
-    private removeMetaChars(metamap: string[][]): { directions: (Directions | undefined)[][], tiles: Tiles[][] } {
+    private removeMetaChars(metamap: string[][]): TileIdentification[][] {
         const directionRegex = /[udlr]/;
         const numberRegex = /\d/;
-        const directions: (Directions | undefined)[][] = [];
-        const tiles: Tiles[][] = [];
+        const result = [];
         for (let line = 0; line < metamap.length; ++line) {
-            let directionsLine: (Directions | undefined)[] = [];
-            let tilesLine: Tiles[] = [];
+            let resultLine: TileIdentification[] = [];
             for (let col = 0; col < metamap[line].length; ++col) {
                 let char = metamap[line][col];
-                let direction = undefined;
+                let orientation = undefined;
 
                 let repetitions = '0';
                 while (numberRegex.test(char)) {
@@ -71,21 +66,20 @@ export class StandardSokobanAnnotationMapper {
                     char = metamap[line][++col];
                 }
                 if (directionRegex.test(char)) {
-                    direction = getDirectionFromChar(char);
+                    orientation = getDirectionFromChar(char);
                     char = metamap[line][++col];
                 }
                 const repetitionAsNumber = Math.max(Number(repetitions), 1);
-                tilesLine = tilesLine
+                resultLine = resultLine
                     .concat(new Array(repetitionAsNumber)
-                        .fill(getTileFromChar(char)));
-                directionsLine = directionsLine
-                    .concat(new Array(repetitionAsNumber)
-                        .fill(direction));
+                        .fill({
+                            code: getTileFromChar(char),
+                            orientation: orientation
+                        }));
             }
-            directions.push(directionsLine);
-            tiles.push(tilesLine);
+            result.push(resultLine);
         }
-        return {directions, tiles};
+        return result;
     }
 
     private splitInIrregularMatrix(encodedLevel: string) {
@@ -97,35 +91,4 @@ export class StandardSokobanAnnotationMapper {
 
     }
 
-    private extractBoxes(tileMap: Tiles[][]): Point[] {
-        const boxes: Point[] = [];
-        for (let line = 0; line < tileMap.length; ++line) {
-            for (let col = 0; col < tileMap[line].length; ++col) {
-                const tile = tileMap[line][col];
-                if (tile === Tiles.box) {
-                    boxes.push(new Point(col, line));
-                    tileMap[line][col] = Tiles.floor;
-                } else if (tile === Tiles.boxOnTarget) {
-                    boxes.push(new Point(col, line));
-                    tileMap[line][col] = Tiles.target;
-                }
-            }
-        }
-        return boxes;
-    }
-
-    private extractHero(tileMap: Tiles[][]): Point | undefined {
-        for (let line = 0; line < tileMap.length; ++line) {
-            for (let col = 0; col < tileMap[line].length; ++col) {
-                const tile: Tiles = tileMap[line][col];
-                if (tile === Tiles.hero) {
-                    tileMap[line][col] = Tiles.floor;
-                    return new Point(col, line);
-                } else if (tile === Tiles.heroOnTarget) {
-                    tileMap[line][col] = Tiles.target;
-                    return new Point(col, line);
-                }
-            }
-        }
-    }
 }

@@ -1,21 +1,19 @@
+import {Tiles} from './tiles';
 import type Phaser from 'phaser';
 import {Box} from '@/game/actors/box';
-import {Tiles} from './tiles';
 import {Point} from '@/game/math/point';
 import {Hero} from '@/game/actors/hero';
-import {configuration} from '../constants/configuration';
-import type {ScaleOutput} from '@/game/math/screen-properties-calculator';
-import type {Mapped} from '@/game/tiles/standard-sokoban-annotation-mapper';
 import {Target} from '@/game/actors/target';
+import {configuration} from '../constants/configuration';
+import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {GameActor} from '@/game/actors/game-actor';
 
 const floorDepth = -1000;
-const targetDepth = 0;
+const targetDepth = -100;
 
 export type FeatureMap = {
-    // staticMap: Phaser.GameObjects.Sprite[][];
+    featurelessMap: StaticMap;
     boxes: Box[];
-    walls: Phaser.GameObjects.Sprite[];
-    floors: Phaser.GameObjects.Sprite[];
     hero: Hero;
     targets: Target[];
 };
@@ -23,79 +21,124 @@ export type FeatureMap = {
 export class FeatureMapExtractor {
     private readonly scale: number;
     private readonly scene: Phaser.Scene;
+    private readonly featurelessMap: StaticMap;
 
-    constructor(scene: Phaser.Scene, scale: number) {
+    constructor(scene: Phaser.Scene, scale: number, map: StaticMap) {
         this.scene = scene;
         this.scale = scale;
+        this.featurelessMap = map;
+        this.featurelessMap.tiles = JSON.parse(JSON.stringify(map.tiles)) as TileIdentification[][];
     }
 
-    public extractFeatures(map: Mapped, scale: ScaleOutput): FeatureMap {
-        const tiles = map.staticMap.tiles;
-        const targets: Target[] = [];
-        const hero = this.getHero(map, scale);
-        const boxes = this.getBoxes(map, scale, tiles);
-        const walls: Phaser.GameObjects.Sprite[] = [];
-        const floors: Phaser.GameObjects.Sprite[] = [];
+    public extract(): FeatureMap {
+        const hero = this.extractHero()!;
+        const boxes = this.extractBoxes();
+        const targets = this.detectTargets(boxes);
 
-        tiles
-            .map((line, y) => line
-                .map((tile: Tiles, x: number) => {
-                    const position = new Point(x, y);
-                    const sprite = this.createSprite(position, tile, scale.scale);
-                    if (tile === Tiles.floor) {
-                        sprite.setDepth(floorDepth);
-                        floors.push(sprite);
-                        //needed because target is not dynamic like a box (that creates its floor at the annotation extractor)
-                    } else if (tile === Tiles.target) {
-                        const target = new Target({scene: this.scene, sprite: sprite, tilePosition: position});
-                        targets.push(target);
-                        if (boxes
-                            .some(box => box.getTilePosition().isEqualTo(position))) {
-                            target.cover();
-                        }
+        this.addFloors(targets as GameActor[]);
 
-                        const floorBehind = this.createSprite(position, Tiles.floor, scale.scale);
-                        floorBehind.setDepth(floorDepth);
-                        floors.push(floorBehind);
-                        sprite.setDepth(targetDepth);
-                    } else if (tile === Tiles.wall) {
-                        walls.push(sprite);
-                    }
-                    return sprite;
-                }));
+        const featurelessMap: StaticMap = {
+            tiles: this.featurelessMap.tiles,
+            width: this.featurelessMap.width,
+            height: this.featurelessMap.height
+        };
         return {
-            // staticMap: staticMap,
+            featurelessMap: featurelessMap,
             targets: targets,
             hero: hero,
-            walls: walls,
-            floors: floors,
             boxes: boxes
         };
 
     }
 
-    private getHero(map: Mapped, scale: ScaleOutput) {
-        return new Hero({scene: this.scene, sprite: this.createSprite(map.hero!, Tiles.hero, scale.scale), tilePosition: map.hero!});
+    private extractHero(): Hero | undefined {
+        let hero: Hero | undefined = undefined;
+        this.featurelessMap.tiles = this.featurelessMap.tiles
+            .map((line, y) => line
+                .map((tile: TileIdentification, x: number) => {
+                    if (tile.code === Tiles.hero || tile.code === Tiles.heroOnTarget) {
+                        const tilePosition = new Point(x, y);
+                        const heroSprite = this.createSprite(tilePosition, Tiles.hero);
+                        hero = new Hero({scene: this.scene, sprite: heroSprite, tilePosition: tilePosition});
+                        return {
+                            code: tile.code === Tiles.hero ? Tiles.floor : Tiles.target,
+                            orientation: tile.orientation
+                        };
+                    }
+                    return tile;
+                }));
+        return hero;
     }
 
-    private getBoxes(map: Mapped, scale: ScaleOutput, tiles: Tiles[][]) {
-        return map.boxes
-            .map(box => {
-                //TODO add an id to each box
-                const boxActor = new Box({scene: this.scene, sprite: this.createSprite(box, Tiles.box, scale.scale), tilePosition: box});
-                boxActor.setIsOnTarget(tiles[box.y][box.x] === Tiles.target);
-                return boxActor;
-            });
+    private extractBoxes(): Box[] {
+        const boxes: Box[] = [];
+        this.featurelessMap.tiles = this.featurelessMap.tiles
+            .map((line, y) => line
+                .map((tile: TileIdentification, x: number) => {
+                    if (tile.code === Tiles.box || tile.code === Tiles.boxOnTarget) {
+                        const tilePosition = new Point(x, y);
+                        const sprite = this.createSprite(tilePosition, Tiles.box);
+                        boxes.push(new Box({scene: this.scene, sprite: sprite, tilePosition: tilePosition, id: boxes.length}));
+                        return {
+                            code: tile.code === Tiles.box ? Tiles.floor : Tiles.target,
+                            orientation: tile.orientation
+                        };
+                    }
+                    return tile;
+                }));
+        return boxes;
     }
 
-    private createSprite(point: Point, tile: Tiles, scale: number): Phaser.GameObjects.Sprite {
+    private detectTargets(boxes: Box[]): Target[] {
+        const targets: Target[] = [];
+        this.featurelessMap.tiles = this.featurelessMap.tiles
+            .map((line, y) => line
+                .map((tile: TileIdentification, x: number) => {
+                    if (tile.code === Tiles.target) {
+                        const tilePosition = new Point(x, y);
+                        const sprite = this.createSprite(tilePosition, Tiles.target);
+                        sprite.setDepth(targetDepth);
+                        const target = new Target({scene: this.scene, sprite: sprite, tilePosition: tilePosition});
+
+                        const boxOnIt = boxes
+                            .find(box => box.getTilePosition().isEqualTo(tilePosition));
+                        if (boxOnIt) {
+                            console.log('cover', boxOnIt.getSprite().depth, target.getSprite().depth)
+                            target.cover();
+                            boxOnIt.setIsOnTarget(true)
+                        }
+
+                        targets.push(target);
+                    }
+                    return tile;
+                }));
+        return targets;
+    }
+
+    private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
         const sprite = this.scene.add.sprite((point.x + 1) * configuration.world.tileSize.horizontal,
             (point.y + 1) * configuration.world.tileSize.vertical, configuration.tiles.spriteSheetKey, tile);
-        sprite.scale = scale;
+        sprite.scale = this.scale;
         sprite.setOrigin(0.5);
         sprite.setDepth(sprite.y);
         sprite.setPipeline('Light2D');
         return sprite;
     }
 
+    private addFloors(actors: GameActor[]) {
+        actors
+            .forEach(actor => this.createSprite(actor.getTilePosition(), Tiles.floor).setDepth(floorDepth));
+
+        this.featurelessMap.tiles
+            .forEach((line, y) => line
+                .forEach((tile: TileIdentification, x: number) => {
+                    if (tile.code !== Tiles.target) { //it was previously created
+                        const tilePosition = new Point(x, y);
+                        const sprite = this.createSprite(tilePosition, tile.code);
+                        if (tile.code === Tiles.floor) {
+                            sprite.setDepth(floorDepth);
+                        }
+                    }
+                }));
+    }
 }
