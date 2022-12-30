@@ -2,7 +2,7 @@ import type Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
 import type {GameActor} from '@/game/actors/game-actor';
-import {getTweenFromDirection} from '@/game/actors/tween';
+import {getTweenFromDirection} from '@/game/animations/tween';
 import type {Directions} from '@/game/constants/directions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
@@ -70,4 +70,9 @@ export class Box implements GameActor {
     public getTileCode(): Tiles {
         return Tiles.box;
     }
+
+    public getOrientation(): Directions | undefined {
+        return undefined;
+    }
+
 }

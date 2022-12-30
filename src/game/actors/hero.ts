@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
-import {HeroAnimator} from './hero-animator';
+import {HeroAnimator} from '../animations/hero-animator';
 import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '../constants/directions';
@@ -11,13 +11,15 @@ export class Hero implements GameActor {
     private readonly heroAnimator: HeroAnimator;
     private readonly inputMap: Map<Actions, () => boolean>;
     private readonly sprite: Phaser.GameObjects.Sprite;
+    private readonly id: number;
 
     private isMoving: boolean = false;
     private tweens: Phaser.Tweens.TweenManager;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
 
-    public constructor(heroConfig: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite, tilePosition: Point }) {
+    public constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
+        this.id = config.id;
         this.inputMap = new Map<Actions, () => boolean>();
         this.inputMap.set(Actions.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors!.right));
         this.inputMap.set(Actions.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors!.left));
@@ -26,13 +28,13 @@ export class Hero implements GameActor {
 
         this.heroAnimator = new HeroAnimator();
 
-        this.tweens = heroConfig.scene.tweens;
-        this.cursors = heroConfig.scene.input.keyboard.createCursorKeys();
+        this.tweens = config.scene.tweens;
+        this.cursors = config.scene.input.keyboard.createCursorKeys();
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
-        this.sprite = heroConfig.sprite;
+        this.sprite = config.sprite;
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));
-        this.tilePosition = heroConfig.tilePosition;
+        this.tilePosition = config.tilePosition;
     }
 
     public getTilePosition(): Point {
@@ -81,6 +83,14 @@ export class Hero implements GameActor {
 
     public getTileCode(): Tiles {
         return Tiles.hero;
+    }
+
+    public getId(): Tiles {
+        return this.id;
+    }
+
+    public getOrientation(): Directions | undefined {
+        return undefined;
     }
 
 }
