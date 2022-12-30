@@ -62,10 +62,10 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable();
         this.lights.enable().setAmbientColor(0x555555);
 
-        const mapfeatureMapExtractorsExtractor = new FeatureMapExtractor(this, output.scale, map);
-        const featureMap = mapfeatureMapExtractorsExtractor.extract();
+        const mapfeatureMapExtractor = new FeatureMapExtractor(this, output.scale, map);
+        const tileMap = mapfeatureMapExtractor.extract();
 
-        this.gameController = new GameController({featureMap, solution: store.solution});
+        this.gameController = new GameController({tileMap: tileMap, solution: store.solution});
 
         this.allowUpdates = true;
     }

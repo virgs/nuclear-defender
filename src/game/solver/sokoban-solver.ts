@@ -33,7 +33,7 @@ export class SokobanSolver {
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.score - b.score);
     private candidatesVisitedHash: { [hash: string]: boolean } = {};
-    private readonly staticMap: StaticMap;
+    private readonly tileMap: StaticMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
@@ -42,15 +42,15 @@ export class SokobanSolver {
     private boxes: Point[] = [];
 
     public constructor(input: {
-        staticMap: StaticMap,
+        tileMap: StaticMap,
         cpu: { sleepForInMs: number, sleepingCycle: number }
         distanceCalculator: DistanceCalculator
     }) {
         this.sleepForInMs = input.cpu.sleepForInMs;
         this.sleepingCycle = input.cpu.sleepingCycle;
 
-        this.staticMap = input.staticMap;
-        this.staticMap.tiles = (JSON.parse(JSON.stringify(input.staticMap.tiles)) as OrientedTile[][])
+        this.tileMap = input.tileMap;
+        this.tileMap.tiles = (JSON.parse(JSON.stringify(input.tileMap.tiles)) as OrientedTile[][])
             .map((tile: OrientedTile[], y: number) => {
                 return tile.map((tile: OrientedTile, x: number) => {
                     if (tile.code === Tiles.heroOnTarget) {
@@ -69,9 +69,9 @@ export class SokobanSolver {
                 });
             });
 
-        this.movementCoordinator = new MovementCoordinator(this.staticMap);
+        this.movementCoordinator = new MovementCoordinator({staticMap: this.tileMap, hero: this.hero!, boxes: this.boxes});
         this.movementAnalyser = new MovementAnalyser({
-            map: this.staticMap,
+            staticMap: this.tileMap,
             distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
@@ -139,9 +139,6 @@ export class SokobanSolver {
         SokobanSolver.actionsList
             .forEach((action: Actions) => {
                 const afterAction = this.movementCoordinator.update({
-                    boxes: candidate.boxes,
-                    hero: candidate.hero,
-                    map: this.staticMap,
                     heroAction: action
                 });
 
@@ -165,7 +162,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: Point[]): boolean {
         return boxesPosition
-            .every(box => this.staticMap.tiles[box.y][box.x].code === Tiles.target);
+            .every(box => this.tileMap.tiles[box.y][box.x].code === Tiles.target);
     }
 
     private candidateWasVisitedBefore(newCandidateHash: string): boolean {

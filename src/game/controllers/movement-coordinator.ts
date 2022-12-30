@@ -25,10 +25,7 @@ export type MovementCoordinatorOutput = {
 };
 
 export type MovementCoordinatorInput = {
-    boxes: Point[];
     heroAction: Actions;
-    map: StaticMap;
-    hero: Point;
 };
 
 export class MovementCoordinator {
@@ -37,9 +34,14 @@ export class MovementCoordinator {
     private readonly orientinedBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
 
     private readonly staticMap: StaticMap;
+    private readonly hero: Movement;
+    private readonly boxes: Movement[];
 
-    constructor(map: StaticMap) {
-        this.staticMap = map;
+    constructor(config: { boxes: Point[]; staticMap: StaticMap; hero: Point }) {
+        this.staticMap = config.staticMap;
+        this.hero = this.initializeMovement(config.hero);
+        this.boxes = config.boxes.map(box => this.initializeMovement(box));
+
         this.orientinedBlockingTiles.set(Tiles.spring,
             (tileOrientation: Directions, movementDirection: Directions) => getOpositeDirectionOf(tileOrientation) === movementDirection);
         this.orientinedBlockingTiles.set(Tiles.treadmil,
@@ -48,30 +50,43 @@ export class MovementCoordinator {
             (tileOrientation: Directions, movementDirection: Directions) => tileOrientation === movementDirection);
     }
 
-    public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
-        let mapChanged = false;
-        let hero: Movement = this.initializeHero(input);
-        let boxes: Movement[] = this.initializeBoxes(input);
+    private initializeMovement(point: Point): Movement {
+        return {
+            previousPosition: point,
+            currentPosition: point,
+            isCurrentlyOnTarget: this.getFeatureAtPosition(point)?.code === Tiles.target,
+            isCurrentlyOnSpring: this.getFeatureAtPosition(point)?.code === Tiles.spring,
+            direction: undefined
+        };
+    }
 
-        mapChanged = mapChanged || this.checkSpringsSituation(hero, boxes);
+    public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
+        this.hero.previousPosition = this.hero.currentPosition;
+        this.boxes
+            .forEach(box => box.previousPosition = box.currentPosition);
+
+        let mapChanged = false;
+
+        mapChanged = mapChanged || this.checkSpringsPushes();
 
         if (input.heroAction !== Actions.STAND) {
             const heroDirection = mapActionToDirection(input.heroAction)!;
-            hero.direction = heroDirection;
+            this.hero.direction = heroDirection;
 
-            const newHeroPosition = input.hero.calculateOffset(heroDirection);
-            if (this.canHeroMove(newHeroPosition, heroDirection, boxes)) {
+            const newHeroPosition = this.hero.currentPosition.calculateOffset(heroDirection);
+            if (this.canHeroMove(newHeroPosition)) {
                 mapChanged = true;
                 //move hero
-                hero.currentPosition = newHeroPosition;
+                this.hero.currentPosition = newHeroPosition;
                 //update target status
-                hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x].code === Tiles.target;
+                this.hero.isCurrentlyOnTarget = this.staticMap.tiles[newHeroPosition.y][newHeroPosition.x].code === Tiles.target;
                 //box moved
-                const movedBox = boxes
+                const movedBox = this.boxes
                     .find(box => box.previousPosition.isEqualTo(newHeroPosition));
                 if (movedBox) {
                     //move box
                     movedBox.direction = heroDirection;
+                    movedBox.previousPosition = movedBox.currentPosition;
                     movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
                     //update target status
                     movedBox.isCurrentlyOnTarget = this.staticMap.tiles[movedBox.currentPosition.y][movedBox.currentPosition.x].code === Tiles.target;
@@ -80,47 +95,26 @@ export class MovementCoordinator {
         }
 
         return {
-            hero: hero,
-            boxes: boxes,
+            hero: this.hero,
+            boxes: this.boxes,
             mapChanged: mapChanged
         };
     }
 
-    private initializeBoxes(input: MovementCoordinatorInput) {
-        return input.boxes
-            .map(box => ({
-                previousPosition: box,
-                currentPosition: box,
-                isCurrentlyOnTarget: false,
-                isCurrentlyOnSpring: false,
-                direction: undefined
-            }));
-    }
-
-    private initializeHero(input: MovementCoordinatorInput) {
-        return {
-            previousPosition: input.hero,
-            currentPosition: input.hero,
-            isCurrentlyOnSpring: false,
-            isCurrentlyOnTarget: false,
-            direction: undefined
-        };
-    }
-
-    private canHeroMove(newHeroPosition: Point, heroDirection: Directions, boxes: Movement[]): boolean {
+    private canHeroMove(newHeroPosition: Point): boolean {
         const featureAhead = this.getFeatureAtPosition(newHeroPosition)?.code;
         if (featureAhead === undefined || featureAhead === Tiles.wall) {
             return false;
         }
 
-        if (boxes
+        if (this.boxes
             .some(box => box.currentPosition.isEqualTo(newHeroPosition))) {
-            const afterNextMove = newHeroPosition.calculateOffset(heroDirection);
+            const afterNextMove = newHeroPosition.calculateOffset(this.hero.direction!);
             const afterNextMoveFeature = this.getFeatureAtPosition(afterNextMove)?.code;
             if (afterNextMoveFeature === undefined || afterNextMoveFeature === Tiles.wall) {
                 return false;
             }
-            if (boxes
+            if (this.boxes
                 .find(box => box.currentPosition.isEqualTo(afterNextMove))) {
                 return false;
             }
@@ -130,23 +124,34 @@ export class MovementCoordinator {
     }
 
     private getFeatureAtPosition(position: Point): OrientedTile | undefined {
-        if (position.x >= this.staticMap.width || position.y >= this.staticMap.height
-            || position.x < 0 || position.y < 0) {
-            return undefined;
+        if (this.hero?.currentPosition.isEqualTo(position)) {
+            return {
+                code: Tiles.hero,
+                orientation: undefined
+            };
         }
-        return this.staticMap.tiles[position.y][position.x];
+        if (this.boxes
+            ?.some(box => box.currentPosition.isEqualTo(position))) {
+            return {
+                code: Tiles.box,
+                orientation: undefined
+            };
+        }
+        if (position.x < this.staticMap.width && position.y < this.staticMap.height
+            && position.x >= 0 && position.y >= 0) {
+            return this.staticMap.tiles[position.y][position.x];
+        }
     }
 
-    private checkSpringsSituation(hero: Movement, boxes: Movement[]): boolean {
+    private checkSpringsPushes(): boolean {
         let mapChanged = false;
         const springs: OrientedPoint[] = this.findSprings();
         springs
-            .forEach(spring => boxes
+            .forEach(spring => this.boxes
                 .some(box => {
                     if (box.currentPosition.isEqualTo(spring.point)) {
                         const nextTilePosition = box.currentPosition.calculateOffset(spring.orientation);
-                        if (nextTilePosition.isDifferentOf(hero.currentPosition) &&
-                            this.isMovementAllowed(Tiles.box, spring.orientation, nextTilePosition)) {
+                        if (this.isMovementAllowed(Tiles.box, spring.orientation, nextTilePosition)) {
                             box.currentPosition = nextTilePosition;
                             box.isCurrentlyOnSpring = true;
                             box.direction = spring.orientation;

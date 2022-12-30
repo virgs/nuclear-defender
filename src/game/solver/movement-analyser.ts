@@ -29,15 +29,15 @@ export class MovementAnalyser {
     private readonly deadlockDetector: DeadlockDetector;
 
     public constructor(data: {
-        map: StaticMap,
+        staticMap: StaticMap,
         distanceCalculator: DistanceCalculator
     }) {
-        this.staticMap = data.map;
+        this.staticMap = data.staticMap;
         this.distanceCalculator = data.distanceCalculator;
         this.targets = [];
-        for (let y = 0; y < data.map.height; ++y) {
-            for (let x = 0; x < data.map.width; ++x) {
-                if (data.map.tiles[y][x].code === Tiles.target) {
+        for (let y = 0; y < data.staticMap.height; ++y) {
+            for (let x = 0; x < data.staticMap.width; ++x) {
+                if (data.staticMap.tiles[y][x].code === Tiles.target) {
                     this.targets.push(new Point(x, y));
                 }
             }

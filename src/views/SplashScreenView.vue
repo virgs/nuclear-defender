@@ -39,7 +39,7 @@ async function runSolutionsAlgorithm() {
   const solvers = new Map<string, SokobanSolver>();
   console.log('running algorithm for: ' + levels[index].title);
   solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
-    staticMap: map, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
+    tileMap: map, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
     distanceCalculator: new ManhattanDistanceCalculator()
   }));
   for (let [name, solver] of solvers) {

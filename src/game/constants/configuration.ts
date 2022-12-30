@@ -26,6 +26,11 @@ export const configuration = {
             vertical: Math.trunc(tileHeight * verticalPerspective),
             horizontal: tileWidth
         },
+        screenAdjustment: {
+            vertical: Math.trunc(tileHeight * verticalPerspective),
+            horizontal: tileWidth
+        }
+
     },
     screenRatio: .75,
     gameWidth: 800,

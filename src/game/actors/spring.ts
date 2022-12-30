@@ -34,11 +34,9 @@ export class Spring implements GameActor {
     }
 
     public push(): void {
-        console.log('spring moved some box')
     }
 
     public activate(): void {
-        console.log('spring was activated by some box')
     }
 
     public getId(): number {

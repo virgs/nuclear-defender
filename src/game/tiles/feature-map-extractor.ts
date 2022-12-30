@@ -8,9 +8,9 @@ import {Spring} from '@/game/actors/spring';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '../constants/configuration';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
-export type FeatureMap = {
+export type TileMap = {
     staticMap: StaticMap;
     boxes: Box[];
     hero: Hero;
@@ -32,7 +32,7 @@ export class FeatureMapExtractor {
         this.actorCounter = 0;
     }
 
-    public extract(): FeatureMap {
+    public extract(): TileMap {
         const hero = this.extractHero()!;
         const boxes = this.extractBoxes();
         const targets = this.detectTargets(boxes);
@@ -138,8 +138,11 @@ export class FeatureMapExtractor {
     }
 
     private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const sprite = this.scene.add.sprite((point.x + 1) * configuration.world.tileSize.horizontal,
-            (point.y + 1) * configuration.world.tileSize.vertical, configuration.tiles.spriteSheetKey, tile);
+        const screenAdjustment = new Point(1, 1);
+
+        const sprite = this.scene.add.sprite(point.x * configuration.world.tileSize.horizontal + configuration.world.screenAdjustment.horizontal,
+            point.y * configuration.world.tileSize.vertical + configuration.world.screenAdjustment.vertical,
+            configuration.tiles.spriteSheetKey, tile);
         sprite.scale = this.scale;
         sprite.setOrigin(0.5);
         sprite.setDepth(new TileDepthCalculator().calculate(tile, sprite.y));
@@ -163,7 +166,7 @@ export class FeatureMapExtractor {
 
     private addRemainingFloors(staticActors: GameActor[]): Set<Tiles> {
         const staticActorsCode: Set<Tiles> = new Set<Tiles>();
-        //(targets and stuff).. They hide floors behind them
+        //(targets and stuff).. those that hide floors behind them
         staticActors
             .forEach(actor => {
                 staticActorsCode.add(actor.getTileCode());

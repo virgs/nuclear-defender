@@ -3,16 +3,16 @@ import type {Hero} from '@/game/actors/hero';
 import type {Spring} from '@/game/actors/spring';
 import type {Target} from '@/game/actors/target';
 import type {Actions} from '@/game/constants/actions';
+import type {TileMap} from '@/game/tiles/feature-map-extractor';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
-import type {FeatureMap} from '@/game/tiles/feature-map-extractor';
-import type {Movement, MovementCoordinatorOutput} from '@/game/controllers/movement-coordinator';
 import {MovementCoordinator} from '@/game/controllers/movement-coordinator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import type {Movement, MovementCoordinatorOutput} from '@/game/controllers/movement-coordinator';
 
 export class GameController {
-    private readonly featurelessMap: StaticMap;
+    private readonly tileMap: StaticMap;
     private readonly playerMoves: Actions[];
     private readonly movementCoordinator: MovementCoordinator;
     private readonly hero: Hero;
@@ -20,48 +20,29 @@ export class GameController {
     private readonly springs: Spring[];
     private readonly targets: Target[];
     private readonly solution?: SolutionOutput;
-    private readonly movementAnalyser?: MovementAnalyser;
+    private readonly movementAnalyser: MovementAnalyser;
 
     private levelComplete: boolean = false;
     private movementsAreAllowed: boolean;
 
-    constructor(config: { featureMap: FeatureMap, solution?: SolutionOutput }) {
-        this.hero = config.featureMap.hero;
-        this.boxes = config.featureMap.boxes;
-        this.springs = config.featureMap.springs;
-        this.targets = config.featureMap.targets;
-        this.featurelessMap = config.featureMap.staticMap;
+    constructor(config: { tileMap: TileMap, solution?: SolutionOutput }) {
+        this.hero = config.tileMap.hero;
+        this.boxes = config.tileMap.boxes;
+        this.springs = config.tileMap.springs;
+        this.targets = config.tileMap.targets;
+        this.tileMap = config.tileMap.staticMap;
         this.solution = config.solution;
         this.playerMoves = [];
         this.levelComplete = false;
         this.movementsAreAllowed = true;
 
-        this.movementAnalyser = new MovementAnalyser({map: this.featurelessMap, distanceCalculator: new ManhattanDistanceCalculator()});
-        this.movementCoordinator = new MovementCoordinator(this.featurelessMap);
-
-    }
-
-    public async update(): Promise<void> {
-        let heroAction: Actions = this.hero!.checkAction();
-        if (this.solution?.actions?.length! > 0) {
-            heroAction = this.solution?.actions?.shift()!;
-        }
-        this.playerMoves!.push(heroAction);
-
-        const movement = this.movementCoordinator!.update({
-            heroAction: heroAction,
-            map: this.featurelessMap!,
-            hero: this.hero!.getTilePosition(),
-            boxes: this.boxes!
-                .map(box => box.getTilePosition())
+        this.movementAnalyser = new MovementAnalyser({staticMap: this.tileMap, distanceCalculator: new ManhattanDistanceCalculator()});
+        this.movementCoordinator = new MovementCoordinator({
+            staticMap: this.tileMap,
+            hero: this.hero.getTilePosition(),
+            boxes: this.boxes.map(box => box.getTilePosition())
         });
 
-        if (movement.mapChanged) {
-            this.movementAnalyser?.analyse(movement);
-            this.movementsAreAllowed = false;
-            await this.updateMapFeatures(movement);
-            this.checkLevelComplete();
-        }
     }
 
     public isLevelComplete(): boolean {
@@ -70,6 +51,25 @@ export class GameController {
 
     public getPlayerMoves(): Actions[] {
         return this.playerMoves;
+    }
+
+    public async update(): Promise<void> {
+        let heroAction: Actions = this.hero.checkAction();
+        if (this.solution?.actions?.length! > 0) {
+            heroAction = this.solution?.actions?.shift()!;
+        }
+        this.playerMoves!.push(heroAction);
+
+        const movement = this.movementCoordinator!.update({
+            heroAction: heroAction
+        });
+
+        if (movement.mapChanged) {
+            this.movementAnalyser.analyse(movement);
+            this.movementsAreAllowed = false;
+            await this.updateMapFeatures(movement);
+            this.checkLevelComplete();
+        }
     }
 
     private async updateMapFeatures(movementCoordinatorOutput: MovementCoordinatorOutput) {
