@@ -88,33 +88,15 @@ export class MovementCoordinator {
             .reduce((changed, action) => changed || action(), false);
 
         if (input.heroAction !== Actions.STAND) {
-            const heroDirection = mapActionToDirection(input.heroAction)!;
-            this.hero.direction = heroDirection;
-
-            const newHeroPosition = this.hero.currentPosition.calculateOffset(heroDirection);
-            if (this.canHeroMove(newHeroPosition)) {
+            const aimedDirection = mapActionToDirection(input.heroAction)!;
+            const aimedPosition = this.hero.currentPosition.calculateOffset(aimedDirection);
+            if (this.canHeroMove(aimedPosition, aimedDirection)) {
                 mapChanged = true;
-                //move hero
-                this.hero.currentPosition = newHeroPosition;
-                //update target status
-                this.hero.isCurrentlyOnTarget = this.getFeatureAtPosition(newHeroPosition)
-                    .some(feature => feature.code === Tiles.target);
-                this.hero.isCurrentlyOnSpring = this.getFeatureAtPosition(newHeroPosition)
-                    .some(feature => feature.code === Tiles.spring);
-                //box moved
-                const movedBox = this.boxes
-                    .find(box => box.previousPosition.isEqualTo(newHeroPosition));
-                if (movedBox) {
-                    //move box
-                    movedBox.direction = heroDirection;
-                    movedBox.previousPosition = movedBox.currentPosition;
-                    movedBox.currentPosition = movedBox.previousPosition.calculateOffset(heroDirection);
-                    //update target status
-                    movedBox.isCurrentlyOnTarget = this.getFeatureAtPosition(movedBox.currentPosition)
-                        .some(feature => feature.code === Tiles.target);
-                    movedBox.isCurrentlyOnSpring = this.getFeatureAtPosition(movedBox.currentPosition)
-                        .some(feature => feature.code === Tiles.spring);
-                }
+                this.hero.direction = aimedDirection;
+                this.moveHero(aimedPosition);
+                this.boxes
+                    .filter(box => box.previousPosition.isEqualTo(aimedPosition))
+                    .forEach(box => this.moveBox(box, this.hero.direction!));
             }
         }
 
@@ -125,29 +107,46 @@ export class MovementCoordinator {
         };
     }
 
-    private canHeroMove(newHeroPosition: Point): boolean {
+    private moveHero(newHeroPosition: Point) {
+        this.hero.currentPosition = newHeroPosition;
+        this.hero.isCurrentlyOnTarget = this.getFeatureAtPosition(newHeroPosition)
+            .some(feature => feature.code === Tiles.target);
+        this.hero.isCurrentlyOnSpring = this.getFeatureAtPosition(newHeroPosition)
+            .some(feature => feature.code === Tiles.spring);
+    }
+
+    private moveBox(movedBox: Movement, direction: Directions) {
+        movedBox.direction = direction;
+        movedBox.previousPosition = movedBox.currentPosition;
+        movedBox.currentPosition = movedBox.previousPosition.calculateOffset(direction);
+        movedBox.isCurrentlyOnTarget = this.getFeatureAtPosition(movedBox.currentPosition)
+            .some(feature => feature.code === Tiles.target);
+        movedBox.isCurrentlyOnSpring = this.getFeatureAtPosition(movedBox.currentPosition)
+            .some(feature => feature.code === Tiles.spring);
+    }
+
+    private canHeroMove(newHeroPosition: Point, aimedDirection: Directions): boolean {
         if (this.hero.isCurrentlyOnSpring) {
             const springOnIt = this.getFeatureAtPosition(this.hero.currentPosition)
                 .find(feature => feature.code === Tiles.spring)!;
-            return !this.orientinedBlockingTiles.get(Tiles.spring)!(springOnIt.orientation!, this.hero.direction!);
+            return !this.orientinedBlockingTiles.get(Tiles.spring)!(springOnIt.orientation!, aimedDirection);
         }
-        const positionProperties = this.getPositionProperties(this.hero.direction!, newHeroPosition);
+        const positionProperties = this.getPositionProperties(aimedDirection, newHeroPosition);
         if (positionProperties
             .some(move => !move.allowMoveOver)) { //it can be a box, check the next one too
             const notAllowed = positionProperties
                 .filter(tile => !tile.allowMoveOver);
             if (notAllowed.length === 1 && notAllowed[0].tileAhead.code === Tiles.box) { //it's a box, check the following
-                const afterNextMove = newHeroPosition.calculateOffset(this.hero.direction!);
-                const followingProperties = this.getPositionProperties(this.hero.direction!, afterNextMove);
+                const afterNextMove = newHeroPosition.calculateOffset(aimedDirection);
+                const followingProperties = this.getPositionProperties(aimedDirection, afterNextMove);
 
                 const springAhead = positionProperties
                     .find(property => property.tileAhead.code === Tiles.spring);
                 if (springAhead) { //the box is on a spring, one direction is not allowed
-                    return !this.orientinedBlockingTiles.get(Tiles.spring)!(springAhead.tileAhead.orientation!, this.hero.direction!);
+                    return !this.orientinedBlockingTiles.get(Tiles.spring)!(springAhead.tileAhead.orientation!, aimedDirection);
                 }
                 return followingProperties
                     .every(property => property.allowMoveOver);
-
             }
             return false;
         }
@@ -165,11 +164,7 @@ export class MovementCoordinator {
                         const properties = this.getPositionProperties(spring.orientation, nextTilePosition);
                         if (properties
                             .every(move => move.allowMoveOver)) {
-                            box.currentPosition = nextTilePosition;
-                            box.isCurrentlyOnSpring = true;
-                            box.direction = spring.orientation;
-                            box.isCurrentlyOnTarget = this.staticMap.tiles[box.currentPosition.y][box.currentPosition.x].code === Tiles.target;
-
+                            this.moveBox(box, spring.orientation);
                             mapChanged = true;
                         }
                     }

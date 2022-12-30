@@ -106,10 +106,10 @@ export class GameController {
             .forEach(feature => {
                 this.springs
                     .find(spring => spring.getTilePosition().isEqualTo(feature.previousPosition))
-                    ?.push();
+                    ?.release();
                 this.springs
                     .find(spring => spring.getTilePosition().isEqualTo(feature.currentPosition))
-                    ?.activate();
+                    ?.engage();
             });
 
     }
