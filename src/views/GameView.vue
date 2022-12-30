@@ -13,6 +13,10 @@ function undoClick() {
   Store.getInstance().update(4);
 }
 
+function exitClick() {
+  console.log('exit');
+}
+
 let currentLevelIndex = computed(() => Store.getInstance().currentLevelIndex);
 let currentLevel = computed(() => levels[Store.getInstance().currentLevelIndex]);
 // const currentStoreLevelIndex = Store.getInstance().currentLevelIndex;
@@ -54,6 +58,12 @@ onUnmounted(() => {
       </div>
       <div class="col-12 my-4">
         <div class="row my-4 justify-content-end">
+          <div class="col-2 d-grid gap-2">
+            <button class="btn btn-primary sokoban-outlined-button"
+                    @click="exitClick" type="button">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
           <div class="col-2 d-grid gap-2">
             <button class="btn btn-primary sokoban-outlined-button"
                     @click="undoClick" type="button">

@@ -11,8 +11,8 @@ import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import type {Movement, MovementCoordinatorOutput} from '../solver/movement-coordinator';
 import {MovementCoordinator} from '../solver/movement-coordinator';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
-import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
@@ -74,7 +74,7 @@ export class GameScene extends Phaser.Scene {
         this.solution = Store.getInstance().solution;
 
         //TODO move this section to scene before this one
-        const map = new StandardSokobanAnnotationMapper().map(codedMap);
+        const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
         const output = new ScreenPropertiesCalculator().calculate(map);
         configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
         configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
@@ -112,7 +112,8 @@ export class GameScene extends Phaser.Scene {
                 heroAction: heroAction,
                 map: this.featurelessMap!,
                 hero: this.hero!.getTilePosition(),
-                boxes: this.boxes!.map(box => box.getTilePosition())
+                boxes: this.boxes!
+                    .map(box => box.getTilePosition())
             });
 
             if (movement.mapChanged) {

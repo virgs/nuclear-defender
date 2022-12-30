@@ -27,7 +27,7 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
         case Directions.DOWN:
             return Directions.LEFT;
         case Directions.LEFT:
-            return Directions.RIGHT;
+            return Directions.UP;
     }
 };
 

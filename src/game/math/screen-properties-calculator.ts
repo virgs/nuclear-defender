@@ -1,6 +1,6 @@
 import {Point} from '@/game/math/point';
 import {configuration} from '@/game/constants/configuration';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {

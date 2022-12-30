@@ -17,7 +17,6 @@ export enum Tiles {
 export const getTileFromChar = (char: string): Tiles => {
     switch (char) {
         case ' ':
-        case '-':
             return Tiles.floor;
         case 't':
             return Tiles.treadmil;

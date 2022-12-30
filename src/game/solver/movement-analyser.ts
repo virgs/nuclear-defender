@@ -1,7 +1,7 @@
 import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {Movement, MovementCoordinatorOutput} from './movement-coordinator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
@@ -119,6 +119,7 @@ export class MovementAnalyser {
         } else {
             segment = this.horizontalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
         }
+        console.log(segment.differentBoxes, segment.targets, segment.empties);
         if (segment.differentBoxes > segment.targets && segment.empties < 2) {
             console.log('deadlocked: no way to get it back and no available targets');
             return true;
@@ -132,15 +133,14 @@ export class MovementAnalyser {
         //  #
         //  #
 
-        const sideDirection = rotateDirectionClockwise(direction);
-        const clockwiseTilePosition = movedBox.currentPosition.calculateOffset(sideDirection);
-        const otherSide = getOpositeDirectionOf(sideDirection);
+        const clockwiseSide = rotateDirectionClockwise(direction);
+        const clockwiseTilePosition = movedBox.currentPosition.calculateOffset(clockwiseSide);
+        const otherSide = getOpositeDirectionOf(clockwiseSide);
         const counterClowiseTilePosition = movedBox.currentPosition.calculateOffset(otherSide);
         const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
         const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
         if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
-            // console.log('clockwiseTilePosition: ' + cwTile);
-            // console.log('counterClowiseTilePosition: ' + ccwTile);
+            console.log(Directions[direction], Directions[clockwiseSide], clockwiseTilePosition, Directions[otherSide], counterClowiseTilePosition);
             console.log('deadlocked: trapped in between walls');
             return true;
         }
@@ -162,7 +162,7 @@ export class MovementAnalyser {
                 ++targets;
             }
             const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x].code;
-            if (nextLineTile !== Tiles.wall) {
+            if (nextLineTile !== Tiles.wall && nextLineTile !== Tiles.empty) {
                 ++empties;
             }
         }
@@ -186,7 +186,7 @@ export class MovementAnalyser {
             }
 
             const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x].code;
-            if (nextColumnTile !== Tiles.wall) {
+            if (nextColumnTile !== Tiles.wall && nextColumnTile !== Tiles.empty) {
                 ++empties;
             }
         }

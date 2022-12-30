@@ -1,11 +1,11 @@
 import Heap from 'heap';
-import type {Point} from '../math/point';
-import {Actions} from '../constants/actions';
+import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
+import {Actions} from '../constants/actions';
 import {MovementCoordinator} from './movement-coordinator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
+import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 type Solution = {
     actions: Actions[],
@@ -27,7 +27,7 @@ export class SokobanSolver {
 
     private static actionsList = Object.keys(Actions)
         .filter(key => !isNaN(Number(key)))
-        .map(key => Number(key) as Actions)
+        .map(key => Number(key) as Actions);
 
     private movementCoordinator: MovementCoordinator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
@@ -38,6 +38,8 @@ export class SokobanSolver {
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
+    private hero?: Point;
+    private boxes: Point[] = [];
 
     public constructor(input: {
         staticMap: StaticMap,
@@ -48,6 +50,25 @@ export class SokobanSolver {
         this.sleepingCycle = input.cpu.sleepingCycle;
 
         this.staticMap = input.staticMap;
+        this.staticMap.tiles = (JSON.parse(JSON.stringify(input.staticMap.tiles)) as TileIdentification[][])
+            .map((tile: TileIdentification[], y: number) => {
+                return tile.map((tile: TileIdentification, x: number) => {
+                    if (tile.code === Tiles.heroOnTarget) {
+                        tile.code = Tiles.target;
+                        this.hero = new Point(x, y);
+                    } else if (tile.code === Tiles.hero) {
+                        this.hero = new Point(x, y);
+                    } else if (tile.code === Tiles.boxOnTarget) {
+                        tile.code = Tiles.target;
+                        this.boxes.push(new Point(x, y));
+                    } else if (tile.code === Tiles.box) {
+                        this.boxes.push(new Point(x, y));
+                    }
+
+                    return tile;
+                });
+            });
+
         this.movementCoordinator = new MovementCoordinator(this.staticMap);
         this.movementAnalyser = new MovementAnalyser({
             map: this.staticMap,
@@ -60,9 +81,9 @@ export class SokobanSolver {
         this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET, -150);
     }
 
-    public async solve(hero: Point, boxes: Point[]): Promise<SolutionOutput> {
+    public async solve(): Promise<SolutionOutput> {
         const startTime = new Date().getTime();
-        const {actions, iterations} = await this.startAlgorithm(hero, boxes);
+        const {actions, iterations} = await this.startAlgorithm();
         return {
             actions: actions,
             iterations: iterations,
@@ -70,11 +91,11 @@ export class SokobanSolver {
         };
     }
 
-    private async startAlgorithm(hero: Point, boxes: Point[]) {
+    private async startAlgorithm() {
         const initialCandidate: Solution = {
             actions: [],
-            hero,
-            boxes,
+            hero: this.hero!,
+            boxes: this.boxes,
             score: 0
         };
         initialCandidate.hash = this.calculateHashOfSolution(initialCandidate);

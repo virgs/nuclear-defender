@@ -8,7 +8,7 @@ import {computed, onMounted, reactive} from "vue";
 import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {QuadracticEuclidianDistanceCalculator} from '@/game/math/quadractic-euclidian-distance-calculator';
-import {StandardSokobanAnnotationMapper} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
 const router = useRouter();
@@ -33,31 +33,31 @@ async function runSolutionsAlgorithm() {
   let solutionOutput: any = undefined;
 
   // for (let index = 1; index < levels.length - 1; ++index) {
-let index = 4
-    const codedMap: string = levels[index].map;
-    const map = new StandardSokobanAnnotationMapper().map(codedMap);
-    const solvers = new Map<string, SokobanSolver>();
-    console.log('running algorithm for: ' + levels[index].title);
-    solvers.set('QuadracticEuclidianDistanceCalculator 2500/50', new SokobanSolver({
-      staticMap: map.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
-      distanceCalculator: new QuadracticEuclidianDistanceCalculator()
-    }));
-    solvers.set('QuadracticEuclidianDistanceCalculator 3000/50', new SokobanSolver({
-      staticMap: map.staticMap, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
-      distanceCalculator: new QuadracticEuclidianDistanceCalculator()
-    }));
-    solvers.set('ManhattanDistanceCalculator 2500/50', new SokobanSolver({
-      staticMap: map.staticMap, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
-      distanceCalculator: new ManhattanDistanceCalculator()
-    }));
-    solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
-      staticMap: map.staticMap, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
-      distanceCalculator: new ManhattanDistanceCalculator()
-    }));
-    solvers.forEach(async (solver, name) => {
-      solutionOutput = await solver.solve(map.hero!, map.boxes);
-      console.log(levels[index].title, name, solutionOutput);
-    })
+  let index = 1;
+  const codedMap: string = levels[index].map;
+  const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
+  const solvers = new Map<string, SokobanSolver>();
+  console.log('running algorithm for: ' + levels[index].title);
+  solvers.set('QuadracticEuclidianDistanceCalculator 2500/50', new SokobanSolver({
+    staticMap: map, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
+    distanceCalculator: new QuadracticEuclidianDistanceCalculator()
+  }));
+  solvers.set('QuadracticEuclidianDistanceCalculator 3000/50', new SokobanSolver({
+    staticMap: map, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
+    distanceCalculator: new QuadracticEuclidianDistanceCalculator()
+  }));
+  solvers.set('ManhattanDistanceCalculator 2500/50', new SokobanSolver({
+    staticMap: map, cpu: {sleepingCycle: 2500, sleepForInMs: 50},
+    distanceCalculator: new ManhattanDistanceCalculator()
+  }));
+  solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
+    staticMap: map, cpu: {sleepingCycle: 3000, sleepForInMs: 40},
+    distanceCalculator: new ManhattanDistanceCalculator()
+  }));
+  solvers.forEach((solver, name) => {
+    solutionOutput = solver.solve();
+    console.log(levels[index].title, name, solutionOutput);
+  });
   // }
   return solutionOutput;
 }

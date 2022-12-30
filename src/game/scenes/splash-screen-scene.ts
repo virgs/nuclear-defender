@@ -12,7 +12,7 @@ import {Actions, mapStringToAction} from '../constants/actions';
 import {FileLevelExtractor} from '../levels/file-level-extractor';
 import WebFontFileLoader from '../file-loaders/web-font-file-loader';
 import type {SplashScreenOnPlayClickCallback} from '../ui/splash-screen-html';
-import {StandardSokobanAnnotationMapper} from '../tiles/standard-sokoban-annotation-mapper';
+import {StandardSokobanAnnotationTranslator} from '../tiles/standard-sokoban-annotation-translator';
 
 export type SplashScreenInput = {
     furthestLevel: number
@@ -121,7 +121,7 @@ export class SplashScreenScene extends Phaser.Scene {
     private parseMap(map: string): Tiles[][] {
         if (map.length > 0) {
             const annotationMap: string[] = map.split('\n');
-            const tileMap = new StandardSokobanAnnotationMapper().map(annotationMap);
+            const tileMap = new StandardSokobanAnnotationTranslator().translate(annotationMap);
             return new MapBuilder().build(tileMap);
         }
         return [];

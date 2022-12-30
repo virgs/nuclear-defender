@@ -2,7 +2,7 @@ import type {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
 import type {Directions} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type Movement = {
     previousPosition: Point,

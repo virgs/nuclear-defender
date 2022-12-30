@@ -5,7 +5,7 @@ import {Point} from '@/game/math/point';
 import {Hero} from '@/game/actors/hero';
 import {Target} from '@/game/actors/target';
 import {configuration} from '../constants/configuration';
-import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-mapper';
+import type {StaticMap, TileIdentification} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {GameActor} from '@/game/actors/game-actor';
 
 const floorDepth = -1000;
@@ -103,9 +103,8 @@ export class FeatureMapExtractor {
                         const boxOnIt = boxes
                             .find(box => box.getTilePosition().isEqualTo(tilePosition));
                         if (boxOnIt) {
-                            console.log('cover', boxOnIt.getSprite().depth, target.getSprite().depth)
                             target.cover();
-                            boxOnIt.setIsOnTarget(true)
+                            boxOnIt.setIsOnTarget(true);
                         }
 
                         targets.push(target);

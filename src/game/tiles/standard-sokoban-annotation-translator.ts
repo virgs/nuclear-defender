@@ -12,8 +12,8 @@ export type StaticMap = {
     tiles: TileIdentification[][]
 };
 
-export class StandardSokobanAnnotationMapper {
-    public map(encodedLevel: string): StaticMap {
+export class StandardSokobanAnnotationTranslator {
+    public translate(encodedLevel: string): StaticMap {
         const irregularMatrix: string[][] = this.splitInIrregularMatrix(encodedLevel);
         const irregularTokenizedMatrix = this.removeMetaChars(irregularMatrix);
 
