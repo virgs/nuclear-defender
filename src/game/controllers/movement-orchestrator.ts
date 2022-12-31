@@ -1,7 +1,6 @@
 import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
 import type {Directions} from '../constants/directions';
-import {getOpositeDirectionOf} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
@@ -32,7 +31,6 @@ export type MovementCoordinatorInput = {
 
 export class MovementOrchestrator {
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
-    private readonly orientedLeavingBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
 
     private readonly staticMap: StaticMap;
     private readonly hero: Movement;
@@ -41,21 +39,18 @@ export class MovementOrchestrator {
 
     constructor(config: { boxes: Point[]; staticMap: StaticMap; hero: Point }) {
         this.staticMap = config.staticMap;
-        this.hero = this.initializeMovement(config.hero);
-        this.boxes = config.boxes.map(box => this.initializeMovement(box));
+        this.hero = this.initializeFeature(config.hero);
+        this.boxes = config.boxes
+            .map(box => this.initializeFeature(box));
         this.movementHandlers = this.findTiles(Tiles.spring)
-            .map(feature => {
-                return new SpringMovementHandler({
+            .map(feature =>
+                new SpringMovementHandler({
                     spring: feature,
                     coordinator: this
-                });
-            });
-
-        this.orientedLeavingBlockingTiles.set(Tiles.spring,
-            (tileOrientation: Directions, movementDirection: Directions) => getOpositeDirectionOf(tileOrientation) === movementDirection);
+                }));
     }
 
-    private initializeMovement(point: Point): Movement {
+    private initializeFeature(point: Point): Movement {
         return {
             previousPosition: point,
             currentPosition: point,
@@ -65,6 +60,16 @@ export class MovementOrchestrator {
                 .some(feature => feature.code === Tiles.spring),
             direction: undefined
         };
+    }
+
+    public moveFeature(movement: Movement, direction: Directions) {
+        movement.direction = direction;
+        movement.previousPosition = movement.currentPosition;
+        movement.currentPosition = movement.previousPosition.calculateOffset(direction);
+        movement.isCurrentlyOnTarget = this.getFeatureAtPosition(movement.currentPosition)
+            .some(feature => feature.code === Tiles.target);
+        movement.isCurrentlyOnSpring = this.getFeatureAtPosition(movement.currentPosition)
+            .some(feature => feature.code === Tiles.spring);
     }
 
     private findTiles(code: Tiles): OrientedPoint[] {
@@ -92,11 +97,10 @@ export class MovementOrchestrator {
             const aimedPosition = this.hero.currentPosition.calculateOffset(aimedDirection);
             if (this.canHeroMove(aimedPosition, aimedDirection)) {
                 mapChanged = true;
-                this.hero.direction = aimedDirection;
-                this.moveHero(aimedPosition);
+                this.moveFeature(this.hero, aimedDirection);
                 this.boxes
                     .filter(box => box.previousPosition.isEqualTo(aimedPosition))
-                    .forEach(box => this.moveBox(box, this.hero.direction!));
+                    .forEach(box => this.moveFeature(box, aimedDirection));
             }
         }
 
@@ -107,55 +111,53 @@ export class MovementOrchestrator {
         };
     }
 
-    private moveHero(newHeroPosition: Point) {
-        this.hero.previousPosition = this.hero.currentPosition;
-        this.hero.currentPosition = newHeroPosition;
-        this.hero.isCurrentlyOnTarget = this.getFeatureAtPosition(newHeroPosition)
-            .some(feature => feature.code === Tiles.target);
-        this.hero.isCurrentlyOnSpring = this.getFeatureAtPosition(newHeroPosition)
-            .some(feature => feature.code === Tiles.spring);
-    }
-
-    public moveBox(movedBox: Movement, direction: Directions) {
-        movedBox.direction = direction;
-        movedBox.previousPosition = movedBox.currentPosition;
-        movedBox.currentPosition = movedBox.previousPosition.calculateOffset(direction);
-        movedBox.isCurrentlyOnTarget = this.getFeatureAtPosition(movedBox.currentPosition)
-            .some(feature => feature.code === Tiles.target);
-        movedBox.isCurrentlyOnSpring = this.getFeatureAtPosition(movedBox.currentPosition)
-            .some(feature => feature.code === Tiles.spring);
+    public getBoxes(): Movement[] {
+        return this.boxes;
     }
 
     private canHeroMove(aimedPosition: Point, aimedDirection: Directions): boolean {
-        if (this.getFeatureAtPosition(this.hero.currentPosition)
-            .filter(feature => this.orientedLeavingBlockingTiles.has(feature.code))
-            .some(feature => this.orientedLeavingBlockingTiles.get(feature.code)!(feature.orientation!, aimedDirection))) {
+        const position = this.hero.currentPosition;
+        if (!this.canFeatureLeavePosition({point: position, orientation: aimedDirection})) {
             return false;
         }
 
-        const positionProperties = this.getPositionProperties(aimedDirection, aimedPosition);
-        if (positionProperties
-            .some(move => !move.allowMoveOver)) { //it can be a box, check the next one too
-            const notAllowed = positionProperties
-                .filter(tile => !tile.allowMoveOver);
-            if (notAllowed.length === 1 && notAllowed[0].tileAhead.code === Tiles.box) { //it's a box
-                if (this.getFeatureAtPosition(aimedPosition) //check if the box is in a position that allows moves
-                    .filter(feature => this.orientedLeavingBlockingTiles.has(feature.code))
-                    .some(feature => this.orientedLeavingBlockingTiles.get(feature.code)!(feature.orientation!, aimedDirection))) {
+        if (!this.canFeatureEnterPosition({point: aimedPosition, orientation: aimedDirection})) { //it can be a box, check the next one too
+            if (this.getFeatureAtPosition(aimedPosition)
+                .some(feature => feature.code === Tiles.box)) { //it's a box
+                //check if the box is in a position that allows moves
+                if (!this.canFeatureLeavePosition({point: aimedPosition, orientation: aimedDirection})) {
                     return false;
                 }
                 //check the tile after the box
                 const afterNextTilePosition = aimedPosition.calculateOffset(aimedDirection);
-                return this.getPositionProperties(aimedDirection, afterNextTilePosition)
-                    .every(property => property.allowMoveOver);
+                return this.canFeatureEnterPosition({point: afterNextTilePosition, orientation: aimedDirection});
             }
             return false;
         }
         return true;
     }
 
-    public getBoxes() {
-        return this.boxes;
+    public canFeatureLeavePosition(move: OrientedPoint): boolean {
+        const positionFeatures = this.getFeatureAtPosition(move.point);
+        return this.movementHandlers
+            .filter(handler => positionFeatures
+                .some(feature => feature.code === handler.getTile() && move.point.isEqualTo(handler.getPosition())))
+            .every(handler => handler.allowLeavingMovement(move.orientation));
+    }
+
+    public canFeatureEnterPosition(move: OrientedPoint): boolean {
+        const positionFeatures = this.getFeatureAtPosition(move.point);
+        if (positionFeatures
+            .some(feature => this.blockerTiles.has(feature.code))) {
+            return false;
+        }
+        if (this.movementHandlers
+            .filter(handler => positionFeatures
+                .some(feature => feature.code === handler.getTile() && move.point.isEqualTo(handler.getPosition())))
+            .every(handler => handler.allowEnteringMovement(move.orientation))) {
+            return true;
+        }
+        return false;
     }
 
     public getFeatureAtPosition(position: Point): OrientedTile[] {
@@ -178,25 +180,5 @@ export class MovementOrchestrator {
             result.push(this.staticMap.tiles[position.y][position.x]);
         }
         return result;
-    }
-
-    public getPositionProperties(movement: Directions, nextTilePosition: Point): { allowMoveOver: boolean, tileAhead: OrientedTile }[] {
-        const tilesAhead = this.getFeatureAtPosition(nextTilePosition)!;
-        return tilesAhead
-            .map(tileAhead => {
-                let allowed = true;
-                if (this.blockerTiles.has(tileAhead.code)) {
-                    allowed = false;
-                } else if (this.movementHandlers
-                    .some(handler => handler.getTile() === tileAhead.code && handler.getPosition().isEqualTo(nextTilePosition))) {
-                    allowed = this.movementHandlers
-                        .find(handler => handler.getTile() === tileAhead.code && handler.getPosition().isEqualTo(nextTilePosition))!
-                        .allowEnteringMovement(movement);
-                }
-                return {
-                    allowMoveOver: allowed,
-                    tileAhead
-                };
-            }, []);
     }
 }

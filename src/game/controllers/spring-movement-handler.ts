@@ -22,10 +22,8 @@ export class SpringMovementHandler implements FeatureMovementHandler {
             .some(box => {
                 if (box.currentPosition.isEqualTo(this.position)) {
                     const nextTilePosition = box.currentPosition.calculateOffset(this.orientation);
-                    const properties = this.coordinator.getPositionProperties(this.orientation, nextTilePosition);
-                    if (properties
-                        .every(move => move.allowMoveOver)) {
-                        this.coordinator.moveBox(box, this.orientation);
+                    if (this.coordinator.canFeatureEnterPosition({point: nextTilePosition, orientation: this.orientation})) {
+                        this.coordinator.moveFeature(box, this.orientation);
                         mapChanged = true;
                     }
                 }
@@ -34,11 +32,11 @@ export class SpringMovementHandler implements FeatureMovementHandler {
     }
 
     public allowEnteringMovement(direction: Directions): boolean {
-        return getOpositeDirectionOf(this.orientation) === direction;
+        return this.orientation === getOpositeDirectionOf(direction);
     }
 
     public allowLeavingMovement(direction: Directions): boolean {
-        return this.orientation === direction;
+        return this.orientation !== getOpositeDirectionOf(direction);
     }
 
     public getTile(): Tiles {
