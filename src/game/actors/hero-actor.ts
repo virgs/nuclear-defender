@@ -53,6 +53,7 @@ export class HeroActor implements GameActor {
     }
 
     public async move(direction: Directions): Promise<void> {
+        this.tilePosition = this.tilePosition.calculateOffset(direction);
         return new Promise<void>((resolve) => {
             this.isMoving = true;
             const heroMovement = this.heroAnimator.map(direction);
@@ -62,7 +63,6 @@ export class HeroActor implements GameActor {
                     targets: this.sprite,
                     onInit: () => {
                         this.sprite!.anims.play(heroMovement.walking, true);
-                        this.tilePosition = this.tilePosition.calculateOffset(direction);
                     },
                     onUpdate: () => {
                         this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
@@ -75,7 +75,7 @@ export class HeroActor implements GameActor {
                     onCompleteScope: this //doc purposes
                 });
             } else {
-                resolve()
+                resolve();
             }
         });
     }
@@ -101,11 +101,11 @@ export class HeroActor implements GameActor {
     }
 
     public onCover() {
-        console.error('hero being covered')
+        console.error('hero being covered');
     }
 
     public onUncover() {
-        console.error('hero being uncovered')
+        console.error('hero being uncovered');
     }
 
 }

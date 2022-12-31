@@ -48,12 +48,12 @@ export class BoxActor implements GameActor {
     }
 
     public async move(direction: Directions) {
+        this.tilePosition = this.tilePosition.calculateOffset(direction);
         return new Promise<void>(resolve => {
             const tween = {
                 ...getTweenFromDirection(direction),
                 targets: this.sprite,
                 onInit: () => {
-                    this.tilePosition = this.tilePosition.calculateOffset(direction);
                 },
                 onUpdate: () => {
                     this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.sprite.y + 1));

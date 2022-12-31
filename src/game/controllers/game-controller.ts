@@ -24,7 +24,7 @@ export class GameController {
     private readonly movementAnalyser: MovementAnalyser;
 
     private levelComplete: boolean = false;
-    private movementsAreAllowed: boolean;
+    private animationsAreOver: boolean;
 
     constructor(config: { tileMap: TileMap, solution?: SolutionOutput }) {
         this.hero = config.tileMap.hero;
@@ -35,7 +35,7 @@ export class GameController {
         this.solution = config.solution;
         this.playerMoves = [];
         this.levelComplete = false;
-        this.movementsAreAllowed = true;
+        this.animationsAreOver = true;
 
         this.movementAnalyser = new MovementAnalyser({staticMap: this.tileMap, distanceCalculator: new ManhattanDistanceCalculator()});
         this.movementCoordinator = new MovementOrchestrator({
@@ -55,25 +55,27 @@ export class GameController {
     }
 
     public async update(): Promise<void> {
-        let heroAction: Actions = this.hero.checkAction();
-        if (this.solution?.actions?.length! > 0) {
-            heroAction = this.solution?.actions?.shift()!;
-        }
-        this.playerMoves!.push(heroAction);
+        if (this.animationsAreOver) {
+            let heroAction: Actions = this.hero.checkAction();
+            if (this.solution?.actions?.length! > 0) {
+                heroAction = this.solution?.actions?.shift()!;
+            }
+            this.playerMoves!.push(heroAction);
 
-        const movement = this.movementCoordinator!.update({
-            heroAction: heroAction
-        });
+            const movement = this.movementCoordinator!.update({
+                heroAction: heroAction
+            });
 
-        if (movement.mapChanged) {
-            this.movementAnalyser.analyse(movement);
-            this.movementsAreAllowed = false;
-            await this.updateMapFeatures(movement);
-            this.checkLevelComplete();
+            if (movement.mapChanged) {
+                this.movementAnalyser.analyse(movement);
+                await this.updateMapFeatures(movement);
+                this.checkLevelComplete();
+            }
         }
     }
 
     private async updateMapFeatures(movementOutput: MovementCoordinatorOutput) {
+        this.animationsAreOver = false;
         const animationsPromises: Promise<any>[] = [];
         animationsPromises.push(...movementOutput.boxes
             .filter(movementBox => movementBox.previousPosition.isDifferentOf(movementBox.currentPosition))
@@ -95,11 +97,11 @@ export class GameController {
 
         const features = [...movementOutput.boxes, movementOutput.hero];
 
-        this.updateActorsCoveringSituation(features, this.springs);
         this.updateActorsCoveringSituation(features, this.targets);
+        this.updateActorsCoveringSituation(features, this.springs);
         await Promise.all(animationsPromises);
 
-        this.movementsAreAllowed = true;
+        this.animationsAreOver = true;
     }
 
     private updateActorsCoveringSituation(features: Movement[], actors: GameActor[]) {

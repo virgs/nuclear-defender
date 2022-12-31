@@ -1,7 +1,6 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
-import type {Directions} from '@/game/constants/directions';
-import {getOpositeDirectionOf} from '@/game/constants/directions';
+import {Directions, getOpositeDirectionOf} from '@/game/constants/directions';
 import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
 import type {MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
 
