@@ -38,24 +38,21 @@ export class MovementOrchestrator {
     private readonly staticMap: StaticMap;
     private readonly hero: Movement;
     private readonly boxes: Movement[];
-    private readonly featuresActions: (() => boolean)[];
     private readonly springs: OrientedPoint[];
-    private readonly springMovementCoordinators: FeatureMovementHandler[];
+    private readonly movementHandlers: FeatureMovementHandler[];
 
     constructor(config: { boxes: Point[]; staticMap: StaticMap; hero: Point }) {
         this.staticMap = config.staticMap;
         this.hero = this.initializeMovement(config.hero);
         this.boxes = config.boxes.map(box => this.initializeMovement(box));
         this.springs = this.findTiles(Tiles.spring);
-        this.springMovementCoordinators = this.springs.map(spring => {
-            return new SpringMovementHandler({
-                spring: spring,
-                coordinator: this
+        this.movementHandlers = this.findTiles(Tiles.spring)
+            .map(feature => {
+                return new SpringMovementHandler({
+                    spring: feature,
+                    coordinator: this
+                });
             });
-        })
-
-        this.featuresActions = [];
-        this.featuresActions.push(() => this.checkSpringsPushes());
 
         this.orientedEnteringBlockingTiles.set(Tiles.spring,
             (tileOrientation: Directions, movementDirection: Directions) => getOpositeDirectionOf(tileOrientation) === movementDirection);
@@ -96,8 +93,8 @@ export class MovementOrchestrator {
         this.boxes
             .forEach(box => box.previousPosition = box.currentPosition);
 
-        let mapChanged = this.featuresActions
-            .reduce((changed, action) => changed || action(), false);
+        let mapChanged = this.movementHandlers
+            .reduce((changed, handler) => changed || handler.act(), false);
 
         if (input.heroAction !== Actions.STAND) {
             const aimedDirection = mapActionToDirection(input.heroAction)!;
@@ -223,6 +220,6 @@ export class MovementOrchestrator {
     }
 
     public getBoxes() {
-        return this.boxes
+        return this.boxes;
     }
 }
