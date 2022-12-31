@@ -7,7 +7,7 @@ import type {Directions} from '../constants/directions';
 import type {GameActor} from '@/game/actors/game-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
-export class Hero implements GameActor {
+export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
     private readonly inputMap: Map<Actions, () => boolean>;
     private readonly sprite: Phaser.GameObjects.Sprite;
@@ -94,6 +94,18 @@ export class Hero implements GameActor {
 
     public getOrientation(): Directions | undefined {
         return undefined;
+    }
+
+    public isCovered(): boolean {
+        return false;
+    }
+
+    public onCover() {
+        console.error('hero being covered')
+    }
+
+    public onUncover() {
+        console.error('hero being uncovered')
     }
 
 }

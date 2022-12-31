@@ -4,6 +4,8 @@ import type {Directions} from '../constants/directions';
 import {getOpositeDirectionOf} from '../constants/directions';
 import {Actions, mapActionToDirection} from '../constants/actions';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
+import {SpringMovementHandler} from '@/game/controllers/spring-movement-handler';
 
 export type Movement = {
     previousPosition: Point,
@@ -13,7 +15,7 @@ export type Movement = {
     direction: Directions | undefined
 };
 
-type OrientedPoint = {
+export type OrientedPoint = {
     point: Point,
     orientation: Directions
 }
@@ -28,7 +30,7 @@ export type MovementCoordinatorInput = {
     heroAction: Actions;
 };
 
-export class MovementCoordinator {
+export class MovementOrchestrator {
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
     private readonly orientedEnteringBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
     private readonly orientedLeavingBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
@@ -38,12 +40,19 @@ export class MovementCoordinator {
     private readonly boxes: Movement[];
     private readonly featuresActions: (() => boolean)[];
     private readonly springs: OrientedPoint[];
+    private readonly springMovementCoordinators: FeatureMovementHandler[];
 
     constructor(config: { boxes: Point[]; staticMap: StaticMap; hero: Point }) {
         this.staticMap = config.staticMap;
         this.hero = this.initializeMovement(config.hero);
         this.boxes = config.boxes.map(box => this.initializeMovement(box));
         this.springs = this.findTiles(Tiles.spring);
+        this.springMovementCoordinators = this.springs.map(spring => {
+            return new SpringMovementHandler({
+                spring: spring,
+                coordinator: this
+            });
+        })
 
         this.featuresActions = [];
         this.featuresActions.push(() => this.checkSpringsPushes());
@@ -118,7 +127,7 @@ export class MovementCoordinator {
             .some(feature => feature.code === Tiles.spring);
     }
 
-    private moveBox(movedBox: Movement, direction: Directions) {
+    public moveBox(movedBox: Movement, direction: Directions) {
         movedBox.direction = direction;
         movedBox.previousPosition = movedBox.currentPosition;
         movedBox.currentPosition = movedBox.previousPosition.calculateOffset(direction);
@@ -174,7 +183,7 @@ export class MovementCoordinator {
         return mapChanged;
     }
 
-    private getFeatureAtPosition(position: Point): OrientedTile[] {
+    public getFeatureAtPosition(position: Point): OrientedTile[] {
         const result: OrientedTile[] = [];
         if (this.hero?.currentPosition.isEqualTo(position)) {
             result.push({
@@ -196,7 +205,7 @@ export class MovementCoordinator {
         return result;
     }
 
-    private getPositionProperties(movement: Directions, nextTilePosition: Point): { allowMoveOver: boolean, tileAhead: OrientedTile }[] {
+    public getPositionProperties(movement: Directions, nextTilePosition: Point): { allowMoveOver: boolean, tileAhead: OrientedTile }[] {
         const tilesAhead = this.getFeatureAtPosition(nextTilePosition)!;
         return tilesAhead
             .map(tileAhead => {
@@ -211,5 +220,9 @@ export class MovementCoordinator {
                     tileAhead
                 };
             }, []);
+    }
+
+    public getBoxes() {
+        return this.boxes
     }
 }

@@ -4,13 +4,14 @@ import {Directions} from '@/game/constants/directions';
 import type {GameActor} from '@/game/actors/game-actor';
 import {Tiles} from '@/game/tiles/tiles';
 
-export class Spring implements GameActor {
+export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly scene: Phaser.Scene;
     private readonly tilePosition: Point;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly orientation: Directions;
+    private covered: boolean;
 
     constructor(config: { orientation: Directions; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene, id: number }) {
         this.orientation = config.orientation;
@@ -19,6 +20,7 @@ export class Spring implements GameActor {
         this.tilePosition = config.tilePosition;
         this.sprite = config.sprite;
         this.tweens = config.scene.tweens;
+        this.covered = false;
 
         switch (this.orientation) {
             case Directions.LEFT:
@@ -33,10 +35,18 @@ export class Spring implements GameActor {
         }
     }
 
-    public release(): void {
+    public isCovered(): boolean {
+        return this.covered;
     }
 
-    public engage(): void {
+    public onUncover(): void {
+        this.covered = false;
+        console.log('spring release')
+    }
+
+    public onCover(): void {
+        console.log('spring engage')
+        this.covered = true;
     }
 
     public getId(): number {

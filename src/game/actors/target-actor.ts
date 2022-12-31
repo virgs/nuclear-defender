@@ -1,11 +1,11 @@
 import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import type {Box} from '@/game/actors/box';
+import type {BoxActor} from '@/game/actors/box-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
 import type {Directions} from '@/game/constants/directions';
 
-export class Target implements GameActor {
+export class TargetActor implements GameActor {
     private static readonly UNCOVERED_LIGHT_INTENSITY = .5;
     private static readonly COVERED_LIGHT_INTENSITY = .025;
     private static readonly LIGHT_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.highlight).color;
@@ -18,7 +18,7 @@ export class Target implements GameActor {
     private readonly id: number;
     private covered: boolean;
 
-    constructor(config: { boxes: Box[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
+    constructor(config: { boxes: BoxActor[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
         this.id = config.id;
         this.scene = config.scene;
         this.covered = false;
@@ -29,15 +29,15 @@ export class Target implements GameActor {
         const boxOnIt = config.boxes
             .find(box => box.getTilePosition().isEqualTo(config.tilePosition));
         if (boxOnIt) {
-            this.cover();
+            this.onCover();
             boxOnIt.setIsOnTarget(true);
         }
         this.addLight(config);
     }
 
-    private addLight(config: { boxes: Box[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene }) {
-        const light = config.scene.lights.addLight(this.sprite.x, this.sprite.y, Target.LIGHT_RADIUS,
-            Target.LIGHT_COLOR, Target.UNCOVERED_LIGHT_INTENSITY);
+    private addLight(config: { boxes: BoxActor[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene }) {
+        const light = config.scene.lights.addLight(this.sprite.x, this.sprite.y, TargetActor.LIGHT_RADIUS,
+            TargetActor.LIGHT_COLOR, TargetActor.UNCOVERED_LIGHT_INTENSITY);
 
         const pathRadius = new Point(configuration.world.tileSize.horizontal * 0.2, configuration.world.tileSize.horizontal * 0.2);
 
@@ -54,9 +54,9 @@ export class Target implements GameActor {
             onUpdate: () => {
                 const intensity = Math.random() * .25;
                 if (this.covered) {
-                    light.intensity = Target.COVERED_LIGHT_INTENSITY + intensity;
+                    light.intensity = TargetActor.COVERED_LIGHT_INTENSITY + intensity;
                 } else {
-                    light.intensity = Target.UNCOVERED_LIGHT_INTENSITY + intensity;
+                    light.intensity = TargetActor.UNCOVERED_LIGHT_INTENSITY + intensity;
                 }
 
                 const point = path.getPoint(follower.t, follower.vec);
@@ -71,11 +71,11 @@ export class Target implements GameActor {
         return this.tilePosition;
     }
 
-    public cover(): void {
+    public onCover(): void {
         this.covered = true;
     }
 
-    public uncover(): void {
+    public onUncover(): void {
         this.covered = false;
     }
 

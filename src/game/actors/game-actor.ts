@@ -12,4 +12,10 @@ export interface GameActor {
     getId(): number;
 
     getOrientation(): Directions | undefined;
+
+    isCovered(): boolean;
+
+    onCover(): void;
+
+    onUncover(): void;
 }

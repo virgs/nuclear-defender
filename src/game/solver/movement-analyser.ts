@@ -2,7 +2,7 @@ import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import type {Movement, MovementCoordinatorOutput} from '../controllers/movement-coordinator';
+import type {Movement, MovementCoordinatorOutput} from '../controllers/movement-orchestrator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 import {DeadlockDetector} from '@/game/solver/deadlock-detector';
 

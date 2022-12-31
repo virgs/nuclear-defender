@@ -4,9 +4,9 @@ https://www.youtube.com/watch?v=b-beyJCCutQ
 
 ### Adicionar sombras
 
-1. Target (pedra radioativa. cor choque: #d4fa00)
-2. Box (meio transparente)
-3. Box on target (cor diferente) (nada mais é do que o 2 em cima do 1)
+1. TargetActor (pedra radioativa. cor choque: #d4fa00)
+2. BoxActor (meio transparente)
+3. BoxActor on target (cor diferente) (nada mais é do que o 2 em cima do 1)
 4. Player standing (front facing)
 5. Player standing on target (front facing) (nada mais é do que o 4 em cima do 1)
 6. Player walking (3 frames x4 directions)(esq e direita são espelhadas)

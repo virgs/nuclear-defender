@@ -6,7 +6,7 @@ import {getTweenFromDirection} from '@/game/animations/tween';
 import type {Directions} from '@/game/constants/directions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
-export class Box implements GameActor {
+export class BoxActor implements GameActor {
     private tilePosition: Point;
     private isOnTarget: boolean;
     private readonly tweens: Phaser.Tweens.TweenManager;
@@ -73,6 +73,18 @@ export class Box implements GameActor {
 
     public getOrientation(): Directions | undefined {
         return undefined;
+    }
+
+    public isCovered(): boolean {
+        return false;
+    }
+
+    public onCover() {
+        console.error('box being covered')
+    }
+
+    public onUncover() {
+        console.error('box being uncovered')
     }
 
 }

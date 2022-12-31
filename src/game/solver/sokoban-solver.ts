@@ -2,7 +2,7 @@ import Heap from 'heap';
 import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
 import {Actions} from '../constants/actions';
-import {MovementCoordinator} from '../controllers/movement-coordinator';
+import {MovementOrchestrator} from '../controllers/movement-orchestrator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -29,7 +29,7 @@ export class SokobanSolver {
         .filter(key => !isNaN(Number(key)))
         .map(key => Number(key) as Actions);
 
-    private movementCoordinator: MovementCoordinator;
+    private movementCoordinator: MovementOrchestrator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.score - b.score);
     private candidatesVisitedHash: { [hash: string]: boolean } = {};
@@ -69,7 +69,7 @@ export class SokobanSolver {
                 });
             });
 
-        this.movementCoordinator = new MovementCoordinator({staticMap: this.tileMap, hero: this.hero!, boxes: this.boxes});
+        this.movementCoordinator = new MovementOrchestrator({staticMap: this.tileMap, hero: this.hero!, boxes: this.boxes});
         this.movementAnalyser = new MovementAnalyser({
             staticMap: this.tileMap,
             distanceCalculator: input.distanceCalculator
