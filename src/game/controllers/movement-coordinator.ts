@@ -30,13 +30,14 @@ export type MovementCoordinatorInput = {
 
 export class MovementCoordinator {
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
-    private readonly orientinedBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
+    private readonly orientedEnteringBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
+    private readonly orientedLeavingBlockingTiles: Map<Tiles, (tileOrientation: Directions, movementDirection: Directions) => boolean> = new Map();
 
     private readonly staticMap: StaticMap;
     private readonly hero: Movement;
     private readonly boxes: Movement[];
     private readonly featuresActions: (() => boolean)[];
-    private springs: OrientedPoint[];
+    private readonly springs: OrientedPoint[];
 
     constructor(config: { boxes: Point[]; staticMap: StaticMap; hero: Point }) {
         this.staticMap = config.staticMap;
@@ -47,12 +48,14 @@ export class MovementCoordinator {
         this.featuresActions = [];
         this.featuresActions.push(() => this.checkSpringsPushes());
 
-        this.orientinedBlockingTiles.set(Tiles.spring,
+        this.orientedEnteringBlockingTiles.set(Tiles.spring,
             (tileOrientation: Directions, movementDirection: Directions) => getOpositeDirectionOf(tileOrientation) === movementDirection);
-        this.orientinedBlockingTiles.set(Tiles.treadmil,
+        this.orientedEnteringBlockingTiles.set(Tiles.treadmil,
             (tileOrientation: Directions, movementDirection: Directions) => getOpositeDirectionOf(tileOrientation) !== movementDirection);
-        this.orientinedBlockingTiles.set(Tiles.oneWayDoor,
+        this.orientedEnteringBlockingTiles.set(Tiles.oneWayDoor,
             (tileOrientation: Directions, movementDirection: Directions) => tileOrientation !== movementDirection);
+        this.orientedLeavingBlockingTiles.set(Tiles.spring,
+            (tileOrientation: Directions, movementDirection: Directions) => getOpositeDirectionOf(tileOrientation) === movementDirection);
     }
 
     private initializeMovement(point: Point): Movement {
@@ -125,32 +128,31 @@ export class MovementCoordinator {
             .some(feature => feature.code === Tiles.spring);
     }
 
-    private canHeroMove(newHeroPosition: Point, aimedDirection: Directions): boolean {
-        if (this.hero.isCurrentlyOnSpring) {
-            const springOnIt = this.getFeatureAtPosition(this.hero.currentPosition)
-                .find(feature => feature.code === Tiles.spring)!;
-            return !this.orientinedBlockingTiles.get(Tiles.spring)!(springOnIt.orientation!, aimedDirection);
+    private canHeroMove(aimedPosition: Point, aimedDirection: Directions): boolean {
+        if (this.getFeatureAtPosition(this.hero.currentPosition)
+            .filter(feature => this.orientedLeavingBlockingTiles.has(feature.code))
+            .some(feature => this.orientedLeavingBlockingTiles.get(feature.code)!(feature.orientation!, aimedDirection))) {
+            return false;
         }
-        const positionProperties = this.getPositionProperties(aimedDirection, newHeroPosition);
+
+        const positionProperties = this.getPositionProperties(aimedDirection, aimedPosition);
         if (positionProperties
             .some(move => !move.allowMoveOver)) { //it can be a box, check the next one too
             const notAllowed = positionProperties
                 .filter(tile => !tile.allowMoveOver);
-            if (notAllowed.length === 1 && notAllowed[0].tileAhead.code === Tiles.box) { //it's a box, check the following
-                const afterNextMove = newHeroPosition.calculateOffset(aimedDirection);
-                const followingProperties = this.getPositionProperties(aimedDirection, afterNextMove);
-
-                const springAhead = positionProperties
-                    .find(property => property.tileAhead.code === Tiles.spring);
-                if (springAhead) { //the box is on a spring, one direction is not allowed
-                    return !this.orientinedBlockingTiles.get(Tiles.spring)!(springAhead.tileAhead.orientation!, aimedDirection);
+            if (notAllowed.length === 1 && notAllowed[0].tileAhead.code === Tiles.box) { //it's a box
+                if (this.getFeatureAtPosition(aimedPosition) //check if the box is in a position that allows moves
+                    .filter(feature => this.orientedLeavingBlockingTiles.has(feature.code))
+                    .some(feature => this.orientedLeavingBlockingTiles.get(feature.code)!(feature.orientation!, aimedDirection))) {
+                    return false;
                 }
-                return followingProperties
+                //check the tile after the box
+                const afterNextTilePosition = aimedPosition.calculateOffset(aimedDirection);
+                return this.getPositionProperties(aimedDirection, afterNextTilePosition)
                     .every(property => property.allowMoveOver);
             }
             return false;
         }
-
         return true;
     }
 
@@ -201,8 +203,8 @@ export class MovementCoordinator {
                 let allowed = true;
                 if (this.blockerTiles.has(tileAhead.code)) {
                     allowed = false;
-                } else if (this.orientinedBlockingTiles.has(tileAhead.code)) {
-                    allowed = this.orientinedBlockingTiles.get(tileAhead.code)!(tileAhead.orientation!, movement);
+                } else if (this.orientedEnteringBlockingTiles.has(tileAhead.code)) {
+                    allowed = this.orientedEnteringBlockingTiles.get(tileAhead.code)!(tileAhead.orientation!, movement);
                 }
                 return {
                     allowMoveOver: allowed,
