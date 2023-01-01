@@ -1,8 +1,8 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
-import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
-import type {MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
+import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
+import type {Movement, MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
 import {Actions, mapActionToDirection} from '@/game/constants/actions';
 
 export class HeroMovementHandler implements FeatureMovementHandler {
@@ -30,21 +30,21 @@ export class HeroMovementHandler implements FeatureMovementHandler {
         return this.position;
     }
 
-    public async act(config: { hero: { action: Actions, position: Point } }): Promise<boolean> {
-        this.position = config.hero.position;
+    public async act(actData: ActData): Promise<boolean> {
+        this.position = actData.hero.position;
         let mapChanged = false;
 
-        if (config.hero.action !== Actions.STAND) {
-            const aimedDirection = mapActionToDirection(config.hero.action)!;
+        if (actData.hero.action !== Actions.STAND) {
+            const aimedDirection = mapActionToDirection(actData.hero.action)!;
             if (!this.coordinator.canFeatureLeavePosition({point: this.position, orientation: aimedDirection})) {
                 return false;
             }
-            const aimedPosition = config.hero.position.calculateOffset(aimedDirection);
+            const aimedPosition = actData.hero.position.calculateOffset(aimedDirection);
             const aimedMovement = {point: aimedPosition, orientation: aimedDirection};
-            if (this.featureAheadAllowsMovement(aimedMovement)) {
+            if (this.featureAheadAllowsMovement(aimedMovement, actData.boxes)) {
                 mapChanged = true;
                 this.coordinator.moveHero(aimedDirection);
-                this.coordinator.getBoxes()
+                actData.boxes
                     .filter(box => box.nextPosition.isEqualTo(aimedPosition))
                     .forEach(box => this.coordinator.moveFeature(box, aimedDirection));
             }
@@ -53,10 +53,9 @@ export class HeroMovementHandler implements FeatureMovementHandler {
         return mapChanged;
     }
 
-    private featureAheadAllowsMovement(aimedMovement: OrientedPoint): boolean {
+    private featureAheadAllowsMovement(aimedMovement: OrientedPoint, boxes: Movement[]): boolean {
         if (!this.coordinator.canFeatureEnterPosition(aimedMovement)) { //it can be a box, check the next one too
-
-            if (this.coordinator.getBoxes()
+            if (boxes
                 .some(box => box.nextPosition.isEqualTo(aimedMovement.point))) { //it's a box
                 //check if the box is in a position that allows moves
                 if (!this.coordinator.canFeatureLeavePosition(aimedMovement)) {

@@ -73,21 +73,17 @@ export class MovementOrchestrator {
         this.boxes
             .forEach(box => box.currentPosition = box.nextPosition);
 
-        let mapChanged = false;
-        for (let i = 0; i < this.movementHandlers.length; ++i) {
-            mapChanged = await this.movementHandlers[i]
-                .act({hero: {action: input.heroAction, position: this.hero.nextPosition}}) || mapChanged;
-        }
+        const mapChanged = await this.movementHandlers
+            .reduce(async (acc, handler) => {
+                const act = await handler.act({hero: {action: input.heroAction, position: this.hero.nextPosition}, boxes: this.boxes});
+                return act || acc;
+            }, Promise.resolve(false));
 
         return {
             hero: this.hero,
             boxes: this.boxes,
-            mapChanged: true
+            mapChanged: mapChanged
         };
-    }
-
-    public getBoxes(): Movement[] {
-        return this.boxes;
     }
 
     public canFeatureLeavePosition(move: OrientedPoint): boolean {

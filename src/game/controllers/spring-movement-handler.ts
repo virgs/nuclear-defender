@@ -1,7 +1,7 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions, getOpositeDirectionOf} from '@/game/constants/directions';
-import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
+import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
 import type {MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
 
 export class SpringMovementHandler implements FeatureMovementHandler {
@@ -15,9 +15,9 @@ export class SpringMovementHandler implements FeatureMovementHandler {
         this.coordinator = config.coordinator;
     }
 
-    public async act(): Promise<boolean> {
+    public async act(actData: ActData): Promise<boolean> {
         let mapChanged = false;
-        this.coordinator.getBoxes()
+        actData.boxes
             .filter(box => box.currentPosition.isEqualTo(this.position))
             .forEach(box => {
                 const nextTilePosition = box.currentPosition.calculateOffset(this.orientation);
