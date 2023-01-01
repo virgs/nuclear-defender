@@ -81,10 +81,11 @@ export class GameController {
             .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition))
             .map(async movedBox => {
                 const spriteBoxMoved = this.boxes
-                    .find(tileBox => movedBox.currentPosition.isEqualTo(tileBox.getTilePosition()));
+                    .find(tileBox => movedBox.currentPosition.isEqualTo(tileBox.getTilePosition()))!;
 
-                await spriteBoxMoved!.move(movedBox.direction!);
-                spriteBoxMoved!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
+                await spriteBoxMoved.move(movedBox.direction!);
+                spriteBoxMoved!.setIsOnTarget(this.targets
+                    .some(target => target.getTilePosition().isEqualTo(spriteBoxMoved.getTilePosition())));
             }));
 
         const heroPromise = async () => {

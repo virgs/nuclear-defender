@@ -10,8 +10,6 @@ import {HeroMovementHandler} from '@/game/controllers/hero-movement-handler';
 export type Movement = {
     currentPosition: Point,
     nextPosition: Point,
-    isCurrentlyOnTarget: boolean,
-    isCurrentlyOnSpring: boolean,
     direction: Directions | undefined
 };
 
@@ -56,10 +54,6 @@ export class MovementOrchestrator {
         return {
             currentPosition: point,
             nextPosition: point,
-            isCurrentlyOnTarget: this.getFeatureAtPosition(point)
-                .some(feature => feature.code === Tiles.target),
-            isCurrentlyOnSpring: this.getFeatureAtPosition(point)
-                .some(feature => feature.code === Tiles.spring),
             direction: undefined
         };
     }
@@ -72,10 +66,6 @@ export class MovementOrchestrator {
         movement.direction = direction;
         movement.currentPosition = movement.nextPosition;
         movement.nextPosition = movement.currentPosition.calculateOffset(direction);
-        movement.isCurrentlyOnTarget = this.getFeatureAtPosition(movement.nextPosition)
-            .some(feature => feature.code === Tiles.target);
-        movement.isCurrentlyOnSpring = this.getFeatureAtPosition(movement.nextPosition)
-            .some(feature => feature.code === Tiles.spring);
     }
 
     public async update(input: MovementCoordinatorInput): Promise<MovementCoordinatorOutput> {

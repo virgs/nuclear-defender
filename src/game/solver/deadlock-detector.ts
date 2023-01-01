@@ -1,7 +1,7 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import type {Movement} from '@/game/controllers/movement-orchestrator';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
 type SegmentAnalysis = { differentBoxes: number; empties: number; targets: number };
@@ -46,7 +46,8 @@ export class DeadlockDetector {
     }
 
     private checkTrappedBoxInCorner(movedBox: Movement, direction: Directions): boolean {
-        if (movedBox.isCurrentlyOnTarget || movedBox.isCurrentlyOnSpring) {
+        const featureAtPosition = this.getFeatureAtPosition(movedBox.nextPosition);
+        if (featureAtPosition?.code === Tiles.target || featureAtPosition?.code === Tiles.spring) {
             return false;
         }
         //  ######
@@ -116,5 +117,13 @@ export class DeadlockDetector {
             .filter(box => box.nextPosition.x === tilePosition.x)
             .reduce((acc, _) => acc + 1, 0);
         return {empties, targets, differentBoxes};
+    }
+
+    public getFeatureAtPosition(position: Point): OrientedTile | undefined {
+        if (position.x < this.staticMap.width && position.y < this.staticMap.height
+            && position.x >= 0 && position.y >= 0) {
+            return this.staticMap.tiles[position.y][position.x];
+        }
+        return undefined;
     }
 }

@@ -1,10 +1,9 @@
 import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import type {DistanceCalculator} from '@/game/math/distance-calculator';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import type {Movement, MovementCoordinatorOutput} from '../controllers/movement-orchestrator';
-import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 import {DeadlockDetector} from '@/game/solver/deadlock-detector';
+import type {DistanceCalculator} from '@/game/math/distance-calculator';
+import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {Movement, MovementCoordinatorOutput} from '../controllers/movement-orchestrator';
 
 export type MovementAnalysis = {
     events: MovementEvents[],
@@ -68,19 +67,21 @@ export class MovementAnalyser {
             .forEach(_ => events.push(MovementEvents.BOX_MOVED));
 
         boxesMoved
-            .filter(box => box.isCurrentlyOnTarget)
+            .filter(box => this.isOneOfTheTilesAtThePosition(box.nextPosition, [Tiles.target]))
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_ONTO_TARGET));
         boxesMoved
-            .filter(box => !box.isCurrentlyOnTarget && movement.hero.isCurrentlyOnTarget)
+            .filter(box => !this.isOneOfTheTilesAtThePosition(box.nextPosition, [Tiles.target]) &&
+                this.isOneOfTheTilesAtThePosition(movement.hero.nextPosition, [Tiles.target]))
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_OUT_OF_TARGET));
 
         boxesMoved
             .filter(box => movement.hero.nextPosition.isEqualTo(box.currentPosition) &&
                 movement.hero.direction === box.direction)
             .find(box => {
-                if (!box.isCurrentlyOnTarget && movement.hero.isCurrentlyOnTarget) {
+                if (!this.isOneOfTheTilesAtThePosition(box.nextPosition, [Tiles.target]) &&
+                    this.isOneOfTheTilesAtThePosition(movement.hero.nextPosition, [Tiles.target])) {
                     events.push(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET);
-                } else if (box.isCurrentlyOnTarget) {
+                } else if (this.isOneOfTheTilesAtThePosition(box.nextPosition, [Tiles.target])) {
                     events.push(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET);
                 }
             });
@@ -96,5 +97,12 @@ export class MovementAnalyser {
             }, 0);
     }
 
-
+    public isOneOfTheTilesAtThePosition(position: Point, tiles: Tiles[]): boolean {
+        if (position.x < this.staticMap.width && position.y < this.staticMap.height
+            && position.x >= 0 && position.y >= 0) {
+            return tiles
+                .some(tile => this.staticMap.tiles[position.y][position.x].code === tile);
+        }
+        return false;
+    }
 }
