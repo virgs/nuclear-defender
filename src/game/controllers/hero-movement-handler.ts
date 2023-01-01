@@ -1,5 +1,5 @@
+import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
 import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
 import type {Movement, MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
@@ -9,9 +9,9 @@ export class HeroMovementHandler implements FeatureMovementHandler {
     private readonly coordinator: MovementOrchestrator;
     private position: Point;
 
-    constructor(config: { coordinator: MovementOrchestrator, position: Point }) {
+    constructor(config: { coordinator: MovementOrchestrator }) {
         this.coordinator = config.coordinator;
-        this.position = config.position;
+        this.position = new Point(0,0);
     }
 
     public allowEnteringMovement(direction: Directions): boolean {
@@ -30,7 +30,7 @@ export class HeroMovementHandler implements FeatureMovementHandler {
         return this.position;
     }
 
-    public async act(actData: ActData): Promise<boolean> {
+    public act(actData: ActData): boolean {
         this.position = actData.hero.position;
         let mapChanged = false;
 

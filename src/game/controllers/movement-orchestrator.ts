@@ -25,23 +25,23 @@ export type MovementCoordinatorOutput = {
 };
 
 export type MovementCoordinatorInput = {
+    heroPosition: Point;
     heroAction: Actions;
+    boxes: Point[];
 };
 
 export class MovementOrchestrator {
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.wall, Tiles.empty]);
 
     private readonly staticMap: StaticMap;
-    private readonly hero: Movement;
-    private readonly boxes: Movement[];
     private readonly movementHandlers: FeatureMovementHandler[] = [];
 
-    constructor(config: { boxes: Point[]; staticMap: StaticMap; hero: Point }) {
+    private hero?: Movement;
+    private boxes?: Movement[];
+
+    constructor(config: { staticMap: StaticMap }) {
         this.staticMap = config.staticMap;
-        this.hero = this.initializeFeature(config.hero);
-        this.boxes = config.boxes
-            .map(box => this.initializeFeature(box));
-        this.movementHandlers.push(new HeroMovementHandler({coordinator: this, position: this.hero.nextPosition}));
+        this.movementHandlers.push(new HeroMovementHandler({coordinator: this}));
         this.movementHandlers.push(...this.findTiles(Tiles.spring)
             .map(feature =>
                 new SpringMovementHandler({
@@ -59,7 +59,7 @@ export class MovementOrchestrator {
     }
 
     public moveHero(direction: Directions): void {
-        this.moveFeature(this.hero, direction);
+        this.moveFeature(this.hero!, direction);
     }
 
     public moveFeature(movement: Movement, direction: Directions) {
@@ -68,16 +68,16 @@ export class MovementOrchestrator {
         movement.nextPosition = movement.currentPosition.calculateOffset(direction);
     }
 
-    public async update(input: MovementCoordinatorInput): Promise<MovementCoordinatorOutput> {
-        this.hero.currentPosition = this.hero.nextPosition;
-        this.boxes
-            .forEach(box => box.currentPosition = box.nextPosition);
+    public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
+        this.hero = this.initializeFeature(input.heroPosition);
+        this.boxes = input.boxes
+            .map(box => this.initializeFeature(box));
 
-        const mapChanged = await this.movementHandlers
-            .reduce(async (acc, handler) => {
-                const act = await handler.act({hero: {action: input.heroAction, position: this.hero.nextPosition}, boxes: this.boxes});
+        const mapChanged = this.movementHandlers
+            .reduce((acc, handler) => {
+                const act = handler.act({hero: {action: input.heroAction, position: this.hero!.nextPosition}, boxes: this.boxes!});
                 return act || acc;
-            }, Promise.resolve(false));
+            }, false);
 
         return {
             hero: this.hero,
@@ -112,7 +112,7 @@ export class MovementOrchestrator {
         return false;
     }
 
-    public getFeatureAtPosition(position: Point): OrientedTile[] {
+    private getFeatureAtPosition(position: Point): OrientedTile[] {
         const result: OrientedTile[] = [];
         if (this.hero?.nextPosition.isEqualTo(position)) {
             result.push({

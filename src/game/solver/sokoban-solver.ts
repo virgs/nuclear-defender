@@ -69,7 +69,7 @@ export class SokobanSolver {
                 });
             });
 
-        this.movementCoordinator = new MovementOrchestrator({staticMap: this.tileMap, hero: this.hero!, boxes: this.boxes});
+        this.movementCoordinator = new MovementOrchestrator({staticMap: this.tileMap});
         this.movementAnalyser = new MovementAnalyser({
             staticMap: this.tileMap,
             distanceCalculator: input.distanceCalculator
@@ -139,7 +139,9 @@ export class SokobanSolver {
         SokobanSolver.actionsList
             .forEach((action: Actions) => {
                 const afterAction = this.movementCoordinator.update({
-                    heroAction: action
+                    heroAction: action,
+                    heroPosition: this.hero!,
+                    boxes: this.boxes
                 });
 
                 if (afterAction.mapChanged) {

@@ -15,7 +15,7 @@ export class SpringMovementHandler implements FeatureMovementHandler {
         this.coordinator = config.coordinator;
     }
 
-    public async act(actData: ActData): Promise<boolean> {
+    public act(actData: ActData): boolean {
         let mapChanged = false;
         actData.boxes
             .filter(box => box.currentPosition.isEqualTo(this.position))

@@ -39,9 +39,7 @@ export class GameController {
 
         this.movementAnalyser = new MovementAnalyser({staticMap: this.tileMap, distanceCalculator: new ManhattanDistanceCalculator()});
         this.movementCoordinator = new MovementOrchestrator({
-            staticMap: this.tileMap,
-            hero: this.hero.getTilePosition(),
-            boxes: this.boxes.map(box => box.getTilePosition())
+            staticMap: this.tileMap
         });
 
     }
@@ -63,7 +61,9 @@ export class GameController {
             this.playerMoves!.push(heroAction);
 
             const movement = await this.movementCoordinator!.update({
-                heroAction: heroAction
+                heroAction: heroAction,
+                heroPosition: this.hero.getTilePosition(),
+                boxes: this.boxes.map(box => box.getTilePosition())
             });
 
             if (movement.mapChanged) {
@@ -84,8 +84,6 @@ export class GameController {
                     .find(tileBox => movedBox.currentPosition.isEqualTo(tileBox.getTilePosition()))!;
 
                 await spriteBoxMoved.move(movedBox.direction!);
-                spriteBoxMoved!.setIsOnTarget(this.targets
-                    .some(target => target.getTilePosition().isEqualTo(spriteBoxMoved.getTilePosition())));
             }));
 
         const heroPromise = async () => {
@@ -95,6 +93,12 @@ export class GameController {
             }
         };
         animationsPromises.push(heroPromise());
+
+        this.boxes
+            .forEach(spriteBox => {
+                spriteBox!.setIsOnTarget(this.targets
+                    .some(target => target.getTilePosition().isEqualTo(spriteBox.getTilePosition())));
+            });
 
         const features = [...movementOutput.boxes, movementOutput.hero];
 

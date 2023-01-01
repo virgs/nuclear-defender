@@ -18,7 +18,7 @@ export interface FeatureMovementHandler {
 
     allowLeavingMovement(direction: Directions): boolean;
 
-    act(actData: ActData): Promise<boolean>;
+    act(actData: ActData): boolean;
 
     getTile(): Tiles;
 
