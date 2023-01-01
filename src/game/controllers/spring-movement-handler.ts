@@ -15,16 +15,15 @@ export class SpringMovementHandler implements FeatureMovementHandler {
         this.coordinator = config.coordinator;
     }
 
-    public act(): boolean {
+    public async act(): Promise<boolean> {
         let mapChanged = false;
         this.coordinator.getBoxes()
-            .some(box => {
-                if (box.currentPosition.isEqualTo(this.position)) {
-                    const nextTilePosition = box.currentPosition.calculateOffset(this.orientation);
-                    if (this.coordinator.canFeatureEnterPosition({point: nextTilePosition, orientation: this.orientation})) {
-                        this.coordinator.moveFeature(box, this.orientation);
-                        mapChanged = true;
-                    }
+            .filter(box => box.currentPosition.isEqualTo(this.position))
+            .forEach(box => {
+                const nextTilePosition = box.currentPosition.calculateOffset(this.orientation);
+                if (this.coordinator.canFeatureEnterPosition({point: nextTilePosition, orientation: this.orientation})) {
+                    this.coordinator.moveFeature(box, this.orientation);
+                    mapChanged = true;
                 }
             });
         return mapChanged;

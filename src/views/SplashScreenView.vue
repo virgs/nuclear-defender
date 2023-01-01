@@ -76,7 +76,7 @@ onMounted(() => {
   <div class="container splash-view text-center pt-3 pt-lg-5">
     <div class="row row-cols-1 justify-content-center gy-3">
       <div class="col">
-        <h1 class="sokoban-display display-2 fw-normal" style="user-select: none">Sokoban</h1>
+        <h1 class="sokoban-display display-2 fw-normal" style="user-select: none">SOKOBAN</h1>
       </div>
       <div class="col">
         <span style="display: flex">

@@ -62,7 +62,7 @@ export class GameController {
             }
             this.playerMoves!.push(heroAction);
 
-            const movement = this.movementCoordinator!.update({
+            const movement = await this.movementCoordinator!.update({
                 heroAction: heroAction
             });
 
@@ -78,10 +78,10 @@ export class GameController {
         this.animationsAreOver = false;
         const animationsPromises: Promise<any>[] = [];
         animationsPromises.push(...movementOutput.boxes
-            .filter(movementBox => movementBox.previousPosition.isDifferentOf(movementBox.currentPosition))
+            .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition))
             .map(async movedBox => {
                 const spriteBoxMoved = this.boxes
-                    .find(tileBox => movedBox.previousPosition.isEqualTo(tileBox.getTilePosition()));
+                    .find(tileBox => movedBox.currentPosition.isEqualTo(tileBox.getTilePosition()));
 
                 await spriteBoxMoved!.move(movedBox.direction!);
                 spriteBoxMoved!.setIsOnTarget(movedBox.isCurrentlyOnTarget);
@@ -89,7 +89,7 @@ export class GameController {
 
         const heroPromise = async () => {
             const hero = movementOutput.hero;
-            if (hero.currentPosition.isDifferentOf(hero.previousPosition)) {
+            if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
                 await this.hero!.move(hero.direction!);
             }
         };
@@ -106,13 +106,13 @@ export class GameController {
 
     private updateActorsCoveringSituation(features: Movement[], actors: GameActor[]) {
         features
-            .filter(feature => feature.currentPosition.isDifferentOf(feature.previousPosition))
+            .filter(feature => feature.nextPosition.isDifferentOf(feature.currentPosition))
             .forEach(movedFeature => {
                 actors
-                    .find(actor => actor.getTilePosition().isEqualTo(movedFeature.currentPosition))
+                    .find(actor => actor.getTilePosition().isEqualTo(movedFeature.nextPosition))
                     ?.onCover();
                 actors
-                    .find(actor => actor.getTilePosition().isEqualTo(movedFeature.previousPosition))
+                    .find(actor => actor.getTilePosition().isEqualTo(movedFeature.currentPosition))
                     ?.onUncover();
             });
 

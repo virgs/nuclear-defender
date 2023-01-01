@@ -58,11 +58,11 @@ export class MovementAnalyser {
 
     private checkEvents(movement: MovementCoordinatorOutput) {
         const events: MovementEvents[] = [];
-        if (movement.hero.currentPosition.isDifferentOf(movement.hero.previousPosition)) {
+        if (movement.hero.nextPosition.isDifferentOf(movement.hero.currentPosition)) {
             events.push(MovementEvents.HERO_MOVED);
         }
         const boxesMoved = movement.boxes
-            .filter(box => box.previousPosition.isDifferentOf(box.currentPosition));
+            .filter(box => box.currentPosition.isDifferentOf(box.nextPosition));
 
         boxesMoved
             .forEach(_ => events.push(MovementEvents.BOX_MOVED));
@@ -75,7 +75,7 @@ export class MovementAnalyser {
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_OUT_OF_TARGET));
 
         boxesMoved
-            .filter(box => movement.hero.currentPosition.isEqualTo(box.previousPosition) &&
+            .filter(box => movement.hero.nextPosition.isEqualTo(box.currentPosition) &&
                 movement.hero.direction === box.direction)
             .find(box => {
                 if (!box.isCurrentlyOnTarget && movement.hero.isCurrentlyOnTarget) {
@@ -91,7 +91,7 @@ export class MovementAnalyser {
         return movement.boxes
             .reduce((acc, box) => {
                 const shortestDistanceToAnyTarget: number = this.targets
-                    .reduce((acc, target) => Math.min(this.distanceCalculator.distance(target, box.currentPosition), acc), Infinity);
+                    .reduce((acc, target) => Math.min(this.distanceCalculator.distance(target, box.nextPosition), acc), Infinity);
                 return acc + shortestDistanceToAnyTarget;
             }, 0);
     }

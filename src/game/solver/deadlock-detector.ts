@@ -15,7 +15,7 @@ export class DeadlockDetector {
 
     public deadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
-        const nextTilePosition = movedBox.currentPosition.calculateOffset(direction);
+        const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
         if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x].code === Tiles.wall) {
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
                 return true;
@@ -32,9 +32,9 @@ export class DeadlockDetector {
     private wallAheadCheck(direction: Directions, movedBox: Movement, nextTilePosition: Point, boxes: Movement[]) {
         let segment: SegmentAnalysis;
         if (direction === Directions.DOWN || direction === Directions.UP) {
-            segment = this.verticalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
+            segment = this.verticalLineSegment(movedBox.nextPosition, nextTilePosition, boxes);
         } else {
-            segment = this.horizontalLineSegment(movedBox.currentPosition, nextTilePosition, boxes);
+            segment = this.horizontalLineSegment(movedBox.nextPosition, nextTilePosition, boxes);
         }
         if (segment.differentBoxes > segment.targets && segment.empties < 2) {
             console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
@@ -55,9 +55,9 @@ export class DeadlockDetector {
         //  #
 
         const clockwiseSide = rotateDirectionClockwise(direction);
-        const clockwiseTilePosition = movedBox.currentPosition.calculateOffset(clockwiseSide);
+        const clockwiseTilePosition = movedBox.nextPosition.calculateOffset(clockwiseSide);
         const otherSide = getOpositeDirectionOf(clockwiseSide);
-        const counterClowiseTilePosition = movedBox.currentPosition.calculateOffset(otherSide);
+        const counterClowiseTilePosition = movedBox.nextPosition.calculateOffset(otherSide);
         const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
         const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
         if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
@@ -88,7 +88,7 @@ export class DeadlockDetector {
             }
         }
         const differentBoxes = boxes
-            .filter(box => box.currentPosition.y === tilePosition.y)
+            .filter(box => box.nextPosition.y === tilePosition.y)
             .reduce((acc, _) => acc + 1, 0);
         return {empties, targets, differentBoxes};
     }
@@ -113,7 +113,7 @@ export class DeadlockDetector {
         }
 
         const differentBoxes = boxes
-            .filter(box => box.currentPosition.x === tilePosition.x)
+            .filter(box => box.nextPosition.x === tilePosition.x)
             .reduce((acc, _) => acc + 1, 0);
         return {empties, targets, differentBoxes};
     }
