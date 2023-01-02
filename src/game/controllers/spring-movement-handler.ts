@@ -2,16 +2,16 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions, getOpositeDirectionOf} from '@/game/constants/directions';
 import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
-import type {Movement, MovementOrchestrator, MovementOrchestratorOutput, OrientedPoint} from '@/game/controllers/movement-orchestrator';
+import type {MovementOrchestrator} from '@/game/controllers/movement-orchestrator';
 
 export class SpringMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;
     private readonly orientation: Directions;
     private readonly coordinator: MovementOrchestrator;
 
-    constructor(config: { spring: OrientedPoint, coordinator: MovementOrchestrator }) {
-        this.position = config.spring.point;
-        this.orientation = config.spring.orientation;
+    constructor(config: { position: Point, orientation: Directions, coordinator: MovementOrchestrator }) {
+        this.position = config.position;
+        this.orientation = config.orientation;
         this.coordinator = config.coordinator;
     }
 

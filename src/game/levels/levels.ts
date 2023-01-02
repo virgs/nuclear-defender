@@ -24,7 +24,7 @@ export const levels: Level[] = [
 #5 o4 #
 #5 o4 #
 #5 o$   #
-#     o@.  #
+# ud   o@.  #
 #5 o*   #
 #5 o4 #
 #4 *o4 #

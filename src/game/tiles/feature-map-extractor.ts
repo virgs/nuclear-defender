@@ -10,6 +10,7 @@ import {configuration} from '../constants/configuration';
 import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 
 export type TileMap = {
     staticMap: StaticMap;
@@ -18,6 +19,7 @@ export type TileMap = {
     springs: SpringActor[];
     targets: TargetActor[];
     oilyFloors: OilyFloorActor[];
+    oneWayDoors: OneWayDoorActor[];
 };
 
 export class FeatureMapExtractor {
@@ -37,11 +39,12 @@ export class FeatureMapExtractor {
     public extract(): TileMap {
         const hero = this.extractHero()!;
         const boxes = this.extractBoxes();
-        const targets = this.detectTargets(boxes);
-        const springs = this.detectFeature(Tiles.spring, (params) => new SpringActor(params)) as SpringActor[];
-        const oilyFloors = this.detectFeature(Tiles.oily, (params) => new OilyFloorActor(params)) as OilyFloorActor[];
+        const targets = this.detectFeature(Tiles.target, boxes, (params) => new TargetActor(params)) as TargetActor[];
+        const springs = this.detectFeature(Tiles.spring, boxes, (params) => new SpringActor(params)) as SpringActor[];
+        const oilyFloors = this.detectFeature(Tiles.oily, boxes, (params) => new OilyFloorActor(params)) as OilyFloorActor[];
+        const oneWayDoors = this.detectFeature(Tiles.oneWayDoor, boxes, (params) => new OneWayDoorActor(params)) as OneWayDoorActor[];
 
-        this.addFloors([...targets, ...springs, ...oilyFloors] as GameActor[]);
+        this.addFloors([...targets, ...springs, ...oilyFloors, ...oneWayDoors] as GameActor[]);
 
         const featurelessMap: StaticMap = {
             tiles: this.featurelessMap.tiles,
@@ -54,7 +57,8 @@ export class FeatureMapExtractor {
             boxes: boxes,
             targets: targets,
             springs: springs,
-            oilyFloors: oilyFloors
+            oilyFloors: oilyFloors,
+            oneWayDoors: oneWayDoors
         };
 
     }
@@ -119,7 +123,7 @@ export class FeatureMapExtractor {
         return targets;
     }
 
-    private detectFeature(tileCode: Tiles, constructorFunction: (params: any) => GameActor) {
+    private detectFeature(tileCode: Tiles, boxes: BoxActor[], constructorFunction: (params: any) => GameActor) {
         const features: GameActor[] = [];
         this.featurelessMap.tiles = this.featurelessMap.tiles
             .map((line, y) => line
@@ -131,6 +135,7 @@ export class FeatureMapExtractor {
                             scene: this.scene,
                             sprite: sprite,
                             tilePosition: tilePosition,
+                            boxes: boxes,
                             orientation: tile.orientation!,
                             id: this.actorCounter++
                         });

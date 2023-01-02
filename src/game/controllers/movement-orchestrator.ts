@@ -6,6 +6,7 @@ import {HeroMovementHandler} from '@/game/controllers/hero-movement-handler';
 import {SpringMovementHandler} from '@/game/controllers/spring-movement-handler';
 import {OilyFloorMovementHandler} from '@/game/controllers/oily-floor-movement-handler';
 import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
+import {OneWayDoorMovementHandler} from '@/game/controllers/one-way-door-movement-handler';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type Movement = {
@@ -47,13 +48,21 @@ export class MovementOrchestrator {
         this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.spring)
             .map(orientedPosition =>
                 new SpringMovementHandler({
-                    spring: orientedPosition,
+                    position: orientedPosition.point,
+                    orientation: orientedPosition.orientation,
                     coordinator: this
                 })));
         this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.oily)
             .map(orientedPosition =>
                 new OilyFloorMovementHandler({
                     position: orientedPosition.point,
+                    coordinator: this
+                })));
+        this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.oneWayDoor)
+            .map(orientedPosition =>
+                new OneWayDoorMovementHandler({
+                    position: orientedPosition.point,
+                    orientation: orientedPosition.orientation,
                     coordinator: this
                 })));
     }
@@ -127,27 +136,14 @@ export class MovementOrchestrator {
 
     public getFeatureAtPosition(position: Point): OrientedTile[] {
         const result: OrientedTile[] = [];
-        if (this.hero?.nextPosition.isEqualTo(position)) {
-            result.push({
-                code: Tiles.hero,
-                orientation: undefined
-            });
-        }
-        if (this.hero?.currentPosition.isEqualTo(position)) {
+        if (this.hero?.nextPosition.isEqualTo(position) || this.hero?.currentPosition.isEqualTo(position)) {
             result.push({
                 code: Tiles.hero,
                 orientation: undefined
             });
         }
         if (this.boxes
-            ?.some(box => box.nextPosition.isEqualTo(position))) {
-            result.push({
-                code: Tiles.box,
-                orientation: undefined
-            });
-        }
-        if (this.boxes
-            ?.some(box => box.currentPosition.isEqualTo(position))) {
+            ?.some(box => box.nextPosition.isEqualTo(position) || box.currentPosition.isEqualTo(position))) {
             result.push({
                 code: Tiles.box,
                 orientation: undefined

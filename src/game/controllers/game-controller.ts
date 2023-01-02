@@ -8,6 +8,7 @@ import type {TileMap} from '@/game/tiles/feature-map-extractor';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import type {OilyFloorActor} from '@/game/actors/oily-floor-actor';
+import type {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 import type {Movement, MovementOrchestratorOutput} from '@/game/controllers/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/controllers/movement-orchestrator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -22,6 +23,7 @@ export class GameController {
     private readonly springs: SpringActor[];
     private readonly oilyFloors: OilyFloorActor[];
     private readonly targets: TargetActor[];
+    private readonly oneWayDoors: OneWayDoorActor[];
     private readonly movementAnalyser: MovementAnalyser;
     private readonly nextMoves: Actions[];
 
@@ -34,6 +36,7 @@ export class GameController {
         this.boxes = config.tileMap.boxes;
         this.springs = config.tileMap.springs;
         this.oilyFloors = config.tileMap.oilyFloors;
+        this.oneWayDoors = config.tileMap.oneWayDoors;
         this.targets = config.tileMap.targets;
         this.tileMap = config.tileMap.staticMap;
         this.nextMoves = config.solution?.actions! || [];
@@ -107,6 +110,7 @@ export class GameController {
         this.updateActorsCoveringSituation(features, this.targets);
         this.updateActorsCoveringSituation(features, this.springs);
         this.updateActorsCoveringSituation(features, this.oilyFloors);
+        this.updateActorsCoveringSituation(features, this.oneWayDoors);
         await Promise.all(animationsPromises);
 
         this.animationsAreOver = true;

@@ -8,10 +8,10 @@ export enum Tiles {
     boxOnTarget = 7,
     heroOnTarget = 71,
     spring = 73,
-    oily = 74,
+    oily = 49,
+    oneWayDoor= 11,
     // not mapped yet
     treadmil,
-    oneWayDoor,
 }
 
 export const getTileFromChar = (char: string): Tiles => {
