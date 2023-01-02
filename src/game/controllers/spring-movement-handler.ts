@@ -2,7 +2,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions, getOpositeDirectionOf} from '@/game/constants/directions';
 import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
-import type {MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
+import type {Movement, MovementOrchestrator, MovementOrchestratorOutput, OrientedPoint} from '@/game/controllers/movement-orchestrator';
 
 export class SpringMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;

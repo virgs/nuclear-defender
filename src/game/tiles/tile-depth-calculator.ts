@@ -6,9 +6,11 @@ export class TileDepthCalculator {
         let modifier = 10;
         switch (code) {
             case Tiles.floor:
-                return -1000;
+                return -100000;
             case Tiles.target:
-                return -100;
+                return -90000;
+            case Tiles.oily:
+                return -80000;
         }
         return (y * 100) + modifier;
     };

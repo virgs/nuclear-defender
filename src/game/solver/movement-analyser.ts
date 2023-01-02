@@ -3,7 +3,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import {DeadlockDetector} from '@/game/solver/deadlock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import type {Movement, MovementCoordinatorOutput} from '../controllers/movement-orchestrator';
+import type {Movement, MovementOrchestratorOutput} from '../controllers/movement-orchestrator';
 
 export type MovementAnalysis = {
     events: MovementEvents[],
@@ -44,7 +44,7 @@ export class MovementAnalyser {
         this.deadlockDetector = new DeadlockDetector({staticMap: this.staticMap});
     }
 
-    public analyse(movement: MovementCoordinatorOutput): MovementAnalysis {
+    public analyse(movement: MovementOrchestratorOutput): MovementAnalysis {
         const events = this.checkEvents(movement);
         let isDeadLocked = events.boxesMoved
             .some(movedBox => this.deadlockDetector.deadLocked(movedBox, movement.boxes));
@@ -55,7 +55,7 @@ export class MovementAnalyser {
         };
     }
 
-    private checkEvents(movement: MovementCoordinatorOutput) {
+    private checkEvents(movement: MovementOrchestratorOutput) {
         const events: MovementEvents[] = [];
         if (movement.hero.nextPosition.isDifferentOf(movement.hero.currentPosition)) {
             events.push(MovementEvents.HERO_MOVED);
@@ -88,7 +88,7 @@ export class MovementAnalyser {
         return {events, boxesMoved};
     }
 
-    private sumOfEveryBoxToTheClosestTarget(movement: MovementCoordinatorOutput): number {
+    private sumOfEveryBoxToTheClosestTarget(movement: MovementOrchestratorOutput): number {
         return movement.boxes
             .reduce((acc, box) => {
                 const shortestDistanceToAnyTarget: number = this.targets

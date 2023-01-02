@@ -6,7 +6,8 @@ export type HeroMovement = {
     tween: {
         x?: string,
         y?: string,
-        duration: number
+        duration: number,
+        ease: string;
     }
     walking: HeroAnimation,
     idle: HeroAnimation

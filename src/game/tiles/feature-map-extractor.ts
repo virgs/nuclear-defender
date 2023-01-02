@@ -1,12 +1,13 @@
 import {Tiles} from './tiles';
 import type Phaser from 'phaser';
-import {BoxActor} from '@/game/actors/box-actor';
 import {Point} from '@/game/math/point';
+import {BoxActor} from '@/game/actors/box-actor';
 import {HeroActor} from '@/game/actors/hero-actor';
 import {TargetActor} from '@/game/actors/target-actor';
 import {SpringActor} from '@/game/actors/spring-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '../constants/configuration';
+import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
@@ -16,6 +17,7 @@ export type TileMap = {
     hero: HeroActor;
     springs: SpringActor[];
     targets: TargetActor[];
+    oilyFloors: OilyFloorActor[];
 };
 
 export class FeatureMapExtractor {
@@ -36,9 +38,10 @@ export class FeatureMapExtractor {
         const hero = this.extractHero()!;
         const boxes = this.extractBoxes();
         const targets = this.detectTargets(boxes);
-        const springs = this.detectSprings();
+        const springs = this.detectFeature(Tiles.spring, (params) => new SpringActor(params)) as SpringActor[];
+        const oilyFloors = this.detectFeature(Tiles.oily, (params) => new OilyFloorActor(params)) as OilyFloorActor[];
 
-        this.addFloors([...targets, ...springs] as GameActor[]);
+        this.addFloors([...targets, ...springs, ...oilyFloors] as GameActor[]);
 
         const featurelessMap: StaticMap = {
             tiles: this.featurelessMap.tiles,
@@ -47,10 +50,11 @@ export class FeatureMapExtractor {
         };
         return {
             staticMap: featurelessMap,
-            targets: targets,
             hero: hero,
+            boxes: boxes,
+            targets: targets,
             springs: springs,
-            boxes: boxes
+            oilyFloors: oilyFloors
         };
 
     }
@@ -115,31 +119,29 @@ export class FeatureMapExtractor {
         return targets;
     }
 
-    private detectSprings() {
-        const springs: SpringActor[] = [];
+    private detectFeature(tileCode: Tiles, constructorFunction: (params: any) => GameActor) {
+        const features: GameActor[] = [];
         this.featurelessMap.tiles = this.featurelessMap.tiles
             .map((line, y) => line
                 .map((tile: OrientedTile, x: number) => {
-                    if (tile.code === Tiles.spring) {
+                    if (tile.code === tileCode) {
                         const tilePosition = new Point(x, y);
-                        const sprite = this.createSprite(tilePosition, Tiles.spring);
-                        const spring = new SpringActor({
+                        const sprite = this.createSprite(tilePosition, tileCode);
+                        const spring = constructorFunction({
                             scene: this.scene,
                             sprite: sprite,
                             tilePosition: tilePosition,
                             orientation: tile.orientation!,
                             id: this.actorCounter++
                         });
-                        springs.push(spring);
+                        features.push(spring);
                     }
                     return tile;
                 }));
-        return springs;
+        return features;
     }
 
     private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const screenAdjustment = new Point(1, 1);
-
         const sprite = this.scene.add.sprite(point.x * configuration.world.tileSize.horizontal + configuration.world.screenAdjustment.horizontal,
             point.y * configuration.world.tileSize.vertical + configuration.world.screenAdjustment.vertical,
             configuration.tiles.spriteSheetKey, tile);

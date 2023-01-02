@@ -1,30 +1,23 @@
-import Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
-import {HeroAnimator} from '../animations/hero-animator';
 import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
-import type {Directions} from '../constants/directions';
+import {InputManager} from '@/game/input/input-manager';
 import type {GameActor} from '@/game/actors/game-actor';
+import type {Directions} from '../constants/directions';
+import {HeroAnimator} from '../animations/hero-animator';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
-    private readonly inputMap: Map<Actions, () => boolean>;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
 
-    private isMoving: boolean = false;
     private tweens: Phaser.Tweens.TweenManager;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
 
     public constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
         this.id = config.id;
-        this.inputMap = new Map<Actions, () => boolean>();
-        this.inputMap.set(Actions.RIGHT, () => Phaser.Input.Keyboard.JustDown(this.cursors!.right));
-        this.inputMap.set(Actions.LEFT, () => Phaser.Input.Keyboard.JustDown(this.cursors!.left));
-        this.inputMap.set(Actions.DOWN, () => Phaser.Input.Keyboard.JustDown(this.cursors!.down));
-        this.inputMap.set(Actions.UP, () => Phaser.Input.Keyboard.JustDown(this.cursors!.up));
 
         this.heroAnimator = new HeroAnimator();
 
@@ -42,20 +35,12 @@ export class HeroActor implements GameActor {
     }
 
     public checkAction(): Actions {
-        if (!this.isMoving) {
-            for (let [action, actionCheckFunction] of this.inputMap.entries()) {
-                if (actionCheckFunction()) {
-                    return action;
-                }
-            }
-        }
-        return Actions.STAND;
+        return InputManager.getInstance().getActionInput() || Actions.STAND;
     }
 
     public async move(direction: Directions): Promise<void> {
         this.tilePosition = this.tilePosition.calculateOffset(direction);
         return new Promise<void>((resolve) => {
-            this.isMoving = true;
             const heroMovement = this.heroAnimator.map(direction);
             if (heroMovement) {
                 this.tweens!.add({
@@ -69,7 +54,6 @@ export class HeroActor implements GameActor {
                     },
                     onComplete: () => {
                         this.sprite!.anims.play(heroMovement.idle, true);
-                        this.isMoving = false;
                         resolve();
                     },
                     onCompleteScope: this //doc purposes

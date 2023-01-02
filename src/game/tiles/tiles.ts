@@ -7,9 +7,9 @@ export enum Tiles {
     floor = 89,
     boxOnTarget = 7,
     heroOnTarget = 71,
+    spring = 73,
+    oily = 74,
     // not mapped yet
-    oily,
-    spring,
     treadmil,
     oneWayDoor,
 }

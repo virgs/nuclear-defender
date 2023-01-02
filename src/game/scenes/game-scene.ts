@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 import {Store} from '@/store';
 import {Scenes} from './scenes';
 import {Actions} from '../constants/actions';
+import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
-import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {GameController} from '@/game/controllers/game-controller';
+import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -46,9 +47,11 @@ export class GameScene extends Phaser.Scene {
                 frameHeight: configuration.tiles.verticalSize
             }
         });
+        this.allowUpdates = true;
     }
 
     public async create() {
+        InputManager.setup(this);
         const store = Store.getInstance();
         const codedMap: string = store.map;
 
@@ -59,18 +62,17 @@ export class GameScene extends Phaser.Scene {
         configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
         //TODO end of section
 
-        this.lights.enable();
-        this.lights.enable().setAmbientColor(0x555555);
+        this.lights.enable()
+            .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
         const mapfeatureMapExtractor = new FeatureMapExtractor(this, output.scale, map);
         const tileMap = mapfeatureMapExtractor.extract();
 
         this.gameController = new GameController({tileMap: tileMap, solution: store.solution});
-
-        this.allowUpdates = true;
     }
 
     public async update(time: number, delta: number) {
+        InputManager.getInstance().update();
         if (this.allowUpdates) {
             await this.gameController!.update();
             if (this.gameController!.isLevelComplete()) {

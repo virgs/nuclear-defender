@@ -2,10 +2,11 @@ import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
 import type {Actions} from '../constants/actions';
 import type {Directions} from '../constants/directions';
+import {HeroMovementHandler} from '@/game/controllers/hero-movement-handler';
 import {SpringMovementHandler} from '@/game/controllers/spring-movement-handler';
+import {OilyFloorMovementHandler} from '@/game/controllers/oily-floor-movement-handler';
 import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {HeroMovementHandler} from '@/game/controllers/hero-movement-handler';
 
 export type Movement = {
     currentPosition: Point,
@@ -18,16 +19,17 @@ export type OrientedPoint = {
     orientation: Directions
 }
 
-export type MovementCoordinatorOutput = {
+export type MovementOrchestratorOutput = {
     mapChanged: boolean;
     boxes: Movement[];
     hero: Movement;
 };
 
-export type MovementCoordinatorInput = {
+export type MovementOrchestratorInput = {
     heroPosition: Point;
     heroAction: Actions;
     boxes: Point[];
+    lastActionResult?: MovementOrchestratorOutput;
 };
 
 export class MovementOrchestrator {
@@ -42,20 +44,18 @@ export class MovementOrchestrator {
     constructor(config: { staticMap: StaticMap }) {
         this.staticMap = config.staticMap;
         this.movementHandlers.push(new HeroMovementHandler({coordinator: this}));
-        this.movementHandlers.push(...this.findTiles(Tiles.spring)
-            .map(feature =>
+        this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.spring)
+            .map(orientedPosition =>
                 new SpringMovementHandler({
-                    spring: feature,
+                    spring: orientedPosition,
                     coordinator: this
                 })));
-    }
-
-    private initializeFeature(point: Point): Movement {
-        return {
-            currentPosition: point,
-            nextPosition: point,
-            direction: undefined
-        };
+        this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.oily)
+            .map(orientedPosition =>
+                new OilyFloorMovementHandler({
+                    position: orientedPosition.point,
+                    coordinator: this
+                })));
     }
 
     public moveHero(direction: Directions): void {
@@ -68,14 +68,22 @@ export class MovementOrchestrator {
         movement.nextPosition = movement.currentPosition.calculateOffset(direction);
     }
 
-    public update(input: MovementCoordinatorInput): MovementCoordinatorOutput {
+    public update(input: MovementOrchestratorInput): MovementOrchestratorOutput {
         this.hero = this.initializeFeature(input.heroPosition);
         this.boxes = input.boxes
             .map(box => this.initializeFeature(box));
 
         const mapChanged = this.movementHandlers
             .reduce((acc, handler) => {
-                const act = handler.act({hero: {action: input.heroAction, position: this.hero!.nextPosition}, boxes: this.boxes!});
+                const act = handler.act({
+                    hero:
+                        {
+                            action: input.heroAction,
+                            position: this.hero!.nextPosition
+                        },
+                    boxes: this.boxes!,
+                    lastActionResult: input.lastActionResult
+                });
                 return act || acc;
             }, false);
 
@@ -103,18 +111,29 @@ export class MovementOrchestrator {
             .some(feature => this.blockerTiles.has(feature.code))) {
             return false;
         }
-        if (this.movementHandlers
+        return this.movementHandlers
             .filter(handler => positionFeatures
                 .some(feature => feature.code === handler.getTile() && move.point.isEqualTo(handler.getPosition())))
-            .every(handler => handler.allowEnteringMovement(move.orientation))) {
-            return true;
-        }
-        return false;
+            .every(handler => handler.allowEnteringMovement(move.orientation));
     }
 
-    private getFeatureAtPosition(position: Point): OrientedTile[] {
+    private initializeFeature(point: Point): Movement {
+        return {
+            currentPosition: point,
+            nextPosition: point,
+            direction: undefined
+        };
+    }
+
+    public getFeatureAtPosition(position: Point): OrientedTile[] {
         const result: OrientedTile[] = [];
         if (this.hero?.nextPosition.isEqualTo(position)) {
+            result.push({
+                code: Tiles.hero,
+                orientation: undefined
+            });
+        }
+        if (this.hero?.currentPosition.isEqualTo(position)) {
             result.push({
                 code: Tiles.hero,
                 orientation: undefined
@@ -127,6 +146,13 @@ export class MovementOrchestrator {
                 orientation: undefined
             });
         }
+        if (this.boxes
+            ?.some(box => box.currentPosition.isEqualTo(position))) {
+            result.push({
+                code: Tiles.box,
+                orientation: undefined
+            });
+        }
         if (position.x < this.staticMap.width && position.y < this.staticMap.height
             && position.x >= 0 && position.y >= 0) {
             result.push(this.staticMap.tiles[position.y][position.x]);
@@ -134,7 +160,7 @@ export class MovementOrchestrator {
         return result;
     }
 
-    private findTiles(code: Tiles): OrientedPoint[] {
+    private findTileOrientedPositions(code: Tiles): OrientedPoint[] {
         const orientedPoints: OrientedPoint[] = [];
         this.staticMap.tiles
             .forEach((line, y) => line

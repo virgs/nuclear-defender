@@ -38,7 +38,8 @@ export const configuration = {
     colors: {
         foregroundColor: '#d6d6d6',
         highlight: '#d4fa00',
-        background: '#dddddd'
+        background: '#dddddd',
+        ambientColor: '#555555'
     },
     html: {
         gameScene: {

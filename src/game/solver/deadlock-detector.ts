@@ -37,9 +37,9 @@ export class DeadlockDetector {
             segment = this.horizontalLineSegment(movedBox.nextPosition, nextTilePosition, boxes);
         }
         if (segment.differentBoxes > segment.targets && segment.empties < 2) {
-            console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
-            console.log(segment.differentBoxes, segment.targets, segment.empties);
-            console.log('deadlocked: no way to get it back and no available targets');
+            // console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
+            // console.log(segment.differentBoxes, segment.targets, segment.empties);
+            // console.log('deadlocked: no way to get it back and no available targets');
             return true;
         }
         return false;

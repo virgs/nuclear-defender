@@ -11,7 +11,7 @@ export class HeroMovementHandler implements FeatureMovementHandler {
 
     constructor(config: { coordinator: MovementOrchestrator }) {
         this.coordinator = config.coordinator;
-        this.position = new Point(0,0);
+        this.position = new Point(0, 0);
     }
 
     public allowEnteringMovement(direction: Directions): boolean {
@@ -44,9 +44,11 @@ export class HeroMovementHandler implements FeatureMovementHandler {
             if (this.featureAheadAllowsMovement(aimedMovement, actData.boxes)) {
                 mapChanged = true;
                 this.coordinator.moveHero(aimedDirection);
-                actData.boxes
-                    .filter(box => box.nextPosition.isEqualTo(aimedPosition))
-                    .forEach(box => this.coordinator.moveFeature(box, aimedDirection));
+                const movedBox = actData.boxes
+                    .find(box => box.nextPosition.isEqualTo(aimedPosition));
+                if (movedBox) {
+                    this.coordinator.moveFeature(movedBox, aimedDirection);
+                }
             }
         }
 
@@ -56,7 +58,7 @@ export class HeroMovementHandler implements FeatureMovementHandler {
     private featureAheadAllowsMovement(aimedMovement: OrientedPoint, boxes: Movement[]): boolean {
         if (!this.coordinator.canFeatureEnterPosition(aimedMovement)) { //it can be a box, check the next one too
             if (boxes
-                .some(box => box.nextPosition.isEqualTo(aimedMovement.point))) { //it's a box
+                .some(box => box.nextPosition.isEqualTo(aimedMovement.point))) { //there's a box
                 //check if the box is in a position that allows moves
                 if (!this.coordinator.canFeatureLeavePosition(aimedMovement)) {
                     return false;

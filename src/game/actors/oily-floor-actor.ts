@@ -1,38 +1,22 @@
 import type {Point} from '@/game/math/point';
 import type Phaser from 'phaser';
-import {Directions} from '@/game/constants/directions';
-import type {GameActor} from '@/game/actors/game-actor';
 import {Tiles} from '@/game/tiles/tiles';
+import type {GameActor} from '@/game/actors/game-actor';
+import type {Directions} from '@/game/constants/directions';
 
-export class SpringActor implements GameActor {
-    private readonly tweens: Phaser.Tweens.TweenManager;
+export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
     private readonly tilePosition: Point;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
-    private readonly orientation: Directions;
     private covered: boolean;
 
-    constructor(config: { orientation: Directions; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene, id: number }) {
-        this.orientation = config.orientation;
+    constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene, id: number }) {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.sprite = config.sprite;
-        this.tweens = config.scene.tweens;
         this.covered = false;
-
-        switch (this.orientation) {
-            case Directions.LEFT:
-                this.sprite.setRotation(Math.PI / 2);
-                break;
-            case Directions.UP:
-                this.sprite.setRotation(Math.PI);
-                break;
-            case Directions.RIGHT:
-                this.sprite.setRotation(-Math.PI / 2);
-                break;
-        }
     }
 
     public isCovered(): boolean {
@@ -41,11 +25,9 @@ export class SpringActor implements GameActor {
 
     public onUncover(): void {
         this.covered = false;
-        // console.log('spring release')
     }
 
     public onCover(): void {
-        // console.log('spring engage')
         this.covered = true;
     }
 
@@ -66,7 +48,7 @@ export class SpringActor implements GameActor {
     }
 
     public getOrientation(): Directions | undefined {
-        return this.orientation;
+        return undefined;
     }
 
 }
