@@ -45,26 +45,13 @@ export class MovementOrchestrator {
     constructor(config: { staticMap: StaticMap }) {
         this.staticMap = config.staticMap;
         this.movementHandlers.push(new HeroMovementHandler({coordinator: this}));
-        this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.spring)
-            .map(orientedPosition =>
-                new SpringMovementHandler({
-                    position: orientedPosition.point,
-                    orientation: orientedPosition.orientation,
-                    coordinator: this
-                })));
-        this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.oily)
-            .map(orientedPosition =>
-                new OilyFloorMovementHandler({
-                    position: orientedPosition.point,
-                    coordinator: this
-                })));
-        this.movementHandlers.push(...this.findTileOrientedPositions(Tiles.oneWayDoor)
-            .map(orientedPosition =>
-                new OneWayDoorMovementHandler({
-                    position: orientedPosition.point,
-                    orientation: orientedPosition.orientation,
-                    coordinator: this
-                })));
+
+        this.movementHandlers
+            .push(...this.findTileOrientedPositions(Tiles.spring, (params) => new SpringMovementHandler(params)));
+        this.movementHandlers
+            .push(...this.findTileOrientedPositions(Tiles.oily, (params) => new OilyFloorMovementHandler(params)));
+        this.movementHandlers
+            .push(...this.findTileOrientedPositions(Tiles.oneWayDoor, (params) => new OneWayDoorMovementHandler(params)));
     }
 
     public moveHero(direction: Directions): void {
@@ -156,15 +143,19 @@ export class MovementOrchestrator {
         return result;
     }
 
-    private findTileOrientedPositions(code: Tiles): OrientedPoint[] {
-        const orientedPoints: OrientedPoint[] = [];
+    private findTileOrientedPositions(code: Tiles, constructorFunction: (params: any) => FeatureMovementHandler): FeatureMovementHandler[] {
+        const handlers: FeatureMovementHandler[] = [];
         this.staticMap.tiles
             .forEach((line, y) => line
                 .forEach((tile, x) => {
                     if (tile.code === code) {
-                        orientedPoints.push({point: new Point(x, y), orientation: tile.orientation!});
+                        handlers.push(constructorFunction({
+                            position: new Point(x, y),
+                            orientation: tile.orientation!,
+                            coordinator: this
+                        }));
                     }
                 }));
-        return orientedPoints;
+        return handlers;
     }
 }

@@ -16,10 +16,7 @@ export type TileMap = {
     staticMap: StaticMap;
     boxes: BoxActor[];
     hero: HeroActor;
-    springs: SpringActor[];
-    targets: TargetActor[];
-    oilyFloors: OilyFloorActor[];
-    oneWayDoors: OneWayDoorActor[];
+    dynamicFeatures: GameActor[];
 };
 
 export class FeatureMapExtractor {
@@ -39,12 +36,13 @@ export class FeatureMapExtractor {
     public extract(): TileMap {
         const hero = this.extractHero()!;
         const boxes = this.extractBoxes();
-        const targets = this.detectFeature(Tiles.target, boxes, (params) => new TargetActor(params)) as TargetActor[];
-        const springs = this.detectFeature(Tiles.spring, boxes, (params) => new SpringActor(params)) as SpringActor[];
-        const oilyFloors = this.detectFeature(Tiles.oily, boxes, (params) => new OilyFloorActor(params)) as OilyFloorActor[];
-        const oneWayDoors = this.detectFeature(Tiles.oneWayDoor, boxes, (params) => new OneWayDoorActor(params)) as OneWayDoorActor[];
 
-        this.addFloors([...targets, ...springs, ...oilyFloors, ...oneWayDoors] as GameActor[]);
+        const dynamicFeatures = [
+            ...this.detectFeature(Tiles.target, boxes, (params) => new TargetActor(params)),
+            ...this.detectFeature(Tiles.spring, boxes, (params) => new SpringActor(params)),
+            ...this.detectFeature(Tiles.oily, boxes, (params) => new OilyFloorActor(params)),
+            ...this.detectFeature(Tiles.oneWayDoor, boxes, (params) => new OneWayDoorActor(params))];
+        this.createWallsAndFloors(dynamicFeatures);
 
         const featurelessMap: StaticMap = {
             tiles: this.featurelessMap.tiles,
@@ -55,10 +53,7 @@ export class FeatureMapExtractor {
             staticMap: featurelessMap,
             hero: hero,
             boxes: boxes,
-            targets: targets,
-            springs: springs,
-            oilyFloors: oilyFloors,
-            oneWayDoors: oneWayDoors
+            dynamicFeatures: dynamicFeatures
         };
 
     }
@@ -157,8 +152,8 @@ export class FeatureMapExtractor {
         return sprite;
     }
 
-    private addFloors(staticActors: GameActor[]) {
-        const staticActorsCode = this.addRemainingFloors(staticActors);
+    private createWallsAndFloors(staticActors: GameActor[]) {
+        const staticActorsCode = this.addHiddenFloors(staticActors);
 
         //Every floor in the map
         this.featurelessMap.tiles
@@ -171,13 +166,13 @@ export class FeatureMapExtractor {
                 }));
     }
 
-    private addRemainingFloors(staticActors: GameActor[]): Set<Tiles> {
+    private addHiddenFloors(staticActors: GameActor[]): Set<Tiles> {
         const staticActorsCode: Set<Tiles> = new Set<Tiles>();
-        //(targets and stuff).. those that hide floors behind them
+        //stuff that hide floors behind them
         staticActors
             .forEach(actor => {
                 staticActorsCode.add(actor.getTileCode());
-                this.createSprite(actor.getTilePosition(), Tiles.floor);
+                // this.createSprite(actor.getTilePosition(), Tiles.floor);
             });
         return staticActorsCode;
     }

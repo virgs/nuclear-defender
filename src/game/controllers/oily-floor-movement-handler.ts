@@ -8,7 +8,7 @@ export class OilyFloorMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;
     private readonly coordinator: MovementOrchestrator;
 
-    constructor(config: { position: Point, coordinator: MovementOrchestrator }) {
+    constructor(config: { position: Point, orientation: Directions, coordinator: MovementOrchestrator }) {
         this.position = config.position;
         this.coordinator = config.coordinator;
     }

@@ -38,6 +38,8 @@ export class GameScene extends Phaser.Scene {
         //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         // });
 
+        this.load.image(configuration.floorKey, configuration.floorTexture);
+
         this.load.spritesheet({
             key: configuration.tiles.spriteSheetKey,
             url: configuration.tiles.sheetAsset,
@@ -72,14 +74,16 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async update(time: number, delta: number) {
-        InputManager.getInstance().update();
+        InputManager.getInstance().update(delta);
         if (this.allowUpdates) {
             await this.gameController!.update();
             if (this.gameController!.isLevelComplete()) {
                 this.allowUpdates = false;
-                console.log('currentLevel complete', this.gameController!.getPlayerMoves().filter(action => action !== Actions.STAND));
+                console.log('currentLevel complete', this.gameController!.getPlayerMoves()
+                    .filter(action => action !== Actions.STAND)
+                    .map(action => Actions[action]));
                 setTimeout(async () => {
-                    // this.lights.destroy();
+                    this.lights.destroy();
 
                     // Store.getInstance().router.push('/next-level');
                 }, 1500);
