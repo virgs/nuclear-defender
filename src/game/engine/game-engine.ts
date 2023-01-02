@@ -1,3 +1,4 @@
+import {Tiles} from '@/game/tiles/tiles';
 import type {Actions} from '@/game/constants/actions';
 import type {BoxActor} from '@/game/actors/box-actor';
 import type {HeroActor} from '@/game/actors/hero-actor';
@@ -6,13 +7,12 @@ import type {TargetActor} from '@/game/actors/target-actor';
 import type {TileMap} from '@/game/tiles/feature-map-extractor';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
-import type {Movement, MovementOrchestratorOutput} from '@/game/controllers/movement-orchestrator';
-import {MovementOrchestrator} from '@/game/controllers/movement-orchestrator';
+import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import {Tiles} from '@/game/tiles/tiles';
+import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 
-export class GameController {
+export class GameEngine {
     private readonly tileMap: StaticMap;
     private readonly playerMoves: Actions[];
     private readonly movementCoordinator: MovementOrchestrator;

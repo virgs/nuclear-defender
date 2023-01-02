@@ -10,7 +10,7 @@ const tileWidth = 40;
 export const configuration = {
     frameRate: 10,
     updateCycleInMs: 200,
-    floorKey: 'floorTexture',
+    floorTextureKey: 'floorTexture',
     floorTexture: floorTexture,
     tiles: { //in tile sheet
         verticalPerspective: verticalPerspective,
@@ -28,19 +28,15 @@ export const configuration = {
         tileSize: { //after rescaling...
             vertical: Math.trunc(tileHeight * verticalPerspective),
             horizontal: tileWidth
-        },
-        screenAdjustment: {
-            vertical: Math.trunc(tileHeight * verticalPerspective),
-            horizontal: tileWidth
         }
-
     },
     screenRatio: .75,
     gameWidth: 800,
     gameHeight: 600,
     colors: {
         foregroundColor: '#d6d6d6',
-        highlight: '#d4fa00',
+        radioactive: '#d4fa00',
+        controlled: '#342012',
         background: '#dddddd',
         ambientColor: '#555555'
     },

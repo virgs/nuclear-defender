@@ -24,7 +24,7 @@ export class NextLevelScene extends Phaser.Scene {
 
         this.add.text(horizontalCenterPosition, height * 0.1, `Level '${levels[data.currentLevel].title}' Complete!`, {
             fontFamily: 'Righteous',
-            color: configuration.colors.highlight,
+            color: configuration.colors.radioactive,
             fontSize: '60px'
         })
             .setOrigin(0.5);

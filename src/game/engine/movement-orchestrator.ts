@@ -2,11 +2,11 @@ import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
 import type {Actions} from '../constants/actions';
 import type {Directions} from '../constants/directions';
-import {HeroMovementHandler} from '@/game/controllers/hero-movement-handler';
-import {SpringMovementHandler} from '@/game/controllers/spring-movement-handler';
-import {OilyFloorMovementHandler} from '@/game/controllers/oily-floor-movement-handler';
-import type {FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
-import {OneWayDoorMovementHandler} from '@/game/controllers/one-way-door-movement-handler';
+import {HeroMovementHandler} from '@/game/engine/hero-movement-handler';
+import {SpringMovementHandler} from '@/game/engine/spring-movement-handler';
+import {OilyFloorMovementHandler} from '@/game/engine/oily-floor-movement-handler';
+import type {FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
+import {OneWayDoorMovementHandler} from '@/game/engine/one-way-door-movement-handler';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type Movement = {

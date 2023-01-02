@@ -4,7 +4,7 @@ import {Scenes} from './scenes';
 import {Actions} from '../constants/actions';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {GameController} from '@/game/controllers/game-controller';
+import {GameEngine} from '@/game/engine/game-engine';
 import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -20,7 +20,7 @@ export type GameSceneConfiguration = {
 //TODO create memento-recorder-class com a habilidade de 'undo' entre cada action do hero que não seja standing
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
-    private gameController?: GameController;
+    private gameEngine?: GameEngine;
 
     constructor() {
         super(Scenes[Scenes.GAME]);
@@ -38,7 +38,7 @@ export class GameScene extends Phaser.Scene {
         //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         // });
 
-        this.load.image(configuration.floorKey, configuration.floorTexture);
+        this.load.image(configuration.floorTextureKey, configuration.floorTexture);
 
         this.load.spritesheet({
             key: configuration.tiles.spriteSheetKey,
@@ -70,22 +70,23 @@ export class GameScene extends Phaser.Scene {
         const mapfeatureMapExtractor = new FeatureMapExtractor(this, output.scale, map);
         const tileMap = mapfeatureMapExtractor.extract();
 
-        this.gameController = new GameController({tileMap: tileMap, solution: store.solution});
+        this.gameEngine = new GameEngine({tileMap: tileMap, solution: store.solution});
     }
 
     public async update(time: number, delta: number) {
         InputManager.getInstance().update(delta);
         if (this.allowUpdates) {
-            await this.gameController!.update();
-            if (this.gameController!.isLevelComplete()) {
+            await this.gameEngine!.update();
+            if (this.gameEngine!.isLevelComplete()) {
                 this.allowUpdates = false;
-                console.log('currentLevel complete', this.gameController!.getPlayerMoves()
+                console.log('currentLevel complete', this.gameEngine!.getPlayerMoves()
                     .filter(action => action !== Actions.STAND)
                     .map(action => Actions[action]));
                 setTimeout(async () => {
                     this.lights.destroy();
 
-                    // Store.getInstance().router.push('/next-level');
+                    console.log(Store.getInstance())
+                    Store.getInstance().router.push('/next-level');
                 }, 1500);
                 // }
             }

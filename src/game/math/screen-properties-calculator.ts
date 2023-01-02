@@ -5,7 +5,7 @@ import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translato
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
     max: 1.15,
-    min: .6
+    min: .5
 };
 
 export class ScreenPropertiesCalculator {
@@ -16,7 +16,9 @@ export class ScreenPropertiesCalculator {
         };
         const xFactor = configuration.gameWidth / map.width;
         const yFactor = configuration.gameHeight / map.height;
+        console.log(map, xFactor, yFactor)
         const scale = Math.min(this.limitValue(xFactor), this.limitValue(yFactor));
+        console.log(scale)
         return {
             scale: scale,
             center: new Point(

@@ -91,7 +91,7 @@ export const createButton = (text, onClick: () => any): HTMLElement => {
 export const createHighlightButton = (text, onClick: () => any): HTMLElement => {
     const htmlElement = createButton(text, onClick);
     htmlElement.classList.add('is-fullwidth');
-    htmlElement.style.backgroundColor = configuration.colors.highlight;
+    htmlElement.style.backgroundColor = configuration.colors.radioactive;
     return htmlElement;
 };
 
@@ -189,7 +189,7 @@ export const createSubmitInput = (data: {
 
     const buttonElement = document.createElement('a');
     buttonElement.classList.add('button', 'is-small');
-    buttonElement.style.backgroundColor = configuration.colors.highlight;
+    buttonElement.style.backgroundColor = configuration.colors.radioactive;
     buttonElement.text = data.buttonText;
     buttonElement.addEventListener('click', () => data.onClick(inputElement.value));
 

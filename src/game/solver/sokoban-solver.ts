@@ -2,7 +2,7 @@ import Heap from 'heap';
 import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
 import {Actions} from '../constants/actions';
-import {MovementOrchestrator} from '../controllers/movement-orchestrator';
+import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';

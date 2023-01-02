@@ -1,16 +1,16 @@
 import {Tiles} from './tiles';
-import type Phaser from 'phaser';
 import {Point} from '@/game/math/point';
 import {BoxActor} from '@/game/actors/box-actor';
 import {HeroActor} from '@/game/actors/hero-actor';
 import {TargetActor} from '@/game/actors/target-actor';
 import {SpringActor} from '@/game/actors/spring-actor';
+import {FloorBuilder} from '@/game/tiles/floor-builder';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '../constants/configuration';
 import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
+import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 
 export type TileMap = {
     staticMap: StaticMap;
@@ -42,15 +42,13 @@ export class FeatureMapExtractor {
             ...this.detectFeature(Tiles.spring, boxes, (params) => new SpringActor(params)),
             ...this.detectFeature(Tiles.oily, boxes, (params) => new OilyFloorActor(params)),
             ...this.detectFeature(Tiles.oneWayDoor, boxes, (params) => new OneWayDoorActor(params))];
-        this.createWallsAndFloors(dynamicFeatures);
+        this.createWalls();
 
-        const featurelessMap: StaticMap = {
-            tiles: this.featurelessMap.tiles,
-            width: this.featurelessMap.width,
-            height: this.featurelessMap.height
-        };
+        const floorBuilder = new FloorBuilder(this.scene, this.featurelessMap);
+        floorBuilder.createMask(dynamicFeatures);
+
         return {
-            staticMap: featurelessMap,
+            staticMap: this.featurelessMap,
             hero: hero,
             boxes: boxes,
             dynamicFeatures: dynamicFeatures
@@ -96,28 +94,6 @@ export class FeatureMapExtractor {
         return boxes;
     }
 
-    private detectTargets(boxes: BoxActor[]): TargetActor[] {
-        const targets: TargetActor[] = [];
-        this.featurelessMap.tiles = this.featurelessMap.tiles
-            .map((line, y) => line
-                .map((tile: OrientedTile, x: number) => {
-                    if (tile.code === Tiles.target) {
-                        const tilePosition = new Point(x, y);
-                        const sprite = this.createSprite(tilePosition, Tiles.target);
-                        const target = new TargetActor({
-                            scene: this.scene,
-                            sprite: sprite,
-                            tilePosition: tilePosition,
-                            boxes: boxes,
-                            id: this.actorCounter++
-                        });
-                        targets.push(target);
-                    }
-                    return tile;
-                }));
-        return targets;
-    }
-
     private detectFeature(tileCode: Tiles, boxes: BoxActor[], constructorFunction: (params: any) => GameActor) {
         const features: GameActor[] = [];
         this.featurelessMap.tiles = this.featurelessMap.tiles
@@ -142,38 +118,25 @@ export class FeatureMapExtractor {
     }
 
     private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const sprite = this.scene.add.sprite(point.x * configuration.world.tileSize.horizontal + configuration.world.screenAdjustment.horizontal,
-            point.y * configuration.world.tileSize.vertical + configuration.world.screenAdjustment.vertical,
+        const sprite = this.scene.add.sprite(point.x * configuration.world.tileSize.horizontal,
+            point.y * configuration.world.tileSize.vertical,
             configuration.tiles.spriteSheetKey, tile);
         sprite.scale = this.scale;
-        sprite.setOrigin(0.5);
+        sprite.setOrigin(0);
         sprite.setDepth(new TileDepthCalculator().calculate(tile, sprite.y));
         sprite.setPipeline('Light2D');
         return sprite;
     }
 
-    private createWallsAndFloors(staticActors: GameActor[]) {
-        const staticActorsCode = this.addHiddenFloors(staticActors);
-
-        //Every floor in the map
+    private createWalls() {
         this.featurelessMap.tiles
             .forEach((line, y) => line
                 .forEach((tile: OrientedTile, x: number) => {
-                    if (!staticActorsCode.has(tile.code)) {//it was created in the staticActors loop
-                        const tilePosition = new Point(x, y);
+                    const tilePosition = new Point(x, y);
+                    if (tile.code === Tiles.wall) {
                         this.createSprite(tilePosition, tile.code);
                     }
                 }));
     }
 
-    private addHiddenFloors(staticActors: GameActor[]): Set<Tiles> {
-        const staticActorsCode: Set<Tiles> = new Set<Tiles>();
-        //stuff that hide floors behind them
-        staticActors
-            .forEach(actor => {
-                staticActorsCode.add(actor.getTileCode());
-                // this.createSprite(actor.getTilePosition(), Tiles.floor);
-            });
-        return staticActorsCode;
-    }
 }

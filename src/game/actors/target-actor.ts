@@ -8,7 +8,8 @@ import type {Directions} from '@/game/constants/directions';
 export class TargetActor implements GameActor {
     private static readonly UNCOVERED_LIGHT_INTENSITY = .5;
     private static readonly COVERED_LIGHT_INTENSITY = .025;
-    private static readonly LIGHT_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.highlight).color;
+    private static readonly LIGHT_UNCOVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.radioactive).color;
+    private static readonly LIGHT_COVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.controlled).color;
     private static readonly LIGHT_RADIUS: number = configuration.world.tileSize.horizontal * 3;
 
     private readonly tilePosition: Point;
@@ -37,9 +38,9 @@ export class TargetActor implements GameActor {
 
     private addLight(config: { boxes: BoxActor[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene }) {
         const light = config.scene.lights.addLight(this.sprite.x, this.sprite.y, TargetActor.LIGHT_RADIUS,
-            TargetActor.LIGHT_COLOR, TargetActor.UNCOVERED_LIGHT_INTENSITY);
+            TargetActor.LIGHT_UNCOVERED_COLOR, TargetActor.UNCOVERED_LIGHT_INTENSITY);
 
-        const pathRadius = new Point(configuration.world.tileSize.horizontal * 0.2, configuration.world.tileSize.horizontal * 0.2);
+        const pathRadius = new Point(configuration.world.tileSize.horizontal * 0.1, configuration.world.tileSize.horizontal * 0.1);
 
         const path = new Phaser.Curves.Path();
         path.add(new Phaser.Curves.Ellipse(this.sprite.x, this.sprite.y,
@@ -49,13 +50,15 @@ export class TargetActor implements GameActor {
         config.scene.tweens.add({
             targets: follower,
             t: 1,
-            ease: 'Sine.easeInOut',
+            ease: 'Linear',
             duration: 5000,
             onUpdate: () => {
                 const intensity = Math.random() * .25;
                 if (this.covered) {
+                    light.setColor(TargetActor.LIGHT_COVERED_COLOR)
                     light.intensity = TargetActor.COVERED_LIGHT_INTENSITY + intensity;
                 } else {
+                    light.setColor(TargetActor.LIGHT_UNCOVERED_COLOR)
                     light.intensity = TargetActor.UNCOVERED_LIGHT_INTENSITY + intensity;
                 }
 
