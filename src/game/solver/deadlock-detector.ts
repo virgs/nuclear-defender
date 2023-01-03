@@ -1,22 +1,22 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
-import type {Movement} from '@/game/controllers/movement-orchestrator';
-import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {Movement} from '@/game/engine/movement-orchestrator';
+import type {OrientedTile, MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
 type SegmentAnalysis = { differentBoxes: number; empties: number; targets: number };
 
 export class DeadlockDetector {
-    private staticMap: StaticMap;
+    private staticMap: MultiLayeredMap;
 
-    constructor(config: { staticMap: StaticMap }) {
+    constructor(config: { staticMap: MultiLayeredMap }) {
         this.staticMap = config.staticMap;
     }
 
     public deadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
-        if (this.staticMap.tiles[nextTilePosition.y][nextTilePosition.x].code === Tiles.wall) {
+        if (this.staticMap.layeredOrientedTiles[nextTilePosition.y][nextTilePosition.x].some(tile => tile.code === Tiles.wall)) {
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
                 return true;
             }
@@ -46,8 +46,8 @@ export class DeadlockDetector {
     }
 
     private checkTrappedBoxInCorner(movedBox: Movement, direction: Directions): boolean {
-        const featureAtPosition = this.getFeatureAtPosition(movedBox.nextPosition);
-        if (featureAtPosition?.code === Tiles.target || featureAtPosition?.code === Tiles.spring) {
+        const featuresAtPosition = this.getFeaturesAtPosition(movedBox.nextPosition);
+        if (featuresAtPosition.some(tile => tile.code === Tiles.target || tile.code === Tiles.spring)) {
             return false;
         }
         //  ######
@@ -59,13 +59,13 @@ export class DeadlockDetector {
         const clockwiseTilePosition = movedBox.nextPosition.calculateOffset(clockwiseSide);
         const otherSide = getOpositeDirectionOf(clockwiseSide);
         const counterClowiseTilePosition = movedBox.nextPosition.calculateOffset(otherSide);
-        const cwTile = this.staticMap.tiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
-        const ccwTile = this.staticMap.tiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
-        if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
-            console.log(cwTile, ccwTile);
-            console.log('deadlocked: trapped in between walls');
-            return true;
-        }
+        // const cwTile = this.staticMap.layeredOrientedTiles[clockwiseTilePosition.y][clockwiseTilePosition.x].code;
+        // const ccwTile = this.staticMap.layeredOrientedTiles[counterClowiseTilePosition.y][counterClowiseTilePosition.x].code;
+        // if (ccwTile === Tiles.wall || cwTile === Tiles.wall) {
+        //     console.log(cwTile, ccwTile);
+        //     console.log('deadlocked: trapped in between walls');
+        //     return true;
+        // }
         return false;
     }
 
@@ -79,14 +79,14 @@ export class DeadlockDetector {
         let empties = 0;
         let targets = 0;
         for (let x = 0; x < this.staticMap.width; ++x) {
-            const currentLineTile = this.staticMap.tiles[tilePosition.y][x].code;
-            if (currentLineTile === Tiles.target) {
-                ++targets;
-            }
-            const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x].code;
-            if (nextLineTile !== Tiles.wall && nextLineTile !== Tiles.empty) {
-                ++empties;
-            }
+            // const currentLineTile = this.staticMap.tiles[tilePosition.y][x].code;
+            // if (currentLineTile === Tiles.target) {
+            //     ++targets;
+            // }
+            // const nextLineTile = this.staticMap.tiles[nextTilePosition.y][x].code;
+            // if (nextLineTile !== Tiles.wall && nextLineTile !== Tiles.empty) {
+            //     ++empties;
+            // }
         }
         const differentBoxes = boxes
             .filter(box => box.nextPosition.y === tilePosition.y)
@@ -102,15 +102,15 @@ export class DeadlockDetector {
         let empties = 0;
         let targets = 0;
         for (let y = 0; y < this.staticMap.height; ++y) {
-            const currentColumnTile = this.staticMap.tiles[y][tilePosition.x].code;
-            if (currentColumnTile === Tiles.target) {
-                ++targets;
-            }
-
-            const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x].code;
-            if (nextColumnTile !== Tiles.wall && nextColumnTile !== Tiles.empty) {
-                ++empties;
-            }
+            // const currentColumnTile = this.staticMap.tiles[y][tilePosition.x].code;
+            // if (currentColumnTile === Tiles.target) {
+            //     ++targets;
+            // }
+            //
+            // const nextColumnTile = this.staticMap.tiles[y][nextTilePosition.x].code;
+            // if (nextColumnTile !== Tiles.wall && nextColumnTile !== Tiles.empty) {
+            //     ++empties;
+            // }
         }
 
         const differentBoxes = boxes
@@ -119,11 +119,11 @@ export class DeadlockDetector {
         return {empties, targets, differentBoxes};
     }
 
-    public getFeatureAtPosition(position: Point): OrientedTile | undefined {
+    public getFeaturesAtPosition(position: Point): OrientedTile[] {
         if (position.x < this.staticMap.width && position.y < this.staticMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.staticMap.tiles[position.y][position.x];
+            return this.staticMap.layeredOrientedTiles[position.y][position.x];
         }
-        return undefined;
+        return [];
     }
 }

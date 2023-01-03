@@ -1,6 +1,5 @@
 import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import type {BoxActor} from '@/game/actors/box-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
 import type {Directions} from '@/game/constants/directions';
@@ -19,7 +18,7 @@ export class TargetActor implements GameActor {
     private readonly id: number;
     private covered: boolean;
 
-    constructor(config: { boxes: BoxActor[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
+    constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
         this.id = config.id;
         this.scene = config.scene;
         this.covered = false;
@@ -27,16 +26,10 @@ export class TargetActor implements GameActor {
         this.sprite = config.sprite;
         this.tweens = config.scene.tweens;
 
-        const boxOnIt = config.boxes
-            .find(box => box.getTilePosition().isEqualTo(config.tilePosition));
-        if (boxOnIt) {
-            this.onCover();
-            boxOnIt.setIsOnTarget(true);
-        }
         this.addLight(config);
     }
 
-    private addLight(config: { boxes: BoxActor[]; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene }) {
+    private addLight(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene }) {
         const light = config.scene.lights.addLight(this.sprite.x, this.sprite.y, TargetActor.LIGHT_RADIUS,
             TargetActor.LIGHT_UNCOVERED_COLOR, TargetActor.UNCOVERED_LIGHT_INTENSITY);
 
@@ -51,14 +44,14 @@ export class TargetActor implements GameActor {
             targets: follower,
             t: 1,
             ease: 'Linear',
-            duration: 5000,
+            duration: Math.random() * 5000 + 3000,
             onUpdate: () => {
                 const intensity = Math.random() * .25;
                 if (this.covered) {
-                    light.setColor(TargetActor.LIGHT_COVERED_COLOR)
+                    light.setColor(TargetActor.LIGHT_COVERED_COLOR);
                     light.intensity = TargetActor.COVERED_LIGHT_INTENSITY + intensity;
                 } else {
-                    light.setColor(TargetActor.LIGHT_UNCOVERED_COLOR)
+                    light.setColor(TargetActor.LIGHT_UNCOVERED_COLOR);
                     light.intensity = TargetActor.UNCOVERED_LIGHT_INTENSITY + intensity;
                 }
 
@@ -74,11 +67,11 @@ export class TargetActor implements GameActor {
         return this.tilePosition;
     }
 
-    public onCover(): void {
+    public cover(): void {
         this.covered = true;
     }
 
-    public onUncover(): void {
+    public uncover(): void {
         this.covered = false;
     }
 

@@ -84,11 +84,11 @@ export class HeroActor implements GameActor {
         return false;
     }
 
-    public onCover() {
+    public cover() {
         console.error('hero being covered');
     }
 
-    public onUncover() {
+    public uncover() {
         console.error('hero being uncovered');
     }
 

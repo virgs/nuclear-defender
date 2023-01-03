@@ -8,7 +8,7 @@ const verticalPerspective = .8;
 const tileHeight = 40;
 const tileWidth = 40;
 export const configuration = {
-    frameRate: 10,
+    frameRate: 8,
     updateCycleInMs: 200,
     floorTextureKey: 'floorTexture',
     floorTexture: floorTexture,

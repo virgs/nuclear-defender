@@ -5,7 +5,7 @@ import {Actions} from '../constants/actions';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
-import type {StaticMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 type Solution = {
     actions: Actions[],
@@ -33,7 +33,7 @@ export class SokobanSolver {
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.score - b.score);
     private candidatesVisitedHash: { [hash: string]: boolean } = {};
-    private readonly tileMap: StaticMap;
+    private readonly tileMap: MultiLayeredMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
@@ -42,7 +42,7 @@ export class SokobanSolver {
     private boxes: Point[] = [];
 
     public constructor(input: {
-        tileMap: StaticMap,
+        tileMap: MultiLayeredMap,
         cpu: { sleepForInMs: number, sleepingCycle: number }
         distanceCalculator: DistanceCalculator
     }) {
@@ -50,28 +50,27 @@ export class SokobanSolver {
         this.sleepingCycle = input.cpu.sleepingCycle;
 
         this.tileMap = input.tileMap;
-        this.tileMap.tiles = (JSON.parse(JSON.stringify(input.tileMap.tiles)) as OrientedTile[][])
-            .map((tile: OrientedTile[], y: number) => {
-                return tile.map((tile: OrientedTile, x: number) => {
-                    if (tile.code === Tiles.heroOnTarget) {
-                        tile.code = Tiles.target;
-                        this.hero = new Point(x, y);
-                    } else if (tile.code === Tiles.hero) {
-                        this.hero = new Point(x, y);
-                    } else if (tile.code === Tiles.boxOnTarget) {
-                        tile.code = Tiles.target;
-                        this.boxes.push(new Point(x, y));
-                    } else if (tile.code === Tiles.box) {
-                        this.boxes.push(new Point(x, y));
-                    }
+        const deepCopy = (JSON.parse(JSON.stringify(input.tileMap.layeredOrientedTiles)) as OrientedTile[][][]);
+        this.tileMap.layeredOrientedTiles = deepCopy
+            .map((tile: OrientedTile[][], y: number) =>
+                tile.map((layers: OrientedTile[], x: number) =>
+                    layers
+                        .filter(tile => {
+                            if (tile.code === Tiles.hero) {
+                                this.hero = new Point(x, y);
+                                return false;
+                            } else if (tile.code === Tiles.box) {
+                                this.boxes.push(new Point(x, y));
+                                return false;
+                            }
+                            return true;
+                        })
+                )
+            );
 
-                    return tile;
-                });
-            });
-
-        this.movementCoordinator = new MovementOrchestrator({staticMap: this.tileMap});
+        this.movementCoordinator = new MovementOrchestrator({multiLayeredStrippedMap: this.tileMap});
         this.movementAnalyser = new MovementAnalyser({
-            staticMap: this.tileMap,
+            multiLayeredStrippedMap: this.tileMap,
             distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
@@ -164,7 +163,8 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: Point[]): boolean {
         return boxesPosition
-            .every(box => this.tileMap.tiles[box.y][box.x].code === Tiles.target);
+            .every(box => this.tileMap.layeredOrientedTiles[box.y][box.x]
+                .some(layer => layer.code === Tiles.target));
     }
 
     private candidateWasVisitedBefore(newCandidateHash: string): boolean {

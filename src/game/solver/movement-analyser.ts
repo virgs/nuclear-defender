@@ -2,8 +2,8 @@ import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
 import {DeadlockDetector} from '@/game/solver/deadlock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
-import type {StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import type {Movement, MovementOrchestratorOutput} from '../controllers/movement-orchestrator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 
 export type MovementAnalysis = {
     events: MovementEvents[],
@@ -24,24 +24,25 @@ export enum MovementEvents {
 export class MovementAnalyser {
     private readonly targets: Point[];
     private readonly distanceCalculator: DistanceCalculator;
-    private readonly staticMap: StaticMap;
+    private readonly multiLayeredStrippedMap: MultiLayeredMap;
     private readonly deadlockDetector: DeadlockDetector;
 
     public constructor(data: {
-        staticMap: StaticMap,
+        multiLayeredStrippedMap: MultiLayeredMap,
         distanceCalculator: DistanceCalculator
     }) {
-        this.staticMap = data.staticMap;
+        this.multiLayeredStrippedMap = data.multiLayeredStrippedMap;
         this.distanceCalculator = data.distanceCalculator;
         this.targets = [];
-        for (let y = 0; y < data.staticMap.height; ++y) {
-            for (let x = 0; x < data.staticMap.width; ++x) {
-                if (data.staticMap.tiles[y][x].code === Tiles.target) {
+        for (let y = 0; y < data.multiLayeredStrippedMap.height; ++y) {
+            for (let x = 0; x < data.multiLayeredStrippedMap.width; ++x) {
+                if (data.multiLayeredStrippedMap.layeredOrientedTiles[y][x]
+                    .some(layer => layer.code === Tiles.target)) {
                     this.targets.push(new Point(x, y));
                 }
             }
         }
-        this.deadlockDetector = new DeadlockDetector({staticMap: this.staticMap});
+        this.deadlockDetector = new DeadlockDetector({staticMap: this.multiLayeredStrippedMap});
     }
 
     public analyse(movement: MovementOrchestratorOutput): MovementAnalysis {
@@ -98,9 +99,10 @@ export class MovementAnalyser {
     }
 
     public isTileAtPosition(position: Point, tile: Tiles): boolean {
-        if (position.x < this.staticMap.width && position.y < this.staticMap.height
+        if (position.x < this.multiLayeredStrippedMap.width && position.y < this.multiLayeredStrippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.staticMap.tiles[position.y][position.x].code === tile;
+            return this.multiLayeredStrippedMap.layeredOrientedTiles[position.y][position.x]
+                .some(layer => layer.code === tile);
         }
         return false;
     }

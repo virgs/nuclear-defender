@@ -23,11 +23,11 @@ export class OilyFloorActor implements GameActor {
         return this.covered;
     }
 
-    public onUncover(): void {
+    public uncover(): void {
         this.covered = false;
     }
 
-    public onCover(): void {
+    public cover(): void {
         this.covered = true;
     }
 

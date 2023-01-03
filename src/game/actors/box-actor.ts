@@ -79,11 +79,11 @@ export class BoxActor implements GameActor {
         return false;
     }
 
-    public onCover() {
+    public cover() {
         console.error('box being covered')
     }
 
-    public onUncover() {
+    public uncover() {
         console.error('box being uncovered')
     }
 

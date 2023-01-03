@@ -1,8 +1,8 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
-import type {MovementOrchestrator} from '@/game/controllers/movement-orchestrator';
-import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
+import type {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
+import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 
 export class OneWayDoorMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;

@@ -21,10 +21,10 @@ export const levels: Level[] = [
 5-###
 #5#ds5#
 #5oo4o#
-#5oo4o#
+#4o[@.o]o4o#
 #5oo2ouso#
 #5oo$ooo#
-#oudoooo@.oo#
+#ouwooooo.oo#
 #5oo*ooo#
 #5oo4o#
 #4o*o4o#

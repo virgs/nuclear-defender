@@ -7,12 +7,12 @@ export class TileDepthCalculator {
         switch (code) {
             case Tiles.floor:
                 return -100000;
-            case Tiles.target:
-                return -90000;
             case Tiles.oily:
-                return -80000;
+                return -90000;
             case Tiles.oneWayDoor:
                 return -80000;
+            case Tiles.target:
+                return -70000;
         }
         return (y * 100) + modifier;
     };

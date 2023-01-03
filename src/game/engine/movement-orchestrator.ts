@@ -7,7 +7,7 @@ import {SpringMovementHandler} from '@/game/engine/spring-movement-handler';
 import {OilyFloorMovementHandler} from '@/game/engine/oily-floor-movement-handler';
 import type {FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 import {OneWayDoorMovementHandler} from '@/game/engine/one-way-door-movement-handler';
-import type {OrientedTile, StaticMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type Movement = {
     currentPosition: Point,
@@ -36,14 +36,14 @@ export type MovementOrchestratorInput = {
 export class MovementOrchestrator {
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.wall, Tiles.empty]);
 
-    private readonly staticMap: StaticMap;
+    private readonly multiLayeredStrippedMap: MultiLayeredMap;
     private readonly movementHandlers: FeatureMovementHandler[] = [];
 
     private hero?: Movement;
     private boxes?: Movement[];
 
-    constructor(config: { staticMap: StaticMap }) {
-        this.staticMap = config.staticMap;
+    constructor(config: { multiLayeredStrippedMap: MultiLayeredMap }) {
+        this.multiLayeredStrippedMap = config.multiLayeredStrippedMap;
         this.movementHandlers.push(new HeroMovementHandler({coordinator: this}));
 
         this.movementHandlers
@@ -136,26 +136,27 @@ export class MovementOrchestrator {
                 orientation: undefined
             });
         }
-        if (position.x < this.staticMap.width && position.y < this.staticMap.height
+        if (position.x < this.multiLayeredStrippedMap.width && position.y < this.multiLayeredStrippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            result.push(this.staticMap.tiles[position.y][position.x]);
+            result.push(...this.multiLayeredStrippedMap.layeredOrientedTiles[position.y][position.x]);
         }
         return result;
     }
 
     private findTileOrientedPositions(code: Tiles, constructorFunction: (params: any) => FeatureMovementHandler): FeatureMovementHandler[] {
         const handlers: FeatureMovementHandler[] = [];
-        this.staticMap.tiles
+        this.multiLayeredStrippedMap.layeredOrientedTiles
             .forEach((line, y) => line
-                .forEach((tile, x) => {
-                    if (tile.code === code) {
-                        handlers.push(constructorFunction({
-                            position: new Point(x, y),
-                            orientation: tile.orientation!,
-                            coordinator: this
-                        }));
-                    }
-                }));
+                .forEach((layer, x) =>
+                    layer.forEach(tile => {
+                        if (tile.code === code) {
+                            handlers.push(constructorFunction({
+                                position: new Point(x, y),
+                                orientation: tile.orientation!,
+                                coordinator: this
+                            }));
+                        }
+                    })));
         return handlers;
     }
 }

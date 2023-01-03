@@ -1,3 +1,5 @@
+import BiMap from 'bidirectional-map';
+
 export enum Directions {
     LEFT,
     UP,
@@ -31,29 +33,20 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
     }
 };
 
+export const directionCharMap = new BiMap({
+    u: Directions.UP,
+    d: Directions.DOWN,
+    l: Directions.LEFT,
+    r: Directions.RIGHT,
+});
 export const getDirectionFromChar = (char: string): Directions | undefined => {
-    switch (char.toLowerCase()) {
-        case 'u':
-            return Directions.UP;
-        case 'd':
-            return Directions.DOWN;
-        case 'l':
-            return Directions.LEFT;
-        case 'r':
-            return Directions.RIGHT;
-    }
+    return directionCharMap.get(char);
 };
 
-export const sumDirections = (...directions: Directions[]): Directions[] => {
-    return directions.reduce((acc, item) => {
-        const oposite = getOpositeDirectionOf(item);
-        const accIndex = acc
-            .findIndex(accItem => accItem === oposite);
-        if (accIndex !== -1) {
-            acc.splice(accIndex, 1);
-        } else {
-            acc.push(item);
-        }
-        return acc;
-    }, [] as Directions[]);
+export const getDirectionRegex = (): RegExp => {
+    let keys = '';
+    for (let key of directionCharMap.keys()) {
+        keys += key;
+    }
+    return new RegExp(`[${keys}]`);
 };

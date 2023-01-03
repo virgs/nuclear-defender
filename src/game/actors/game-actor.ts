@@ -15,7 +15,7 @@ export interface GameActor {
 
     isCovered(): boolean;
 
-    onCover(): void;
+    cover(): void;
 
-    onUncover(): void;
+    uncover(): void;
 }

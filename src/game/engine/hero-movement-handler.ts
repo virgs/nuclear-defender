@@ -1,8 +1,8 @@
 import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
 import type {Directions} from '@/game/constants/directions';
-import type {ActData, FeatureMovementHandler} from '@/game/controllers/feature-movement-handler';
-import type {Movement, MovementOrchestrator, OrientedPoint} from '@/game/controllers/movement-orchestrator';
+import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
+import type {Movement, MovementOrchestrator, OrientedPoint} from '@/game/engine/movement-orchestrator';
 import {Actions, mapActionToDirection} from '@/game/constants/actions';
 
 export class HeroMovementHandler implements FeatureMovementHandler {
@@ -45,7 +45,7 @@ export class HeroMovementHandler implements FeatureMovementHandler {
                 mapChanged = true;
                 this.coordinator.moveHero(aimedDirection);
                 const movedBox = actData.boxes
-                    .find(box => box.nextPosition.isEqualTo(aimedPosition));
+                    .find((box: Movement) => box.nextPosition.isEqualTo(aimedPosition));
                 if (movedBox) {
                     this.coordinator.moveFeature(movedBox, aimedDirection);
                 }

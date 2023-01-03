@@ -57,20 +57,23 @@ export class GameScene extends Phaser.Scene {
         const store = Store.getInstance();
         const codedMap: string = store.map;
 
-        //TODO move this section to scenes before this one
-        const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
-        const output = new ScreenPropertiesCalculator().calculate(map);
-        configuration.world.tileSize.horizontal = Math.trunc(configuration.world.tileSize.horizontal * output.scale);
-        configuration.world.tileSize.vertical = Math.trunc(configuration.world.tileSize.vertical * output.scale);
+        //TODO move this section to scenes before this one (splash view)
+        const multiLayeredMap = new StandardSokobanAnnotationTranslator().translate(codedMap);
+        const output = new ScreenPropertiesCalculator().calculate(multiLayeredMap);
+        configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * output.scale);
+        configuration.world.tileSize.vertical = Math.trunc(Math.trunc(configuration.tiles.verticalSize * configuration.tiles.verticalPerspective) * output.scale);
         //TODO end of section
 
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        const mapfeatureMapExtractor = new FeatureMapExtractor(this, output.scale, map);
+        const mapfeatureMapExtractor = new FeatureMapExtractor(this, output.scale, multiLayeredMap);
         const tileMap = mapfeatureMapExtractor.extract();
 
-        this.gameEngine = new GameEngine({tileMap: tileMap, solution: store.solution});
+        this.gameEngine = new GameEngine({
+            tileMap: tileMap,
+            solution: store.solution
+        });
     }
 
     public async update(time: number, delta: number) {
@@ -85,7 +88,7 @@ export class GameScene extends Phaser.Scene {
                 setTimeout(async () => {
                     this.lights.destroy();
 
-                    console.log(Store.getInstance())
+                    console.log(Store.getInstance());
                     Store.getInstance().router.push('/next-level');
                 }, 1500);
                 // }
