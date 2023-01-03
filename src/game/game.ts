@@ -12,10 +12,9 @@ const launch = (containerId: string) => {
         parent: containerId,
         width: configuration.gameWidth,
         height: configuration.gameHeight,
-        pixelArt: true,
+        // pixelArt: true,
         physics: {default: 'arcade'},
         backgroundColor: '#000000',
-        // Plugin registration
         plugins: {
         },
         dom: {

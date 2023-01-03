@@ -30,7 +30,7 @@ export const configuration = {
             horizontal: tileWidth
         }
     },
-    screenRatio: .75,
+    screenRatio: .7,
     gameWidth: 800,
     gameHeight: 600,
     colors: {

@@ -20,14 +20,14 @@ export const levels: Level[] = [
         map: `
 5-###
 #5#ds5#
-#5oo4o#
-#4o[@.o]o4o#
-#5oo2ouso#
-#5oo$ooo#
-#ouwooooo.oo#
-#5oo*ooo#
-#5oo4o#
-#4o*o4o#
+#5  4 #
+#4 [@. ] 4 #
+#5  2 us #
+#5  $   #
+# uw     .  #
+#5  *   #
+#5  4 #
+#4 * 4 #
 #5#us5#
 5-###
 `,
