@@ -36,7 +36,7 @@ export class MovementAnalyser {
         this.targets = [];
         for (let y = 0; y < data.multiLayeredStrippedMap.height; ++y) {
             for (let x = 0; x < data.multiLayeredStrippedMap.width; ++x) {
-                if (data.multiLayeredStrippedMap.layeredOrientedTiles[y][x]
+                if (data.multiLayeredStrippedMap.layeredTileMatrix[y][x]
                     .some(layer => layer.code === Tiles.target)) {
                     this.targets.push(new Point(x, y));
                 }
@@ -101,7 +101,7 @@ export class MovementAnalyser {
     public isTileAtPosition(position: Point, tile: Tiles): boolean {
         if (position.x < this.multiLayeredStrippedMap.width && position.y < this.multiLayeredStrippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.multiLayeredStrippedMap.layeredOrientedTiles[position.y][position.x]
+            return this.multiLayeredStrippedMap.layeredTileMatrix[position.y][position.x]
                 .some(layer => layer.code === tile);
         }
         return false;

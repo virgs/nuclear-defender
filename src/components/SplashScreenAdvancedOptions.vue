@@ -27,7 +27,7 @@
               <input type="text" class="form-control" placeholder="Level password" aria-label="Level password"
                      @change="notifyParent" v-model="levelPassword">
               <button class="btn btn-outline-secondary" type="button" id="toastBtn"
-                      style="background-color: var(--highlight-color)"
+                      style="background-color: var(--radioactive-color)"
                       :disabled="levelPassword.length === 0">Check
               </button>
             </div>

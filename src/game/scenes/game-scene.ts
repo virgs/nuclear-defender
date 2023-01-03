@@ -5,7 +5,7 @@ import {Actions} from '../constants/actions';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
 import {GameEngine} from '@/game/engine/game-engine';
-import {FeatureMapExtractor} from '../tiles/feature-map-extractor';
+import {GameActorsCreator} from '../tiles/game-actors-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 
@@ -67,8 +67,8 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        const mapfeatureMapExtractor = new FeatureMapExtractor(this, output.scale, multiLayeredMap);
-        const tileMap = mapfeatureMapExtractor.extract();
+        const actorsCreator = new GameActorsCreator(this, output.scale, multiLayeredMap);
+        const tileMap = actorsCreator.create();
 
         this.gameEngine = new GameEngine({
             tileMap: tileMap,

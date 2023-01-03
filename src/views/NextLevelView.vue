@@ -73,7 +73,7 @@ onMounted(() => {
             <input type="text" class="form-control" aria-label="Level password" readonly
                    :value="codedMoves">
             <button class="btn btn-outline-secondary" type="button" id="toastBtn"
-                    style="background-color: var(--highlight-color)" @click="copyMovesCode">
+                    style="background-color: var(--radioactive-color)" @click="copyMovesCode">
               Copy
             </button>
           </div>

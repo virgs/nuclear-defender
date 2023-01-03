@@ -16,7 +16,7 @@ export type TileMap = {
     indexedMap: Map<Tiles, GameActor[]>;
 };
 
-export class FeatureMapExtractor {
+export class GameActorsCreator {
     private readonly scale: number;
     private readonly scene: Phaser.Scene;
     private readonly strippedLayeredMap: MultiLayeredMap;
@@ -29,7 +29,7 @@ export class FeatureMapExtractor {
         this.scene = scene;
         this.scale = scale;
         this.strippedLayeredMap = map;
-        this.strippedLayeredMap.layeredOrientedTiles = JSON.parse(JSON.stringify(map.layeredOrientedTiles)) as OrientedTile[][][];
+        this.strippedLayeredMap.layeredTileMatrix = JSON.parse(JSON.stringify(map.layeredTileMatrix)) as OrientedTile[][][];
         this.indexedMap = new Map<Tiles, GameActor[]>();
         Object.keys(Tiles)
             .filter(key => !isNaN(Number(key)))
@@ -46,8 +46,8 @@ export class FeatureMapExtractor {
         this.constructorMap.set(Tiles.oneWayDoor, params => new OneWayDoorActor(params));
     }
 
-    public extract(): TileMap {
-        this.strippedLayeredMap.layeredOrientedTiles
+    public create(): TileMap {
+        this.strippedLayeredMap.layeredTileMatrix
             .forEach((line, y) => line
                 .forEach((layers: OrientedTile[], x: number, editableLine) => {
                     editableLine[x] = layers

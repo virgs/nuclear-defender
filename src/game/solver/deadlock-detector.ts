@@ -16,7 +16,7 @@ export class DeadlockDetector {
     public deadLocked(movedBox: Movement, boxes: Movement[]): boolean {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
-        if (this.staticMap.layeredOrientedTiles[nextTilePosition.y][nextTilePosition.x].some(tile => tile.code === Tiles.wall)) {
+        if (this.staticMap.layeredTileMatrix[nextTilePosition.y][nextTilePosition.x].some(tile => tile.code === Tiles.wall)) {
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
                 return true;
             }
@@ -122,7 +122,7 @@ export class DeadlockDetector {
     public getFeaturesAtPosition(position: Point): OrientedTile[] {
         if (position.x < this.staticMap.width && position.y < this.staticMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.staticMap.layeredOrientedTiles[position.y][position.x];
+            return this.staticMap.layeredTileMatrix[position.y][position.x];
         }
         return [];
     }

@@ -6,10 +6,12 @@ export type OrientedTile = {
     orientation?: Directions
 };
 
+export type LayeredTileMatrix = OrientedTile[][][];
+
 export type MultiLayeredMap = {
     width: number,
     height: number,
-    layeredOrientedTiles: OrientedTile[][][]
+    layeredTileMatrix: LayeredTileMatrix
 };
 
 //TODO improve the readibility. It sucks big time
@@ -26,11 +28,11 @@ export class StandardSokobanAnnotationTranslator {
         return {
             height: height,
             width: width,
-            layeredOrientedTiles: layeredOrientedTiles
+            layeredTileMatrix: layeredOrientedTiles
         };
     }
 
-    private createRectangularLayeredMatrix(height: number, width: number, baseMatrix: OrientedTile[][][]): OrientedTile[][][] {
+    private createRectangularLayeredMatrix(height: number, width: number, baseMatrix: LayeredTileMatrix): LayeredTileMatrix {
         return new Array(height)
             .fill(new Array(width)
                 .fill(null))
@@ -43,8 +45,8 @@ export class StandardSokobanAnnotationTranslator {
                         }))));
     }
 
-    private removeMetaChars(metamap: string[][]): OrientedTile[][][] {
-        const result: OrientedTile[][][] = [];
+    private removeMetaChars(metamap: string[][]): LayeredTileMatrix {
+        const result: LayeredTileMatrix = [];
         for (let line = 0; line < metamap.length; ++line) {
             let resultLine: OrientedTile[][] = [];
             for (let col = 0; col < metamap[line].length; ++col) {

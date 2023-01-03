@@ -72,6 +72,7 @@ onMounted(() => {
   [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
       // @ts-ignore
       .map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+  history.replaceState({urlPath: router.currentRoute.value.fullPath}, "", '/');
 });
 
 </script>
@@ -107,7 +108,7 @@ onMounted(() => {
       <div class="col">
         <div class="d-grid">
           <button class="btn btn-primary"
-                  style="background-color: var(--highlight-color); color: var(--foreground-color); border-color: transparent"
+                  style="background-color: var(--radioactive-color); color: var(--foreground-color); border-color: transparent"
                   @click="playButtonClick"
                   type="button">Play
           </button>
@@ -120,7 +121,7 @@ onMounted(() => {
 
 <style scoped>
 .advanved-options-button {
-  background-color: var(--highlight-color);
+  background-color: var(--radioactive-color);
   color: var(--foreground-color);
 }
 </style>

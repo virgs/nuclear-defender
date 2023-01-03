@@ -2,7 +2,7 @@
 import {useRouter} from 'vue-router';
 
 const router = useRouter();
-router.push('/splash');
+router.push('/');
 </script>
 
 <template>

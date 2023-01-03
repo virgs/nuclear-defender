@@ -15,3 +15,8 @@
 - https://www.miniclip.com/games/shove-it/en/#privacy-settings
 
 [Maybe doing an animation like the way the hero moves here](https://www.youtube.com/watch?v=toY3SVETPSY)
+
+
+create moving feature stripper (hero and boxes)
+rename features extractor to sprite creator (merge with floor builder)
+\[(.*)\]|(\d*[udlr]?.)

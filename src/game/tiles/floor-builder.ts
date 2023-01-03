@@ -23,7 +23,7 @@ export class FloorBuilder {
     }
 
     public createMask() {
-        this.featurelessMap.layeredOrientedTiles
+        this.featurelessMap.layeredTileMatrix
             .forEach((line, y) => line
                 .forEach((cell: OrientedTile[], x: number) => cell
                     .forEach(tile => {

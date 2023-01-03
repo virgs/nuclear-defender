@@ -50,8 +50,8 @@ export class SokobanSolver {
         this.sleepingCycle = input.cpu.sleepingCycle;
 
         this.tileMap = input.tileMap;
-        const deepCopy = (JSON.parse(JSON.stringify(input.tileMap.layeredOrientedTiles)) as OrientedTile[][][]);
-        this.tileMap.layeredOrientedTiles = deepCopy
+        const deepCopy = (JSON.parse(JSON.stringify(input.tileMap.layeredTileMatrix)) as OrientedTile[][][]);
+        this.tileMap.layeredTileMatrix = deepCopy
             .map((tile: OrientedTile[][], y: number) =>
                 tile.map((layers: OrientedTile[], x: number) =>
                     layers
@@ -163,7 +163,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: Point[]): boolean {
         return boxesPosition
-            .every(box => this.tileMap.layeredOrientedTiles[box.y][box.x]
+            .every(box => this.tileMap.layeredTileMatrix[box.y][box.x]
                 .some(layer => layer.code === Tiles.target));
     }
 
