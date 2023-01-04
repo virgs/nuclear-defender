@@ -63,6 +63,7 @@ async function playButtonClick() {
   const store = Store.getInstance();
   store.currentLevelIndex = data.currentSelectedIndex;
   store.map = levels[data.currentSelectedIndex].map;
+  store.router = router;
   // store.solution = await runSolutionsAlgorithm()
 
   await router.push('/game');

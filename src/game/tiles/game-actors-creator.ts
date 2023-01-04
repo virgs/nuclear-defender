@@ -17,7 +17,7 @@ export class GameActorsCreator {
     private readonly scene: Phaser.Scene;
     private readonly constructorMap: Map<Tiles, (params: any) => GameActor>;
 
-    private readonly floorPic: Phaser.GameObjects.Sprite;
+    private readonly floorPic: Phaser.GameObjects.Image;
     private readonly floorMaskShape: Phaser.GameObjects.Graphics;
     private readonly dynamicFeatures: Map<Tiles, Point[]>;
     private readonly matrix: MultiLayeredMap;
@@ -43,7 +43,7 @@ export class GameActorsCreator {
         this.constructorMap.set(Tiles.oneWayDoor, params => new OneWayDoorActor(params));
 
         this.floorMaskShape = this.scene.make.graphics({});
-        this.floorPic = this.scene.add.sprite(0, 0, configuration.floorTextureKey);
+        this.floorPic = this.scene.add.image(0, 0, configuration.floorTextureKey);
         this.floorPic.scale = 2 * configuration.gameWidth / this.floorPic.width;
         this.floorPic.setPipeline('Light2D');
         this.floorPic.setDepth(new TileDepthCalculator().calculate(Tiles.floor, -10));
@@ -90,7 +90,7 @@ export class GameActorsCreator {
     }
 
     private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const sprite = this.scene.add.sprite(point.x * configuration.world.tileSize.horizontal,
+        const sprite = this.scene.add.sprite(configuration.world.horizontalAdjustment + point.x * configuration.world.tileSize.horizontal,
             point.y * configuration.world.tileSize.vertical,
             configuration.tiles.spriteSheetKey, tile);
         sprite.scale = this.scale;
@@ -104,7 +104,7 @@ export class GameActorsCreator {
         // this.floorMaskShape.fillStyle(0xFFFFFF);
         this.floorMaskShape.beginPath();
         this.floorMaskShape.fillRectShape(new Phaser.Geom.Rectangle(
-            (point.x * configuration.world.tileSize.horizontal),
+            (configuration.world.horizontalAdjustment + point.x * configuration.world.tileSize.horizontal),
             (point.y * configuration.world.tileSize.vertical),
             configuration.world.tileSize.horizontal, configuration.world.tileSize.vertical));
     }

@@ -1,8 +1,8 @@
-import type {Point} from '@/game/math/point';
 import type Phaser from 'phaser';
+import {Tiles} from '@/game/tiles/tiles';
+import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
 import type {GameActor} from '@/game/actors/game-actor';
-import {Tiles} from '@/game/tiles/tiles';
 
 export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;

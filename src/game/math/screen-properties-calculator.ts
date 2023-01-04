@@ -5,7 +5,7 @@ import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tra
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
     max: 1.15,
-    min: .5
+    min: .45
 };
 
 export class ScreenPropertiesCalculator {

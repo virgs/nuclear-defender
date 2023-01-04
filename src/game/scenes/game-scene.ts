@@ -32,14 +32,6 @@ export class GameScene extends Phaser.Scene {
     }
 
     public preload() {
-        //Note needed only when loading from file
-
-        // this.load.html(configuration.html.gameScene.key, configuration.html.gameScene.file);
-        // this.load.tilemapTiledJSON(configuration.tiles.tilemapKey, configuration.tiles.tilesheets[0]);
-        // this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-        //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
-        // });
-
         this.load.image(configuration.floorTextureKey, configuration.floorTexture);
 
         this.load.spritesheet({
@@ -88,7 +80,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async update(time: number, delta: number) {
-        InputManager.getInstance().update(delta);
+        InputManager.getInstance().update();
         if (this.allowUpdates) {
             await this.gameEngine!.update();
             if (this.gameEngine!.isLevelComplete()) {
@@ -102,7 +94,6 @@ export class GameScene extends Phaser.Scene {
                     console.log(Store.getInstance());
                     Store.getInstance().router.push('/next-level');
                 }, 1500);
-                // }
             }
         }
     }

@@ -28,7 +28,8 @@ export const configuration = {
         tileSize: { //after rescaling...
             vertical: Math.trunc(tileHeight * verticalPerspective),
             horizontal: tileWidth
-        }
+        },
+        horizontalAdjustment: 20
     },
     screenRatio: .7,
     gameWidth: 800,

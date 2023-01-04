@@ -2,9 +2,10 @@ import Phaser from 'phaser';
 import {GameScene} from './scenes/game-scene';
 import {configuration} from './constants/configuration';
 
-const gameViewContainer = document.getElementsByClassName('game-view')[0];
-configuration.gameWidth = gameViewContainer.clientWidth;
-configuration.gameHeight = Math.trunc(gameViewContainer.clientWidth * configuration.screenRatio);
+const container = document.getElementById('phaser-container')!;
+
+configuration.gameWidth = container.clientWidth;
+configuration.gameHeight = Math.trunc(container.clientWidth * configuration.screenRatio);
 
 const launch = (containerId: string) => {
     return new Phaser.Game({
@@ -13,12 +14,11 @@ const launch = (containerId: string) => {
         width: configuration.gameWidth,
         height: configuration.gameHeight,
         // pixelArt: true,
-        physics: {default: 'arcade'},
+        // physics: {default: 'arcade'},
         backgroundColor: '#000000',
-        plugins: {
-        },
+        plugins: {},
         dom: {
-            createContainer: true
+            // createContainer: true
         },
         scene: [GameScene]
     });

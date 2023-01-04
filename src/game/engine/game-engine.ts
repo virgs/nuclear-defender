@@ -50,6 +50,9 @@ export class GameEngine {
         this.movementCoordinator = new MovementOrchestrator({
             multiLayeredStrippedMap: this.multiLayeredStrippedMap
         });
+        this.targets
+            .find(target => target.getTilePosition().isEqualTo(this.hero.getTilePosition()))
+            ?.cover();
         this.boxes
             .forEach(spriteBox => {
                 spriteBox.setIsOnTarget(this.targets
