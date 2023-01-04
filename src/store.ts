@@ -1,13 +1,14 @@
-import type {Actions} from '@/game/constants/actions';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 
 export class Store {
-    private _movesCode?: Actions[] = [];
+    private _movesCode: string = '';
     private _map: string = '';
     private _currentLevelIndex: number = -1;
     private _bestMoves: number[] = [];
     private _router: any;
     private _solution?: SolutionOutput;
+    private _totalTimeInMs: number = 0;
+    private _furthestEnabledLevel: number = 0;
 
     private static _instance: Store = new Store();
 
@@ -18,11 +19,11 @@ export class Store {
         return Store._instance;
     }
 
-    get movesCode(): Actions[] | undefined {
+    get movesCode(): string {
         return this._movesCode;
     }
 
-    set movesCode(value: Actions[] | undefined) {
+    set movesCode(value: string) {
         this._movesCode = value;
     }
 
@@ -66,12 +67,24 @@ export class Store {
         this._solution = value;
     }
 
-    static get instance(): Store {
-        return this._instance;
+    get totalTimeInMs(): number {
+        return this._totalTimeInMs;
     }
 
-    static set instance(value: Store) {
-        this._instance = value;
+    set totalTimeInMs(value: number) {
+        this._totalTimeInMs = value;
+    }
+
+    get furthestEnabledLevel(): number {
+        return this._furthestEnabledLevel;
+    }
+
+    set furthestEnabledLevel(value: number) {
+        this._furthestEnabledLevel = value;
+    }
+
+    static get instance(): Store {
+        return this._instance;
     }
 
     public update(x: number): void {

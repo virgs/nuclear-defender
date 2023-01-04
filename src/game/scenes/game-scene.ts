@@ -1,7 +1,5 @@
 import Phaser from 'phaser';
 import {Store} from '@/store';
-import {Scenes} from './scenes';
-import {Actions} from '../constants/actions';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
 import {GameEngine} from '@/game/engine/game-engine';
@@ -13,7 +11,7 @@ import {Tiles} from '@/game/tiles/tiles';
 
 export type GameSceneConfiguration = {
     map: string,
-    moves?: Actions[]
+    moves: string,
     currentLevel: number,
     bestMoves?: number,
     router: any
@@ -23,9 +21,10 @@ export type GameSceneConfiguration = {
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
     private gameEngine?: GameEngine;
+    private initialTime?: number;
 
     constructor() {
-        super(Scenes[Scenes.GAME]);
+        super('game');
     }
 
     public init() {
@@ -47,6 +46,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create(scene: Phaser.Scene, scale: number) {
+        this.initialTime = new Date().getTime();
         InputManager.setup(this);
         const store = Store.getInstance();
         const codedMap: string = store.map;
@@ -85,17 +85,20 @@ export class GameScene extends Phaser.Scene {
             await this.gameEngine!.update();
             if (this.gameEngine!.isLevelComplete()) {
                 this.allowUpdates = false;
-                console.log('currentLevel complete', this.gameEngine!.getPlayerMoves()
-                    .filter(action => action !== Actions.STAND)
-                    .map(action => Actions[action]));
+                console.log('currentLevel complete', this.gameEngine!.getPlayerMoves());
                 setTimeout(async () => {
-                    this.lights.destroy();
-
-                    console.log(Store.getInstance());
-                    Store.getInstance().router.push('/next-level');
+                    this.changeScene();
                 }, 1500);
             }
         }
     }
 
+    private changeScene() {
+        this.lights.destroy();
+
+        const store = Store.getInstance();
+        store.totalTimeInMs = new Date().getTime() - this.initialTime!;
+        store.movesCode = this.gameEngine!.getPlayerMoves();
+        store.router.push('/next-level');
+    }
 }

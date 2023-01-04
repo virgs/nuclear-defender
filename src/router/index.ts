@@ -21,6 +21,7 @@ const router = createRouter({
             path: '/next-level',
             component: NextLevelView,
             meta: {transition: 'slide-left'},
+            props: true
         }
     ],
 });

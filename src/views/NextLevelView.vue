@@ -1,42 +1,43 @@
-<script setup lang="ts">
-import {computed, onMounted} from 'vue';
+<script>
 import {Store} from '@/store';
 import {levels} from '@/game/levels/levels';
-import {Actions, mapActionToString} from '@/game/constants/actions';
-import * as lzString from 'lz-string';
 
-const currentLevel = computed(() => {
-  return {
-    index: Store.getInstance().currentLevelIndex,
-    title: levels[Store.getInstance().currentLevelIndex]
-  };
-});
+export default {
+  name: "NextLevelView",
+  data() {
+    const store = Store.getInstance();
+    return {
+      totalTime: store.totalTimeInMs,
+      codedMoves: store.movesCode,
+      index: store.currentLevelIndex,
+      router: store.router,
+      currentLevel: levels[store.currentLevelIndex]
+    }
+  },
+  mounted() {
+    history.replaceState({urlPath: this.router.currentRoute.fullPath}, "", '/');
 
-const codedMoves = computed(() => {
-  const mapText = [Actions.RIGHT, Actions.LEFT, Actions.RIGHT, Actions.LEFT].map(action => mapActionToString(action)).join('');
-  return lzString.compressToEncodedURIComponent(mapText);
-});
+    const toastTrigger = document.getElementById('toastBtn');
+    const toastLiveExample = document.getElementById('copy-toast');
+    if (toastTrigger) {
+      // @ts-ignore
+      toastTrigger.addEventListener('click', () => new bootstrap.Toast(toastLiveExample).show());
+    }
+  },
+  methods: {
+    async copyMovesCode() {
+      await navigator.clipboard.writeText(this.codedMoves);
+    },
+    async continueButton() {
+      const store = Store.getInstance();
+      ++store.furthestEnabledLevel
+      //TODO store it in the chrome storage
 
-async function copyMovesCode() {
-  await navigator.clipboard.writeText(codedMoves.value);
-}
-
-async function retry() {
-  console.log('retry');
-}
-
-async function nextLevel() {
-  console.log('nextLevel');
-}
-
-onMounted(() => {
-  const toastTrigger = document.getElementById('toastBtn');
-  const toastLiveExample = document.getElementById('copy-toast');
-  if (toastTrigger) {
-    // @ts-ignore
-    toastTrigger.addEventListener('click', () => new bootstrap.Toast(toastLiveExample).show());
+      await this.router.push('/');
+    }
   }
-});
+}
+
 
 </script>
 
@@ -55,16 +56,16 @@ onMounted(() => {
     </div>
 
     <div class="container my-5 splash-view text-center">
-      <div class="row row-cols-1 justify-content-center gy-3">
+      <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col">
-          <h1 class="sokoban-display display-2 fw-normal" style="user-select: none">Level
-            '{{ currentLevel.index }}: {{ currentLevel.title }}'
+          <h1 class="sokoban-display display-3 fw-normal" style="user-select: none; text-align: left">Level
+            '{{ index }}: {{ currentLevel.title }}'
             complete!</h1>
         </div>
-        <div class="col">
+        <div class="col my-1">
           <h4 class="sokoban-display fw-normal"
               style="user-select: none; color: var(--background-color); text-align: right">Total time:
-            {{ '10' }}s
+            {{ Math.trunc(totalTime / 100) / 10 }}s
           </h4>
         </div>
         <div class="col">
@@ -78,25 +79,13 @@ onMounted(() => {
             </button>
           </div>
         </div>
-        <div class="col my-5">
-          <div class="row my-2 justify-content-center">
-            <div class="col-9 col-lg-3 d-grid gap-2 my-2">
-              <button class="btn btn-primary sokoban-outlined-button"
-                      @change="retry"
-                      type="button">
-                <i class="fa-solid fa-arrow-rotate-left"></i>
-                Retry
-              </button>
-            </div>
-            <div class="col-12 col-lg-9 d-grid gap-2 my-2">
-              <button class="btn btn-primary sokoban-call-for-action-button"
-                      @change="nextLevel"
-                      type="button">
-                <i class="fa-solid fa-forward"></i>
-                Next
-              </button>
-            </div>
-          </div>
+        <div class="col-4 col-lg-3 d-grid gap-2 my-5">
+          <button class="btn btn-primary sokoban-call-for-action-button"
+                  @click="continueButton"
+                  type="button">
+            <i class="fa-solid fa-forward"></i>
+            Continue
+          </button>
         </div>
       </div>
     </div>

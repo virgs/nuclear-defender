@@ -1,5 +1,5 @@
 import {Tiles} from '@/game/tiles/tiles';
-import {Actions} from '@/game/constants/actions';
+import {Actions, mapActionToString} from '@/game/constants/actions';
 import type {BoxActor} from '@/game/actors/box-actor';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {TargetActor} from '@/game/actors/target-actor';
@@ -13,7 +13,6 @@ import type {GameActor} from '@/game/actors/game-actor';
 
 export class GameEngine {
     private readonly multiLayeredStrippedMap: MultiLayeredMap;
-    private readonly playerMoves: Actions[];
     private readonly movementCoordinator: MovementOrchestrator;
     private readonly hero: HeroActor;
     private readonly boxes: BoxActor[];
@@ -22,10 +21,11 @@ export class GameEngine {
     private readonly nextMoves: Actions[];
     private readonly staticActors: GameActor[];
 
+    private playerMoves: string;
     private levelComplete: boolean = false;
     private animationsAreOver: boolean;
     private lastActionResult?: MovementOrchestratorOutput;
-    private checkUpdateNextCycle: boolean;
+    private mapChangedLastCycle: boolean;
 
     constructor(config: { solution: SolutionOutput; tileMap: MultiLayeredMap; actorMap: Map<Tiles, GameActor[]> }) {
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
@@ -38,10 +38,10 @@ export class GameEngine {
             .concat(config.actorMap.get(Tiles.oneWayDoor)!);
         this.multiLayeredStrippedMap = config.tileMap;
         this.nextMoves = config.solution?.actions! || [];
-        this.playerMoves = [];
+        this.playerMoves = '';
         this.levelComplete = false;
         this.animationsAreOver = true;
-        this.checkUpdateNextCycle = true;
+        this.mapChangedLastCycle = true;
 
         this.movementAnalyser = new MovementAnalyser({
             multiLayeredStrippedMap: this.multiLayeredStrippedMap,
@@ -70,7 +70,7 @@ export class GameEngine {
         return this.levelComplete;
     }
 
-    public getPlayerMoves(): Actions[] {
+    public getPlayerMoves(): string {
         return this.playerMoves;
     }
 
@@ -78,10 +78,9 @@ export class GameEngine {
         if (this.animationsAreOver) {
             this.nextMoves.push(this.hero.checkAction());
             const heroAction = this.nextMoves.shift()!;
-            this.playerMoves!.push(heroAction);
 
-            if (this.checkUpdateNextCycle || heroAction !== Actions.STAND) {
-                this.checkUpdateNextCycle = false;
+            if (this.mapChangedLastCycle || heroAction !== Actions.STAND) {
+                this.mapChangedLastCycle = false;
                 this.lastActionResult = await this.movementCoordinator!.update({
                     heroAction: heroAction,
                     heroPosition: this.hero.getTilePosition(),
@@ -90,13 +89,27 @@ export class GameEngine {
                 });
 
                 if (this.lastActionResult.mapChanged) {
-                    this.checkUpdateNextCycle = true;
+                    this.registerPlayerMove(heroAction);
+
+                    this.mapChangedLastCycle = true;
                     this.movementAnalyser.analyse(this.lastActionResult!);
                     await this.updateMapFeatures();
                     this.checkLevelComplete();
                 }
             }
         }
+    }
+
+    private registerPlayerMove(heroAction: Actions) {
+        let moveLetter = mapActionToString(heroAction);
+        if (heroAction !== Actions.STAND) {
+            if (this.lastActionResult!.boxes
+                .some(box => box.currentPosition.isDifferentOf(box.nextPosition) &&
+                    this.lastActionResult!.hero.nextPosition.isEqualTo(box.currentPosition))) {
+                moveLetter = moveLetter.toUpperCase();
+            }
+        }
+        this.playerMoves += moveLetter;
     }
 
     private async updateMapFeatures() {

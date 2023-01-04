@@ -11,13 +11,15 @@ import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
 const router = useRouter();
+//TODO get it from OptionsComponent
+const store = Store.getInstance();
+const furthestLevel = store.furthestEnabledLevel;
+store.movesCode = ''
 
 const data = reactive({
-  currentSelectedIndex: 0
+  currentSelectedIndex: furthestLevel
 });
 
-//TODO get it from OptionsComponent
-const furthestLevel = 30;
 
 const currentLevelName = computed(() => levels[data.currentSelectedIndex].title);
 const availableLevels = computed(() => levels
@@ -64,7 +66,8 @@ async function playButtonClick() {
   store.currentLevelIndex = data.currentSelectedIndex;
   store.map = levels[data.currentSelectedIndex].map;
   store.router = router;
-  // store.solution = await runSolutionsAlgorithm()
+  store.solution = await runSolutionsAlgorithm()
+  console.log(store.solution)
 
   await router.push('/game');
 }

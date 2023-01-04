@@ -38,7 +38,7 @@ onMounted(() => {
   }, interval);
 
   const container = document.getElementById('phaser-container')!;
-  console.log(container.clientHeight, container.clientWidth);
+  // console.log(container.clientHeight, container.clientWidth);
     if (container.clientWidth > 992 / 2) { //hal of bootstrap 'lg' breakpoint
       console.log('no directional buttons');
     } else {
