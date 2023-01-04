@@ -8,6 +8,8 @@ import {GameEngine} from '@/game/engine/game-engine';
 import {GameActorsCreator} from '../tiles/game-actors-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {FeatureRemover} from '@/game/tiles/feature-remover';
+import {Tiles} from '@/game/tiles/tiles';
 
 export type GameSceneConfiguration = {
     map: string,
@@ -52,14 +54,14 @@ export class GameScene extends Phaser.Scene {
         this.allowUpdates = true;
     }
 
-    public async create() {
+    public async create(scene: Phaser.Scene, scale: number) {
         InputManager.setup(this);
         const store = Store.getInstance();
         const codedMap: string = store.map;
 
         //TODO move this section to scenes before this one (splash view)
-        const multiLayeredMap = new StandardSokobanAnnotationTranslator().translate(codedMap);
-        const output = new ScreenPropertiesCalculator().calculate(multiLayeredMap);
+        const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
+        const output = new ScreenPropertiesCalculator().calculate(map);
         configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * output.scale);
         configuration.world.tileSize.vertical = Math.trunc(Math.trunc(configuration.tiles.verticalSize * configuration.tiles.verticalPerspective) * output.scale);
         //TODO end of section
@@ -67,11 +69,20 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        const actorsCreator = new GameActorsCreator(this, output.scale, multiLayeredMap);
-        const tileMap = actorsCreator.create();
+        const strip = new FeatureRemover([Tiles.hero, Tiles.box])
+            .strip(map);
+
+        const actorsCreator = new GameActorsCreator({
+            scene: this,
+            scale: output.scale,
+            dynamicFeatures: strip.removedFeatures,
+            matrix: strip.strippedLayeredTileMatrix
+        });
+        const actorMap = actorsCreator.create();
 
         this.gameEngine = new GameEngine({
-            tileMap: tileMap,
+            tileMap: strip.strippedLayeredTileMatrix,
+            actorMap: actorMap,
             solution: store.solution
         });
     }

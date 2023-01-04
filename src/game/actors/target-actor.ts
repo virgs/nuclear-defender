@@ -5,7 +5,7 @@ import {configuration} from '@/game/constants/configuration';
 import type {Directions} from '@/game/constants/directions';
 
 export class TargetActor implements GameActor {
-    private static readonly UNCOVERED_LIGHT_INTENSITY = .5;
+    private static readonly UNCOVERED_LIGHT_INTENSITY = .66;
     private static readonly COVERED_LIGHT_INTENSITY = .025;
     private static readonly LIGHT_UNCOVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.radioactive).color;
     private static readonly LIGHT_COVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.controlled).color;

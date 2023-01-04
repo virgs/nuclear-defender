@@ -6,12 +6,10 @@ export type OrientedTile = {
     orientation?: Directions
 };
 
-export type LayeredTileMatrix = OrientedTile[][][];
-
 export type MultiLayeredMap = {
     width: number,
     height: number,
-    layeredTileMatrix: LayeredTileMatrix
+    layeredTileMatrix: OrientedTile[][][]
 };
 
 //TODO improve the readibility. It sucks big time
@@ -32,7 +30,7 @@ export class StandardSokobanAnnotationTranslator {
         };
     }
 
-    private createRectangularLayeredMatrix(height: number, width: number, baseMatrix: LayeredTileMatrix): LayeredTileMatrix {
+    private createRectangularLayeredMatrix(height: number, width: number, baseMatrix: OrientedTile[][][]): OrientedTile[][][] {
         return new Array(height)
             .fill(new Array(width)
                 .fill(null))
@@ -51,7 +49,10 @@ export class StandardSokobanAnnotationTranslator {
             .filter(line => line.length > 0);
     }
 
-    private removeMetaChars(metamap: string[]): LayeredTileMatrix {
+    private removeMetaChars(metamap: string[]): OrientedTile[][][] {
+        const baseLayerTiles = [Tiles.floor, Tiles.empty, Tiles.wall];
+        const baseLayer = {code: Tiles.floor};
+
         const tileRegex = /\d*\[(.*)\]|(\d*[udlr]?.)/g;
         // #dw14lt$22[@.usdw]us4-#
         //
@@ -64,9 +65,9 @@ export class StandardSokobanAnnotationTranslator {
         // 4-
         // #
         return metamap
-            .map(line => {
-                return (line.match(tileRegex)! || [])
-                    .reduce((acc, annotation) => {
+            .map(line =>
+                (line.match(tileRegex)! || [])
+                    .reduce((layer, annotation) => {
                         if (annotation.includes('[')) {
                             //22[@.usdw]
                             let repetition = 1;
@@ -74,19 +75,28 @@ export class StandardSokobanAnnotationTranslator {
                             if (repetitionStr) {
                                 repetition = Math.max(Number(repetitionStr), repetition);
                             }
-                            const layered = tiles.match(tileRegex)!
+                            const cell = tiles.match(tileRegex)!
                                 .map(coded => this.getOrientedTilesFromExpression(coded)[0]);
+
+                            if (cell.every(item => !baseLayerTiles.includes(item.code))) {
+                                cell.push(baseLayer);
+                            }
                             Array.from(new Array(repetition))
                                 .forEach(_ => {
-                                    acc.push(layered);
+                                    layer.push(cell);
                                 });
                         } else {
                             this.getOrientedTilesFromExpression(annotation)
-                                .forEach(tile => acc.push([tile]));
+                                .forEach(tile => {
+                                    const cell = [tile];
+                                    if (!baseLayerTiles.includes(cell[0].code)) {
+                                        cell.push(baseLayer);
+                                    }
+                                    layer.push(cell);
+                                });
                         }
-                        return acc;
-                    }, [] as OrientedTile[][]);
-            });
+                        return layer;
+                    }, [] as OrientedTile[][]));
     }
 
     private getOrientedTilesFromExpression(expression: string): OrientedTile[] {
@@ -104,8 +114,7 @@ export class StandardSokobanAnnotationTranslator {
             code: getTilesFromChar(tileStr),
             orientation: direction
         };
-        const fill: OrientedTile[] = new Array(repetition)
+        return new Array(repetition)
             .fill(orientedTile);
-        return fill;
     }
 }
