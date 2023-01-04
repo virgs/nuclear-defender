@@ -39,14 +39,7 @@ export const directionCharMap = new BiMap({
     l: Directions.LEFT,
     r: Directions.RIGHT,
 });
+
 export const getDirectionFromChar = (char: string): Directions | undefined => {
     return directionCharMap.get(char);
-};
-
-export const getDirectionRegex = (): RegExp => {
-    let keys = '';
-    for (let key of directionCharMap.keys()) {
-        keys += key;
-    }
-    return new RegExp(`[${keys}]`);
 };

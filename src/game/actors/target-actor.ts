@@ -57,7 +57,8 @@ export class TargetActor implements GameActor {
 
                 const point = path.getPoint(follower.t, follower.vec);
                 this.sprite.setPosition(point.x, point.y);
-                light.setPosition(point.x, point.y);
+                light.setPosition(point.x + this.sprite.width / 2,
+                    point.y + this.sprite.height / 2);
             },
             repeat: -1
         });
