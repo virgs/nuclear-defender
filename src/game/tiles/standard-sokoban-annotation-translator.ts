@@ -53,7 +53,7 @@ export class StandardSokobanAnnotationTranslator {
         const baseLayerTiles = [Tiles.floor, Tiles.empty, Tiles.wall];
         const baseLayer = {code: Tiles.floor};
 
-        const tileRegex = /\d*\[(.*)\]|(\d*[udlr]?.)/g;
+        const tileRegex = /\d*\[([^\]]*)\]|(\d*[udlr]?.)/g;
         // #dw14lt$22[@.usdw]us4-#
         //
         // #

@@ -25,12 +25,15 @@ export class SpringActor implements GameActor {
         switch (this.orientation) {
             case Directions.LEFT:
                 this.sprite.setRotation(Math.PI / 2);
+                //     this.sprite.flipY = true
                 break;
             case Directions.UP:
-                this.sprite.setRotation(Math.PI);
+                this.sprite.flipY = true
+                // this.sprite.setRotation(Math.PI);
                 break;
             case Directions.RIGHT:
-                this.sprite.setRotation(-Math.PI / 2);
+                this.sprite.setRotation(Math.PI / 2);
+                this.sprite.flipX = true;
                 break;
         }
     }

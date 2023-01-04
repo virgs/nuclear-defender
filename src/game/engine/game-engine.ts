@@ -1,5 +1,5 @@
 import {Tiles} from '@/game/tiles/tiles';
-import type {Actions} from '@/game/constants/actions';
+import {Actions} from '@/game/constants/actions';
 import type {BoxActor} from '@/game/actors/box-actor';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {TargetActor} from '@/game/actors/target-actor';
@@ -7,7 +7,7 @@ import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import type {GameActor} from '@/game/actors/game-actor';
 
@@ -25,6 +25,7 @@ export class GameEngine {
     private levelComplete: boolean = false;
     private animationsAreOver: boolean;
     private lastActionResult?: MovementOrchestratorOutput;
+    private checkUpdateNextCycle: boolean;
 
     constructor(config: { solution: SolutionOutput; tileMap: MultiLayeredMap; actorMap: Map<Tiles, GameActor[]> }) {
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
@@ -40,6 +41,7 @@ export class GameEngine {
         this.playerMoves = [];
         this.levelComplete = false;
         this.animationsAreOver = true;
+        this.checkUpdateNextCycle = true;
 
         this.movementAnalyser = new MovementAnalyser({
             multiLayeredStrippedMap: this.multiLayeredStrippedMap,
@@ -75,17 +77,21 @@ export class GameEngine {
             const heroAction = this.nextMoves.shift()!;
             this.playerMoves!.push(heroAction);
 
-            this.lastActionResult = await this.movementCoordinator!.update({
-                heroAction: heroAction,
-                heroPosition: this.hero.getTilePosition(),
-                boxes: this.boxes.map(box => box.getTilePosition()),
-                lastActionResult: this.lastActionResult
-            });
+            if (this.checkUpdateNextCycle || heroAction !== Actions.STAND) {
+                this.checkUpdateNextCycle = false;
+                this.lastActionResult = await this.movementCoordinator!.update({
+                    heroAction: heroAction,
+                    heroPosition: this.hero.getTilePosition(),
+                    boxes: this.boxes.map(box => box.getTilePosition()),
+                    lastActionResult: this.lastActionResult
+                });
 
-            if (this.lastActionResult.mapChanged) {
-                this.movementAnalyser.analyse(this.lastActionResult!);
-                await this.updateMapFeatures();
-                this.checkLevelComplete();
+                if (this.lastActionResult.mapChanged) {
+                    this.checkUpdateNextCycle = true;
+                    this.movementAnalyser.analyse(this.lastActionResult!);
+                    await this.updateMapFeatures();
+                    this.checkLevelComplete();
+                }
             }
         }
     }

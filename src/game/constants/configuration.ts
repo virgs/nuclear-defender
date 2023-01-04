@@ -9,7 +9,7 @@ const tileHeight = 40;
 const tileWidth = 40;
 export const configuration = {
     frameRate: 8,
-    updateCycleInMs: 200,
+    updateCycleInMs: 175,
     floorTextureKey: 'floorTexture',
     floorTexture: floorTexture,
     tiles: { //in tile sheet

@@ -10,6 +10,7 @@ import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 import Phaser from 'phaser';
+import {SpringActor} from '@/game/actors/spring-actor';
 
 export class GameActorsCreator {
     private readonly scale: number;
@@ -36,6 +37,7 @@ export class GameActorsCreator {
         this.constructorMap = new Map<Tiles, (params: any) => GameActor>();
         this.constructorMap.set(Tiles.hero, params => new HeroActor(params));
         this.constructorMap.set(Tiles.box, params => new BoxActor(params));
+        this.constructorMap.set(Tiles.spring, params => new SpringActor(params));
         this.constructorMap.set(Tiles.target, params => new TargetActor(params));
         this.constructorMap.set(Tiles.oily, params => new OilyFloorActor(params));
         this.constructorMap.set(Tiles.oneWayDoor, params => new OneWayDoorActor(params));
@@ -78,6 +80,7 @@ export class GameActorsCreator {
         if (this.constructorMap.get(item.code)) {
             const gameActor = this.constructorMap.get(item.code)!({
                 scene: this.scene,
+                orientation: item.orientation,
                 sprite: sprite,
                 tilePosition: tilePosition,
                 id: this.actorCounter++

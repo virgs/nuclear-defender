@@ -45,6 +45,7 @@ export class TargetActor implements GameActor {
             t: 1,
             ease: 'Linear',
             duration: Math.random() * 5000 + 3000,
+            useFrames: true,
             onUpdate: () => {
                 const intensity = Math.random() * .25;
                 if (this.covered) {
