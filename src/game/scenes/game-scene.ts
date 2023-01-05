@@ -58,7 +58,6 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        console.log(screenProperties)
         const actorsCreator = new GameActorsCreator({
             scene: this,
             scale: screenProperties.scale,
@@ -68,7 +67,7 @@ export class GameScene extends Phaser.Scene {
         const actorMap = actorsCreator.create();
 
         this.gameEngine = new GameEngine({
-            tileMap: store.strippedLayeredTileMatrix!,
+            strippedMap: store.strippedLayeredTileMatrix!,
             actorMap: actorMap,
             solution: store.solution
         });
@@ -82,7 +81,7 @@ export class GameScene extends Phaser.Scene {
                 this.allowUpdates = false;
                 console.log('currentLevel complete', this.gameEngine!.getPlayerMoves());
                 setTimeout(async () => {
-                    this.changeScene();
+                    // this.changeScene();
                 }, 1500);
             }
         }

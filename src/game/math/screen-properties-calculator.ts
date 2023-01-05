@@ -5,7 +5,7 @@ import Phaser from 'phaser';
 
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
-    max: 1.15,
+    max: 1.25,
     min: .45
 };
 
@@ -18,8 +18,6 @@ export class ScreenPropertiesCalculator {
         };
         const xFactor = (configuration.gameWidth -gutter) / map.width;
         const yFactor = (configuration.gameHeight -gutter) / map.height;
-        console.log(configuration.gameWidth, map.width, (configuration.gameWidth -gutter)/ map.width)
-        console.log(configuration.gameHeight, map.height, (configuration.gameHeight -gutter) / map.height)
         const scale = Math.min(this.limitValue(xFactor), this.limitValue(yFactor));
         return {
             scale: scale,

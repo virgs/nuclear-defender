@@ -8,8 +8,6 @@ import {computed, onMounted, reactive} from "vue";
 import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import {configuration} from '@/game/constants/configuration';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {Tiles} from '@/game/tiles/tiles';
 import {Point} from '@/game/math/point';
@@ -19,11 +17,11 @@ import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban
 const router = useRouter();
 //TODO get it from OptionsComponent
 const store = Store.getInstance();
-const furthestLevel = store.furthestEnabledLevel;
+const furthestLevel = levels.length;//store.furthestEnabledLevel;
 store.movesCode = '';
 
 const data = reactive({
-  currentSelectedIndex: furthestLevel
+  currentSelectedIndex: 0//furthestLevel
 });
 
 const currentLevelName = computed(() => levels[data.currentSelectedIndex].title);
@@ -46,8 +44,8 @@ async function runSolutionsAlgorithm(strip: { removedFeatures: Map<Tiles, Point[
 
 
   solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
-    strippedMatrix: strip.strippedLayeredTileMatrix,
-    features: new Map([...Array.from(strip.pointMap.entries()), ...Array.from(strip.removedFeatures.entries())]),
+    strippedMap: strip.strippedLayeredTileMatrix,
+    staticFeatures: strip.pointMap,
     cpu: {
       sleepingCycle: 3000,
       sleepForInMs: 40
@@ -55,7 +53,7 @@ async function runSolutionsAlgorithm(strip: { removedFeatures: Map<Tiles, Point[
     distanceCalculator: new ManhattanDistanceCalculator()
   }));
   for (let [name, solver] of solvers) {
-    solutionOutput = await solver.solve();
+    solutionOutput = await solver.solve(strip.removedFeatures);
     console.log(levels[index].title, name, solutionOutput);
 
   }
@@ -72,7 +70,6 @@ async function playButtonClick() {
 
   const map = new StandardSokobanAnnotationTranslator()
       .translate(levels[data.currentSelectedIndex].map);
-  console.log(map)
   const output = new SokobanMapProcessor(map)
       .strip([Tiles.hero, Tiles.box]);
 

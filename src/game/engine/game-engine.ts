@@ -28,7 +28,7 @@ export class GameEngine {
     private lastActionResult?: MovementOrchestratorOutput;
     private mapChangedLastCycle: boolean;
 
-    constructor(config: { solution: SolutionOutput; tileMap: MultiLayeredMap; actorMap: Map<Tiles, GameActor[]> }) {
+    constructor(config: { solution: SolutionOutput; strippedMap: MultiLayeredMap; actorMap: Map<Tiles, GameActor[]> }) {
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
         this.boxes = config.actorMap.get(Tiles.box)! as BoxActor[];
         this.targets = config.actorMap.get(Tiles.target)! as TargetActor[];
@@ -37,7 +37,7 @@ export class GameEngine {
             .concat(config.actorMap.get(Tiles.spring)!)
             .concat(config.actorMap.get(Tiles.treadmil)!)
             .concat(config.actorMap.get(Tiles.oneWayDoor)!);
-        this.strippedMap = config.tileMap;
+        this.strippedMap = config.strippedMap;
         this.nextMoves = config.solution?.actions! || [];
         this.playerMoves = '';
         this.levelComplete = false;
@@ -51,7 +51,7 @@ export class GameEngine {
         }
 
         this.movementAnalyser = new MovementAnalyser({
-            featureMap: pointMap,
+            staticFeatures: pointMap,
             strippedMap: this.strippedMap,
             distanceCalculator: new ManhattanDistanceCalculator()
         });

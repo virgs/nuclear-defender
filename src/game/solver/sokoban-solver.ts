@@ -33,32 +33,27 @@ export class SokobanSolver {
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.score - b.score);
     private candidatesVisitedHash: { [hash: string]: boolean } = {};
-    private readonly tileMap: MultiLayeredMap;
+    private readonly strippedMap: MultiLayeredMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
-    private readonly hero?: Point;
-    private readonly boxes: Point[] = [];
 
     public constructor(input: {
-        features: Map<Tiles, Point[]>;
+        staticFeatures: Map<Tiles, Point[]>;
         distanceCalculator: ManhattanDistanceCalculator;
         cpu: { sleepForInMs: number; sleepingCycle: number };
-        strippedMatrix: any
+        strippedMap: MultiLayeredMap
     }) {
         this.sleepForInMs = input.cpu.sleepForInMs;
         this.sleepingCycle = input.cpu.sleepingCycle;
 
-        this.tileMap = input.strippedMatrix;
-        this.hero = input.features.get(Tiles.hero)![0];
-        this.boxes = input.features.get(Tiles.box)!;
-        console.log(input.features);
+        this.strippedMap = input.strippedMap;
 
-        this.movementCoordinator = new MovementOrchestrator({strippedMap: this.tileMap});
+        this.movementCoordinator = new MovementOrchestrator({strippedMap: this.strippedMap});
         this.movementAnalyser = new MovementAnalyser({
-            featureMap: input.features,
-            strippedMap: this.tileMap,
+            staticFeatures: input.staticFeatures,
+            strippedMap: this.strippedMap,
             distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
@@ -68,9 +63,9 @@ export class SokobanSolver {
         this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET, -150);
     }
 
-    public async solve(): Promise<SolutionOutput> {
+    public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
         const startTime = new Date().getTime();
-        const {actions, iterations} = await this.startAlgorithm();
+        const {actions, iterations} = await this.startAlgorithm(dynamicMap);
         return {
             actions: actions,
             iterations: iterations,
@@ -78,12 +73,12 @@ export class SokobanSolver {
         };
     }
 
-    private async startAlgorithm() {
+    private async startAlgorithm(dynamicMap: Map<Tiles, Point[]>) {
         console.log('start algorithm');
         const initialCandidate: Solution = {
             actions: [],
-            hero: this.hero!,
-            boxes: this.boxes,
+            hero: dynamicMap.get(Tiles.hero)![0],
+            boxes: dynamicMap.get(Tiles.box)!,
             score: 0
         };
         initialCandidate.hash = this.calculateHashOfSolution(initialCandidate);
@@ -112,7 +107,6 @@ export class SokobanSolver {
     }
 
     private checkSolution(candidate: Solution): Solution | undefined {
-        console.log(candidate.hash);
         if (!this.candidateWasVisitedBefore(candidate.hash!)) {
             this.candidatesVisitedHash[candidate.hash!] = true;
 
@@ -129,8 +123,8 @@ export class SokobanSolver {
             .forEach((action: Actions) => {
                 const afterAction = this.movementCoordinator.update({
                     heroAction: action,
-                    heroPosition: this.hero!,
-                    boxes: this.boxes
+                    heroPosition: candidate.hero,
+                    boxes: candidate.boxes
                 });
 
                 if (afterAction.mapChanged) {
@@ -138,17 +132,17 @@ export class SokobanSolver {
                     // const actionScore = analysis.events.reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
                     const heroMovementCost = 1;
                     const newCandidate: Solution = {
-                        boxes: afterAction.boxes.map(box => box.nextPosition),
+                        boxes: afterAction.boxes
+                            .map(box => box.nextPosition),
                         hero: afterAction.hero.nextPosition,
                         actions: candidate.actions.concat(action),
-                        score: candidate.score + heroMovementCost + analysis.shortestDistanceFromEveryBoxToTheClosestTarget
+                        score: candidate.score + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
                     };
                     newCandidate.hash = this.calculateHashOfSolution(newCandidate);
-                    // console.log(Actions[action], newCandidate.hash)
                     if (!analysis.isDeadLocked) {
                         this.candidatesToVisit.push(newCandidate);
                     } else {
-                        console.log('dead');
+                        console.log('dead')
                     }
                 }
             });
@@ -156,7 +150,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: Point[]): boolean {
         return boxesPosition
-            .every(box => this.tileMap.layeredTileMatrix[box.y][box.x]
+            .every(box => this.strippedMap.layeredTileMatrix[box.y][box.x]
                 .some(layer => layer.code === Tiles.target));
     }
 

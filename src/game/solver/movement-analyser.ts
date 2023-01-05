@@ -8,7 +8,7 @@ import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orch
 export type MovementAnalysis = {
     events: MovementEvents[],
     boxesMoved: Movement[],
-    shortestDistanceFromEveryBoxToTheClosestTarget: number,
+    sumOfEveryBoxToTheClosestTarget: number,
     isDeadLocked: boolean
 }
 
@@ -27,22 +27,20 @@ export class MovementAnalyser {
     private readonly strippedMap: MultiLayeredMap;
     private readonly deadlockDetector: DeadlockDetector;
 
-    public constructor(data: { distanceCalculator: DistanceCalculator; featureMap: Map<Tiles, Point[]>; strippedMap: MultiLayeredMap }) {
+    public constructor(data: { distanceCalculator: DistanceCalculator; staticFeatures: Map<Tiles, Point[]>; strippedMap: MultiLayeredMap }) {
         this.strippedMap = data.strippedMap;
         this.distanceCalculator = data.distanceCalculator;
-        this.targets = data.featureMap.get(Tiles.target)!;
-        console.log(this.targets)
+        this.targets = data.staticFeatures.get(Tiles.target)!;
         this.deadlockDetector = new DeadlockDetector({staticMap: this.strippedMap});
     }
 
     public analyse(movement: MovementOrchestratorOutput): MovementAnalysis {
         const events = this.checkEvents(movement);
-        let isDeadLocked = events.boxesMoved
-            .some(movedBox => this.deadlockDetector.deadLocked(movedBox, movement.boxes));
+        let isDeadLocked = this.deadlockDetector.deadLocked(movement);
         return {
-            shortestDistanceFromEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestTarget(movement),
+            sumOfEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestAvailableTarget(movement),
             ...events,
-            isDeadLocked
+            isDeadLocked: isDeadLocked,
         };
     }
 
@@ -79,12 +77,13 @@ export class MovementAnalyser {
         return {events, boxesMoved};
     }
 
-    private sumOfEveryBoxToTheClosestTarget(movement: MovementOrchestratorOutput): number {
+    private sumOfEveryBoxToTheClosestAvailableTarget(movement: MovementOrchestratorOutput): number {
+        //TODO check if the target is not covered by a different box
         return movement.boxes
-            .reduce((acc, box) => {
+            .reduce((sum, box) => {
                 const shortestDistanceToAnyTarget: number = this.targets
                     .reduce((acc, target) => Math.min(this.distanceCalculator.distance(target, box.nextPosition), acc), Infinity);
-                return acc + shortestDistanceToAnyTarget;
+                return sum + shortestDistanceToAnyTarget;
             }, 0);
     }
 

@@ -1,11 +1,12 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
-import type {Movement} from '@/game/engine/movement-orchestrator';
+import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import type {OrientedTile, MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
 type SegmentAnalysis = { differentBoxes: number; empties: number; targets: number };
 
+// TODO fix it
 export class DeadlockDetector {
     private staticMap: MultiLayeredMap;
 
@@ -13,19 +14,19 @@ export class DeadlockDetector {
         this.staticMap = config.staticMap;
     }
 
-    public deadLocked(movedBox: Movement, boxes: Movement[]): boolean {
-        const direction = movedBox.direction!;
-        const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
-        if (this.staticMap.layeredTileMatrix[nextTilePosition.y][nextTilePosition.x].some(tile => tile.code === Tiles.wall)) {
-            if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
-                return true;
-            }
-
-            if (this.checkTrappedBoxInCorner(movedBox, direction)) {
-                return true;
-            }
-
-        }
+    public deadLocked(movement: MovementOrchestratorOutput): boolean {
+        // const direction = movedBox.direction!;
+        // const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
+        // if (this.staticMap.layeredTileMatrix[nextTilePosition.y][nextTilePosition.x].some(tile => tile.code === Tiles.wall)) {
+        //     if (this.wallAheadCheck(direction, movedBox, nextTilePosition, boxes)) {
+        //         return true;
+        //     }
+        //
+        //     if (this.checkTrappedBoxInCorner(movedBox, direction)) {
+        //         return true;
+        //     }
+        //
+        // }
         return false;
     }
 
