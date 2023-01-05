@@ -12,7 +12,6 @@ export type MultiLayeredMap = {
     layeredTileMatrix: OrientedTile[][][]
 };
 
-//TODO improve the readibility. It sucks big time
 export class StandardSokobanAnnotationTranslator {
     public translate(encodedLevel: string): MultiLayeredMap {
         const lines: string[] = this.splitInLines(replaceImplicitLayeredTiles(encodedLevel.toLowerCase()));
@@ -78,7 +77,8 @@ export class StandardSokobanAnnotationTranslator {
                             const cell = tiles.match(tileRegex)!
                                 .map(coded => this.getOrientedTilesFromExpression(coded)[0]);
 
-                            if (cell.every(item => !baseLayerTiles.includes(item.code))) {
+                            if (cell
+                                .every(item => !baseLayerTiles.includes(item.code))) {
                                 cell.push(baseLayer);
                             }
                             Array.from(new Array(repetition))

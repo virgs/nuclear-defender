@@ -36,14 +36,14 @@ export type MovementOrchestratorInput = {
 export class MovementOrchestrator {
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.wall, Tiles.empty]);
 
-    private readonly multiLayeredStrippedMap: MultiLayeredMap;
+    private readonly strippedMap: MultiLayeredMap;
     private readonly movementHandlers: FeatureMovementHandler[] = [];
 
     private hero?: Movement;
     private boxes?: Movement[];
 
-    constructor(config: { multiLayeredStrippedMap: MultiLayeredMap }) {
-        this.multiLayeredStrippedMap = config.multiLayeredStrippedMap;
+    constructor(config: { strippedMap: MultiLayeredMap }) {
+        this.strippedMap = config.strippedMap;
         this.movementHandlers.push(new HeroMovementHandler({coordinator: this}));
 
         this.movementHandlers
@@ -136,16 +136,16 @@ export class MovementOrchestrator {
                 orientation: undefined
             });
         }
-        if (position.x < this.multiLayeredStrippedMap.width && position.y < this.multiLayeredStrippedMap.height
+        if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            result.push(...this.multiLayeredStrippedMap.layeredTileMatrix[position.y][position.x]);
+            result.push(...this.strippedMap.layeredTileMatrix[position.y][position.x]);
         }
         return result;
     }
 
     private findTileOrientedPositions(code: Tiles, constructorFunction: (params: any) => FeatureMovementHandler): FeatureMovementHandler[] {
         const handlers: FeatureMovementHandler[] = [];
-        this.multiLayeredStrippedMap.layeredTileMatrix
+        this.strippedMap.layeredTileMatrix
             .forEach((line, y) => line
                 .forEach((layer, x) =>
                     layer.forEach(tile => {

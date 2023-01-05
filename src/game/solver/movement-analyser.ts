@@ -1,5 +1,5 @@
-import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
+import type {Point} from '@/game/math/point';
 import {DeadlockDetector} from '@/game/solver/deadlock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -24,25 +24,15 @@ export enum MovementEvents {
 export class MovementAnalyser {
     private readonly targets: Point[];
     private readonly distanceCalculator: DistanceCalculator;
-    private readonly multiLayeredStrippedMap: MultiLayeredMap;
+    private readonly strippedMap: MultiLayeredMap;
     private readonly deadlockDetector: DeadlockDetector;
 
-    public constructor(data: {
-        multiLayeredStrippedMap: MultiLayeredMap,
-        distanceCalculator: DistanceCalculator
-    }) {
-        this.multiLayeredStrippedMap = data.multiLayeredStrippedMap;
+    public constructor(data: { distanceCalculator: DistanceCalculator; featureMap: Map<Tiles, Point[]>; strippedMap: MultiLayeredMap }) {
+        this.strippedMap = data.strippedMap;
         this.distanceCalculator = data.distanceCalculator;
-        this.targets = [];
-        for (let y = 0; y < data.multiLayeredStrippedMap.height; ++y) {
-            for (let x = 0; x < data.multiLayeredStrippedMap.width; ++x) {
-                if (data.multiLayeredStrippedMap.layeredTileMatrix[y][x]
-                    .some(layer => layer.code === Tiles.target)) {
-                    this.targets.push(new Point(x, y));
-                }
-            }
-        }
-        this.deadlockDetector = new DeadlockDetector({staticMap: this.multiLayeredStrippedMap});
+        this.targets = data.featureMap.get(Tiles.target)!;
+        console.log(this.targets)
+        this.deadlockDetector = new DeadlockDetector({staticMap: this.strippedMap});
     }
 
     public analyse(movement: MovementOrchestratorOutput): MovementAnalysis {
@@ -99,9 +89,9 @@ export class MovementAnalyser {
     }
 
     public isTileAtPosition(position: Point, tile: Tiles): boolean {
-        if (position.x < this.multiLayeredStrippedMap.width && position.y < this.multiLayeredStrippedMap.height
+        if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.multiLayeredStrippedMap.layeredTileMatrix[position.y][position.x]
+            return this.strippedMap.layeredTileMatrix[position.y][position.x]
                 .some(layer => layer.code === tile);
         }
         return false;

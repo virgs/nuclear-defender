@@ -6,7 +6,7 @@ import {GameEngine} from '@/game/engine/game-engine';
 import {GameActorsCreator} from '../tiles/game-actors-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {FeatureRemover} from '@/game/tiles/feature-remover';
+import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {Tiles} from '@/game/tiles/tiles';
 
 export type GameSceneConfiguration = {
@@ -45,35 +45,30 @@ export class GameScene extends Phaser.Scene {
         this.allowUpdates = true;
     }
 
-    public async create(scene: Phaser.Scene, scale: number) {
+    public async create() {
         this.initialTime = new Date().getTime();
         InputManager.setup(this);
         const store = Store.getInstance();
-        const codedMap: string = store.map;
 
-        //TODO move this section to scenes before this one (splash view)
-        const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
-        const output = new ScreenPropertiesCalculator().calculate(map);
-        configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * output.scale);
-        configuration.world.tileSize.vertical = Math.trunc(Math.trunc(configuration.tiles.verticalSize * configuration.tiles.verticalPerspective) * output.scale);
-        //TODO end of section
+        const screenProperties = new ScreenPropertiesCalculator()
+            .calculate(store.strippedLayeredTileMatrix!);
+        configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * screenProperties.scale);
+        configuration.world.tileSize.vertical = Math.trunc(Math.trunc(configuration.tiles.verticalSize * configuration.tiles.verticalPerspective) * screenProperties.scale);
 
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        const strip = new FeatureRemover([Tiles.hero, Tiles.box])
-            .strip(map);
-
+        console.log(screenProperties)
         const actorsCreator = new GameActorsCreator({
             scene: this,
-            scale: output.scale,
-            dynamicFeatures: strip.removedFeatures,
-            matrix: strip.strippedLayeredTileMatrix
+            scale: screenProperties.scale,
+            dynamicFeatures: store.features,
+            matrix: store.strippedLayeredTileMatrix!
         });
         const actorMap = actorsCreator.create();
 
         this.gameEngine = new GameEngine({
-            tileMap: strip.strippedLayeredTileMatrix,
+            tileMap: store.strippedLayeredTileMatrix!,
             actorMap: actorMap,
             solution: store.solution
         });

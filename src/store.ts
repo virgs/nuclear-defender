@@ -1,14 +1,18 @@
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {Tiles} from '@/game/tiles/tiles';
+import type {Point} from '@/game/math/point';
 
 export class Store {
     private _movesCode: string = '';
-    private _map: string = '';
     private _currentLevelIndex: number = -1;
     private _bestMoves: number[] = [];
     private _router: any;
     private _solution?: SolutionOutput;
     private _totalTimeInMs: number = 0;
     private _furthestEnabledLevel: number = 0;
+    private _strippedLayeredTileMatrix?: MultiLayeredMap;
+    private _features: Map<Tiles, Point[]> = new Map<Tiles, Point[]>();
 
     private static _instance: Store = new Store();
 
@@ -25,14 +29,6 @@ export class Store {
 
     set movesCode(value: string) {
         this._movesCode = value;
-    }
-
-    get map(): string {
-        return this._map;
-    }
-
-    set map(value: string) {
-        this._map = value;
     }
 
     get currentLevelIndex(): number {
@@ -76,11 +72,29 @@ export class Store {
     }
 
     get furthestEnabledLevel(): number {
+        //TODO store it in the chrome storage
         return this._furthestEnabledLevel;
     }
 
     set furthestEnabledLevel(value: number) {
+        //TODO get max from param and browser storage
         this._furthestEnabledLevel = value;
+    }
+
+    get strippedLayeredTileMatrix(): MultiLayeredMap | undefined {
+        return this._strippedLayeredTileMatrix;
+    }
+
+    set strippedLayeredTileMatrix(value: MultiLayeredMap | undefined) {
+        this._strippedLayeredTileMatrix = value;
+    }
+
+    get features(): Map<Tiles, Point[]> {
+        return this._features;
+    }
+
+    set features(value: Map<Tiles, Point[]>) {
+        this._features = value;
     }
 
     static get instance(): Store {

@@ -1,11 +1,11 @@
 import Heap from 'heap';
-import {Point} from '../math/point';
 import {Tiles} from '../tiles/tiles';
+import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
 type Solution = {
     actions: Actions[],
@@ -38,39 +38,27 @@ export class SokobanSolver {
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
-    private hero?: Point;
-    private boxes: Point[] = [];
+    private readonly hero?: Point;
+    private readonly boxes: Point[] = [];
 
     public constructor(input: {
-        tileMap: MultiLayeredMap,
-        cpu: { sleepForInMs: number, sleepingCycle: number }
-        distanceCalculator: DistanceCalculator
+        features: Map<Tiles, Point[]>;
+        distanceCalculator: ManhattanDistanceCalculator;
+        cpu: { sleepForInMs: number; sleepingCycle: number };
+        strippedMatrix: any
     }) {
         this.sleepForInMs = input.cpu.sleepForInMs;
         this.sleepingCycle = input.cpu.sleepingCycle;
 
-        this.tileMap = input.tileMap;
-        const deepCopy = (JSON.parse(JSON.stringify(input.tileMap.layeredTileMatrix)) as OrientedTile[][][]);
-        this.tileMap.layeredTileMatrix = deepCopy
-            .map((tile: OrientedTile[][], y: number) =>
-                tile.map((layers: OrientedTile[], x: number) =>
-                    layers
-                        .filter(tile => {
-                            if (tile.code === Tiles.hero) {
-                                this.hero = new Point(x, y);
-                                return false;
-                            } else if (tile.code === Tiles.box) {
-                                this.boxes.push(new Point(x, y));
-                                return false;
-                            }
-                            return true;
-                        })
-                )
-            );
+        this.tileMap = input.strippedMatrix;
+        this.hero = input.features.get(Tiles.hero)![0];
+        this.boxes = input.features.get(Tiles.box)!;
+        console.log(input.features);
 
-        this.movementCoordinator = new MovementOrchestrator({multiLayeredStrippedMap: this.tileMap});
+        this.movementCoordinator = new MovementOrchestrator({strippedMap: this.tileMap});
         this.movementAnalyser = new MovementAnalyser({
-            multiLayeredStrippedMap: this.tileMap,
+            featureMap: input.features,
+            strippedMap: this.tileMap,
             distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
@@ -91,6 +79,7 @@ export class SokobanSolver {
     }
 
     private async startAlgorithm() {
+        console.log('start algorithm');
         const initialCandidate: Solution = {
             actions: [],
             hero: this.hero!,
@@ -123,6 +112,7 @@ export class SokobanSolver {
     }
 
     private checkSolution(candidate: Solution): Solution | undefined {
+        console.log(candidate.hash);
         if (!this.candidateWasVisitedBefore(candidate.hash!)) {
             this.candidatesVisitedHash[candidate.hash!] = true;
 
@@ -148,14 +138,17 @@ export class SokobanSolver {
                     // const actionScore = analysis.events.reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
                     const heroMovementCost = 1;
                     const newCandidate: Solution = {
-                        boxes: afterAction.boxes.map(box => box.currentPosition),
-                        hero: afterAction.hero.currentPosition,
+                        boxes: afterAction.boxes.map(box => box.nextPosition),
+                        hero: afterAction.hero.nextPosition,
                         actions: candidate.actions.concat(action),
                         score: candidate.score + heroMovementCost + analysis.shortestDistanceFromEveryBoxToTheClosestTarget
                     };
                     newCandidate.hash = this.calculateHashOfSolution(newCandidate);
+                    // console.log(Actions[action], newCandidate.hash)
                     if (!analysis.isDeadLocked) {
                         this.candidatesToVisit.push(newCandidate);
+                    } else {
+                        console.log('dead');
                     }
                 }
             });

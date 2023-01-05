@@ -31,7 +31,6 @@ export default {
     async continueButton() {
       const store = Store.getInstance();
       ++store.furthestEnabledLevel
-      //TODO store it in the chrome storage
 
       await this.router.push('/');
     }

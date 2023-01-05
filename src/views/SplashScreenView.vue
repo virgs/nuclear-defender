@@ -7,19 +7,24 @@ import {levels} from '@/game/levels/levels';
 import {computed, onMounted, reactive} from "vue";
 import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
-import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {configuration} from '@/game/constants/configuration';
+import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
+import {Tiles} from '@/game/tiles/tiles';
+import {Point} from '@/game/math/point';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 const router = useRouter();
 //TODO get it from OptionsComponent
 const store = Store.getInstance();
 const furthestLevel = store.furthestEnabledLevel;
-store.movesCode = ''
+store.movesCode = '';
 
 const data = reactive({
   currentSelectedIndex: furthestLevel
 });
-
 
 const currentLevelName = computed(() => levels[data.currentSelectedIndex].title);
 const availableLevels = computed(() => levels
@@ -30,18 +35,19 @@ function optionsChanged(valid: boolean) {
   console.log();
 }
 
-async function runSolutionsAlgorithm() {
+async function runSolutionsAlgorithm(strip: { removedFeatures: Map<Tiles, Point[]>; strippedLayeredTileMatrix: MultiLayeredMap, pointMap: Map<Tiles, Point[]> }) {
   let solutionOutput: any = undefined;
 
   // for (let index = 1; index < levels.length - 1; ++index) {
   // let index = 4;
   const index = data.currentSelectedIndex;
-  const codedMap: string = levels[index].map;
-  const map = new StandardSokobanAnnotationTranslator().translate(codedMap);
   const solvers = new Map<string, SokobanSolver>();
   console.log('running algorithm for: ' + levels[index].title);
+
+
   solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
-    tileMap: map,
+    strippedMatrix: strip.strippedLayeredTileMatrix,
+    features: new Map([...Array.from(strip.pointMap.entries()), ...Array.from(strip.removedFeatures.entries())]),
     cpu: {
       sleepingCycle: 3000,
       sleepForInMs: 40
@@ -63,11 +69,18 @@ async function playButtonClick() {
   //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 
   const store = Store.getInstance();
+
+  const map = new StandardSokobanAnnotationTranslator()
+      .translate(levels[data.currentSelectedIndex].map);
+  console.log(map)
+  const output = new SokobanMapProcessor(map)
+      .strip([Tiles.hero, Tiles.box]);
+
   store.currentLevelIndex = data.currentSelectedIndex;
-  store.map = levels[data.currentSelectedIndex].map;
+  store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
+  store.features = output.removedFeatures;
   store.router = router;
-  store.solution = await runSolutionsAlgorithm()
-  console.log(store.solution)
+  store.solution = await runSolutionsAlgorithm(output);
 
   await router.push('/game');
 }

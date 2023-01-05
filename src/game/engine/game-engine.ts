@@ -1,18 +1,19 @@
 import {Tiles} from '@/game/tiles/tiles';
-import {Actions, mapActionToString} from '@/game/constants/actions';
+import type {Point} from '@/game/math/point';
 import type {BoxActor} from '@/game/actors/box-actor';
 import type {HeroActor} from '@/game/actors/hero-actor';
+import type {GameActor} from '@/game/actors/game-actor';
 import type {TargetActor} from '@/game/actors/target-actor';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
+import {Actions, mapActionToString} from '@/game/constants/actions';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import type {GameActor} from '@/game/actors/game-actor';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export class GameEngine {
-    private readonly multiLayeredStrippedMap: MultiLayeredMap;
+    private readonly strippedMap: MultiLayeredMap;
     private readonly movementCoordinator: MovementOrchestrator;
     private readonly hero: HeroActor;
     private readonly boxes: BoxActor[];
@@ -36,19 +37,26 @@ export class GameEngine {
             .concat(config.actorMap.get(Tiles.spring)!)
             .concat(config.actorMap.get(Tiles.treadmil)!)
             .concat(config.actorMap.get(Tiles.oneWayDoor)!);
-        this.multiLayeredStrippedMap = config.tileMap;
+        this.strippedMap = config.tileMap;
         this.nextMoves = config.solution?.actions! || [];
         this.playerMoves = '';
         this.levelComplete = false;
         this.animationsAreOver = true;
         this.mapChangedLastCycle = true;
 
+        const pointMap: Map<Tiles, Point[]> = new Map<Tiles, Point[]>();
+        for (let [tile, actorList] of config.actorMap.entries()) {
+            pointMap.set(tile, actorList
+                .map(actor => actor.getTilePosition()));
+        }
+
         this.movementAnalyser = new MovementAnalyser({
-            multiLayeredStrippedMap: this.multiLayeredStrippedMap,
+            featureMap: pointMap,
+            strippedMap: this.strippedMap,
             distanceCalculator: new ManhattanDistanceCalculator()
         });
         this.movementCoordinator = new MovementOrchestrator({
-            multiLayeredStrippedMap: this.multiLayeredStrippedMap
+            strippedMap: this.strippedMap
         });
         this.targets
             .find(target => target.getTilePosition().isEqualTo(this.hero.getTilePosition()))
