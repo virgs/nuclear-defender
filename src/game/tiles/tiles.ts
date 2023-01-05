@@ -6,11 +6,11 @@ export enum Tiles {
     hero = 52,
     floor = 89,
     boxOnTarget = 7,
+    treadmil = 71,
     spring = 73,
     oily = 49,
     oneWayDoor = 47,
     // not mapped yet
-    treadmil,
 }
 
 const tileCharMap = new Map<string, Tiles>();

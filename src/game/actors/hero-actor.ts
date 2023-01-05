@@ -2,10 +2,10 @@ import {Tiles} from '@/game/tiles/tiles';
 import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
 import {InputManager} from '@/game/input/input-manager';
-import type {GameActor} from '@/game/actors/game-actor';
 import type {Directions} from '../constants/directions';
 import {HeroAnimator} from '../animations/hero-animator';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
+import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -16,7 +16,7 @@ export class HeroActor implements GameActor {
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
 
-    public constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
+    public constructor(config: GameActorConfig) {
         this.id = config.id;
 
         this.heroAnimator = new HeroAnimator();

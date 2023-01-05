@@ -4,6 +4,7 @@ import type {Actions} from '../constants/actions';
 import type {Directions} from '../constants/directions';
 import {HeroMovementHandler} from '@/game/engine/hero-movement-handler';
 import {SpringMovementHandler} from '@/game/engine/spring-movement-handler';
+import {TreadmillMovementHandler} from '@/game/engine/treadmill-movement-handler';
 import {OilyFloorMovementHandler} from '@/game/engine/oily-floor-movement-handler';
 import type {FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 import {OneWayDoorMovementHandler} from '@/game/engine/one-way-door-movement-handler';
@@ -34,7 +35,7 @@ export type MovementOrchestratorInput = {
 };
 
 export class MovementOrchestrator {
-    private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.wall, Tiles.empty]);
+    private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
 
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementHandlers: FeatureMovementHandler[] = [];
@@ -52,6 +53,8 @@ export class MovementOrchestrator {
             .push(...this.findTileOrientedPositions(Tiles.oily, (params) => new OilyFloorMovementHandler(params)));
         this.movementHandlers
             .push(...this.findTileOrientedPositions(Tiles.oneWayDoor, (params) => new OneWayDoorMovementHandler(params)));
+        this.movementHandlers
+            .push(...this.findTileOrientedPositions(Tiles.treadmil, (params) => new TreadmillMovementHandler(params)));
     }
 
     public moveHero(direction: Directions): void {
@@ -101,16 +104,19 @@ export class MovementOrchestrator {
             .every(handler => handler.allowLeavingMovement(move.orientation));
     }
 
-    public canFeatureEnterPosition(move: OrientedPoint): boolean {
+    public getFeaturesBlockingMoveIntoPosition(move: OrientedPoint): { tile: Tiles, orientation?: Directions }[] {
+        const result: { tile: Tiles, orientation?: Directions }[] = [];
         const positionFeatures = this.getFeatureAtPosition(move.point);
-        if (positionFeatures
-            .some(feature => this.blockerTiles.has(feature.code))) {
-            return false;
-        }
-        return this.movementHandlers
+        result.push(...positionFeatures
+            .filter(feature => this.blockerTiles.has(feature.code))
+            .map(feature => ({tile: feature.code, orientation: feature.orientation})));
+
+        result.push(...this.movementHandlers
             .filter(handler => positionFeatures
                 .some(feature => feature.code === handler.getTile() && move.point.isEqualTo(handler.getPosition())))
-            .every(handler => handler.allowEnteringMovement(move.orientation));
+            .filter(handler => !handler.allowEnteringMovement(move.orientation))
+            .map(handler => ({tile: handler.getTile(), orientation: handler.getOrientation()})));
+        return result;
     }
 
     private initializeFeature(point: Point): Movement {
@@ -125,15 +131,13 @@ export class MovementOrchestrator {
         const result: OrientedTile[] = [];
         if (this.hero?.nextPosition.isEqualTo(position) || this.hero?.currentPosition.isEqualTo(position)) {
             result.push({
-                code: Tiles.hero,
-                orientation: undefined
+                code: Tiles.hero
             });
         }
         if (this.boxes
             ?.some(box => box.nextPosition.isEqualTo(position) || box.currentPosition.isEqualTo(position))) {
             result.push({
-                code: Tiles.box,
-                orientation: undefined
+                code: Tiles.box
             });
         }
         if (position.x < this.strippedMap.width && position.y < this.strippedMap.height

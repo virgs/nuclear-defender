@@ -24,5 +24,7 @@ export interface FeatureMovementHandler {
     getTile(): Tiles;
 
     getPosition(): Point;
+
+    getOrientation(): Directions | undefined;
 }
 

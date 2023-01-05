@@ -1,8 +1,8 @@
 import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import type {GameActor} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
 import type {Directions} from '@/game/constants/directions';
+import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
 
 export class TargetActor implements GameActor {
     private static readonly UNCOVERED_LIGHT_INTENSITY = .66;
@@ -18,7 +18,7 @@ export class TargetActor implements GameActor {
     private readonly id: number;
     private covered: boolean;
 
-    constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; id: number; scene: Phaser.Scene }) {
+    constructor(config: GameActorConfig) {
         this.id = config.id;
         this.scene = config.scene;
         this.covered = false;

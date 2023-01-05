@@ -9,6 +9,8 @@ export class TileDepthCalculator {
                 return -100000;
             case Tiles.oily:
                 return -90000;
+            case Tiles.treadmil:
+                return -90000;
             case Tiles.oneWayDoor:
                 return -80000;
             case Tiles.target:

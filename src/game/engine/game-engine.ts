@@ -97,9 +97,8 @@ export class GameEngine {
                 });
 
                 if (this.lastActionResult.mapChanged) {
-                    this.registerPlayerMove(heroAction);
-
                     this.mapChangedLastCycle = true;
+                    this.registerPlayerMove(heroAction);
                     this.movementAnalyser.analyse(this.lastActionResult!);
                     await this.updateMapFeatures();
                     this.checkLevelComplete();

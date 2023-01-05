@@ -3,7 +3,7 @@ import {Store} from '@/store';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
 import {GameEngine} from '@/game/engine/game-engine';
-import {GameActorsCreator} from '../tiles/game-actors-creator';
+import {GameActorsFactory} from '../actors/game-actors-factory';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
@@ -58,7 +58,7 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        const actorsCreator = new GameActorsCreator({
+        const actorsCreator = new GameActorsFactory({
             scene: this,
             scale: screenProperties.scale,
             dynamicFeatures: store.features,

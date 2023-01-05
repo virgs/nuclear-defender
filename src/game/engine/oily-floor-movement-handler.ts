@@ -25,7 +25,10 @@ export class OilyFloorMovementHandler implements FeatureMovementHandler {
                     const movementDirection = boxThatMovedLastTurnOntoTheOilyFloor.direction!;
                     const nextTilePosition = box.currentPosition.calculateOffset(movementDirection);
                     if (nextTilePosition.isDifferentOf(actData.hero.position)) {
-                        if (this.coordinator.canFeatureEnterPosition({point: nextTilePosition, orientation: movementDirection})) {
+                        if (this.coordinator.getFeaturesBlockingMoveIntoPosition({
+                            point: nextTilePosition,
+                            orientation: movementDirection
+                        }).length <= 0) {
                             this.coordinator.moveFeature(box, movementDirection);
                             mapChanged = true;
                         }
@@ -41,6 +44,10 @@ export class OilyFloorMovementHandler implements FeatureMovementHandler {
 
     public allowLeavingMovement(direction: Directions): boolean {
         return true;
+    }
+
+    public getOrientation(): Directions | undefined {
+        return undefined;
     }
 
     public getTile(): Tiles {

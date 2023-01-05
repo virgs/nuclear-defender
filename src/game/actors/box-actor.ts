@@ -1,10 +1,10 @@
 import type Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import type {GameActor} from '@/game/actors/game-actor';
 import {getTweenFromDirection} from '@/game/animations/tween';
 import type {Directions} from '@/game/constants/directions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
+import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
 
 export class BoxActor implements GameActor {
     private tilePosition: Point;
@@ -13,7 +13,7 @@ export class BoxActor implements GameActor {
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
 
-    constructor(boxConfig: { scene: Phaser.Scene, sprite: Phaser.GameObjects.Sprite, tilePosition: Point, id: number }) {
+    constructor(boxConfig: GameActorConfig) {
         this.id = boxConfig.id;
         this.tilePosition = boxConfig.tilePosition;
         this.tweens = boxConfig.scene.tweens;

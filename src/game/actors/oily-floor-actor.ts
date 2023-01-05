@@ -1,8 +1,8 @@
 import type {Point} from '@/game/math/point';
 import type Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
-import type {GameActor} from '@/game/actors/game-actor';
 import type {Directions} from '@/game/constants/directions';
+import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
@@ -11,7 +11,7 @@ export class OilyFloorActor implements GameActor {
     private readonly id: number;
     private covered: boolean;
 
-    constructor(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene, id: number }) {
+    constructor(config: GameActorConfig) {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;

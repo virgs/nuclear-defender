@@ -18,16 +18,16 @@ type Level = {
 export const levels: Level[] = [
     {
         map: `
-5-###
-#5#ds5#
-#5 o4 #
-#4 [@.]o4 #
-#4 rso2 ls #
-#3 ooo$   #
-# uw o[$.o]o [$.]  #
-#3 ooo  * #
-#5 o 3 #
-#4 *o4 #
+5-#####
+#5#ds#ds##
+#5rto2rtls##
+#ut3 [@.]o4 #
+#ut3 rso2 ls #
+#ut2 ooo$   #
+#utuw o[$.o]o [$.]  #
+#ut2 ooo  * #
+#ut4 o 3 #
+#ut3lt*o4 #
 #5#us5#
 5-###
 `,

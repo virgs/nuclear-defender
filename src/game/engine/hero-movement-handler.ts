@@ -30,6 +30,10 @@ export class HeroMovementHandler implements FeatureMovementHandler {
         return this.position;
     }
 
+    public getOrientation(): Directions | undefined {
+        return undefined;
+    }
+
     public act(actData: ActData): boolean {
         this.position = actData.hero.position;
         let mapChanged = false;
@@ -56,16 +60,20 @@ export class HeroMovementHandler implements FeatureMovementHandler {
     }
 
     private featureAheadAllowsMovement(aimedMovement: OrientedPoint, boxes: Movement[]): boolean {
-        if (!this.coordinator.canFeatureEnterPosition(aimedMovement)) { //it can be a box, check the next one too
-            if (boxes
-                .some(box => box.nextPosition.isEqualTo(aimedMovement.point))) { //there's a box
+        const featuresBlockingMoveIntoPosition = this.coordinator.getFeaturesBlockingMoveIntoPosition(aimedMovement);
+        if (featuresBlockingMoveIntoPosition.length >= 1) { //it can be a box, check the next one too
+            if (featuresBlockingMoveIntoPosition.length === 1 && featuresBlockingMoveIntoPosition[0].tile === Tiles.box) { //only a box blocks it
                 //check if the box is in a position that allows moves
                 if (!this.coordinator.canFeatureLeavePosition(aimedMovement)) {
                     return false;
                 }
                 //check the tile after the box
                 const afterNextTilePosition = aimedMovement.point.calculateOffset(aimedMovement.orientation);
-                return this.coordinator.canFeatureEnterPosition({point: afterNextTilePosition, orientation: aimedMovement.orientation});
+                const featuresBlockingAfterNextPosition = this.coordinator.getFeaturesBlockingMoveIntoPosition({
+                    point: afterNextTilePosition,
+                    orientation: aimedMovement.orientation
+                });
+                return featuresBlockingAfterNextPosition.length <= 0;
             }
             return false;
         }

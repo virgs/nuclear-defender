@@ -2,7 +2,8 @@ import type Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
-import type {GameActor} from '@/game/actors/game-actor';
+import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
+
 
 export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
@@ -13,7 +14,7 @@ export class SpringActor implements GameActor {
     private readonly orientation: Directions;
     private covered: boolean;
 
-    constructor(config: { orientation: Directions; tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene, id: number }) {
+    constructor(config: GameActorConfig) {
         this.orientation = config.orientation;
         this.id = config.id;
         this.scene = config.scene;
@@ -24,7 +25,7 @@ export class SpringActor implements GameActor {
 
         switch (this.orientation) {
             case Directions.LEFT:
-                this.sprite.setRotation(Math.PI / 2);
+                // this.sprite.setRotation(Math.PI / 2);
                 //     this.sprite.flipY = true
                 break;
             case Directions.UP:
@@ -32,7 +33,7 @@ export class SpringActor implements GameActor {
                 // this.sprite.setRotation(Math.PI);
                 break;
             case Directions.RIGHT:
-                this.sprite.setRotation(Math.PI / 2);
+                // this.sprite.setRotation(Math.PI / 2);
                 this.sprite.flipX = true;
                 break;
         }

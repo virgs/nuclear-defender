@@ -1,10 +1,10 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
-import {Directions, getOpositeDirectionOf} from '@/game/constants/directions';
+import type {Directions} from '@/game/constants/directions';
 import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 import type {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 
-export class SpringMovementHandler implements FeatureMovementHandler {
+export class TreadmillMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;
     private readonly orientation: Directions;
     private readonly coordinator: MovementOrchestrator;
@@ -35,11 +35,11 @@ export class SpringMovementHandler implements FeatureMovementHandler {
     }
 
     public allowEnteringMovement(direction: Directions): boolean {
-        return this.orientation === getOpositeDirectionOf(direction);
+        return true;
     }
 
     public allowLeavingMovement(direction: Directions): boolean {
-        return this.orientation !== getOpositeDirectionOf(direction);
+        return true;
     }
 
     public getTile(): Tiles {

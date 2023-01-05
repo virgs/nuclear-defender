@@ -35,4 +35,8 @@ export class OneWayDoorMovementHandler implements FeatureMovementHandler {
         return this.position;
     }
 
+    public getOrientation(): Directions | undefined{
+        return this.orientation;
+    }
+
 }

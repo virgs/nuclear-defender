@@ -1,9 +1,9 @@
-import {Tiles} from './tiles';
+import {Tiles} from '../tiles/tiles';
 import {Point} from '@/game/math/point';
 import {BoxActor} from '@/game/actors/box-actor';
 import {HeroActor} from '@/game/actors/hero-actor';
 import {TargetActor} from '@/game/actors/target-actor';
-import type {GameActor} from '@/game/actors/game-actor';
+import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {configuration} from '../constants/configuration';
 import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
 import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
@@ -11,8 +11,9 @@ import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 import Phaser from 'phaser';
 import {SpringActor} from '@/game/actors/spring-actor';
+import {TreadmillActor} from '@/game/actors/treadmill-actor';
 
-export class GameActorsCreator {
+export class GameActorsFactory {
     private readonly scale: number;
     private readonly scene: Phaser.Scene;
     private readonly constructorMap: Map<Tiles, (params: any) => GameActor>;
@@ -30,7 +31,7 @@ export class GameActorsCreator {
         this.scale = config.scale;
         this.dynamicFeatures = config.dynamicFeatures;
         this.matrix = config.matrix;
-        this.actorMap = GameActorsCreator.initializeActorMap();
+        this.actorMap = GameActorsFactory.initializeActorMap();
 
         this.actorCounter = 0;
 
@@ -41,6 +42,7 @@ export class GameActorsCreator {
         this.constructorMap.set(Tiles.target, params => new TargetActor(params));
         this.constructorMap.set(Tiles.oily, params => new OilyFloorActor(params));
         this.constructorMap.set(Tiles.oneWayDoor, params => new OneWayDoorActor(params));
+        this.constructorMap.set(Tiles.treadmil, params => new TreadmillActor(params));
 
         this.floorMaskShape = this.scene.make.graphics({});
         this.floorPic = this.scene.add.image(0, 0, configuration.floorTextureKey);
@@ -84,7 +86,7 @@ export class GameActorsCreator {
                 sprite: sprite,
                 tilePosition: tilePosition,
                 id: this.actorCounter++
-            });
+            } as GameActorConfig);
             this.actorMap.get(item.code)!.push(gameActor);
         }
     }
