@@ -5,7 +5,7 @@ import {configuration} from './constants/configuration';
 const container = document.getElementById('phaser-container')!;
 
 configuration.gameWidth = container.clientWidth;
-configuration.gameHeight = Math.trunc(container.clientWidth * configuration.screenRatio);
+configuration.gameHeight = Math.min(Math.trunc(container.clientWidth * configuration.screenRatio), document.body.clientHeight * .75);
 
 const launch = (containerId: string) => {
     return new Phaser.Game({
