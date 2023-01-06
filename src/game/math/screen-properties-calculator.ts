@@ -10,7 +10,10 @@ const scaleLimits = {
 };
 
 export class ScreenPropertiesCalculator {
-    public calculateScale(data: MultiLayeredMap): ScaleOutput {
+    private readonly scale: number;
+    private readonly origin: Point;
+
+    public constructor(data: MultiLayeredMap) {
         const gutter = 30;
         const map = {
             width: data.width * configuration.tiles.horizontalSize,
@@ -18,19 +21,19 @@ export class ScreenPropertiesCalculator {
         };
         const xFactor = (configuration.gameWidth - gutter) / map.width;
         const yFactor = (configuration.gameHeight - gutter) / map.height;
-        const scale = Math.min(this.limitValue(xFactor), this.limitValue(yFactor));
-        console.log(scale);
-        return {
-            scale: scale,
-            center: new Point(
-                (configuration.gameWidth - map.width * scale) / 2,
-                (configuration.gameHeight - map.height * scale) / 2)
-        };
+        this.scale = Math.min(this.limitValue(xFactor), this.limitValue(yFactor));
+        this.origin = new Point(
+            (configuration.gameWidth - map.width * this.scale) / 2,
+            (configuration.gameHeight - map.height * this.scale) / 2);
     };
 
+    public getScale(): number {
+        return this.scale;
+    }
+
     public getWorldPositionFromTilePosition(tile: Point): Point {
-        return new Point(configuration.world.horizontalAdjustment + tile.x * configuration.world.tileSize.horizontal,
-            tile.y * configuration.world.tileSize.vertical);
+        return new Point(this.origin.x + tile.x * configuration.world.tileSize.horizontal,
+            this.origin.y + tile.y * configuration.world.tileSize.vertical);
 
     }
 

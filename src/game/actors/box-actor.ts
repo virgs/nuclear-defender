@@ -5,7 +5,7 @@ import type {Directions} from '@/game/constants/directions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
-import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export class BoxActor implements GameActor {
     private tilePosition: Point;
@@ -13,8 +13,10 @@ export class BoxActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
+    private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
 
     constructor(boxConfig: GameActorConfig) {
+        this.screenPropertiesCalculator = boxConfig.screenPropertiesCalculator;
         this.id = boxConfig.id;
         this.tilePosition = boxConfig.tilePosition;
         this.tweens = boxConfig.scene.tweens;
@@ -49,7 +51,7 @@ export class BoxActor implements GameActor {
     }
 
     public async move(nextPosition: Point) {
-        const spritePosition = new ScreenPropertiesCalculator().getWorldPositionFromTilePosition(nextPosition);
+        const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(nextPosition);
         this.tilePosition = nextPosition;
         return new Promise<void>(resolve => {
             const tween = {
@@ -84,11 +86,11 @@ export class BoxActor implements GameActor {
     }
 
     public cover(tile: Tiles): void {
-        console.error('box being covered')
+        console.error('box being covered');
     }
 
     public uncover(tile: Tiles): void {
-        console.error('box being uncovered')
+        console.error('box being uncovered');
     }
 
 }

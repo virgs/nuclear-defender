@@ -6,8 +6,7 @@ import type {Directions} from '../constants/directions';
 import {HeroAnimator} from '../animations/hero-animator';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
-import {configuration} from '@/game/constants/configuration';
-import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -17,9 +16,11 @@ export class HeroActor implements GameActor {
     private tweens: Phaser.Tweens.TweenManager;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
+    private screenPropertiesCalculator: ScreenPropertiesCalculator;
 
     public constructor(config: GameActorConfig) {
         this.id = config.id;
+        this.screenPropertiesCalculator = config.screenPropertiesCalculator;
 
         this.heroAnimator = new HeroAnimator();
 
@@ -41,7 +42,7 @@ export class HeroActor implements GameActor {
     }
 
     public async move(nextPosition: Point, direction?: Directions): Promise<void> {
-        const spritePosition = new ScreenPropertiesCalculator().getWorldPositionFromTilePosition(nextPosition);
+        const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(nextPosition);
         this.tilePosition = nextPosition;
         return new Promise<void>((resolve) => {
             const heroMovement = this.heroAnimator.getAnimation(spritePosition, direction);

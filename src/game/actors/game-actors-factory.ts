@@ -28,10 +28,10 @@ export class GameActorsFactory {
 
     private actorCounter: number;
 
-    constructor(config: { scale: number; matrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
-        this.screenPropertiesCalculator = new ScreenPropertiesCalculator();
+    constructor(config: { matrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+        this.screenPropertiesCalculator = new ScreenPropertiesCalculator(config.matrix);
         this.scene = config.scene;
-        this.scale = config.scale;
+        this.scale = this.screenPropertiesCalculator.getScale();
         this.dynamicFeatures = config.dynamicFeatures;
         this.matrix = config.matrix;
         this.actorMap = GameActorsFactory.initializeActorMap();
@@ -87,6 +87,7 @@ export class GameActorsFactory {
                 scene: this.scene,
                 orientation: item.orientation,
                 sprite: sprite,
+                screenPropertiesCalculator: this.screenPropertiesCalculator,
                 tilePosition: tilePosition,
                 id: this.actorCounter++
             } as GameActorConfig);
@@ -95,9 +96,9 @@ export class GameActorsFactory {
     }
 
     private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(point);
-        const sprite = this.scene.add.sprite(spritePosition.x,
-            spritePosition.y,
+        const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(point);
+        const sprite = this.scene.add.sprite(worldPosition.x,
+            worldPosition.y,
             configuration.tiles.spriteSheetKey, tile);
         sprite.scale = this.scale;
         sprite.setOrigin(0);
@@ -106,12 +107,12 @@ export class GameActorsFactory {
         return sprite;
     }
 
-    private createFloorMask(point: Point) {
+    private createFloorMask(tilePosition: Point) {
         // this.floorMaskShape.fillStyle(0xFFFFFF);
+        const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
+
         this.floorMaskShape.beginPath();
-        this.floorMaskShape.fillRectShape(new Phaser.Geom.Rectangle(
-            (configuration.world.horizontalAdjustment + point.x * configuration.world.tileSize.horizontal),
-            (point.y * configuration.world.tileSize.vertical),
+        this.floorMaskShape.fillRectShape(new Phaser.Geom.Rectangle(worldPosition.x, worldPosition.y,
             configuration.world.tileSize.horizontal, configuration.world.tileSize.vertical));
     }
 

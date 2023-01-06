@@ -1,9 +1,11 @@
 import type {Point} from '@/game/math/point';
 import type {Tiles} from '@/game/tiles/tiles';
 import type {Directions} from '@/game/constants/directions';
+import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export type GameActorConfig = {
     orientation: Directions;
+    screenPropertiesCalculator: ScreenPropertiesCalculator;
     tilePosition: Point;
     sprite: Phaser.GameObjects.Sprite;
     scene: Phaser.Scene,

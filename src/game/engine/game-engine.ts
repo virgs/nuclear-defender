@@ -12,7 +12,7 @@ import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {EventEmitter, EventName} from '@/event-emitter';
-import {Directions, getOpositeDirectionOf} from '@/game/constants/directions';
+import {Directions} from '@/game/constants/directions';
 
 export class GameEngine {
     private readonly strippedMap: MultiLayeredMap;
@@ -24,7 +24,8 @@ export class GameEngine {
     private readonly nextMoves: Actions[];
     private readonly staticActors: GameActor[];
 
-    private lastActionResult: MovementOrchestratorOutput[];
+    private lastActionResult?: MovementOrchestratorOutput;
+    private movesMemento: MovementOrchestratorOutput[];
     private playerMoves: string;
     private levelComplete: boolean = false;
     private animationsAreOver: boolean;
@@ -41,11 +42,11 @@ export class GameEngine {
             .concat(config.actorMap.get(Tiles.oneWayDoor)!);
         this.strippedMap = config.strippedMap;
         this.nextMoves = config.solution?.actions! || [];
+        this.movesMemento = [];
         this.playerMoves = '';
         this.levelComplete = false;
         this.animationsAreOver = true;
         this.mapChangedLastCycle = true;
-        this.lastActionResult = [];
 
         const pointMap: Map<Tiles, Point[]> = new Map<Tiles, Point[]>();
         for (let [tile, actorList] of config.actorMap.entries()) {
@@ -95,15 +96,14 @@ export class GameEngine {
 
             if (this.mapChangedLastCycle || heroAction !== Actions.STAND) {
                 this.mapChangedLastCycle = false;
-                console.log('move coordinator');
                 const actionResult = await this.movementCoordinator!.update({
                     heroAction: heroAction,
-                    heroPosition: this.hero.getTilePosition(),
-                    boxes: this.boxes.map(box => box.getTilePosition()),
-                    lastActionResult: this.lastActionResult[this.lastActionResult.length - 1]
+                    hero: {point: this.hero.getTilePosition(), id: this.hero.getId()},
+                    boxes: this.boxes.map(box => ({point: box.getTilePosition(), id: box.getId()})),
+                    lastActionResult: this.lastActionResult
                 });
-                this.lastActionResult.push(actionResult);
-                this.registerPlayerMove(heroAction);
+                this.lastActionResult = actionResult;
+                this.registerPlayerMove(heroAction, actionResult);
                 await this.updateMap(actionResult);
             }
         }
@@ -118,17 +118,18 @@ export class GameEngine {
         }
     }
 
-    private registerPlayerMove(heroAction: Actions) {
-        const lastAction = this.lastActionResult[this.lastActionResult.length - 1];
+    private registerPlayerMove(heroAction: Actions, actionResult: MovementOrchestratorOutput) {
         let moveLetter = mapActionToString(heroAction);
         if (heroAction !== Actions.STAND) {
-            if (lastAction.boxes
+            if (this.lastActionResult?.boxes
                 .some(box => box.currentPosition.isDifferentOf(box.nextPosition) &&
-                    lastAction.hero.nextPosition.isEqualTo(box.currentPosition))) {
+                    this.lastActionResult?.hero.nextPosition.isEqualTo(box.currentPosition))) {
                 moveLetter = moveLetter.toUpperCase();
             }
+            this.movesMemento.push(actionResult);
         }
-        this.playerMoves += moveLetter;
+
+        this.playerMoves = moveLetter;
     }
 
     private async updateAnimations(lastAction: MovementOrchestratorOutput) {
@@ -137,8 +138,9 @@ export class GameEngine {
         animationsPromises.push(...lastAction.boxes
             .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition))
             .map(async movedBox => {
+                console.log('moved')
                 const spriteBoxMoved = this.boxes
-                    .find(tileBox => movedBox.currentPosition.isEqualTo(tileBox.getTilePosition()))!;
+                    .find(tileBox => movedBox.id === tileBox.getId())!;
                 await spriteBoxMoved?.move(movedBox.nextPosition);
             }));
 
@@ -191,27 +193,32 @@ export class GameEngine {
 
     private async undoLastMovement() {
         //it has to pause for 3 seconds
-        console.log('undo', this.lastActionResult.length);
-        if (this.lastActionResult.length > 2) {
-
-            this.lastActionResult = this.lastActionResult
-                .filter((_, index) => index < this.lastActionResult.length-1);
-            this.playerMoves = this.playerMoves.substring(0, this.playerMoves.length - 1);
-            const lastAction = this.lastActionResult[this.lastActionResult.length - 1];
+        if (this.movesMemento.length > 0) {
+            const lastAction = this.movesMemento[this.movesMemento.length - 1];
+            this.lastActionResult = lastAction;
             console.log(lastAction);
-            if (lastAction.hero.direction !== undefined) {
-                lastAction.hero.direction = getOpositeDirectionOf(lastAction.hero.direction!);
-            }
-            lastAction.boxes
-                .filter(box => box.direction !== undefined)
-                .forEach(box => {
-                    const swap = box.currentPosition;
-                    box.currentPosition = box.nextPosition;
-                    box.nextPosition = swap;
-                    return box.direction = getOpositeDirectionOf(box.direction!);
-                });
-            await this.updateAnimations(lastAction);
-            await new Promise(r => setTimeout(r, 3000));
+
+            this.movesMemento = this.movesMemento
+                .filter((_, index) => index < this.movesMemento.length - 1);
+            this.playerMoves = this.playerMoves.substring(0, this.playerMoves.length - 1);
+
+            const undoLastAction: MovementOrchestratorOutput = {
+                mapChanged: true,
+                hero: {
+                    id: this.hero.getId(),
+                    currentPosition: lastAction.hero.nextPosition,
+                    nextPosition: lastAction.hero.currentPosition,
+                    direction: lastAction.hero.direction
+                },
+                boxes: lastAction.boxes
+                    .map(box => ({
+                        id: box.id,
+                        currentPosition: box.nextPosition,
+                        nextPosition: box.currentPosition,
+                        direction: undefined
+                    }))
+            };
+            await this.updateAnimations(undoLastAction);
         }
     }
 

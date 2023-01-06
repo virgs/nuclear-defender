@@ -38,17 +38,16 @@ export class GameScene extends Phaser.Scene {
         InputManager.setup(this);
         const store = Store.getInstance();
 
-        const screenProperties = new ScreenPropertiesCalculator()
-            .calculateScale(store.strippedLayeredTileMatrix!);
-        configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * screenProperties.scale);
-        configuration.world.tileSize.vertical = Math.trunc(Math.trunc(configuration.tiles.verticalSize * configuration.tiles.verticalPerspective) * screenProperties.scale);
+        const scale = new ScreenPropertiesCalculator(store.strippedLayeredTileMatrix!)
+            .getScale();
+        configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * scale);
+        configuration.world.tileSize.vertical = Math.trunc(Math.trunc(configuration.tiles.verticalSize * configuration.tiles.verticalPerspective) * scale);
 
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
         const actorsCreator = new GameActorsFactory({
             scene: this,
-            scale: screenProperties.scale,
             dynamicFeatures: store.features,
             matrix: store.strippedLayeredTileMatrix!
         });

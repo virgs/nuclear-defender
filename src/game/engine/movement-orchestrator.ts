@@ -11,6 +11,7 @@ import {OneWayDoorMovementHandler} from '@/game/engine/one-way-door-movement-han
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type Movement = {
+    id: number,
     currentPosition: Point,
     nextPosition: Point,
     direction: Directions | undefined
@@ -28,9 +29,9 @@ export type MovementOrchestratorOutput = {
 };
 
 export type MovementOrchestratorInput = {
-    heroPosition: Point;
+    hero: { id: number, point: Point };
     heroAction: Actions;
-    boxes: Point[];
+    boxes: { id: number, point: Point }[];
     lastActionResult?: MovementOrchestratorOutput;
 };
 
@@ -68,24 +69,23 @@ export class MovementOrchestrator {
     }
 
     public update(input: MovementOrchestratorInput): MovementOrchestratorOutput {
-        this.hero = this.initializeFeature(input.heroPosition);
+        this.hero = this.initializeFeature(input.hero);
         this.boxes = input.boxes
             .map(box => this.initializeFeature(box));
-
+        const actConfig = {
+            hero:
+                {
+                    action: input.heroAction,
+                    position: this.hero!.nextPosition
+                },
+            boxes: this.boxes!,
+            lastActionResult: input.lastActionResult
+        };
         const mapChanged = this.movementHandlers
-            .reduce((acc, handler) => {
-                const act = handler.act({
-                    hero:
-                        {
-                            action: input.heroAction,
-                            position: this.hero!.nextPosition
-                        },
-                    boxes: this.boxes!,
-                    lastActionResult: input.lastActionResult
-                });
-                return act || acc;
+            .reduce((changed, handler) => {
+                const act = handler.act(actConfig);
+                return act || changed;
             }, false);
-
         return {
             hero: this.hero,
             boxes: this.boxes,
@@ -119,10 +119,11 @@ export class MovementOrchestrator {
         return result;
     }
 
-    private initializeFeature(point: Point): Movement {
+    private initializeFeature(feature: { id: number; point: Point }): Movement {
         return {
-            currentPosition: point,
-            nextPosition: point,
+            id: feature.id,
+            currentPosition: feature.point,
+            nextPosition: feature.point,
             direction: undefined
         };
     }

@@ -9,8 +9,8 @@ import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-c
 
 type Solution = {
     actions: Actions[],
-    hero: Point,
-    boxes: Point[],
+    hero: { id: number, point: Point },
+    boxes: { id: number, point: Point }[],
     score: number,
     hash?: string,
 };
@@ -75,10 +75,12 @@ export class SokobanSolver {
 
     private async startAlgorithm(dynamicMap: Map<Tiles, Point[]>) {
         console.log('start algorithm');
+        const hero = dynamicMap.get(Tiles.hero)![0];
+        const boxes = dynamicMap.get(Tiles.box)!;
         const initialCandidate: Solution = {
             actions: [],
-            hero: dynamicMap.get(Tiles.hero)![0],
-            boxes: dynamicMap.get(Tiles.box)!,
+            hero: {point: hero, id: 0},
+            boxes: boxes.map((box, id) => ({point: box, id: id + 1})),
             score: 0
         };
         initialCandidate.hash = this.calculateHashOfSolution(initialCandidate);
@@ -123,7 +125,7 @@ export class SokobanSolver {
             .forEach((action: Actions) => {
                 const afterAction = this.movementCoordinator.update({
                     heroAction: action,
-                    heroPosition: candidate.hero,
+                    hero: candidate.hero,
                     boxes: candidate.boxes
                 });
 
@@ -133,24 +135,22 @@ export class SokobanSolver {
                     const heroMovementCost = 1;
                     const newCandidate: Solution = {
                         boxes: afterAction.boxes
-                            .map(box => box.nextPosition),
-                        hero: afterAction.hero.nextPosition,
+                            .map(box => ({point: box.nextPosition, id: box.id})),
+                        hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},
                         actions: candidate.actions.concat(action),
                         score: candidate.score + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
                     };
                     newCandidate.hash = this.calculateHashOfSolution(newCandidate);
                     if (!analysis.isDeadLocked) {
                         this.candidatesToVisit.push(newCandidate);
-                    } else {
-                        console.log('dead')
                     }
                 }
             });
     }
 
-    private candidateSolvesMap(boxesPosition: Point[]): boolean {
+    private candidateSolvesMap(boxesPosition: { id: number; point: Point }[]): boolean {
         return boxesPosition
-            .every(box => this.strippedMap.layeredTileMatrix[box.y][box.x]
+            .every(box => this.strippedMap.layeredTileMatrix[box.point.y][box.point.x]
                 .some(layer => layer.code === Tiles.target));
     }
 
@@ -160,9 +160,9 @@ export class SokobanSolver {
 
     private calculateHashOfSolution(newCandidate: Solution) {
         return `${newCandidate.boxes
-            .map(box => `${box.x},${box.y}`)
+            .map(box => `${box.point.x},${box.point.y}`)
             .sort()
-            .join(';')}:${newCandidate.hero.x},${newCandidate.hero.y}`;
+            .join(';')}:${newCandidate.hero.point.x},${newCandidate.hero.point.y}`;
     }
 
 }

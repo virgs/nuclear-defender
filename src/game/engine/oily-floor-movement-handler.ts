@@ -15,26 +15,24 @@ export class OilyFloorMovementHandler implements FeatureMovementHandler {
 
     public act(actData: ActData): boolean {
         let mapChanged = false;
-        actData.boxes
-            .filter(box => box.currentPosition.isEqualTo(this.position))
-            .forEach(box => {
-                const boxThatMovedLastTurnOntoTheOilyFloor = actData.lastActionResult?.boxes
-                    .filter(box => box.currentPosition.isDifferentOf(box.nextPosition))
-                    .find(box => box.nextPosition.isEqualTo(this.position));
-                if (boxThatMovedLastTurnOntoTheOilyFloor) {
-                    const movementDirection = boxThatMovedLastTurnOntoTheOilyFloor.direction!;
-                    const nextTilePosition = box.currentPosition.calculateOffset(movementDirection);
-                    if (nextTilePosition.isDifferentOf(actData.hero.position)) {
-                        if (this.coordinator.getFeaturesBlockingMoveIntoPosition({
-                            point: nextTilePosition,
-                            orientation: movementDirection
-                        }).length <= 0) {
-                            this.coordinator.moveFeature(box, movementDirection);
-                            mapChanged = true;
-                        }
-                    }
+        const boxThatMovedLastTurnOntoTheOilyFloor = actData.lastActionResult?.boxes
+            .find(box => box.nextPosition.isEqualTo(this.position) && box.currentPosition.isDifferentOf(box.nextPosition)); //box on this tile
+        if (boxThatMovedLastTurnOntoTheOilyFloor) {
+            const boxToMove = actData.boxes
+                .find(box => box.id === boxThatMovedLastTurnOntoTheOilyFloor.id)!;
+            const movementDirection = boxThatMovedLastTurnOntoTheOilyFloor.direction!;
+            const nextTilePosition = this.position.calculateOffset(movementDirection);
+            if (nextTilePosition.isDifferentOf(actData.hero.position)) {
+                const featuresBlockingMoveIntoPosition = this.coordinator.getFeaturesBlockingMoveIntoPosition({
+                    point: nextTilePosition,
+                    orientation: movementDirection
+                });
+                if (featuresBlockingMoveIntoPosition.length <= 0) {
+                    this.coordinator.moveFeature(boxToMove, movementDirection);
+                    mapChanged = true;
                 }
-            });
+            }
+        }
         return mapChanged;
     }
 
