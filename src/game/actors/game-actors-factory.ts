@@ -60,7 +60,7 @@ export class GameActorsFactory {
                 value
                     .forEach(tilePosition => this.createActor(tilePosition, {code: key})));
 
-        this.matrix.layeredTileMatrix
+        this.matrix.strippedFeatureLayeredMatrix
             .forEach((line, y) => line
                 .forEach((layers: OrientedTile[], x: number) => layers
                     .forEach(item => {

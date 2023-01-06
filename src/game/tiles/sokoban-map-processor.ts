@@ -20,7 +20,7 @@ export class SokobanMapProcessor {
         featuresToStripOff
             .forEach(feature => removed.set(feature, []));
         const deepCopy = JSON.parse(JSON.stringify(this.dressedLayeredTileMatrix)) as MultiLayeredMap;
-        deepCopy.layeredTileMatrix
+        deepCopy.strippedFeatureLayeredMatrix
             .forEach((line, y) =>
                 line
                     .forEach((layers: OrientedTile[], x: number, editableLine) =>

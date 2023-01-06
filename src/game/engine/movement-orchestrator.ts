@@ -143,14 +143,14 @@ export class MovementOrchestrator {
         }
         if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            result.push(...this.strippedMap.layeredTileMatrix[position.y][position.x]);
+            result.push(...this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x]);
         }
         return result;
     }
 
     private findTileOrientedPositions(code: Tiles, constructorFunction: (params: any) => FeatureMovementHandler): FeatureMovementHandler[] {
         const handlers: FeatureMovementHandler[] = [];
-        this.strippedMap.layeredTileMatrix
+        this.strippedMap.strippedFeatureLayeredMatrix
             .forEach((line, y) => line
                 .forEach((layer, x) =>
                     layer.forEach(tile => {

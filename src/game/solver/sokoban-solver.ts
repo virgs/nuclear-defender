@@ -38,6 +38,7 @@ export class SokobanSolver {
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
+    private startTime?: number;
 
     public constructor(input: {
         staticFeatures: Map<Tiles, Point[]>;
@@ -64,12 +65,12 @@ export class SokobanSolver {
     }
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
-        const startTime = new Date().getTime();
+        this.startTime = new Date().getTime();
         const {actions, iterations} = await this.startAlgorithm(dynamicMap);
         return {
             actions: actions,
             iterations: iterations,
-            totalTime: new Date().getTime() - startTime
+            totalTime: new Date().getTime() - this.startTime
         };
     }
 
@@ -101,7 +102,10 @@ export class SokobanSolver {
             }
             if (cpuBreath > this.sleepForInMs) {
                 cpuBreath -= this.sleepForInMs;
-                await new Promise(r => setTimeout(r, this.sleepForInMs));
+                await new Promise(resolve => setTimeout(() => {
+                    console.log(iterations, (new Date().getTime() - this.startTime!) / 1000);
+                    resolve(9);
+                }, this.sleepForInMs));
             }
 
         }
@@ -150,7 +154,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: { id: number; point: Point }[]): boolean {
         return boxesPosition
-            .every(box => this.strippedMap.layeredTileMatrix[box.point.y][box.point.x]
+            .every(box => this.strippedMap.strippedFeatureLayeredMatrix[box.point.y][box.point.x]
                 .some(layer => layer.code === Tiles.target));
     }
 

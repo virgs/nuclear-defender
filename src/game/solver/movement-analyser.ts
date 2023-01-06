@@ -1,7 +1,9 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
-import {DeadlockDetector} from '@/game/solver/deadlock-detector';
+import type {DeadLockDetector} from '@/game/solver/dead-lock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
+import {BoxClusterDeadlockDetector} from '@/game/solver/box-cluster-deadlock-detector';
+import {BoxGluedToWallDetector} from '@/game/solver/box-glued-to-wall-deadlock-detector';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 
@@ -25,18 +27,21 @@ export class MovementAnalyser {
     private readonly targets: Point[];
     private readonly distanceCalculator: DistanceCalculator;
     private readonly strippedMap: MultiLayeredMap;
-    private readonly deadlockDetector: DeadlockDetector;
+    private readonly deadlockDetectors: DeadLockDetector[];
 
     public constructor(data: { distanceCalculator: DistanceCalculator; staticFeatures: Map<Tiles, Point[]>; strippedMap: MultiLayeredMap }) {
         this.strippedMap = data.strippedMap;
         this.distanceCalculator = data.distanceCalculator;
         this.targets = data.staticFeatures.get(Tiles.target)!;
-        this.deadlockDetector = new DeadlockDetector({staticMap: this.strippedMap});
+        this.deadlockDetectors = [
+            new BoxClusterDeadlockDetector({strippedStaticMapMap: this.strippedMap}),
+            new BoxGluedToWallDetector({strippedStaticMapMap: this.strippedMap})];
     }
 
     public analyse(movement: MovementOrchestratorOutput): MovementAnalysis {
         const events = this.checkEvents(movement);
-        let isDeadLocked = this.deadlockDetector.deadLocked(movement);
+        const isDeadLocked = this.deadlockDetectors
+            .some(detector => detector.deadLocked(movement));
         return {
             sumOfEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestAvailableTarget(movement),
             ...events,
@@ -90,7 +95,7 @@ export class MovementAnalyser {
     public isTileAtPosition(position: Point, tile: Tiles): boolean {
         if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.strippedMap.layeredTileMatrix[position.y][position.x]
+            return this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x]
                 .some(layer => layer.code === tile);
         }
         return false;

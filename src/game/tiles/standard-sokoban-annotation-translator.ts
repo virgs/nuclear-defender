@@ -9,7 +9,7 @@ export type OrientedTile = {
 export type MultiLayeredMap = {
     width: number,
     height: number,
-    layeredTileMatrix: OrientedTile[][][]
+    strippedFeatureLayeredMatrix: OrientedTile[][][]
 };
 
 export class StandardSokobanAnnotationTranslator {
@@ -25,7 +25,7 @@ export class StandardSokobanAnnotationTranslator {
         return {
             height: height,
             width: width,
-            layeredTileMatrix: layeredOrientedTiles
+            strippedFeatureLayeredMatrix: layeredOrientedTiles
         };
     }
 
