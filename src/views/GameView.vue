@@ -4,46 +4,44 @@ import {computed, onMounted, onUnmounted, ref} from 'vue';
 import PhaserContainer from "@/components/PhaserContainer.vue";
 import {levels} from '@/game/levels/levels';
 import {useRouter} from 'vue-router';
+import {EventEmitter, EventName} from '@/event-emitter';
 
 const router = useRouter();
 
 function resetClick() {
-  console.log('restart');
+  forceRerender();
+  totalTime.value = 0;
 }
 
 function undoClick() {
-  console.log('undo');
-  Store.getInstance().update(4);
+  EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);
 }
 
 function exitClick() {
-  console.log('exit');
+  router.push('/');
 }
+
+const componentKey = ref(0);
+const forceRerender = () => {
+  componentKey.value += 1;
+};
 
 let currentLevelIndex = computed(() => Store.getInstance().currentLevelIndex);
 let currentLevel = computed(() => levels[Store.getInstance().currentLevelIndex]);
-// const currentStoreLevelIndex = Store.getInstance().currentLevelIndex;
-// console.log(currentStoreLevelIndex)
-// console.log(currentLevel)
+let directionalButtonsEnabled = ref(true);
 let totalTime = ref(0);
+
 let timer: number;
 
 onMounted(() => {
   history.replaceState({urlPath: router.currentRoute.value.fullPath}, "", '/');
-  // console.log(Store.getInstance().currentLevelIndex)
-  // console.log(levels[Store.getInstance().currentLevelIndex])
   const interval = 100;
   timer = setInterval(() => {
     totalTime.value += interval;
   }, interval);
 
   const container = document.getElementById('phaser-container')!;
-  // console.log(container.clientHeight, container.clientWidth);
-    if (container.clientWidth > 992 / 2) { //hal of bootstrap 'lg' breakpoint
-      console.log('no directional buttons');
-    } else {
-      console.log('add directional buttons');
-    }
+  directionalButtonsEnabled.value = container.clientWidth <= 992 / 2; //half of bootstrap 'lg' breakpoint
 });
 
 onUnmounted(() => {
@@ -68,7 +66,7 @@ onUnmounted(() => {
       <div class="row mx-auto px-0">
         <div class="col-12 col-md-8 col-lg-12 px-0" id="phaser-container">
           <Suspense>
-            <PhaserContainer/>
+            <PhaserContainer :key="componentKey"/>
             <template #fallback>
               <div class="spinner-border text-info" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -78,23 +76,27 @@ onUnmounted(() => {
         </div>
 
 
-        <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-4" v-if="true">
+        <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-4">
           <div class="row justify-content-end">
-            <div class="col-4 col-lg-1 d-grid gap-1">
+            <div class="col-1" v-if="directionalButtonsEnabled">
+              Directional buttons
+            </div>
+            <div class="w-100"></div>
+            <div class="col-auto col-lg-1 d-grid gap-1">
               <button class="btn btn-primary sokoban-outlined-button"
                       @click="exitClick" type="button">
                 <i class="fa-solid fa-right-from-bracket"></i>
               </button>
             </div>
-            <div class="col-4 col-lg-1 d-grid gap-2">
+            <div class="col-auto col-lg-1 d-grid gap-2">
               <button class="btn btn-primary sokoban-outlined-button"
-                      @click="undoClick" type="button">
+                      @click="resetClick" type="button">
                 <i class="fa-solid fa-arrow-left"></i>
               </button>
             </div>
-            <div class="col-4 col-lg-1 d-grid gap-2">
+            <div class="col-auto col-lg-1 d-grid gap-2">
               <button class="btn btn-primary sokoban-call-for-action-button"
-                      @click="resetClick"
+                      @click="undoClick"
                       type="button">
                 <i class="fa-solid fa-arrow-rotate-left"></i>
               </button>

@@ -23,3 +23,12 @@
         //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         // });
 
+
+
+Bootstrap slide 3d carousel:
+- https://codepen.io/abhishekdana/pen/orEoLx
+- https://codepen.io/tranthaigit/pen/PoBZZQG
+- https://codepen.io/adev07/pen/NWBqNPe
+- https://codepen.io/adev07/pen/NWBqNPe
+- https://sachinchoolur.github.io/lightslider/
+- https://codepen.io/crianbluff/pen/PMZBVJ

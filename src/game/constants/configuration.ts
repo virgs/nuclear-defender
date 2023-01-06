@@ -37,7 +37,7 @@ export const configuration = {
     colors: {
         foregroundColor: '#d6d6d6',
         radioactive: '#d4fa00',
-        controlled: '#342012',
+        controlled: '#ff3c91',
         background: '#dddddd',
         ambientColor: '#555555'
     },

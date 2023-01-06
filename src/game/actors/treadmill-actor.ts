@@ -42,12 +42,12 @@ export class TreadmillActor implements GameActor {
         return this.covered;
     }
 
-    public uncover(): void {
+    public uncover(tile: Tiles): void {
         this.covered = false;
         // console.log('treadmil release')
     }
 
-    public cover(): void {
+    public cover(tile: Tiles): void {
         // console.log('treadmil engage')
         this.covered = true;
     }

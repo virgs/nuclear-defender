@@ -6,7 +6,7 @@ import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
 
 export class TargetActor implements GameActor {
     private static readonly UNCOVERED_LIGHT_INTENSITY = .66;
-    private static readonly COVERED_LIGHT_INTENSITY = .025;
+    private static readonly COVERED_LIGHT_INTENSITY = .15;
     private static readonly LIGHT_UNCOVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.radioactive).color;
     private static readonly LIGHT_COVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.controlled).color;
     private static readonly LIGHT_RADIUS: number = configuration.world.tileSize.horizontal * 3;
@@ -69,11 +69,11 @@ export class TargetActor implements GameActor {
         return this.tilePosition;
     }
 
-    public cover(): void {
+    public cover(tile: Tiles): void {
         this.covered = true;
     }
 
-    public uncover(): void {
+    public uncover(tile: Tiles): void {
         this.covered = false;
     }
 

@@ -10,7 +10,7 @@ const scaleLimits = {
 };
 
 export class ScreenPropertiesCalculator {
-    public calculate(data: MultiLayeredMap): ScaleOutput {
+    public calculateScale(data: MultiLayeredMap): ScaleOutput {
         const gutter = 30;
         const map = {
             width: data.width * configuration.tiles.horizontalSize,
@@ -27,6 +27,12 @@ export class ScreenPropertiesCalculator {
                 (configuration.gameHeight - map.height * scale) / 2)
         };
     };
+
+    public getWorldPositionFromTilePosition(tile: Point): Point {
+        return new Point(configuration.world.horizontalAdjustment + tile.x * configuration.world.tileSize.horizontal,
+            tile.y * configuration.world.tileSize.vertical);
+
+    }
 
     private limitValue(value: number): number {
         return Phaser.Math.Clamp(value, scaleLimits.min, scaleLimits.max);

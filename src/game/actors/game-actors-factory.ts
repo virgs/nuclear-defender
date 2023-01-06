@@ -12,6 +12,7 @@ import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-
 import Phaser from 'phaser';
 import {SpringActor} from '@/game/actors/spring-actor';
 import {TreadmillActor} from '@/game/actors/treadmill-actor';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export class GameActorsFactory {
     private readonly scale: number;
@@ -23,10 +24,12 @@ export class GameActorsFactory {
     private readonly dynamicFeatures: Map<Tiles, Point[]>;
     private readonly matrix: MultiLayeredMap;
     private readonly actorMap: Map<Tiles, GameActor[]>;
+    private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
 
     private actorCounter: number;
 
     constructor(config: { scale: number; matrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+        this.screenPropertiesCalculator = new ScreenPropertiesCalculator();
         this.scene = config.scene;
         this.scale = config.scale;
         this.dynamicFeatures = config.dynamicFeatures;
@@ -92,8 +95,9 @@ export class GameActorsFactory {
     }
 
     private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const sprite = this.scene.add.sprite(configuration.world.horizontalAdjustment + point.x * configuration.world.tileSize.horizontal,
-            point.y * configuration.world.tileSize.vertical,
+        const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(point);
+        const sprite = this.scene.add.sprite(spritePosition.x,
+            spritePosition.y,
             configuration.tiles.spriteSheetKey, tile);
         sprite.scale = this.scale;
         sprite.setOrigin(0);

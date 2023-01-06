@@ -1,10 +1,11 @@
 import type Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
-import {getTweenFromDirection} from '@/game/animations/tween';
 import type {Directions} from '@/game/constants/directions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
+import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import {configuration} from '@/game/constants/configuration';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export class BoxActor implements GameActor {
     private tilePosition: Point;
@@ -32,7 +33,7 @@ export class BoxActor implements GameActor {
             this.sprite.setFrame(Tiles.box);
         }
 
-        return this.isOnTarget = isOnTarget;
+        this.isOnTarget = isOnTarget;
     }
 
     public getIsOnTarget(): boolean {
@@ -47,11 +48,14 @@ export class BoxActor implements GameActor {
         return this.id;
     }
 
-    public async move(direction: Directions) {
-        this.tilePosition = this.tilePosition.calculateOffset(direction);
+    public async move(nextPosition: Point) {
+        const spritePosition = new ScreenPropertiesCalculator().getWorldPositionFromTilePosition(nextPosition);
+        this.tilePosition = nextPosition;
         return new Promise<void>(resolve => {
             const tween = {
-                ...getTweenFromDirection(direction),
+                x: spritePosition.x,
+                y: spritePosition.y,
+                duration: configuration.updateCycleInMs,
                 targets: this.sprite,
                 onInit: () => {
                 },
@@ -79,11 +83,11 @@ export class BoxActor implements GameActor {
         return false;
     }
 
-    public cover() {
+    public cover(tile: Tiles): void {
         console.error('box being covered')
     }
 
-    public uncover() {
+    public uncover(tile: Tiles): void {
         console.error('box being uncovered')
     }
 

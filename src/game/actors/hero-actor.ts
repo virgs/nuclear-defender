@@ -5,7 +5,9 @@ import {InputManager} from '@/game/input/input-manager';
 import type {Directions} from '../constants/directions';
 import {HeroAnimator} from '../animations/hero-animator';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
+import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import {configuration} from '@/game/constants/configuration';
+import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -38,10 +40,11 @@ export class HeroActor implements GameActor {
         return InputManager.getInstance().getActionInput() || Actions.STAND;
     }
 
-    public async move(direction: Directions): Promise<void> {
-        this.tilePosition = this.tilePosition.calculateOffset(direction);
+    public async move(nextPosition: Point, direction?: Directions): Promise<void> {
+        const spritePosition = new ScreenPropertiesCalculator().getWorldPositionFromTilePosition(nextPosition);
+        this.tilePosition = nextPosition;
         return new Promise<void>((resolve) => {
-            const heroMovement = this.heroAnimator.map(direction);
+            const heroMovement = this.heroAnimator.getAnimation(spritePosition, direction);
             if (heroMovement) {
                 this.tweens!.add({
                     ...heroMovement.tween,
@@ -84,11 +87,11 @@ export class HeroActor implements GameActor {
         return false;
     }
 
-    public cover() {
+    public cover(tile: Tiles): void {
         console.error('hero being covered');
     }
 
-    public uncover() {
+    public uncover(tile: Tiles): void {
         console.error('hero being uncovered');
     }
 

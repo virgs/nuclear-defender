@@ -1,13 +1,12 @@
-import {getTweenFromDirection} from './tween';
+import type {Point} from '@/game/math/point';
 import {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
 
 export type HeroMovement = {
     tween: {
-        x?: string,
-        y?: string,
+        x?: number | string,
+        y?: number | string,
         duration: number,
-        ease: string;
     }
     walking: HeroAnimation,
     idle: HeroAnimation
@@ -24,35 +23,29 @@ enum HeroAnimation {
     RIGHT = 'RIGHT'
 }
 
-export class HeroAnimator {
-    public map(direction: Directions): HeroMovement {
-        switch (direction) {
-            case Directions.DOWN:
-                return {
-                    walking: HeroAnimation.DOWN,
-                    idle: HeroAnimation.IDLE_DOWN,
-                    tween: getTweenFromDirection(Directions.DOWN)
-                };
-            case Directions.LEFT:
-                return {
-                    walking: HeroAnimation.LEFT,
-                    idle: HeroAnimation.IDLE_LEFT,
-                    tween: getTweenFromDirection(Directions.LEFT)
-                };
-            case Directions.RIGHT:
-                return {
-                    walking: HeroAnimation.RIGHT,
-                    idle: HeroAnimation.IDLE_RIGHT,
-                    tween: getTweenFromDirection(Directions.RIGHT)
-                };
-            case Directions.UP:
-                return {
-                    walking: HeroAnimation.UP,
-                    idle: HeroAnimation.IDLE_UP,
-                    tween: getTweenFromDirection(Directions.UP)
-                };
-        }
+const animationMap = new Map<Directions, { walking: HeroAnimation, idle: HeroAnimation }>();
+animationMap.set(Directions.DOWN, {walking: HeroAnimation.DOWN, idle: HeroAnimation.IDLE_DOWN});
+animationMap.set(Directions.LEFT, {walking: HeroAnimation.LEFT, idle: HeroAnimation.IDLE_LEFT});
+animationMap.set(Directions.RIGHT, {walking: HeroAnimation.RIGHT, idle: HeroAnimation.IDLE_RIGHT});
+animationMap.set(Directions.UP, {walking: HeroAnimation.UP, idle: HeroAnimation.IDLE_UP});
 
+export class HeroAnimator {
+    public getAnimation(spritePosition: Point, direction: Directions | undefined): HeroMovement {
+        const animation: HeroMovement = {
+            walking: HeroAnimation.DOWN,
+            idle: HeroAnimation.IDLE_DOWN,
+            tween: {
+                x: spritePosition.x,
+                y: spritePosition.y,
+                duration: configuration.updateCycleInMs,
+            }
+        };
+        if (direction !== undefined && animationMap.has(direction)) {
+            const animationFromMap = animationMap.get(direction)!;
+            animation.walking = animationFromMap.walking;
+            animation.idle = animationFromMap.idle;
+        }
+        return animation;
     }
 
     public createAnimations() {

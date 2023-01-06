@@ -43,12 +43,12 @@ export class SpringActor implements GameActor {
         return this.covered;
     }
 
-    public uncover(): void {
+    public uncover(tile: Tiles): void {
         this.covered = false;
         // console.log('spring release')
     }
 
-    public cover(): void {
+    public cover(tile: Tiles): void {
         // console.log('spring engage')
         this.covered = true;
     }

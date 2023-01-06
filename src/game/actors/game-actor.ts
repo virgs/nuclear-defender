@@ -23,7 +23,7 @@ export interface GameActor {
 
     isCovered(): boolean;
 
-    cover(): void;
+    cover(tile: Tiles): void;
 
-    uncover(): void;
+    uncover(tile: Tiles): void;
 }

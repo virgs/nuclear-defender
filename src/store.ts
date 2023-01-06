@@ -97,12 +97,9 @@ export class Store {
         this._features = value;
     }
 
-    static get instance(): Store {
+    private static get instance(): Store {
         return this._instance;
     }
 
-    public update(x: number): void {
-        console.log(x);
-    }
 
 }
