@@ -12,7 +12,6 @@ import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {EventEmitter, EventName} from '@/event-emitter';
-import {Directions} from '@/game/constants/directions';
 
 export class GameEngine {
     private readonly strippedMap: MultiLayeredMap;
@@ -25,11 +24,12 @@ export class GameEngine {
     private readonly staticActors: GameActor[];
 
     private lastActionResult?: MovementOrchestratorOutput;
-    private movesMemento: MovementOrchestratorOutput[];
+    private boxPushMementos: MovementOrchestratorOutput[];
     private playerMoves: string;
     private levelComplete: boolean = false;
     private animationsAreOver: boolean;
     private mapChangedLastCycle: boolean;
+    private undoIsOver: boolean;
 
     constructor(config: { solution: SolutionOutput; strippedMap: MultiLayeredMap; actorMap: Map<Tiles, GameActor[]> }) {
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
@@ -42,7 +42,8 @@ export class GameEngine {
             .concat(config.actorMap.get(Tiles.oneWayDoor)!);
         this.strippedMap = config.strippedMap;
         this.nextMoves = config.solution?.actions! || [];
-        this.movesMemento = [];
+        this.undoIsOver = true;
+        this.boxPushMementos = [];
         this.playerMoves = '';
         this.levelComplete = false;
         this.animationsAreOver = true;
@@ -125,8 +126,8 @@ export class GameEngine {
                 .some(box => box.currentPosition.isDifferentOf(box.nextPosition) &&
                     this.lastActionResult?.hero.nextPosition.isEqualTo(box.currentPosition))) {
                 moveLetter = moveLetter.toUpperCase();
+                this.boxPushMementos.push(actionResult);
             }
-            this.movesMemento.push(actionResult);
         }
 
         this.playerMoves = moveLetter;
@@ -138,7 +139,6 @@ export class GameEngine {
         animationsPromises.push(...lastAction.boxes
             .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition))
             .map(async movedBox => {
-                console.log('moved')
                 const spriteBoxMoved = this.boxes
                     .find(tileBox => movedBox.id === tileBox.getId())!;
                 await spriteBoxMoved?.move(movedBox.nextPosition);
@@ -184,41 +184,40 @@ export class GameEngine {
     }
 
     private checkLevelComplete() {
-        this.levelComplete = false;
-        if (this.boxes
-            .every(box => box.getIsOnTarget())) {
-            this.levelComplete = true;
-        }
+        this.levelComplete = this.boxes
+            .every(box => box.getIsOnTarget());
     }
 
     private async undoLastMovement() {
-        //it has to pause for 3 seconds
-        if (this.movesMemento.length > 0) {
-            const lastAction = this.movesMemento[this.movesMemento.length - 1];
-            this.lastActionResult = lastAction;
-            console.log(lastAction);
+        if (this.undoIsOver) {
+            if (this.boxPushMementos.length > 0) {
+                this.undoIsOver = false;
+                const lastAction = this.boxPushMementos[this.boxPushMementos.length - 1];
+                this.lastActionResult = this.boxPushMementos[this.boxPushMementos.length - 2];
 
-            this.movesMemento = this.movesMemento
-                .filter((_, index) => index < this.movesMemento.length - 1);
-            this.playerMoves = this.playerMoves.substring(0, this.playerMoves.length - 1);
+                this.boxPushMementos = this.boxPushMementos
+                    .filter((_, index) => index < this.boxPushMementos.length - 1);
+                this.playerMoves = this.playerMoves.substring(0, this.playerMoves.length - 1);
 
-            const undoLastAction: MovementOrchestratorOutput = {
-                mapChanged: true,
-                hero: {
-                    id: this.hero.getId(),
-                    currentPosition: lastAction.hero.nextPosition,
-                    nextPosition: lastAction.hero.currentPosition,
-                    direction: lastAction.hero.direction
-                },
-                boxes: lastAction.boxes
-                    .map(box => ({
-                        id: box.id,
-                        currentPosition: box.nextPosition,
-                        nextPosition: box.currentPosition,
-                        direction: undefined
-                    }))
-            };
-            await this.updateAnimations(undoLastAction);
+                const undoLastAction: MovementOrchestratorOutput = {
+                    mapChanged: true,
+                    hero: {
+                        id: this.hero.getId(),
+                        currentPosition: lastAction.hero.nextPosition,
+                        nextPosition: lastAction.hero.currentPosition,
+                        direction: lastAction.hero.direction
+                    },
+                    boxes: lastAction.boxes
+                        .map(box => ({
+                            id: box.id,
+                            currentPosition: box.nextPosition,
+                            nextPosition: box.currentPosition,
+                            direction: undefined
+                        }))
+                };
+                await this.updateAnimations(undoLastAction);
+                this.undoIsOver = true;
+            }
         }
     }
 
