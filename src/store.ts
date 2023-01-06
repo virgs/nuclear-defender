@@ -2,6 +2,7 @@ import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
+import {configuration} from '@/game/constants/configuration';
 
 export class Store {
     private _movesCode: string = '';
@@ -17,6 +18,14 @@ export class Store {
     private static _instance: Store = new Store();
 
     private constructor() {
+        const item = localStorage.getItem(configuration.store.furthestEnabledLevelKey);
+        if (item !== null) {
+            const parsed = Number(item);
+            if (!isNaN(parsed)) {
+                this.furthestEnabledLevel = parsed;
+            }
+        }
+
     }
 
     public static getInstance(): Store {
@@ -72,12 +81,11 @@ export class Store {
     }
 
     get furthestEnabledLevel(): number {
-        //TODO store it in the chrome storage
         return this._furthestEnabledLevel;
     }
 
     set furthestEnabledLevel(value: number) {
-        //TODO get max from param and browser storage
+        localStorage.setItem(configuration.store.furthestEnabledLevelKey, value.toString());
         this._furthestEnabledLevel = value;
     }
 
@@ -100,6 +108,5 @@ export class Store {
     private static get instance(): Store {
         return this._instance;
     }
-
 
 }

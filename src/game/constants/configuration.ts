@@ -39,10 +39,12 @@ export const configuration = {
         radioactive: '#d4fa00',
         controlled: '#ff3c91',
         background: '#dddddd',
-        ambientColor: '#555555'
+        ambientColor: '#777777'
     },
     html: {
         gameScene: {}
+    },
+    store: {
+        furthestEnabledLevelKey: 'furthestEnabledLevel'
     }
-
 };
