@@ -4,7 +4,7 @@ import {Directions} from '@/game/constants/directions';
 import {DeadLockDetector} from '@/game/solver/dead-lock-detector';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 
-type SegmentAnalysis = { differentBoxes: number; empties: number; targets: number };
+type SegmentAnalysis = { boxes: number; emptiesAhead: number; targets: number };
 
 export class BoxGluedToWallDetector extends DeadLockDetector {
     public deadLocked(movement: MovementOrchestratorOutput): boolean {
@@ -32,10 +32,11 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
         } else {
             segment = this.horizontalLineSegment(movedBox.nextPosition, nextTilePosition, boxes);
         }
-        if (segment.differentBoxes > segment.targets && segment.empties < 2) {
+
+        if (segment.boxes > segment.targets && segment.emptiesAhead < 2) {
             // console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
             // console.log(segment.differentBoxes, segment.targets, segment.empties);
-            // console.log('deadlocked: no way to get it back and no available targets');
+            console.log('deadlocked: no way to get it back and no available targets');
             return true;
         }
         return false;
@@ -61,10 +62,11 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
                 ++empties;
             }
         }
+
         const differentBoxes = boxes
             .filter(box => box.nextPosition.y === tilePosition.y)
             .reduce((acc, _) => acc + 1, 0);
-        return {empties, targets, differentBoxes};
+        return {emptiesAhead: empties, targets, boxes: differentBoxes};
     }
 
     private horizontalLineSegment(tilePosition: Point, nextTilePosition: Point, boxes: Movement[]): SegmentAnalysis {
@@ -93,6 +95,6 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
         const differentBoxes = boxes
             .filter(box => box.nextPosition.x === tilePosition.x)
             .reduce((acc, _) => acc + 1, 0);
-        return {empties, targets, differentBoxes};
+        return {emptiesAhead: empties, targets, boxes: differentBoxes};
     }
 }

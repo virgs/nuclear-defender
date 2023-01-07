@@ -22,9 +22,9 @@ export class GameEngine {
     private readonly movementAnalyser: MovementAnalyser;
     private readonly nextMoves: Actions[];
     private readonly staticActors: GameActor[];
+    private readonly boxPushMementos: MovementOrchestratorOutput[];
 
     private lastActionResult?: MovementOrchestratorOutput;
-    private boxPushMementos: MovementOrchestratorOutput[];
     private playerMoves: string;
     private levelComplete: boolean = false;
     private animationsAreOver: boolean;
@@ -103,6 +103,8 @@ export class GameEngine {
                     boxes: this.boxes.map(box => ({point: box.getTilePosition(), id: box.getId()})),
                     lastActionResult: this.lastActionResult
                 });
+                this.movementAnalyser.analyse(actionResult);
+
                 this.lastActionResult = actionResult;
                 this.registerPlayerMove(heroAction, actionResult);
                 await this.updateMap(actionResult);
@@ -192,11 +194,8 @@ export class GameEngine {
         if (this.undoIsOver) {
             if (this.boxPushMementos.length > 0) {
                 this.undoIsOver = false;
-                const lastAction = this.boxPushMementos[this.boxPushMementos.length - 1];
-                this.lastActionResult = this.boxPushMementos[this.boxPushMementos.length - 2];
-
-                this.boxPushMementos = this.boxPushMementos
-                    .filter((_, index) => index < this.boxPushMementos.length - 1);
+                const lastAction = this.boxPushMementos.pop()!;
+                this.lastActionResult = this.boxPushMementos[this.boxPushMementos.length - 1];
                 this.playerMoves = this.playerMoves.substring(0, this.playerMoves.length - 1);
 
                 const undoLastAction: MovementOrchestratorOutput = {

@@ -22,10 +22,10 @@ export const levels: Level[] = [
 #5#ds#ds##
 #5rto2rtls##
 #ut3 [@.]o4 #
-#ut3 rso2 ls #
-#ut2 ooo$   #
-#utuw o[$.o]o [$.]  #
-#ut2 ooo  * #
+#ut3 rso2   #
+#ut2 ooo [$rs]$[$ls]#
+#utuw o o    #
+#ut2 ooo    #
 #ut4 o 3 #
 #ut3lt*o4 #
 #5#us5#
@@ -43,6 +43,31 @@ export const levels: Level[] = [
 3-3#
 `,
         title: 'Welcome',
+    }, {
+        map: `
+6-3#
+7#ds#
+#5 rw[.o]#
+# $ $ #[.o]#
+3#@###[.o]#
+-2# $oout#
+-# $ #o.#
+-#   ####
+-#####
+`,
+        title: 'Shoe it',
+    }, {
+        map: `
+10#
+#   .@#  #
+#  $#  $ #
+## .###  #
+###$ .#$ #
+#   #  $ #
+#   .  #.#
+10#
+`,
+        title: 'Shoe it again',
     },
     {
         map: `
@@ -56,6 +81,7 @@ export const levels: Level[] = [
 `,
         title: 'Are you familiar?', //euclidian: 340213, manhattan: {Steps: 117. Total time: 74385; iterations: 66774}
     },                              //                   manhattan: {Steps: 117. Total time: 96172; iterations: 88084}
+                                    //                               Steps: 117, Total time: 85162; iterations: 77175
     {
         map: `
 4#|#  #
@@ -67,7 +93,7 @@ export const levels: Level[] = [
 # ..    #
 #########
 `,
-        title: 'Small world', //euclidian: {Steps: 126. Total time: 242789; iterations: 231330}, manhattan: 2511931
+        title: 'Small world', //euclidian: {Steps: 126. Total time: 242789; iterations: 231330}, manhattan: actions: Steps(130), iterations: 221890, totalTime: 242230
     },      //                                          Total time: 272507; iterations: 233424
     {
         map: `

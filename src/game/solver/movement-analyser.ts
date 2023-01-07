@@ -83,12 +83,23 @@ export class MovementAnalyser {
     }
 
     private sumOfEveryBoxToTheClosestAvailableTarget(movement: MovementOrchestratorOutput): number {
-        //TODO check if the target is not covered by a different box
+        let availableTargets = this.targets;
         return movement.boxes
             .reduce((sum, box) => {
-                const shortestDistanceToAnyTarget: number = this.targets
-                    .reduce((acc, target) => Math.min(this.distanceCalculator.distance(target, box.nextPosition), acc), Infinity);
-                return sum + shortestDistanceToAnyTarget;
+                const shortestDistanceToAvailableTarget = availableTargets
+                    .reduce((acc, target, targetIndex) => {
+                        const distance = this.distanceCalculator.distance(target, box.nextPosition);
+                        if (acc.value === -1 || distance < acc.value) {
+                            return {
+                                value: distance,
+                                index: targetIndex
+                            };
+                        }
+                        return acc;
+                    }, {value: -1, index: -1});
+                availableTargets = availableTargets
+                    .filter((_, index) => index !== shortestDistanceToAvailableTarget.index);
+                return sum + shortestDistanceToAvailableTarget.value;
             }, 0);
     }
 

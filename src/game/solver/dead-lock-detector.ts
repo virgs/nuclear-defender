@@ -2,6 +2,7 @@ import type {Point} from '@/game/math/point';
 import type {MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
+//http://sokobano.de/wiki/index.php?title=Sokoban_solver_%22scribbles%22_by_Brian_Damgaard_about_the_YASS_solver
 export abstract class DeadLockDetector {
     protected staticMap: MultiLayeredMap;
 

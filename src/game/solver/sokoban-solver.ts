@@ -11,6 +11,7 @@ type Solution = {
     actions: Actions[],
     hero: { id: number, point: Point },
     boxes: { id: number, point: Point }[],
+    distanceSum: number,
     score: number,
     hash?: string,
 };
@@ -31,7 +32,13 @@ export class SokobanSolver {
 
     private movementCoordinator: MovementOrchestrator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
-    private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.score - b.score);
+    private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => {
+        const distanceDifference = a.distanceSum - b.distanceSum;
+        if (distanceDifference === 0) {
+            return a.score - b.score
+        }
+        return distanceDifference;
+    });
     private candidatesVisitedHash: { [hash: string]: boolean } = {};
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
@@ -58,10 +65,12 @@ export class SokobanSolver {
             distanceCalculator: input.distanceCalculator
         });
         this.movementBonusMap = new Map<MovementEvents, number>;
-        this.movementBonusMap.set(MovementEvents.HERO_MOVED, -1);
+        this.movementBonusMap.set(MovementEvents.HERO_MOVED, 0);
         this.movementBonusMap.set(MovementEvents.BOX_MOVED, 100);
-        this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET, 5000);
-        this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET, -150);
+        this.movementBonusMap.set(MovementEvents.BOX_MOVED_ONTO_TARGET, 200);
+        this.movementBonusMap.set(MovementEvents.BOX_MOVED_OUT_OF_TARGET, 200);
+        this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET, 200);
+        this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET, -200);
     }
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
@@ -82,6 +91,7 @@ export class SokobanSolver {
             actions: [],
             hero: {point: hero, id: 0},
             boxes: boxes.map((box, id) => ({point: box, id: id + 1})),
+            distanceSum: 0,
             score: 0
         };
         initialCandidate.hash = this.calculateHashOfSolution(initialCandidate);
@@ -103,8 +113,8 @@ export class SokobanSolver {
             if (cpuBreath > this.sleepForInMs) {
                 cpuBreath -= this.sleepForInMs;
                 await new Promise(resolve => setTimeout(() => {
-                    console.log(iterations, (new Date().getTime() - this.startTime!) / 1000);
-                    resolve(9);
+                    // console.log(iterations, (new Date().getTime() - this.startTime!) / 1000);
+                    resolve(undefined);
                 }, this.sleepForInMs));
             }
 
@@ -135,14 +145,16 @@ export class SokobanSolver {
 
                 if (afterAction.mapChanged) {
                     const analysis = this.movementAnalyser.analyse(afterAction);
-                    // const actionScore = analysis.events.reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
+                    const actionScore = analysis.events
+                        .reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
                     const heroMovementCost = 1;
                     const newCandidate: Solution = {
                         boxes: afterAction.boxes
                             .map(box => ({point: box.nextPosition, id: box.id})),
                         hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},
                         actions: candidate.actions.concat(action),
-                        score: candidate.score + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
+                        score: actionScore,
+                        distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
                     };
                     newCandidate.hash = this.calculateHashOfSolution(newCandidate);
                     if (!analysis.isDeadLocked) {

@@ -14,7 +14,8 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
     private boxIsDeadLocked(movedBox: Movement, boxes: Movement[]) {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
-        if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x].some(tile => tile.code === Tiles.wall)) {
+        if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x]
+            .some(tile => tile.code === Tiles.wall)) {
             if (this.checkTrappedBoxInCorner(movedBox, direction)) {
                 return true;
             }
@@ -26,11 +27,11 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
     private checkTrappedBoxInCorner(movedBox: Movement, direction: Directions): boolean {
         const featuresAtPosition = this.getStaticFeaturesAtPosition(movedBox.nextPosition);
         if (featuresAtPosition
-            .some(tile => tile.code !== Tiles.target)) {
+            .some(tile => tile.code === Tiles.target)) {
             return false;
         }
-        //  ######
-        //  #$@  player pushed left (or up, in this case)
+        //  #'#'####
+        //  '#'$@  player pushed left (or up, in this case)
         //  #
         //  #
 
@@ -43,7 +44,7 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
         if (cwTiles
             .some(tile => tile.code === Tiles.wall) || ccwTiles
             .some(tile => tile.code === Tiles.wall)) {
-            console.log('deadlocked: trapped in between walls');
+            console.log('deadlocked: trapped in a blocked cluster');
             return true;
         }
         return false;
