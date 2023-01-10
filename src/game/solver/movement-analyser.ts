@@ -1,5 +1,6 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
+import type {Directions} from '@/game/constants/directions';
 import type {DeadLockDetector} from '@/game/solver/dead-lock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {BoxClusterDeadlockDetector} from '@/game/solver/box-cluster-deadlock-detector';
@@ -7,9 +8,11 @@ import {BoxGluedToWallDetector} from '@/game/solver/box-glued-to-wall-deadlock-d
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 
+export type PushedBox = { id: number, direction: Directions };
 export type MovementAnalysis = {
     events: MovementEvents[],
     boxesMoved: Movement[],
+    pushedBox: PushedBox
     sumOfEveryBoxToTheClosestTarget: number,
     isDeadLocked: boolean
 }
@@ -49,9 +52,8 @@ export class MovementAnalyser {
         };
     }
 
-    private checkEvents(movement: MovementOrchestratorOutput) {
+    private checkEvents(movement: MovementOrchestratorOutput): any {
         const events: MovementEvents[] = [];
-        //TODO add the id of the box pushed by the player and its direction
         if (movement.hero.nextPosition.isDifferentOf(movement.hero.currentPosition)) {
             events.push(MovementEvents.HERO_MOVED);
         }
@@ -61,6 +63,24 @@ export class MovementAnalyser {
         boxesMoved
             .forEach(_ => events.push(MovementEvents.BOX_MOVED));
 
+        let pushedBoxResult: PushedBox | undefined = undefined;
+        const pushedBox = boxesMoved
+            .find(box => movement.hero.nextPosition.isEqualTo(box.currentPosition) &&
+                movement.hero.direction === box.direction);
+        if (pushedBox) {
+            pushedBoxResult = {
+                id: pushedBox.id,
+                direction: pushedBox.direction!
+            };
+
+            if (!this.isTileAtPosition(pushedBox.nextPosition, Tiles.target) &&
+                this.isTileAtPosition(movement.hero.nextPosition, Tiles.target)) {
+                events.push(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET);
+            } else if (this.isTileAtPosition(pushedBox.nextPosition, Tiles.target)) {
+                events.push(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET);
+            }
+        }
+
         boxesMoved
             .filter(box => this.isTileAtPosition(box.nextPosition, Tiles.target))
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_ONTO_TARGET));
@@ -69,18 +89,7 @@ export class MovementAnalyser {
                 this.isTileAtPosition(movement.hero.nextPosition, Tiles.target))
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_OUT_OF_TARGET));
 
-        boxesMoved
-            .filter(box => movement.hero.nextPosition.isEqualTo(box.currentPosition) &&
-                movement.hero.direction === box.direction)
-            .find(box => {
-                if (!this.isTileAtPosition(box.nextPosition, Tiles.target) &&
-                    this.isTileAtPosition(movement.hero.nextPosition, Tiles.target)) {
-                    events.push(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET);
-                } else if (this.isTileAtPosition(box.nextPosition, Tiles.target)) {
-                    events.push(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET);
-                }
-            });
-        return {events, boxesMoved};
+        return {events, boxesMoved, lastPushedBox: pushedBoxResult};
     }
 
     private sumOfEveryBoxToTheClosestAvailableTarget(movement: MovementOrchestratorOutput): number {

@@ -147,24 +147,23 @@ export class GameEngine {
     }
 
     private updateActorsCoveringSituation(moves: Movement[], actors: GameActor[]) {
-        //NOTE: It's important to have the 'cover' method being called before 'uncover', so a sprite doesn't get uncovered for milliseconds when it's uncover then cover right away
         moves
             .filter(move => move.nextPosition.isDifferentOf(move.currentPosition))
             .forEach(move => {
                 const gameActor = actors
                     .find(actor => actor.getTilePosition().isEqualTo(move.nextPosition))!;
-                const coveringTile = this.staticActors
-                    .find(actor => actor.getTilePosition().isEqualTo(move.nextPosition));
-                if (coveringTile) {
-                    coveringTile.cover(gameActor.getTileCode());
-                    gameActor.cover(coveringTile.getTileCode());
-                }
 
                 const uncoveringTile = this.staticActors
                     .find(actor => actor.getTilePosition().isEqualTo(move.currentPosition));
                 if (uncoveringTile) {
-                    uncoveringTile.uncover(gameActor.getTileCode());
-                    gameActor.uncover(uncoveringTile.getTileCode());
+                    uncoveringTile.uncover(gameActor);
+                    gameActor.uncover(uncoveringTile);
+                }
+                const coveringTile = this.staticActors
+                    .find(actor => actor.getTilePosition().isEqualTo(move.nextPosition));
+                if (coveringTile) {
+                    coveringTile.cover(gameActor);
+                    gameActor.cover(coveringTile);
                 }
             });
     }

@@ -42,7 +42,7 @@ export const levels: Level[] = [
 3-#.#
 3-3#
 `,
-        title: 'Welcome',
+        title: 'Welcome', //boxesline = 4
     }, {
         map: `
 6-3#
@@ -55,7 +55,7 @@ export const levels: Level[] = [
 -#   ####
 -#####
 `,
-        title: 'Shoe on',
+        title: 'Shoe on', //boxesLine = 14
     },{
         map: `
 10#
@@ -67,7 +67,7 @@ export const levels: Level[] = [
 # .$  oo.#
 10#
 `,
-        title: 'Devotron',
+        title: 'Devotron', //boxesLine = 14
     }, {
         map: `
 10#
@@ -79,7 +79,7 @@ export const levels: Level[] = [
 #   .  #.#
 10#
 `,
-        title: 'Snikers',
+        title: 'Snikers', //boxesLine = 15
     },{
         map: `
 6-3#
@@ -92,7 +92,7 @@ export const levels: Level[] = [
 -#   ####
 -5#
 `,
-        title: 'Ahituna',
+        title: 'Ahituna', //boxesLine = 11
     },
     {
         map: `
@@ -106,7 +106,7 @@ export const levels: Level[] = [
 `,
         title: 'Are you familiar?', //euclidian: 340213, manhattan: {Steps: 117. Total time: 74385; iterations: 66774}
     },                              //                   manhattan: {Steps: 117. Total time: 96172; iterations: 88084}
-                                    //                               Steps: 117, Total time: 85162; iterations: 77175
+                                    //                               Steps: 117, Total time: 85162; iterations: 77175; boxesLine = 17
     {
         map: `
 4#|#  #
@@ -119,7 +119,7 @@ export const levels: Level[] = [
 #########
 `,
         title: 'Small world', //euclidian: {Steps: 126. Total time: 242789; iterations: 231330}, manhattan: actions: Steps(130), iterations: 221890, totalTime: 242230
-    },      //                                          Total time: 272507; iterations: 233424
+    },      //                                          Total time: 272507; iterations: 233424, boxesLine = 15
     {
         map: `
 -6#
@@ -130,7 +130,7 @@ export const levels: Level[] = [
 3#  3#
 --4#
 `,
-        title: 'Memories', //euclidian: {Steps: 66. Total time: 228998; iterations: 216575}, manhattan: {Steps: 66. Total time: 227213; iterations: 216575}
+        title: 'Memories', //euclidian: {Steps: 66. Total time: 228998; iterations: 216575}, manhattan: {Steps: 66. Total time: 227213; iterations: 216575}, boxesLine = 19
     },
     {
         map: `
@@ -143,5 +143,5 @@ export const levels: Level[] = [
 # #us## #
 8#
 `,
-        title: 'Oldschool'
+        title: 'Oldschool' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
     }];

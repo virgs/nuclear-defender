@@ -71,17 +71,17 @@ export class BoxActor implements GameActor {
         return false;
     }
 
-    public cover(tile: Tiles): void {
-        if (tile === Tiles.target) {
+    public cover(actor: GameActor): void {
+        if (actor.getTileCode() === Tiles.target) {
             this.sprite.setFrame(Tiles.boxOnTarget);
             this.isOnTarget = true;
         }
     }
 
-    public uncover(tile: Tiles): void {
-        if (tile === Tiles.target) {
+    public uncover(actor: GameActor): void {
+        if (actor.getTileCode() === Tiles.target) {
             this.sprite.setFrame(Tiles.box);
-            this.isOnTarget = true;
+            this.isOnTarget = false;
         }
     }
 

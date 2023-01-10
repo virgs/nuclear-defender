@@ -2,12 +2,14 @@ import Heap from 'heap';
 import {Tiles} from '../tiles/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
+import type {PushedBox} from '@/game/solver/movement-analyser';
+import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
 import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import {Directions} from '@/game/constants/directions';
 
 type Solution = {
     actions: Actions[],
@@ -17,15 +19,17 @@ type Solution = {
     distanceSum: number,
     score: number,
     hash?: string,
+    boxesLine: number,
+    lastPushedBox: PushedBox;
 };
 
 export type SolutionOutput = {
     actions?: Actions[];
     iterations: number;
     totalTime: number;
+    boxesLine: number;
 }
 
-//TODO Create an interface out of this to allow comparisions
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
 export class SokobanSolver {
 
@@ -80,8 +84,9 @@ export class SokobanSolver {
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
         this.startTime = new Date().getTime();
-        const {actions, iterations} = await this.startAlgorithm(dynamicMap);
+        const {actions, iterations, boxesLine} = await this.startAlgorithm(dynamicMap);
         return {
+            boxesLine: boxesLine,
             actions: actions,
             iterations: iterations,
             totalTime: new Date().getTime() - this.startTime
@@ -93,6 +98,8 @@ export class SokobanSolver {
         const hero = dynamicMap.get(Tiles.hero)![0];
         const boxes = dynamicMap.get(Tiles.box)!;
         const initialCandidate: Solution = {
+            boxesLine: 0,
+            lastPushedBox: {id: -1, direction: Directions.UP},
             actions: [],
             hero: {point: hero, id: 0},
             boxes: boxes.map((box, id) => ({point: box, id: id + 1})),
@@ -128,7 +135,7 @@ export class SokobanSolver {
         }
         console.log(this.candidatesToVisit.size(), candidate);
         this.metricEmitter.log();
-        return {actions: foundSolution?.actions, iterations};
+        return {actions: foundSolution?.actions, iterations, boxesLine: foundSolution?.boxesLine || 0};
     }
 
     private async checkSolution(candidate: Solution): Promise<Solution | undefined> {
@@ -157,7 +164,15 @@ export class SokobanSolver {
                 const actionScore = analysis.events
                     .reduce((acc: number, value: MovementEvents) => acc + this.movementBonusMap.get(value)!, 0);
                 const heroMovementCost = 1;
+                let currentBoxesLine = 0;
+                if (analysis.lastPushedBox) {
+                    if (analysis.lastPushedBox.id !== candidate.lastPushedBox.id || analysis.lastPushedBox.direction !== candidate.lastPushedBox.direction) {
+                        currentBoxesLine = 1;
+                    }
+                }
                 const newCandidate: Solution = {
+                    lastPushedBox: analysis.lastPushedBox || candidate.lastPushedBox,
+                    boxesLine: candidate.boxesLine + currentBoxesLine,
                     boxes: afterAction.boxes
                         .map(box => ({point: box.nextPosition, id: box.id})),
                     hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},

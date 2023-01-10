@@ -70,10 +70,10 @@ export class GameActorsFactory {
                         } else {
                             const boxCover = this.actorMap.get(Tiles.box)!
                                 .find(box => box.getTilePosition().isEqualTo(tilePosition));
-                            boxCover?.cover(tile.code);
                             const heroCover = this.dynamicFeatures.get(Tiles.hero)!
                                 .some(box => box.isEqualTo(tilePosition));
-                            this.createActor(tilePosition, tile, !!boxCover || heroCover);
+                            const gameActor = this.createActor(tilePosition, tile, !!boxCover || heroCover)!;
+                            boxCover?.cover(gameActor);
                         }
 
                     })));
@@ -87,7 +87,8 @@ export class GameActorsFactory {
 
     private createActor(tilePosition: Point, item: OrientedTile, cover: boolean = false) {
         const sprite = this.createSprite(tilePosition, item.code);
-        if (this.constructorMap.get(item.code)) {
+        if (this.constructorMap.has(item.code)) {
+
             const gameActor = this.constructorMap.get(item.code)!({
                 scene: this.scene,
                 orientation: item.orientation,
@@ -98,6 +99,7 @@ export class GameActorsFactory {
                 id: this.actorCounter++
             } as GameActorConfig);
             this.actorMap.get(item.code)!.push(gameActor);
+            return gameActor;
         }
     }
 

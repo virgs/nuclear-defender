@@ -71,11 +71,11 @@ export class TargetActor implements GameActor {
         return this.tilePosition;
     }
 
-    public cover(tile: Tiles): void {
+    public cover(tile: GameActor): void {
         this.covered = true;
     }
 
-    public uncover(tile: Tiles): void {
+    public uncover(tile: GameActor): void {
         this.covered = false;
     }
 
