@@ -3,6 +3,7 @@ import {DeadLockDetector} from '@/game/solver/dead-lock-detector';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
+//TODO improve to accomodate richer features
 export class BoxClusterDeadlockDetector extends DeadLockDetector {
 
     public deadLocked(movement: MovementOrchestratorOutput): boolean {
@@ -27,7 +28,7 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
     private checkTrappedBoxInCorner(movedBox: Movement, direction: Directions): boolean {
         const featuresAtPosition = this.getStaticFeaturesAtPosition(movedBox.nextPosition);
         if (featuresAtPosition
-            .some(tile => tile.code === Tiles.target)) {
+            .some(tile => tile.code === Tiles.target || tile.code === Tiles.spring || tile.code === Tiles.treadmil)) {
             return false;
         }
         //  #'#'####

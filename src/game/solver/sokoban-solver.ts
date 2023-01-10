@@ -41,7 +41,6 @@ export class SokobanSolver {
         return distanceDifference;
     });
     private candidatesVisitedSet: Set<string> = new Set();
-    // private candidatesVisitedHash: { [hash: string]: boolean } = {};
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
     private readonly movementAnalyser: MovementAnalyser;
@@ -104,15 +103,14 @@ export class SokobanSolver {
 
         let iterations = 0;
         let cpuBreath = 0;
-        let solution: Solution | undefined = undefined;
-        for (let candidate: Solution | undefined = this.candidatesToVisit.pop();
-             candidate;
-        ) {
+        let foundSolution: Solution | undefined = undefined;
+        let candidate: Solution | undefined = this.candidatesToVisit.pop();
+        while (candidate) {
             ++iterations;
             ++cpuBreath;
 
-            solution = await this.checkSolution(candidate);
-            if (solution) {
+            foundSolution = await this.checkSolution(candidate);
+            if (foundSolution) {
                 break;
             }
             if (cpuBreath > this.sleepingCycle) {
@@ -120,21 +118,20 @@ export class SokobanSolver {
 
                 await this.metricEmitter.measureFunction(Metrics.BREATHING_TIME, async () => {
                     await new Promise(resolve => setTimeout(() => {
-                        // console.log(iterations, (new Date().getTime() - this.startTime!) / 1000);
                         resolve(undefined);
                     }, this.sleepForInMs));
                 });
             }
             candidate = await this.metricEmitter.measureFunction(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
+        console.log(this.candidatesToVisit.size());
         this.metricEmitter.log();
-        return {actions: solution?.actions, iterations};
+        return {actions: foundSolution?.actions, iterations};
     }
 
     private async checkSolution(candidate: Solution): Solution | undefined {
 
         if (await this.metricEmitter.measureFunction(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
-            // this.candidatesVisitedHash[candidate.hash!] = true;
             this.candidatesVisitedSet.add(candidate.hash!);
 
             if (this.candidateSolvesMap(candidate.boxes)) {
@@ -182,7 +179,6 @@ export class SokobanSolver {
     }
 
     private candidateWasVisitedBefore(newCandidateHash: string): boolean {
-        // return this.candidatesVisitedHash[newCandidateHash];
         return this.candidatesVisitedSet.has(newCandidateHash);
     }
 

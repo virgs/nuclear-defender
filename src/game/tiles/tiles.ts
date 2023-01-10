@@ -16,6 +16,7 @@ export enum Tiles {
 const tileCharMap = new Map<string, Tiles>();
 tileCharMap.set('-', Tiles.empty);
 tileCharMap.set(' ', Tiles.floor);
+tileCharMap.set('f', Tiles.floor);
 tileCharMap.set('t', Tiles.treadmil);
 tileCharMap.set('w', Tiles.oneWayDoor);
 tileCharMap.set('o', Tiles.oily);
@@ -23,7 +24,9 @@ tileCharMap.set('s', Tiles.spring);
 tileCharMap.set('#', Tiles.wall);
 tileCharMap.set('.', Tiles.target);
 tileCharMap.set('$', Tiles.box);
+tileCharMap.set('b', Tiles.box);
 tileCharMap.set('@', Tiles.hero);
+tileCharMap.set('p', Tiles.hero);
 
 export const getTilesFromChar = (char: string): Tiles => {
     return tileCharMap.get(char) || Tiles.empty;

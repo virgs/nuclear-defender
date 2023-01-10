@@ -94,7 +94,7 @@ export class MovementOrchestrator {
     }
 
     public canFeatureLeavePosition(move: OrientedPoint): boolean {
-        const positionFeatures = this.getFeatureAtPosition(move.point);
+        const positionFeatures = this.getFeaturesAtPosition(move.point);
         const featureMovementHandlers = this.movementHandlers
             .filter(handler => positionFeatures
                 .some(feature =>
@@ -104,19 +104,20 @@ export class MovementOrchestrator {
             .every(handler => handler.allowLeavingMovement(move.orientation));
     }
 
-    public getFeaturesBlockingMoveIntoPosition(move: OrientedPoint): { tile: Tiles, orientation?: Directions }[] {
-        const result: { tile: Tiles, orientation?: Directions }[] = [];
-        const positionFeatures = this.getFeatureAtPosition(move.point);
-        result.push(...positionFeatures
+    public getFeaturesBlockingMoveIntoPosition(move: OrientedPoint): (OrientedTile | Movement)[] {
+        const result: (OrientedTile | Movement)[] = [];
+        const dynamicFeaturesAtPosition: (OrientedTile | Movement)[] = this.getFeaturesAtPosition(move.point);
+        result.push(...dynamicFeaturesAtPosition
             .filter(feature => this.blockerTiles.has(feature.code))
-            .map(feature => ({tile: feature.code, orientation: feature.orientation})));
+            .map(feature => (feature)));
 
+        const staticFeaturesAtPosition: OrientedTile[] = this.getStaticFeaturesAtPosition(move.point);
         result.push(...this.movementHandlers
-            .filter(handler => positionFeatures
+            .filter(handler => staticFeaturesAtPosition
                 .some(feature => feature.code === handler.getTile() && move.point.isEqualTo(handler.getPosition())))
             .filter(handler => !handler.allowEnteringMovement(move.orientation))
-            .map(handler => ({tile: handler.getTile(), orientation: handler.getOrientation()})));
-        return result;
+            .map(handler => ({code: handler.getTile(), orientation: handler.getOrientation()})));
+        return [...new Set(result)];
     }
 
     private initializeFeature(feature: { id: number; point: Point }): Movement {
@@ -128,19 +129,32 @@ export class MovementOrchestrator {
         };
     }
 
-    public getFeatureAtPosition(position: Point): OrientedTile[] {
-        const result: OrientedTile[] = [];
-        if (this.hero?.nextPosition.isEqualTo(position) || this.hero?.currentPosition.isEqualTo(position)) {
+    public getFeaturesAtPosition(position: Point): (OrientedTile | Movement)[] {
+        let result = this.getDynamicFeaturesAtPosition(position);
+        result = result.concat(this.getStaticFeaturesAtPosition(position));
+        return result;
+    }
+
+    private getDynamicFeaturesAtPosition(position: Point) {
+        let result: (OrientedTile | Movement)[] = [];
+        if (this.hero?.currentPosition.isEqualTo(position)) {
             result.push({
-                code: Tiles.hero
+                code: Tiles.hero,
+                ...this.hero
             });
         }
         if (this.boxes
-            ?.some(box => box.nextPosition.isEqualTo(position) || box.currentPosition.isEqualTo(position))) {
+            ?.some(box => box.currentPosition.isEqualTo(position) || box.nextPosition.isEqualTo(position))) {
             result.push({
-                code: Tiles.box
+                code: Tiles.box,
+                ...this.box
             });
         }
+        return result;
+    }
+
+    private getStaticFeaturesAtPosition(position: Point): OrientedTile[] {
+        const result: OrientedTile[] = [];
         if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
             result.push(...this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x]);

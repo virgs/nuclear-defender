@@ -45,7 +45,7 @@ export class HeroMovementHandler implements FeatureMovementHandler {
             }
             const aimedPosition = actData.hero.position.calculateOffset(aimedDirection);
             const aimedMovement = {point: aimedPosition, orientation: aimedDirection};
-            if (this.featureAheadAllowsMovement(aimedMovement, actData.boxes)) {
+            if (this.featureAheadAllowsMovement(aimedMovement)) {
                 mapChanged = true;
                 this.coordinator.moveHero(aimedDirection);
                 const movedBox = actData.boxes
@@ -59,10 +59,10 @@ export class HeroMovementHandler implements FeatureMovementHandler {
         return mapChanged;
     }
 
-    private featureAheadAllowsMovement(aimedMovement: OrientedPoint, boxes: Movement[]): boolean {
+    private featureAheadAllowsMovement(aimedMovement: OrientedPoint): boolean {
         const featuresBlockingMoveIntoPosition = this.coordinator.getFeaturesBlockingMoveIntoPosition(aimedMovement);
         if (featuresBlockingMoveIntoPosition.length >= 1) { //it can be a box, check the next one too
-            if (featuresBlockingMoveIntoPosition.length === 1 && featuresBlockingMoveIntoPosition[0].tile === Tiles.box) { //only a box blocks it
+            if (featuresBlockingMoveIntoPosition.length === 1 && featuresBlockingMoveIntoPosition[0].code === Tiles.box) { //only a box blocks it
                 //check if the box is in a position that allows moves
                 if (!this.coordinator.canFeatureLeavePosition(aimedMovement)) {
                     return false;

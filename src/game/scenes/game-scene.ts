@@ -74,7 +74,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     private changeScene() {
-        this.lights.destroy();
+        // this.lights.destroy();
 
         const store = Store.getInstance();
         store.totalTimeInMs = new Date().getTime() - this.initialTime!;

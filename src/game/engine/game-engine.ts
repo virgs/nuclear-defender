@@ -103,7 +103,6 @@ export class GameEngine {
                     boxes: this.boxes.map(box => ({point: box.getTilePosition(), id: box.getId()})),
                     lastActionResult: this.lastActionResult
                 });
-                this.movementAnalyser.analyse(actionResult);
 
                 this.lastActionResult = actionResult;
                 this.registerPlayerMove(heroAction, actionResult);
@@ -116,6 +115,7 @@ export class GameEngine {
         if (actionResult.mapChanged) {
             this.mapChangedLastCycle = true;
             this.movementAnalyser.analyse(actionResult);
+            // console.log(this.movementAnalyser.analyse(actionResult));
             await this.updateAnimations(actionResult);
             this.checkLevelComplete();
         }

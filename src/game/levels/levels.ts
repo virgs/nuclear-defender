@@ -21,8 +21,8 @@ export const levels: Level[] = [
 5-#####
 #5#ds#ds##
 #5rto2rtls##
-#ut3 [@.]o4 #
-#ut3 rso2   #
+#ut[$ds]  [.]o4 #
+#ut[$rs]@ rso2   #
 #ut2 ooo [$rs]$[$ls]#
 #utuw o o    #
 #ut2 ooo    #
@@ -55,7 +55,7 @@ export const levels: Level[] = [
 -#   ####
 -#####
 `,
-        title: 'Shoe it',
+        title: 'Shoe on',
     },{
         map: `
 10#
@@ -79,7 +79,7 @@ export const levels: Level[] = [
 #   .  #.#
 10#
 `,
-        title: 'Shoe it again',
+        title: 'Snikers',
     },{
         map: `
 6-3#
@@ -87,7 +87,7 @@ export const levels: Level[] = [
 #  dt  #[$dt]#
 # . .lt#[$dt]#
 ### ###[$dt]#
--## . @ls#
+-## .o[@o]ls#
 -# . #  #
 -#   ####
 -5#

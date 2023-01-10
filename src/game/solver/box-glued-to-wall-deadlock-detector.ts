@@ -6,6 +6,7 @@ import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-
 
 type SegmentAnalysis = { boxes: number; emptiesAhead: number; targets: number };
 
+//TODO improve to accomodate richer features
 export class BoxGluedToWallDetector extends DeadLockDetector {
     public deadLocked(movement: MovementOrchestratorOutput): boolean {
         return movement.boxes
@@ -14,13 +15,16 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
     }
 
     private boxIsDeadLocked(movedBox: Movement, moves: Movement[]) {
+        if (this.staticMap.strippedFeatureLayeredMatrix[movedBox.nextPosition.y][movedBox.nextPosition.x]
+            .some(tile => tile.code === Tiles.spring || tile.code === Tiles.treadmil)) {
+            return false
+        }
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
         if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x]
             .some(tile => tile.code === Tiles.wall)) {
-            //TODO fix this. It breaks the AI on Devotron map
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, moves)) {
-                return false;
+                return true;
             }
         }
         return false;
@@ -36,7 +40,7 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
 
         if (segment.boxes > segment.targets && segment.emptiesAhead < 2) {
             // console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
-            // console.log(segment.differentBoxes, segment.targets, segment.empties);
+            // console.log(segment.boxes, segment.targets, segment.emptiesAhead);
             // console.log('deadlocked: no way to get it back and no available targets');
             return true;
         }

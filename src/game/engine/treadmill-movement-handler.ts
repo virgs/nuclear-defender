@@ -1,8 +1,8 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
+import type {Movement, MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
-import type {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 
 export class TreadmillMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;
@@ -23,15 +23,35 @@ export class TreadmillMovementHandler implements FeatureMovementHandler {
             .filter(box => box.currentPosition.isEqualTo(this.position) &&
                 box.currentPosition.isEqualTo(box.nextPosition)) //box is not moving already
             .forEach(box => {
-                if (this.coordinator.getFeaturesBlockingMoveIntoPosition({
+                const blockers = this.coordinator.getFeaturesBlockingMoveIntoPosition({
                     point: this.nextTilePosition,
                     orientation: this.orientation
-                }).length <= 0) {
-                    this.coordinator.moveFeature(box, this.orientation);
-                    mapChanged = true;
+                });
+                if (blockers.length <= 0) {
+                    mapChanged = this.move(box);
+                } else {
+                    const pusherFeature = blockers
+                        .find(feature => feature.code === Tiles.spring || feature.code === Tiles.treadmil);
+                    if (pusherFeature) {
+                        if (blockers
+                            .some(moving => {
+                                const moveableFeature = moving.code === Tiles.hero || moving.code === Tiles.box;
+                                const isMoving = moving.currentPosition?.isDifferentOf(moving.nextPosition);
+                                const isMovingToTheRightDirection = moving.direction !== pusherFeature.orientation;
+                                const isLeavingPositionThatBlocksMyMove = moveableFeature && moving.currentPosition?.isEqualTo(this.nextTilePosition);
+                                return isLeavingPositionThatBlocksMyMove && isMoving && isMovingToTheRightDirection;
+                            })) {
+                            mapChanged = this.move(box);
+                        }
+                    }
                 }
             });
         return mapChanged;
+    }
+
+    private move(box: Movement) {
+        this.coordinator.moveFeature(box, this.orientation);
+        return true;
     }
 
     public allowEnteringMovement(direction: Directions): boolean {

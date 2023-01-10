@@ -77,7 +77,7 @@ async function playButtonClick() {
   store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
   store.features = output.removedFeatures;
   store.router = router;
-  // store.solution = await runSolutionsAlgorithm(output);
+  store.solution = await runSolutionsAlgorithm(output);
 
   await router.push('/game');
 }

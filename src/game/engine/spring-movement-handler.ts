@@ -23,12 +23,29 @@ export class SpringMovementHandler implements FeatureMovementHandler {
             .filter(box => box.currentPosition.isEqualTo(this.position) &&
                 box.currentPosition.isEqualTo(box.nextPosition)) //box is not moving already
             .forEach(box => {
-                if (this.coordinator.getFeaturesBlockingMoveIntoPosition({
+                const blockers = this.coordinator.getFeaturesBlockingMoveIntoPosition({
                     point: this.nextTilePosition,
                     orientation: this.orientation
-                }).length <= 0) {
+                });
+                if (blockers.length <= 0) {
                     this.coordinator.moveFeature(box, this.orientation);
                     mapChanged = true;
+                } else {
+                    const pusherFeature = blockers
+                        .find(feature => feature.code === Tiles.spring || feature.code === Tiles.treadmil);
+                    if (pusherFeature) {
+                        if (blockers
+                            .some(moving => {
+                                const moveableFeature = moving.code === Tiles.hero || moving.code === Tiles.box;
+                                const isMoving = moving.currentPosition?.isDifferentOf(moving.nextPosition);
+                                const isMovingToTheRightDirection = moving.direction !== pusherFeature.orientation;
+                                const isLeavingPositionThatBlocksMyMove = moveableFeature && moving.currentPosition?.isEqualTo(this.nextTilePosition);
+                                return isLeavingPositionThatBlocksMyMove && isMoving && isMovingToTheRightDirection;
+                            })) {
+                            this.coordinator.moveFeature(box, this.orientation);
+                            mapChanged = true;
+                        }
+                    }
                 }
             });
         return mapChanged;
