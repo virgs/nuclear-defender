@@ -3,8 +3,8 @@ import {Tiles} from '../tiles/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
-import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
+import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
@@ -13,7 +13,7 @@ type Solution = {
     actions: Actions[],
     hero: { id: number, point: Point },
     boxes: { id: number, point: Point }[],
-    lastActionResult: MovementOrchestratorOutput,
+    lastActionResult?: MovementOrchestratorOutput,
     distanceSum: number,
     score: number,
     hash?: string,
@@ -131,7 +131,7 @@ export class SokobanSolver {
         return {actions: foundSolution?.actions, iterations};
     }
 
-    private async checkSolution(candidate: Solution): Solution | undefined {
+    private async checkSolution(candidate: Solution): Promise<Solution | undefined> {
         if (await this.metricEmitter.measureTime(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
             this.candidatesVisitedSet.add(candidate.hash!);
 
@@ -155,7 +155,7 @@ export class SokobanSolver {
             if (afterAction.mapChanged) {
                 const analysis = await this.metricEmitter.measureTime(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
                 const actionScore = analysis.events
-                    .reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
+                    .reduce((acc: number, value: MovementEvents) => acc + this.movementBonusMap.get(value)!, 0);
                 const heroMovementCost = 1;
                 const newCandidate: Solution = {
                     boxes: afterAction.boxes

@@ -49,7 +49,7 @@ export class GameScene extends Phaser.Scene {
         const actorsCreator = new GameActorsFactory({
             scene: this,
             dynamicFeatures: store.features,
-            matrix: store.strippedLayeredTileMatrix!
+            strippedTileMatrix: store.strippedLayeredTileMatrix!
         });
         const actorMap = actorsCreator.create();
 
@@ -76,10 +76,11 @@ export class GameScene extends Phaser.Scene {
     private changeScene() {
         // this.lights.destroy();
 
-        console.log('level complete')
         const store = Store.getInstance();
         store.totalTimeInMs = new Date().getTime() - this.initialTime!;
-        store.movesCode = this.gameEngine!.getPlayerMoves();
+        const playerMoves = this.gameEngine!.getPlayerMoves();
+        store.movesCode = playerMoves;
+        console.log('level complete: ' + playerMoves)
         // store.router.push('/next-level');
     }
 

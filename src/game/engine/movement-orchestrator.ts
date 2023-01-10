@@ -34,8 +34,9 @@ export type MovementOrchestratorInput = {
     boxes: { id: number, point: Point }[];
     lastActionResult?: MovementOrchestratorOutput;
 };
-
+//TODO do not use oriented tile anywhere, replace it with Movement (merge if necessary)
 export class MovementOrchestrator {
+    //TODO create pusher categories as well (spring, player, treadmil)... and us it by treadmil and spring.. you'll see where
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
 
     private readonly strippedMap: MultiLayeredMap;

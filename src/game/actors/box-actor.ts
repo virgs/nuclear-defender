@@ -28,20 +28,6 @@ export class BoxActor implements GameActor {
         return this.tilePosition;
     }
 
-    public setIsOnTarget(isOnTarget: boolean) {
-        if (isOnTarget) {
-            this.sprite.setFrame(Tiles.boxOnTarget);
-        } else {
-            this.sprite.setFrame(Tiles.box);
-        }
-
-        this.isOnTarget = isOnTarget;
-    }
-
-    public getIsOnTarget(): boolean {
-        return this.isOnTarget;
-    }
-
     public getSprite(): Phaser.GameObjects.Sprite {
         return this.sprite;
     }
@@ -86,11 +72,20 @@ export class BoxActor implements GameActor {
     }
 
     public cover(tile: Tiles): void {
-        console.error('box being covered');
+        if (tile === Tiles.target) {
+            this.sprite.setFrame(Tiles.boxOnTarget);
+            this.isOnTarget = true;
+        }
     }
 
     public uncover(tile: Tiles): void {
-        console.error('box being uncovered');
+        if (tile === Tiles.target) {
+            this.sprite.setFrame(Tiles.box);
+            this.isOnTarget = true;
+        }
     }
 
+    public getIsOnTarget(): boolean {
+        return this.isOnTarget;
+    }
 }

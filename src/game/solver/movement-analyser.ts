@@ -51,6 +51,7 @@ export class MovementAnalyser {
 
     private checkEvents(movement: MovementOrchestratorOutput) {
         const events: MovementEvents[] = [];
+        //TODO add the id of the box pushed by the player and its direction
         if (movement.hero.nextPosition.isDifferentOf(movement.hero.currentPosition)) {
             events.push(MovementEvents.HERO_MOVED);
         }

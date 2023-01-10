@@ -63,20 +63,6 @@ export class GameEngine {
         this.movementCoordinator = new MovementOrchestrator({
             strippedMap: this.strippedMap
         });
-        this.targets
-            .find(target => target.getTilePosition().isEqualTo(this.hero.getTilePosition()))
-            ?.cover(Tiles.hero);
-        this.boxes
-            .forEach(spriteBox => {
-                spriteBox.setIsOnTarget(this.targets
-                    .some(target => {
-                        const isCovered = target.getTilePosition().isEqualTo(spriteBox.getTilePosition());
-                        if (isCovered) {
-                            target.cover(Tiles.box);
-                        }
-                        return isCovered;
-                    }));
-            });
 
         EventEmitter.listenToEvent(EventName.UNDO_BUTTON_CLICKED, async () => this.undoLastMovement());
 
@@ -131,8 +117,7 @@ export class GameEngine {
                 this.boxPushMementos.push(actionResult);
             }
         }
-
-        this.playerMoves = moveLetter;
+        this.playerMoves += moveLetter;
     }
 
     private async updateAnimations(lastAction: MovementOrchestratorOutput) {
@@ -154,34 +139,33 @@ export class GameEngine {
         };
         animationsPromises.push(heroAnimationPromise());
 
-        this.boxes
-            .forEach(spriteBox => {
-                spriteBox!.setIsOnTarget(this.targets
-                    .some(target => target.getTilePosition().isEqualTo(spriteBox.getTilePosition())));
-            });
-
-        const movementMap = new Map<Tiles, Movement[]>();
-        movementMap.set(Tiles.box, lastAction.boxes);
-        movementMap.set(Tiles.hero, [lastAction.hero]);
-        this.updateActorsCoveringSituation(movementMap);
+        this.updateActorsCoveringSituation(lastAction.boxes, this.boxes);
+        this.updateActorsCoveringSituation([lastAction.hero], [this.hero]);
         await Promise.all(animationsPromises);
 
         this.animationsAreOver = true;
     }
 
-    private updateActorsCoveringSituation(dynamicFeatures: Map<Tiles, Movement[]>) {
+    private updateActorsCoveringSituation(moves: Movement[], actors: GameActor[]) {
         //NOTE: It's important to have the 'cover' method being called before 'uncover', so a sprite doesn't get uncovered for milliseconds when it's uncover then cover right away
-        dynamicFeatures
-            .forEach((features, tile) => {
-                features.filter(feature => feature.nextPosition.isDifferentOf(feature.currentPosition))
-                    .forEach(movedFeature => {
-                        this.staticActors
-                            .find(actor => actor.getTilePosition().isEqualTo(movedFeature.nextPosition))
-                            ?.cover(tile);
-                        this.staticActors
-                            .find(actor => actor.getTilePosition().isEqualTo(movedFeature.currentPosition))
-                            ?.uncover(tile);
-                    });
+        moves
+            .filter(move => move.nextPosition.isDifferentOf(move.currentPosition))
+            .forEach(move => {
+                const gameActor = actors
+                    .find(actor => actor.getTilePosition().isEqualTo(move.nextPosition))!;
+                const coveringTile = this.staticActors
+                    .find(actor => actor.getTilePosition().isEqualTo(move.nextPosition));
+                if (coveringTile) {
+                    coveringTile.cover(gameActor.getTileCode());
+                    gameActor.cover(coveringTile.getTileCode());
+                }
+
+                const uncoveringTile = this.staticActors
+                    .find(actor => actor.getTilePosition().isEqualTo(move.currentPosition));
+                if (uncoveringTile) {
+                    uncoveringTile.uncover(gameActor.getTileCode());
+                    gameActor.uncover(uncoveringTile.getTileCode());
+                }
             });
     }
 

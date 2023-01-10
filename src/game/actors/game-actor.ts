@@ -7,6 +7,7 @@ export type GameActorConfig = {
     orientation: Directions;
     screenPropertiesCalculator: ScreenPropertiesCalculator;
     tilePosition: Point;
+    covered: boolean;
     sprite: Phaser.GameObjects.Sprite;
     scene: Phaser.Scene,
     id: number

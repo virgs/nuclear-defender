@@ -22,18 +22,18 @@ export class GameActorsFactory {
     private readonly floorPic: Phaser.GameObjects.Image;
     private readonly floorMaskShape: Phaser.GameObjects.Graphics;
     private readonly dynamicFeatures: Map<Tiles, Point[]>;
-    private readonly matrix: MultiLayeredMap;
+    private readonly strippedMatrix: MultiLayeredMap;
     private readonly actorMap: Map<Tiles, GameActor[]>;
     private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
 
     private actorCounter: number;
 
-    constructor(config: { matrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
-        this.screenPropertiesCalculator = new ScreenPropertiesCalculator(config.matrix);
+    constructor(config: { strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+        this.screenPropertiesCalculator = new ScreenPropertiesCalculator(config.strippedTileMatrix);
         this.scene = config.scene;
         this.scale = this.screenPropertiesCalculator.getScale();
         this.dynamicFeatures = config.dynamicFeatures;
-        this.matrix = config.matrix;
+        this.strippedMatrix = config.strippedTileMatrix;
         this.actorMap = GameActorsFactory.initializeActorMap();
 
         this.actorCounter = 0;
@@ -60,15 +60,20 @@ export class GameActorsFactory {
                 value
                     .forEach(tilePosition => this.createActor(tilePosition, {code: key})));
 
-        this.matrix.strippedFeatureLayeredMatrix
+        this.strippedMatrix.strippedFeatureLayeredMatrix
             .forEach((line, y) => line
                 .forEach((layers: OrientedTile[], x: number) => layers
-                    .forEach(item => {
+                    .forEach(tile => {
                         const tilePosition = new Point(x, y);
-                        if (item.code === Tiles.floor) {
+                        if (tile.code === Tiles.floor) {
                             this.createFloorMask(tilePosition);
                         } else {
-                            this.createActor(tilePosition, item);
+                            const boxCover = this.actorMap.get(Tiles.box)!
+                                .find(box => box.getTilePosition().isEqualTo(tilePosition));
+                            boxCover?.cover(tile.code);
+                            const heroCover = this.dynamicFeatures.get(Tiles.hero)!
+                                .some(box => box.isEqualTo(tilePosition));
+                            this.createActor(tilePosition, tile, !!boxCover || heroCover);
                         }
 
                     })));
@@ -80,7 +85,7 @@ export class GameActorsFactory {
         return this.actorMap;
     }
 
-    private createActor(tilePosition: Point, item: OrientedTile) {
+    private createActor(tilePosition: Point, item: OrientedTile, cover: boolean = false) {
         const sprite = this.createSprite(tilePosition, item.code);
         if (this.constructorMap.get(item.code)) {
             const gameActor = this.constructorMap.get(item.code)!({
@@ -89,6 +94,7 @@ export class GameActorsFactory {
                 sprite: sprite,
                 screenPropertiesCalculator: this.screenPropertiesCalculator,
                 tilePosition: tilePosition,
+                covered: cover,
                 id: this.actorCounter++
             } as GameActorConfig);
             this.actorMap.get(item.code)!.push(gameActor);

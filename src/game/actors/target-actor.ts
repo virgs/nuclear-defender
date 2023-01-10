@@ -25,6 +25,8 @@ export class TargetActor implements GameActor {
         this.tilePosition = config.tilePosition;
         this.sprite = config.sprite;
         this.tweens = config.scene.tweens;
+        this.covered = config.covered;
+
 
         this.addLight(config);
     }

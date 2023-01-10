@@ -89,11 +89,9 @@ export class HeroActor implements GameActor {
     }
 
     public cover(tile: Tiles): void {
-        console.error('hero being covered');
     }
 
     public uncover(tile: Tiles): void {
-        console.error('hero being uncovered');
     }
 
 }
