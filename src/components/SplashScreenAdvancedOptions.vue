@@ -92,7 +92,7 @@ export default {
     notifyParent() {
       // this.$emit('valid', true);
     },
-    //TODO check if it's solvable, compare box and target numbers, check if there's onlu one hero...
+    //TODO check if it's solvable, compare box and target numbers, check if there's only one hero...
     validateMap(map) {
       return true;
     },

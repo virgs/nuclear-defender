@@ -8,13 +8,14 @@ import {TreadmillMovementHandler} from '@/game/engine/treadmill-movement-handler
 import {OilyFloorMovementHandler} from '@/game/engine/oily-floor-movement-handler';
 import type {FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 import {OneWayDoorMovementHandler} from '@/game/engine/one-way-door-movement-handler';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export type Movement = {
     id: number,
     currentPosition: Point,
     nextPosition: Point,
-    direction: Directions | undefined
+    direction: Directions | undefined,
+    code: Tiles
 };
 
 export type OrientedPoint = {
@@ -34,10 +35,12 @@ export type MovementOrchestratorInput = {
     boxes: { id: number, point: Point }[];
     lastActionResult?: MovementOrchestratorOutput;
 };
+
 //TODO do not use oriented tile anywhere, replace it with Movement (merge if necessary)
 export class MovementOrchestrator {
     //TODO create pusher categories as well (spring, player, treadmil)... and us it by treadmil and spring.. you'll see where
     private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
+    public static readonly PUSHER_FEATURES: Set<Tiles> = new Set<Tiles>([Tiles.hero, Tiles.treadmil, Tiles.spring]);
 
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementHandlers: FeatureMovementHandler[] = [];
@@ -70,9 +73,9 @@ export class MovementOrchestrator {
     }
 
     public update(input: MovementOrchestratorInput): MovementOrchestratorOutput {
-        this.hero = this.initializeFeature(input.hero);
+        this.hero = this.initializeFeature(input.hero, Tiles.box);
         this.boxes = input.boxes
-            .map(box => this.initializeFeature(box));
+            .map(box => this.initializeFeature(box, Tiles.box));
         const actConfig = {
             hero:
                 {
@@ -105,60 +108,71 @@ export class MovementOrchestrator {
             .every(handler => handler.allowLeavingMovement(move.orientation));
     }
 
-    public getFeaturesBlockingMoveIntoPosition(move: OrientedPoint): (OrientedTile | Movement)[] {
-        const result: (OrientedTile | Movement)[] = [];
-        const dynamicFeaturesAtPosition: (OrientedTile | Movement)[] = this.getFeaturesAtPosition(move.point);
+    public getFeaturesBlockingMoveIntoPosition(move: OrientedPoint): Movement[] {
+        const result: Movement[] = [];
+        const dynamicFeaturesAtPosition: Movement[] = this.getFeaturesAtPosition(move.point);
         result.push(...dynamicFeaturesAtPosition
             .filter(feature => this.blockerTiles.has(feature.code))
             .map(feature => (feature)));
 
-        const staticFeaturesAtPosition: OrientedTile[] = this.getStaticFeaturesAtPosition(move.point);
+        const staticFeaturesAtPosition: Movement[] = this.getStaticFeaturesAtPosition(move.point);
         result.push(...this.movementHandlers
             .filter(handler => staticFeaturesAtPosition
                 .some(feature => feature.code === handler.getTile() && move.point.isEqualTo(handler.getPosition())))
             .filter(handler => !handler.allowEnteringMovement(move.orientation))
-            .map(handler => ({code: handler.getTile(), orientation: handler.getOrientation()})));
+            .map(handler => {
+                return ({
+                    code: handler.getTile(),
+                    direction: handler.getOrientation(),
+                    nextPosition: move.point,
+                    currentPosition: move.point,
+                    id: -1
+                });
+            }));
         return [...new Set(result)];
     }
 
-    private initializeFeature(feature: { id: number; point: Point }): Movement {
+    private initializeFeature(feature: { id: number; point: Point }, tile: Tiles): Movement {
         return {
             id: feature.id,
             currentPosition: feature.point,
             nextPosition: feature.point,
-            direction: undefined
+            direction: undefined,
+            code: tile
         };
     }
 
-    public getFeaturesAtPosition(position: Point): (OrientedTile | Movement)[] {
+    public getFeaturesAtPosition(position: Point): Movement[] {
         let result = this.getDynamicFeaturesAtPosition(position);
         result = result.concat(this.getStaticFeaturesAtPosition(position));
         return result;
     }
 
     private getDynamicFeaturesAtPosition(position: Point) {
-        let result: (OrientedTile | Movement)[] = [];
+        let result: Movement[] = [];
         if (this.hero?.currentPosition.isEqualTo(position) || this.hero?.nextPosition.isEqualTo(position)) {
-            result.push({
-                code: Tiles.hero,
-                ...this.hero
-            });
+            result.push(this.hero);
         }
-        if (this.boxes
-            ?.some(box => box.currentPosition.isEqualTo(position) || box.nextPosition.isEqualTo(position))) {
-            result.push({
-                code: Tiles.box,
-                ...this.box
-            });
-        }
+        this.boxes
+            ?.filter(box => box.currentPosition.isEqualTo(position) || box.nextPosition.isEqualTo(position))
+            .forEach(box => result.push(box));
         return result;
     }
 
-    private getStaticFeaturesAtPosition(position: Point): OrientedTile[] {
-        const result: OrientedTile[] = [];
+    private getStaticFeaturesAtPosition(position: Point): Movement[] {
+        const result: Movement[] = [];
+        let id = 0;
         if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            result.push(...this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x]);
+            const tiles = this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x];
+            result.push(...tiles
+                .map(tile => ({
+                    code: tile.code,
+                    currentPosition: position,
+                    direction: tile.orientation,
+                    id: ++id,
+                    nextPosition: position
+                })));
         }
         return result;
     }

@@ -1,7 +1,8 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
-import type {Movement, MovementOrchestrator} from '@/game/engine/movement-orchestrator';
+import type {Movement} from '@/game/engine/movement-orchestrator';
+import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 
 export class TreadmillMovementHandler implements FeatureMovementHandler {
@@ -21,7 +22,7 @@ export class TreadmillMovementHandler implements FeatureMovementHandler {
         let mapChanged = false;
         actData.boxes
             .filter(box => box.currentPosition.isEqualTo(this.position) &&
-                box.currentPosition.isEqualTo(box.nextPosition)) //box is not moving already
+                box.currentPosition.isEqualTo(box.nextPosition)) //box is not moving yet
             .forEach(box => {
                 const blockers = this.coordinator.getFeaturesBlockingMoveIntoPosition({
                     point: this.nextTilePosition,
@@ -31,13 +32,13 @@ export class TreadmillMovementHandler implements FeatureMovementHandler {
                     mapChanged = this.move(box);
                 } else {
                     const pusherFeature = blockers
-                        .find(feature => feature.code === Tiles.spring || feature.code === Tiles.treadmil);
+                        .find(feature => MovementOrchestrator.PUSHER_FEATURES.has(feature.code));
                     if (pusherFeature) {
                         if (blockers
                             .some(moving => {
                                 const moveableFeature = moving.code === Tiles.hero || moving.code === Tiles.box;
                                 const isMoving = moving.currentPosition?.isDifferentOf(moving.nextPosition);
-                                const isMovingToTheRightDirection = moving.direction !== pusherFeature.orientation;
+                                const isMovingToTheRightDirection = moving.direction !== pusherFeature.direction;
                                 const isLeavingPositionThatBlocksMyMove = moveableFeature && moving.currentPosition?.isEqualTo(this.nextTilePosition);
                                 return isLeavingPositionThatBlocksMyMove && isMoving && isMovingToTheRightDirection;
                             })) {
