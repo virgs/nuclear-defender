@@ -137,7 +137,7 @@ export class MovementOrchestrator {
 
     private getDynamicFeaturesAtPosition(position: Point) {
         let result: (OrientedTile | Movement)[] = [];
-        if (this.hero?.currentPosition.isEqualTo(position)) {
+        if (this.hero?.currentPosition.isEqualTo(position) || this.hero?.nextPosition.isEqualTo(position)) {
             result.push({
                 code: Tiles.hero,
                 ...this.hero

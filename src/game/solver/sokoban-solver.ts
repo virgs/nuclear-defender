@@ -2,16 +2,18 @@ import Heap from 'heap';
 import {Tiles} from '../tiles/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
+import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
+import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
 
 type Solution = {
     actions: Actions[],
     hero: { id: number, point: Point },
     boxes: { id: number, point: Point }[],
+    lastActionResult: MovementOrchestratorOutput,
     distanceSum: number,
     score: number,
     hash?: string,
@@ -98,7 +100,7 @@ export class SokobanSolver {
             score: 0
         };
         initialCandidate.hash = await this.metricEmitter
-            .measureFunction(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
+            .measureTime(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
         this.candidatesToVisit.push(initialCandidate);
 
         let iterations = 0;
@@ -116,22 +118,21 @@ export class SokobanSolver {
             if (cpuBreath > this.sleepingCycle) {
                 cpuBreath = 0;
 
-                await this.metricEmitter.measureFunction(Metrics.BREATHING_TIME, async () => {
+                await this.metricEmitter.measureTime(Metrics.BREATHING_TIME, async () => {
                     await new Promise(resolve => setTimeout(() => {
                         resolve(undefined);
                     }, this.sleepForInMs));
                 });
             }
-            candidate = await this.metricEmitter.measureFunction(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
+            candidate = await this.metricEmitter.measureTime(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
-        console.log(this.candidatesToVisit.size());
+        console.log(this.candidatesToVisit.size(), candidate);
         this.metricEmitter.log();
         return {actions: foundSolution?.actions, iterations};
     }
 
     private async checkSolution(candidate: Solution): Solution | undefined {
-
-        if (await this.metricEmitter.measureFunction(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
+        if (await this.metricEmitter.measureTime(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
             this.candidatesVisitedSet.add(candidate.hash!);
 
             if (this.candidateSolvesMap(candidate.boxes)) {
@@ -147,11 +148,12 @@ export class SokobanSolver {
             const afterAction = this.movementCoordinator.update({
                 heroAction: action,
                 hero: candidate.hero,
-                boxes: candidate.boxes
+                boxes: candidate.boxes,
+                lastActionResult: candidate.lastActionResult
             });
 
             if (afterAction.mapChanged) {
-                const analysis = await this.metricEmitter.measureFunction(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
+                const analysis = await this.metricEmitter.measureTime(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
                 const actionScore = analysis.events
                     .reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
                 const heroMovementCost = 1;
@@ -160,13 +162,14 @@ export class SokobanSolver {
                         .map(box => ({point: box.nextPosition, id: box.id})),
                     hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},
                     actions: candidate.actions.concat(action),
+                    lastActionResult: afterAction,
                     score: actionScore,
                     distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
                 };
 
-                newCandidate.hash = await this.metricEmitter.measureFunction(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(newCandidate));
+                newCandidate.hash = await this.metricEmitter.measureTime(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(newCandidate));
                 if (!analysis.isDeadLocked) {
-                    await this.metricEmitter.measureFunction(Metrics.ADD_CANDIDATE, () => this.candidatesToVisit.push(newCandidate));
+                    await this.metricEmitter.measureTime(Metrics.ADD_CANDIDATE, () => this.candidatesToVisit.push(newCandidate));
                 }
             }
         }

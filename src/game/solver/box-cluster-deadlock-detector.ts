@@ -9,10 +9,10 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
     public deadLocked(movement: MovementOrchestratorOutput): boolean {
         return movement.boxes
             .filter(box => box.currentPosition.isDifferentOf(box.nextPosition))
-            .some(movedBox => this.boxIsDeadLocked(movedBox, movement.boxes));
+            .some(movedBox => this.boxIsDeadLocked(movedBox));
     }
 
-    private boxIsDeadLocked(movedBox: Movement, boxes: Movement[]) {
+    private boxIsDeadLocked(movedBox: Movement) {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
         if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x]

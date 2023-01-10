@@ -43,12 +43,12 @@ async function runSolutionsAlgorithm(strip: { removedFeatures: Map<Tiles, Point[
   console.log('running algorithm for: ' + levels[index].title);
 
 
-  solvers.set('ManhattanDistanceCalculator 3000/40', new SokobanSolver({
+  solvers.set('calculator', new SokobanSolver({
     strippedMap: strip.strippedLayeredTileMatrix,
     staticFeatures: strip.pointMap,
     cpu: {
       sleepingCycle: 5000,
-      sleepForInMs: 10
+      sleepForInMs: 25
     },
     distanceCalculator: new ManhattanDistanceCalculator()
   }));

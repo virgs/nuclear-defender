@@ -114,7 +114,7 @@ export class GameEngine {
     private async updateMap(actionResult: MovementOrchestratorOutput) {
         if (actionResult.mapChanged) {
             this.mapChangedLastCycle = true;
-            this.movementAnalyser.analyse(actionResult);
+            // this.movementAnalyser.analyse(actionResult);
             // console.log(this.movementAnalyser.analyse(actionResult));
             await this.updateAnimations(actionResult);
             this.checkLevelComplete();

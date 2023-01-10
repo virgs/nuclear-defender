@@ -76,6 +76,7 @@ export class GameScene extends Phaser.Scene {
     private changeScene() {
         // this.lights.destroy();
 
+        console.log('level complete')
         const store = Store.getInstance();
         store.totalTimeInMs = new Date().getTime() - this.initialTime!;
         store.movesCode = this.gameEngine!.getPlayerMoves();
