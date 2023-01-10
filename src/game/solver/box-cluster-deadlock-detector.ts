@@ -44,7 +44,7 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
         if (cwTiles
             .some(tile => tile.code === Tiles.wall) || ccwTiles
             .some(tile => tile.code === Tiles.wall)) {
-            console.log('deadlocked: trapped in a blocked cluster');
+            // console.log('deadlocked: trapped in a blocked cluster');
             return true;
         }
         return false;

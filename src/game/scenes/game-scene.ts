@@ -66,9 +66,8 @@ export class GameScene extends Phaser.Scene {
             await this.gameEngine!.update();
             if (this.gameEngine!.isLevelComplete()) {
                 this.allowUpdates = false;
-                console.log('currentLevel complete', this.gameEngine!.getPlayerMoves());
                 setTimeout(async () => {
-                    // this.changeScene();
+                    this.changeScene();
                 }, 1500);
             }
         }
@@ -80,7 +79,7 @@ export class GameScene extends Phaser.Scene {
         const store = Store.getInstance();
         store.totalTimeInMs = new Date().getTime() - this.initialTime!;
         store.movesCode = this.gameEngine!.getPlayerMoves();
-        store.router.push('/next-level');
+        // store.router.push('/next-level');
     }
 
 }

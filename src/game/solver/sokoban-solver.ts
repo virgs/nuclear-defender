@@ -6,6 +6,7 @@ import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
 
 type Solution = {
     actions: Actions[],
@@ -35,17 +36,19 @@ export class SokobanSolver {
     private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => {
         const distanceDifference = a.distanceSum - b.distanceSum;
         if (distanceDifference === 0) {
-            return a.score - b.score
+            return a.score - b.score;
         }
         return distanceDifference;
     });
-    private candidatesVisitedHash: { [hash: string]: boolean } = {};
+    private candidatesVisitedSet: Set<string> = new Set();
+    // private candidatesVisitedHash: { [hash: string]: boolean } = {};
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementBonusMap: Map<MovementEvents, number>;
     private readonly movementAnalyser: MovementAnalyser;
     private readonly sleepForInMs: number;
     private readonly sleepingCycle: number;
     private startTime?: number;
+    private readonly metricEmitter: MetricEmitter;
 
     public constructor(input: {
         staticFeatures: Map<Tiles, Point[]>;
@@ -71,6 +74,7 @@ export class SokobanSolver {
         this.movementBonusMap.set(MovementEvents.BOX_MOVED_OUT_OF_TARGET, 200);
         this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_ONTO_TARGET, 200);
         this.movementBonusMap.set(MovementEvents.HERO_MOVED_BOX_OUT_OF_TARGET, -200);
+        this.metricEmitter = new MetricEmitter();
     }
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
@@ -94,7 +98,8 @@ export class SokobanSolver {
             distanceSum: 0,
             score: 0
         };
-        initialCandidate.hash = this.calculateHashOfSolution(initialCandidate);
+        initialCandidate.hash = await this.metricEmitter
+            .measureFunction(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
         this.candidatesToVisit.push(initialCandidate);
 
         let iterations = 0;
@@ -102,66 +107,72 @@ export class SokobanSolver {
         let solution: Solution | undefined = undefined;
         for (let candidate: Solution | undefined = this.candidatesToVisit.pop();
              candidate;
-             candidate = this.candidatesToVisit.pop()) {
+        ) {
             ++iterations;
             ++cpuBreath;
 
-            solution = this.checkSolution(candidate);
+            solution = await this.checkSolution(candidate);
             if (solution) {
                 break;
             }
-            if (cpuBreath > this.sleepForInMs) {
-                cpuBreath -= this.sleepForInMs;
-                await new Promise(resolve => setTimeout(() => {
-                    // console.log(iterations, (new Date().getTime() - this.startTime!) / 1000);
-                    resolve(undefined);
-                }, this.sleepForInMs));
-            }
+            if (cpuBreath > this.sleepingCycle) {
+                cpuBreath = 0;
 
+                await this.metricEmitter.measureFunction(Metrics.BREATHING_TIME, async () => {
+                    await new Promise(resolve => setTimeout(() => {
+                        // console.log(iterations, (new Date().getTime() - this.startTime!) / 1000);
+                        resolve(undefined);
+                    }, this.sleepForInMs));
+                });
+            }
+            candidate = await this.metricEmitter.measureFunction(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
+        this.metricEmitter.log();
         return {actions: solution?.actions, iterations};
     }
 
-    private checkSolution(candidate: Solution): Solution | undefined {
-        if (!this.candidateWasVisitedBefore(candidate.hash!)) {
-            this.candidatesVisitedHash[candidate.hash!] = true;
+    private async checkSolution(candidate: Solution): Solution | undefined {
+
+        if (await this.metricEmitter.measureFunction(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
+            // this.candidatesVisitedHash[candidate.hash!] = true;
+            this.candidatesVisitedSet.add(candidate.hash!);
 
             if (this.candidateSolvesMap(candidate.boxes)) {
                 return candidate;
             }
 
-            this.applyMoreActions(candidate);
+            await this.applyMoreActions(candidate);
         }
     }
 
-    private applyMoreActions(candidate: Solution) {
-        SokobanSolver.actionsList
-            .forEach((action: Actions) => {
-                const afterAction = this.movementCoordinator.update({
-                    heroAction: action,
-                    hero: candidate.hero,
-                    boxes: candidate.boxes
-                });
-
-                if (afterAction.mapChanged) {
-                    const analysis = this.movementAnalyser.analyse(afterAction);
-                    const actionScore = analysis.events
-                        .reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
-                    const heroMovementCost = 1;
-                    const newCandidate: Solution = {
-                        boxes: afterAction.boxes
-                            .map(box => ({point: box.nextPosition, id: box.id})),
-                        hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},
-                        actions: candidate.actions.concat(action),
-                        score: actionScore,
-                        distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
-                    };
-                    newCandidate.hash = this.calculateHashOfSolution(newCandidate);
-                    if (!analysis.isDeadLocked) {
-                        this.candidatesToVisit.push(newCandidate);
-                    }
-                }
+    private async applyMoreActions(candidate: Solution) {
+        for (const action of SokobanSolver.actionsList) {
+            const afterAction = this.movementCoordinator.update({
+                heroAction: action,
+                hero: candidate.hero,
+                boxes: candidate.boxes
             });
+
+            if (afterAction.mapChanged) {
+                const analysis = await this.metricEmitter.measureFunction(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
+                const actionScore = analysis.events
+                    .reduce((acc, value) => acc + this.movementBonusMap.get(value)!, 0);
+                const heroMovementCost = 1;
+                const newCandidate: Solution = {
+                    boxes: afterAction.boxes
+                        .map(box => ({point: box.nextPosition, id: box.id})),
+                    hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},
+                    actions: candidate.actions.concat(action),
+                    score: actionScore,
+                    distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
+                };
+
+                newCandidate.hash = await this.metricEmitter.measureFunction(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(newCandidate));
+                if (!analysis.isDeadLocked) {
+                    await this.metricEmitter.measureFunction(Metrics.ADD_CANDIDATE, () => this.candidatesToVisit.push(newCandidate));
+                }
+            }
+        }
     }
 
     private candidateSolvesMap(boxesPosition: { id: number; point: Point }[]): boolean {
@@ -171,7 +182,8 @@ export class SokobanSolver {
     }
 
     private candidateWasVisitedBefore(newCandidateHash: string): boolean {
-        return this.candidatesVisitedHash[newCandidateHash];
+        // return this.candidatesVisitedHash[newCandidateHash];
+        return this.candidatesVisitedSet.has(newCandidateHash);
     }
 
     private calculateHashOfSolution(newCandidate: Solution) {

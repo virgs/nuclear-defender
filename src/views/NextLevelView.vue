@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import {Store} from '@/store';
 import {levels} from '@/game/levels/levels';
 

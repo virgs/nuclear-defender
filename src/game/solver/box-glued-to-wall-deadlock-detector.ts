@@ -18,8 +18,9 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
         if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x]
             .some(tile => tile.code === Tiles.wall)) {
+            //TODO fix this. It breaks the AI on Devotron map
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, moves)) {
-                return true;
+                return false;
             }
         }
         return false;
@@ -36,7 +37,7 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
         if (segment.boxes > segment.targets && segment.emptiesAhead < 2) {
             // console.log('segment.differentBoxes > segment.targets && segment.empties < 2');
             // console.log(segment.differentBoxes, segment.targets, segment.empties);
-            console.log('deadlocked: no way to get it back and no available targets');
+            // console.log('deadlocked: no way to get it back and no available targets');
             return true;
         }
         return false;

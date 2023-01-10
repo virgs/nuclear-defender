@@ -1,5 +1,3 @@
-import BiMap from 'bidirectional-map';
-
 export enum Directions {
     LEFT,
     UP,
@@ -33,13 +31,12 @@ export const rotateDirectionClockwise = (direction: Directions): Directions => {
     }
 };
 
-export const directionCharMap = new BiMap({
-    u: Directions.UP,
-    d: Directions.DOWN,
-    l: Directions.LEFT,
-    r: Directions.RIGHT,
-});
+export const directionCharMap = new Map<string, Directions>();
+directionCharMap.set('u', Directions.UP);
+directionCharMap.set('l', Directions.LEFT);
+directionCharMap.set('d', Directions.DOWN);
+directionCharMap.set('r', Directions.RIGHT);
 
 export const getDirectionFromChar = (char: string): Directions | undefined => {
-    return directionCharMap.get(char);
+    return directionCharMap.get(char.toLowerCase());
 };

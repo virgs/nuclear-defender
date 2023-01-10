@@ -91,7 +91,7 @@ export class GameEngine {
     }
 
     public async update(): Promise<void> {
-        if (this.animationsAreOver) {
+        if (this.animationsAreOver && !this.levelComplete) {
             this.nextMoves.push(this.hero.checkAction());
             const heroAction = this.nextMoves.shift()!;
 

@@ -56,6 +56,18 @@ export const levels: Level[] = [
 -#####
 `,
         title: 'Shoe it',
+    },{
+        map: `
+10#
+#. #ds4 #
+# .$  $  #
+#   $#.  #
+## #rs[.o]o$@#
+#  ###$###
+# .$  oo.#
+10#
+`,
+        title: 'Devotron',
     }, {
         map: `
 10#
@@ -68,6 +80,19 @@ export const levels: Level[] = [
 10#
 `,
         title: 'Shoe it again',
+    },{
+        map: `
+6-3#
+7#[$dt]#
+#  dt  #[$dt]#
+# . .lt#[$dt]#
+### ###[$dt]#
+-## . @ls#
+-# . #  #
+-#   ####
+-5#
+`,
+        title: 'Ahituna',
     },
     {
         map: `

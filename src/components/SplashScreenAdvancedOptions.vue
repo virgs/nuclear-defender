@@ -56,10 +56,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 
 import {mapStringToAction} from "@/game/constants/actions";
-import * as lzString from "lz-string";
 
 export default {
   name: "SplashScreenAdvancedOptionsComponent",
@@ -91,7 +90,7 @@ export default {
   },
   methods: {
     notifyParent() {
-      this.$emit('valid', true);
+      // this.$emit('valid', true);
     },
     //TODO check if it's solvable, compare box and target numbers, check if there's onlu one hero...
     validateMap(map) {

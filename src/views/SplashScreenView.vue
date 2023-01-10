@@ -47,8 +47,8 @@ async function runSolutionsAlgorithm(strip: { removedFeatures: Map<Tiles, Point[
     strippedMap: strip.strippedLayeredTileMatrix,
     staticFeatures: strip.pointMap,
     cpu: {
-      sleepingCycle: 3000,
-      sleepForInMs: 40
+      sleepingCycle: 5000,
+      sleepForInMs: 10
     },
     distanceCalculator: new ManhattanDistanceCalculator()
   }));
