@@ -7,7 +7,7 @@ import vueJsx from "@vitejs/plugin-vue-jsx";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), vueJsx()],
-  assetsInclude: ["**/*.html"],
+  assetsInclude: ["**/*.html", "**/*.m4a"],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

@@ -3,6 +3,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
 import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
+import {sounds} from '@/game/constants/sounds';
 
 
 export class TreadmillActor implements GameActor {
@@ -44,6 +45,10 @@ export class TreadmillActor implements GameActor {
 
     public uncover(tile: GameActor): void {
         this.covered = false;
+        if (tile.getTileCode() === Tiles.box) {
+            this.scene.sound.play(sounds.treadmil.key, {volume: 0.2})
+        }
+
         // console.log('treadmil release')
     }
 

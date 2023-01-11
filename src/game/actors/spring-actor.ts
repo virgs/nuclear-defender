@@ -2,8 +2,8 @@ import type Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
-import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
-
+import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import {sounds} from '@/game/constants/sounds';
 
 export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
@@ -29,7 +29,7 @@ export class SpringActor implements GameActor {
                 //     this.sprite.flipY = true
                 break;
             case Directions.UP:
-                this.sprite.flipY = true
+                this.sprite.flipY = true;
                 // this.sprite.setRotation(Math.PI);
                 break;
             case Directions.RIGHT:
@@ -45,12 +45,12 @@ export class SpringActor implements GameActor {
 
     public uncover(tile: GameActor): void {
         this.covered = false;
-        // console.log('spring release')
+        this.scene.sound.play(sounds.springRelease.key, {volume: 0.2});
     }
 
     public cover(tile: GameActor): void {
-        // console.log('spring engage')
         this.covered = true;
+        this.scene.sound.play(sounds.springEngage.key, {volume: 0.2});
     }
 
     public getId(): number {

@@ -12,6 +12,7 @@ import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {EventEmitter, EventName} from '@/event-emitter';
+import {sounds} from '@/game/constants/sounds';
 
 export class GameEngine {
     private readonly strippedMap: MultiLayeredMap;
@@ -23,6 +24,7 @@ export class GameEngine {
     private readonly nextMoves: Actions[];
     private readonly staticActors: GameActor[];
     private readonly boxPushMementos: MovementOrchestratorOutput[];
+    private readonly scene: Phaser.Scene;
 
     private lastActionResult?: MovementOrchestratorOutput;
     private playerMoves: string;
@@ -31,7 +33,8 @@ export class GameEngine {
     private mapChangedLastCycle: boolean;
     private undoIsOver: boolean;
 
-    constructor(config: { solution: SolutionOutput; strippedMap: MultiLayeredMap; actorMap: Map<Tiles, GameActor[]> }) {
+    constructor(config: { solution: SolutionOutput; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
+        this.scene = config.scene;
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
         this.boxes = config.actorMap.get(Tiles.box)! as BoxActor[];
         this.targets = config.actorMap.get(Tiles.target)! as TargetActor[];
@@ -114,6 +117,7 @@ export class GameEngine {
                 .some(box => box.currentPosition.isDifferentOf(box.nextPosition) &&
                     this.lastActionResult?.hero.nextPosition.isEqualTo(box.currentPosition))) {
                 moveLetter = moveLetter.toUpperCase();
+                this.scene.sound.play(sounds.pushingBox.key, {volume: 0.1})
                 this.boxPushMementos.push(actionResult);
             }
         }
@@ -184,6 +188,7 @@ export class GameEngine {
                 const undoLastAction: MovementOrchestratorOutput = {
                     mapChanged: true,
                     hero: {
+                        code: Tiles.hero,
                         id: this.hero.getId(),
                         currentPosition: lastAction.hero.nextPosition,
                         nextPosition: lastAction.hero.currentPosition,
@@ -191,6 +196,7 @@ export class GameEngine {
                     },
                     boxes: lastAction.boxes
                         .map(box => ({
+                            code: Tiles.box,
                             id: box.id,
                             currentPosition: box.nextPosition,
                             nextPosition: box.currentPosition,

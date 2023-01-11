@@ -5,6 +5,7 @@ import {configuration} from '../constants/configuration';
 import {GameEngine} from '@/game/engine/game-engine';
 import {GameActorsFactory} from '../actors/game-actors-factory';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {sounds} from '@/game/constants/sounds';
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
@@ -30,10 +31,16 @@ export class GameScene extends Phaser.Scene {
                 frameHeight: configuration.tiles.verticalSize
             }
         });
+        Object.keys(sounds)
+            .forEach(item => {
+                const sound = sounds[item];
+                this.load.audio(sound.key, sound.resource);
+            });
         this.allowUpdates = true;
     }
 
     public async create() {
+        this.sound.play(sounds.game.key, {volume: 0.15});
         this.initialTime = new Date().getTime();
         InputManager.setup(this);
         const store = Store.getInstance();
@@ -54,6 +61,7 @@ export class GameScene extends Phaser.Scene {
         const actorMap = actorsCreator.create();
 
         this.gameEngine = new GameEngine({
+            scene: this,
             strippedMap: store.strippedLayeredTileMatrix!,
             actorMap: actorMap,
             solution: store.solution
@@ -65,6 +73,7 @@ export class GameScene extends Phaser.Scene {
         if (this.allowUpdates) {
             await this.gameEngine!.update();
             if (this.gameEngine!.isLevelComplete()) {
+                this.sound.play(sounds.victory.key, {volume: 0.75});
                 this.allowUpdates = false;
                 setTimeout(async () => {
                     this.changeScene();
@@ -80,7 +89,7 @@ export class GameScene extends Phaser.Scene {
         store.totalTimeInMs = new Date().getTime() - this.initialTime!;
         const playerMoves = this.gameEngine!.getPlayerMoves();
         store.movesCode = playerMoves;
-        console.log('level complete: ' + playerMoves)
+        console.log('level complete: ' + playerMoves);
         // store.router.push('/next-level');
     }
 

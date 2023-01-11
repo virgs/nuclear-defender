@@ -6,6 +6,7 @@ import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {configuration} from '@/game/constants/configuration';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {sounds} from '@/game/constants/sounds';
 
 export class BoxActor implements GameActor {
     private tilePosition: Point;
@@ -14,10 +15,12 @@ export class BoxActor implements GameActor {
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
+    private readonly scene: Phaser.Scene;
 
     constructor(boxConfig: GameActorConfig) {
         this.screenPropertiesCalculator = boxConfig.screenPropertiesCalculator;
         this.id = boxConfig.id;
+        this.scene = boxConfig.scene;
         this.tilePosition = boxConfig.tilePosition;
         this.tweens = boxConfig.scene.tweens;
         this.sprite = boxConfig.sprite;
@@ -75,6 +78,7 @@ export class BoxActor implements GameActor {
         if (actor.getTileCode() === Tiles.target) {
             this.sprite.setFrame(Tiles.boxOnTarget);
             this.isOnTarget = true;
+                this.scene.sound.play(sounds.boxOnTarget.key, {volume: 0.5})
         }
     }
 
