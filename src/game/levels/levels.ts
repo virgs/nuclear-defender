@@ -1,11 +1,5 @@
-// All credits to:
-// Title: Aruba7
-// Description: Lucky set no.7
-// Author: Eric F Tchong
-// Email: serenata@setarnet.aw
-
 //TODO add thumbnail?
-//show tem as a carrousel instead of a dropdown?
+//TODO show tem as a carrousel instead of a dropdown
 
 type Level = {
     title: string,
@@ -56,7 +50,7 @@ export const levels: Level[] = [
 -#####
 `,
         title: 'Shoe on', //boxesLine = 14
-    },{
+    }, {
         map: `
 10#
 #. #ds4 #
@@ -80,7 +74,7 @@ export const levels: Level[] = [
 10#
 `,
         title: 'Snikers', //boxesLine = 15
-    },{
+    }, {
         map: `
 6-3#
 7#[$dt]#
@@ -144,4 +138,249 @@ export const levels: Level[] = [
 8#
 `,
         title: 'Oldschool' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+    },
+    {
+        map: `
+####    ####
+#   #  #   #
+# *  ## $* #
+# $.  .$.  #
+ # $.$#.  #
+  #.# @$ #
+  # $  #.#
+ #  .#$.$ #
+#  .$.  .$ #
+# *$ ##  * #
+#   #  #   #
+####    ####
+`,
+        title: 'openbar' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+    },
+    {
+        map: `
+     ##
+   ##..##
+  #. $ $ #
+ #  $  $ .#
+ #$$##*#$ #
+#.  *.+# $.#
+#.$ #..*  .#
+ # $#*##$$#
+ #. $  $  #
+  # $ $ .#
+   ##..##
+     ##
+`,
+        title: 'medfest'
+    },
+    {
+        map: `
+ ##########
+##   #    ##
+#  #.  .#  #
+# # . #. # #
+# $$* $*$$ #
+#   #* .  ##
+##  . *#   #
+# $$*$ *$$ #
+# # .# . # #
+#  #.  .#@ #
+##    #   ##
+ ##########
+
+`,
+        title: 'batata'
+    },
+    {
+        map: `
+############
+#          ##   ####
+# ######## ######  #
+# ##     #         #
+# ## ###   ######$ #
+# ## # ## $   $   ##
+# ## # ##  ##### ##
+# ## ####   $ $  #
+# ## ### $ ## @ ##
+# # $ ##  #######
+# $   ...**.#
+########....#
+       ######
+`,
+        title: 'vodka' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+    },
+    {
+        map: `
+###########
+#         #
+# $$.$$.$ #
+# $.$..$. #
+# $..$$.$ #
+# $.*+.$. #
+# .$....$ #
+# $.$$.$. #
+# $$..$.$ #
+#         #
+###########
+`,
+        title: 'isnt it chaotic' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+    },{
+        map: `
+   ####
+####  #
+# $.*.#
+# ## .#
+#    .####
+### $$   #
+  #$     #
+  #@###  #
+  ### ####
+`,
+        title: 'snoopy' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+    },{
+        map: `
+#######
+# .$  #
+#.    #
+#.  ###
+#.# ###
+#.# $@#
+#  $$ #
+##$#  #
+ #    #
+ ######
+`,
+        title: 'bee hive'
+    },{
+        map: `
+  #######
+  #  .*@#
+###  $$ #
+#  $ # ####
+#    # $ .#
+####..  ###
+   ######
+`,
+        title: 'wooden icecream'
+    },{
+        map: `
+###########
+#.. @#    #
+##  $$  $ #
+###  $$ # #
+#...  #   #
+###########
+`,
+        title: 'eminems suitcase'
+    },{
+        map: `
+    #####
+#####@  #
+#   $$$ #
+#..**. ##
+#      #
+########
+`,
+        title: 'groundbreak'
+    },{
+        map: `
+ #######
+ # .   ##
+ #  $   #
+####$ *.#
+#@$ .   #
+#########
+`,
+        title: 'daredevil'
+    },{
+        map: `
+######
+#@#  #
+#$#  #
+# $  #
+#.*  #
+# * ##
+# .  #
+##   #
+ #####
+`,
+        title: 'young child singer'
+    },{
+        map: `
+########
+# .... #
+#  $@$ #
+#####  ###
+ ###     #
+ #     $ #
+ #   ##$ #
+ ######  #
+      ####
+`,
+        title: 'fantasma'
+    },{
+        map: `
+ ######
+ #.   ##
+#### $.#
+#@$  #.#
+# $$   #
+#. #   #
+########
+`,
+        title: 'pacman enemy'
+    },{
+        map: `
+######
+#... #
+# #. ##
+#   $ #
+#$$$  #
+#@ #  #
+#######
+`,
+        title: 'sour green tea'
+    },{
+        map: `
+#####  ###
+#   ####.#
+# $ #  #.#
+#  $#$  .#
+#     $@.#
+#####  ###
+    ####
+`,
+        title: 'vida loka'
+    },{
+        map: `
+  #####
+  #   #
+### # ##
+#  ... #
+# $$ $ #
+# @#####
+####
+`,
+        title: 'rocker science'
+    },{
+        map: `
+------####
+------#  #
+####### .##
+#  ##   ..#
+#@$   $$  #
+####   ####
+---#####
+`,
+        title: 'ambulance call'
+    },{
+        map: `
+##### ####
+#   ###  #
+#     $@ #
+## $#$   #
+#...#   ##
+#########
+`,
+        title: 'coke tail'
     }];

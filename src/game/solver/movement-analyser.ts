@@ -23,7 +23,8 @@ export enum MovementEvents {
     HERO_MOVED_BOX_ONTO_TARGET,
     HERO_MOVED_BOX_OUT_OF_TARGET,
     BOX_MOVED_ONTO_TARGET,
-    BOX_MOVED_OUT_OF_TARGET
+    BOX_MOVED_OUT_OF_TARGET,
+    BOX_MOVED_ONTO_FEATURE,
 }
 
 export class MovementAnalyser {
@@ -81,6 +82,11 @@ export class MovementAnalyser {
             }
         }
 
+        boxesMoved
+            .filter(box =>
+                this.strippedMap.strippedFeatureLayeredMatrix[box.nextPosition.y][box.nextPosition.x]
+                    .some(layer => layer.code !== Tiles.floor))
+            .forEach(_ => events.push(MovementEvents.BOX_MOVED_ONTO_FEATURE));
         boxesMoved
             .filter(box => this.isTileAtPosition(box.nextPosition, Tiles.target))
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_ONTO_TARGET));

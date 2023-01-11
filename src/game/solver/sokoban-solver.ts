@@ -20,6 +20,7 @@ type Solution = {
     score: number,
     hash?: string,
     boxesLine: number,
+    featureUsed: number,
     lastPushedBox: PushedBox;
 };
 
@@ -28,6 +29,7 @@ export type SolutionOutput = {
     iterations: number;
     totalTime: number;
     boxesLine: number;
+    featureUsed: number;
 }
 
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
@@ -84,8 +86,9 @@ export class SokobanSolver {
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
         this.startTime = new Date().getTime();
-        const {actions, iterations, boxesLine} = await this.startAlgorithm(dynamicMap);
+        const {actions, iterations, boxesLine, featureUsed} = await this.startAlgorithm(dynamicMap);
         return {
+            featureUsed: featureUsed,
             boxesLine: boxesLine,
             actions: actions,
             iterations: iterations,
@@ -98,6 +101,7 @@ export class SokobanSolver {
         const hero = dynamicMap.get(Tiles.hero)![0];
         const boxes = dynamicMap.get(Tiles.box)!;
         const initialCandidate: Solution = {
+            featureUsed: 0,
             boxesLine: 0,
             lastPushedBox: {id: -1, direction: Directions.UP},
             actions: [],
@@ -135,7 +139,10 @@ export class SokobanSolver {
         }
         console.log(this.candidatesToVisit.size(), candidate);
         this.metricEmitter.log();
-        return {actions: foundSolution?.actions, iterations, boxesLine: foundSolution?.boxesLine || 0};
+        return {
+            actions: foundSolution?.actions, iterations,
+            boxesLine: foundSolution?.boxesLine || 0, featureUsed: foundSolution?.featureUsed || 0
+        };
     }
 
     private async checkSolution(candidate: Solution): Promise<Solution | undefined> {
@@ -170,7 +177,11 @@ export class SokobanSolver {
                         currentBoxesLine = 1;
                     }
                 }
+                const featuresUsed = analysis.events
+                    .filter((event: MovementEvents) => event === MovementEvents.BOX_MOVED_ONTO_FEATURE)
+                    .length;
                 const newCandidate: Solution = {
+                    featureUsed: candidate.featureUsed + featuresUsed,
                     lastPushedBox: analysis.lastPushedBox || candidate.lastPushedBox,
                     boxesLine: candidate.boxesLine + currentBoxesLine,
                     boxes: afterAction.boxes
