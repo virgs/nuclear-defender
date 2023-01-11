@@ -15,13 +15,13 @@ export class BoxGluedToWallDetector extends DeadLockDetector {
     }
 
     private boxIsDeadLocked(movedBox: Movement, moves: Movement[]) {
-        if (this.staticMap.strippedFeatureLayeredMatrix[movedBox.nextPosition.y][movedBox.nextPosition.x]
+        if (this.getStaticFeaturesAtPosition(movedBox.nextPosition)
             .some(tile => tile.code === Tiles.spring || tile.code === Tiles.treadmil)) {
-            return false
+            return false;
         }
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
-        if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x]
+        if (this.getStaticFeaturesAtPosition(nextTilePosition)
             .some(tile => tile.code === Tiles.wall)) {
             if (this.wallAheadCheck(direction, movedBox, nextTilePosition, moves)) {
                 return true;

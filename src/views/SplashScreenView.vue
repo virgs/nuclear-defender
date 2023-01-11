@@ -10,9 +10,8 @@ import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {Tiles} from '@/game/tiles/tiles';
-import {Point} from '@/game/math/point';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {Actions, mapActionToString} from '@/game/constants/actions';
 
 const router = useRouter();
 //TODO get it from OptionsComponent
@@ -33,31 +32,67 @@ function optionsChanged(valid: boolean) {
   console.log();
 }
 
-async function runSolutionsAlgorithm(strip: { removedFeatures: Map<Tiles, Point[]>; strippedLayeredTileMatrix: MultiLayeredMap, pointMap: Map<Tiles, Point[]> }) {
+async function runSolutionsAlgorithm() {
   let solutionOutput: any = undefined;
 
-  // for (let index = 1; index < levels.length - 1; ++index) {
-  // let index = 4;
-  const index = data.currentSelectedIndex;
-  const solvers = new Map<string, SokobanSolver>();
-  console.log('running algorithm for: ' + levels[index].title);
+  console.log('running algorithms');
+  let solutions: any[] = [];
+  await Promise.all(levels
+      .filter((_, index) => index > 0) //skip test level
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index > 4) //skip first 4 levels
+      .filter((_, index) => index < 5) //only first n levels
+      .map(async level => {
+        console.log(level.title);
+        const map = new StandardSokobanAnnotationTranslator()
+            .translate(level.map);
+        const output = new SokobanMapProcessor(map)
+            .strip([Tiles.hero, Tiles.box]);
 
+        const solver = new SokobanSolver({
+          strippedMap: output.strippedLayeredTileMatrix,
+          staticFeatures: output.pointMap,
+          cpu: {
+            sleepingCycle: 5000,
+            sleepForInMs: 25
+          },
+          distanceCalculator: new ManhattanDistanceCalculator()
+        });
 
-  solvers.set('calculator', new SokobanSolver({
-    strippedMap: strip.strippedLayeredTileMatrix,
-    staticFeatures: strip.pointMap,
-    cpu: {
-      sleepingCycle: 5000,
-      sleepForInMs: 25
-    },
-    distanceCalculator: new ManhattanDistanceCalculator()
-  }));
-  for (let [name, solver] of solvers) {
-    solutionOutput = await solver.solve(strip.removedFeatures);
-    console.log(levels[index].title, name, solutionOutput);
+        solutionOutput = await solver.solve(output.removedFeatures);
+        const data = {
+          title: level.title,
+          map: level.map.replace(/\n/g, '\n'),
+          ...solutionOutput,
+          actions: solutionOutput.actions
+              ?.map((action: Actions) => mapActionToString(action))
+              .join('')
+        };
+        solutions.push(data);
+        console.log(data);
 
-  }
-  // }
+      }));
+  console.log('saving file');
+  const file = new Blob([JSON.stringify(solutions)], {type: 'text/plain'});
+
+  const a = document.createElement("a"),
+      url = URL.createObjectURL(file);
+  a.href = url;
+  a.download = 'sokoban-levels-solutions.json';
+  document.body.appendChild(a);
+  console.log(solutions);
+  a.click();
+  setTimeout(function () {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 0);
+
   return solutionOutput;
 }
 
@@ -76,8 +111,8 @@ async function playButtonClick() {
   store.currentLevelIndex = data.currentSelectedIndex;
   store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
   store.features = output.removedFeatures;
-  store.router = router
-  store.solution = await runSolutionsAlgorithm(output);
+  store.router = router;
+  store.solution = await runSolutionsAlgorithm();
 
   await router.push('/game');
 }

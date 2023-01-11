@@ -5,7 +5,7 @@ import type {DeadLockDetector} from '@/game/solver/dead-lock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {BoxClusterDeadlockDetector} from '@/game/solver/box-cluster-deadlock-detector';
 import {BoxGluedToWallDetector} from '@/game/solver/box-glued-to-wall-deadlock-detector';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 
 export type PushedBox = { id: number, direction: Directions };
@@ -84,8 +84,8 @@ export class MovementAnalyser {
 
         boxesMoved
             .filter(box =>
-                this.strippedMap.strippedFeatureLayeredMatrix[box.nextPosition.y][box.nextPosition.x]
-                    .some(layer => layer.code !== Tiles.floor))
+                this.getTilesAtPosition(box.nextPosition)
+                    .some(layer => layer.code !== Tiles.floor && layer.code !== Tiles.target))
             .forEach(_ => events.push(MovementEvents.BOX_MOVED_ONTO_FEATURE));
         boxesMoved
             .filter(box => this.isTileAtPosition(box.nextPosition, Tiles.target))
@@ -120,11 +120,16 @@ export class MovementAnalyser {
     }
 
     public isTileAtPosition(position: Point, tile: Tiles): boolean {
+        return this.getTilesAtPosition(position)
+            .some(layer => layer.code === tile);
+    }
+
+    public getTilesAtPosition(position: Point): OrientedTile[] {
         if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
             && position.x >= 0 && position.y >= 0) {
-            return this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x]
-                .some(layer => layer.code === tile);
+            return this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x];
+
         }
-        return false;
+        return [];
     }
 }

@@ -4,11 +4,13 @@
 type Level = {
     title: string,
     map: string,
-    solution?: {
-        moves: string,
-        iterationsToFind: number //sort by iterationsToFind to determine level order?
-    }
+    featureUsed?: number,
+    boxesLine?: number,
+    actions?: string,
+    iterations?: number //sort by iterationsToFind to determine level order?
+    totalTime?: number //sort by iterationsToFind to determine level order?
 };
+
 export const levels: Level[] = [
     {
         map: `
@@ -62,6 +64,39 @@ export const levels: Level[] = [
 10#
 `,
         title: 'Devotron', //boxesLine = 14
+    }, {
+        map: `
+--####
+--#  #
+--#  #
+### *###
+#      #
+# .*** #
+## $  ##
+-##* ##
+--#@  #
+--# # #
+--#   #
+--#####
+`,
+        title: 'tony middle finger'
+    }, {
+        map: `
+4-5#
+5-# ds[$ls]#
+5-##[@o]#
+7#o#
+#[$rt]4o[rwo]dt#
+#[.o]5#[.dwo]#
+#o#---#o#
+#o#---#o#
+#o#---#o#
+#o#---#o#
+#o5#[.o]#
+#[$ut][.o]4o[$lt]#
+9#
+`,
+        title: 'adventure time', //boxesLine = 15
     }, {
         map: `
 10#
@@ -154,7 +189,7 @@ export const levels: Level[] = [
 #   #  #   #
 ####    ####
 `,
-        title: 'openbar' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+        title: 'openbar resume' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
     },
     {
         map: `
@@ -171,7 +206,7 @@ export const levels: Level[] = [
    ##..##
      ##
 `,
-        title: 'medfest'
+        title: 'medfest crazy night'
     },
     {
         map: `
@@ -189,7 +224,7 @@ export const levels: Level[] = [
  ##########
 
 `,
-        title: 'batata'
+        title: 'english muffin potato'
     },
     {
         map: `
@@ -207,7 +242,7 @@ export const levels: Level[] = [
 ########....#
        ######
 `,
-        title: 'vodka' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+        title: 'vodka selfsteem' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
     },
     {
         map: `
@@ -224,7 +259,7 @@ export const levels: Level[] = [
 ###########
 `,
         title: 'isnt it chaotic' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
-    },{
+    }, {
         map: `
    ####
 ####  #
@@ -236,8 +271,8 @@ export const levels: Level[] = [
   #@###  #
   ### ####
 `,
-        title: 'snoopy' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
-    },{
+        title: 'snoopy light bulb' //{boxesLine: 15, actions: Array(48), iterations: 22200, totalTime: 864}
+    }, {
         map: `
 #######
 # .$  #
@@ -250,8 +285,8 @@ export const levels: Level[] = [
  #    #
  ######
 `,
-        title: 'bee hive'
-    },{
+        title: 'bee hive behavior'
+    }, {
         map: `
   #######
   #  .*@#
@@ -262,7 +297,7 @@ export const levels: Level[] = [
    ######
 `,
         title: 'wooden icecream'
-    },{
+    }, {
         map: `
 ###########
 #.. @#    #
@@ -272,7 +307,7 @@ export const levels: Level[] = [
 ###########
 `,
         title: 'eminems suitcase'
-    },{
+    }, {
         map: `
     #####
 #####@  #
@@ -281,8 +316,8 @@ export const levels: Level[] = [
 #      #
 ########
 `,
-        title: 'groundbreak'
-    },{
+        title: 'groundbreak rules'
+    }, {
         map: `
  #######
  # .   ##
@@ -291,8 +326,8 @@ export const levels: Level[] = [
 #@$ .   #
 #########
 `,
-        title: 'daredevil'
-    },{
+        title: 'daredevil microphone'
+    }, {
         map: `
 ######
 #@#  #
@@ -305,7 +340,7 @@ export const levels: Level[] = [
  #####
 `,
         title: 'young child singer'
-    },{
+    }, {
         map: `
 ########
 # .... #
@@ -317,19 +352,19 @@ export const levels: Level[] = [
  ######  #
       ####
 `,
-        title: 'fantasma'
-    },{
+        title: 'one eye phantom'
+    }, {
         map: `
- ######
- #.   ##
+-######
+-#.   ##
 #### $.#
 #@$  #.#
 # $$   #
 #. #   #
 ########
 `,
-        title: 'pacman enemy'
-    },{
+        title: 'pacman red enemy'
+    }, {
         map: `
 ######
 #... #
@@ -340,7 +375,7 @@ export const levels: Level[] = [
 #######
 `,
         title: 'sour green tea'
-    },{
+    }, {
         map: `
 #####  ###
 #   ####.#
@@ -350,8 +385,8 @@ export const levels: Level[] = [
 #####  ###
     ####
 `,
-        title: 'vida loka'
-    },{
+        title: 'vida loka aunt'
+    }, {
         map: `
   #####
   #   #
@@ -362,7 +397,7 @@ export const levels: Level[] = [
 ####
 `,
         title: 'rocker science'
-    },{
+    }, {
         map: `
 ------####
 ------#  #
@@ -373,7 +408,7 @@ export const levels: Level[] = [
 ---#####
 `,
         title: 'ambulance call'
-    },{
+    }, {
         map: `
 ##### ####
 #   ###  #
@@ -383,4 +418,191 @@ export const levels: Level[] = [
 #########
 `,
         title: 'coke tail'
+    }, {
+        map: `
+ ####
+ #  ####
+ #     #
+## #.  #
+# * #*##
+# $  * #
+# # @  #
+#   ####
+#####
+`,
+        title: 'houston situation'
+    }, {
+        map: `
+  #####
+###@  #
+# $*#$##
+# #  . #
+# . $# #
+## #.  #
+ #    ##
+ ###  #
+   ####
+`,
+        title: 'brazilian home kitchen'
+    }, {
+        map: `
+#####
+#   ####
+#  $$  #
+##.@ . #
+ #. #.##
+ # $$ #
+ #  ###
+ ####
+`,
+        title: 'middle west texas'
+    }, {
+        map: `
+#####
+#. .#####
+#  .    #
+##$$@$  #
+## ######
+#  $ ##
+#   . #
+###   #
+  #####
+`,
+        title: 'hospital prayers'
+    }, {
+        map: `
+  ####
+ ##  #
+ #   ####
+##$ ..*.#
+# $  #$ #
+#    #@ #
+#########
+`,
+        title: 'church time'
+    }, {
+        map: `
+ #####
+##   #
+#  # ###
+# # *  #
+# #  #@#
+#   *  #
+### *$##
+  # . #
+  #####
+`,
+        title: 'alternative portugal flag'
+    }, {
+        map: `
+  ########
+  #   #  #
+  # . $. #
+ ###$##  #
+ #.. ##$##
+## $*$   #
+#  * #   #
+#  @.#####
+##   #
+ #####
+`,
+        title: 'formula one justice'
+    }, {
+        map: `
+ #######
+ #  #  #
+ #$.@.$#
+ # .#. #
+##$.#.$##
+# $   $ #
+#   #   #
+#########
+`,
+        title: 'left business'
+    }, {
+        map: `
+ #####
+##  .#
+# $#.##
+#     #
+##$   #
+#  #*##
+# @  #
+#  ###
+####
+`,
+        title: 'eastern island mistery'
+    }, {
+        map: `
+  #####
+###   ##
+# .. . #
+# $$ # #
+## #$$ #
+ #.@  ##
+ ###  #
+   ####
+`,
+        title: 'run forrest'
+    }, {
+        map: `
+  #####
+###   #
+#   #.##
+#  *$@ #
+## * **##
+ # # #  #
+ #      #
+ ###  ###
+   ####
+`,
+        title: 'beauty saloon hair'
+    }, {
+        map: `
+########
+#   #  #
+#      #
+## #.$.#
+#  $@###
+# #$*.#
+# # # #
+#     #
+##   ##
+ #####
+`,
+        title: 'kharma chameleon'
+    }, {
+        "title": "mr. lonely",
+        "map": "\n     #####\n   ###   #\n  ## * # #\n ##      #\n## * * ###\n#   $###\n#  + #\n######\n",
+        "featureUsed": 0,
+        "boxesLine": 22,
+        "actions": "ruudllururdurrdlluldlddrrudlluurduurrruurrddlldlluurdrrruulldurrddlldlulldrddlulldr",
+        "iterations": 20668,
+        "totalTime": 2820
+    },
+    {
+        map: `
+      ####
+     ## .#
+    ##   #
+   ## ...#
+#### $$ ##
+# @$   ##
+#  $  ##
+#   ###
+#####
+`,
+        title: 'driving license'
+    }, {
+        map: `
+     ####
+  ####@ #
+  #.* $ #
+###   # ##
+#    #.. #
+#    $ $ #
+####  ####
+   ####
+`,
+        title: 'baby got another'
     }];

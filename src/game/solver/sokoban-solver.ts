@@ -2,14 +2,14 @@ import Heap from 'heap';
 import {Tiles} from '../tiles/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
+import {Directions} from '@/game/constants/directions';
 import type {PushedBox} from '@/game/solver/movement-analyser';
 import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
 import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import {Directions} from '@/game/constants/directions';
 
 type Solution = {
     actions: Actions[],
@@ -97,7 +97,6 @@ export class SokobanSolver {
     }
 
     private async startAlgorithm(dynamicMap: Map<Tiles, Point[]>) {
-        console.log('start algorithm');
         const hero = dynamicMap.get(Tiles.hero)![0];
         const boxes = dynamicMap.get(Tiles.box)!;
         const initialCandidate: Solution = {
@@ -137,8 +136,7 @@ export class SokobanSolver {
             }
             candidate = await this.metricEmitter.measureTime(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
-        console.log(this.candidatesToVisit.size(), candidate);
-        this.metricEmitter.log();
+        // this.metricEmitter.log();
         return {
             actions: foundSolution?.actions, iterations,
             boxesLine: foundSolution?.boxesLine || 0, featureUsed: foundSolution?.featureUsed || 0
@@ -203,7 +201,7 @@ export class SokobanSolver {
 
     private candidateSolvesMap(boxesPosition: { id: number; point: Point }[]): boolean {
         return boxesPosition
-            .every(box => this.strippedMap.strippedFeatureLayeredMatrix[box.point.y][box.point.x]
+            .every(box => this.getStaticFeaturesAtPosition(box.point)
                 .some(layer => layer.code === Tiles.target));
     }
 
@@ -218,4 +216,11 @@ export class SokobanSolver {
             .join(';')}:${newCandidate.hero.point.x},${newCandidate.hero.point.y}`;
     }
 
+    private getStaticFeaturesAtPosition(position: Point): OrientedTile[] {
+        if (position.x < this.strippedMap.width && position.y < this.strippedMap.height
+            && position.x >= 0 && position.y >= 0) {
+            return this.strippedMap.strippedFeatureLayeredMatrix[position.y][position.x];
+        }
+        return [];
+    }
 }

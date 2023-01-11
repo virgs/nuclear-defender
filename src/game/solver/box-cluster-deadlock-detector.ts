@@ -15,12 +15,11 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
     private boxIsDeadLocked(movedBox: Movement) {
         const direction = movedBox.direction!;
         const nextTilePosition = movedBox.nextPosition.calculateOffset(direction);
-        if (this.staticMap.strippedFeatureLayeredMatrix[nextTilePosition.y][nextTilePosition.x]
+        if (this.getStaticFeaturesAtPosition(nextTilePosition)
             .some(tile => tile.code === Tiles.wall)) {
             if (this.checkTrappedBoxInCorner(movedBox, direction)) {
                 return true;
             }
-
         }
         return false;
     }
