@@ -12,7 +12,7 @@ import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
 import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
-import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export class GameActorsFactory {
@@ -29,8 +29,8 @@ export class GameActorsFactory {
 
     private actorCounter: number;
 
-    constructor(config: { strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
-        this.screenPropertiesCalculator = new ScreenPropertiesCalculator(config.strippedTileMatrix);
+    constructor(config: { screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+        this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.scene = config.scene;
         this.scale = this.screenPropertiesCalculator.getScale();
         this.dynamicFeatures = config.dynamicFeatures;
@@ -114,7 +114,6 @@ export class GameActorsFactory {
                 scene: this.scene,
                 orientation: item.orientation,
                 worldPosition: worldPosition,
-                screenPropertiesCalculator: this.screenPropertiesCalculator,
                 tilePosition: tilePosition,
                 coveredByDynamicFeature: heroCover || !!boxCover,
                 contentAround: tilesAround,

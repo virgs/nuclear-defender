@@ -1,6 +1,8 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
+import {sounds} from '@/game/constants/sounds';
 import type {BoxActor} from '@/game/actors/box-actor';
+import {EventEmitter, EventName} from '@/event-emitter';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import type {TargetActor} from '@/game/actors/target-actor';
@@ -10,9 +12,8 @@ import {Actions, mapActionToString} from '@/game/constants/actions';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {EventEmitter, EventName} from '@/event-emitter';
-import {sounds} from '@/game/constants/sounds';
 
 export class GameEngine {
     private readonly strippedMap: MultiLayeredMap;
@@ -32,9 +33,11 @@ export class GameEngine {
     private animationsAreOver: boolean;
     private mapChangedLastCycle: boolean;
     private undoIsOver: boolean;
+    private screenPropertiesCalculator: ScreenPropertiesCalculator;
 
-    constructor(config: { solution: SolutionOutput; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
+    constructor(config: { solution: SolutionOutput; screenPropertiesCalculator: ScreenPropertiesCalculator; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
         this.scene = config.scene;
+        this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
         this.boxes = config.actorMap.get(Tiles.box)! as BoxActor[];
         this.targets = config.actorMap.get(Tiles.target)! as TargetActor[];
@@ -132,12 +135,19 @@ export class GameEngine {
             .map(async movedBox => {
                 const spriteBoxMoved = this.boxes
                     .find(tileBox => movedBox.id === tileBox.getId())!;
-                await spriteBoxMoved?.animate(movedBox.nextPosition);
+
+                const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
+                spriteBoxMoved?.setTilePosition(movedBox.nextPosition);
+                await spriteBoxMoved?.animate(spritePosition);
             }));
 
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
-            await this.hero!.animate(hero.nextPosition, hero.direction);
+            if (hero.nextPosition.isDifferentOf(this.hero.getTilePosition())) {
+                const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
+                this.hero.setTilePosition(hero.nextPosition);
+                await this.hero!.animate(spritePosition, hero.direction);
+            }
         };
         animationsPromises.push(heroAnimationPromise());
 

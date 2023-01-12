@@ -22,18 +22,18 @@ export class TreadmillMovementHandler implements FeatureMovementHandler {
         let mapChanged = false;
         actData.boxes
             .filter(box => box.currentPosition.isEqualTo(this.position) &&
-                box.currentPosition.isEqualTo(box.nextPosition)) //box is not moving yet
+                box.currentPosition.isEqualTo(box.nextPosition)) //box is on me, but is not moving
             .forEach(box => {
                 const blockers = this.coordinator.getFeaturesBlockingMoveIntoPosition({
                     point: this.nextTilePosition,
                     orientation: this.orientation
-                });
-                if (blockers.length <= 0) {
+                }); //check if there is something blocking on the position I want to move onto
+                if (blockers.length <= 0) { //nothing blocks
                     mapChanged = this.move(box);
-                } else {
+                } else { //there is a blocker
                     const pusherFeature = blockers
                         .find(feature => MovementOrchestrator.PUSHER_FEATURES.has(feature.code));
-                    if (pusherFeature) {
+                    if (pusherFeature) { //is it a pusher (hero, treadmil, spring)?
                         if (blockers
                             .some(moving => {
                                 const moveableFeature = moving.code === Tiles.hero || moving.code === Tiles.box;

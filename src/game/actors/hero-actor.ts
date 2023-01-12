@@ -17,11 +17,9 @@ export class HeroActor implements GameActor {
     private tweens: Phaser.Tweens.TweenManager;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
-    private screenPropertiesCalculator: ScreenPropertiesCalculator;
 
     public constructor(config: GameActorConfig) {
         this.id = config.id;
-        this.screenPropertiesCalculator = config.screenPropertiesCalculator;
 
         this.heroAnimator = new HeroAnimator();
 
@@ -39,18 +37,17 @@ export class HeroActor implements GameActor {
         return this.tilePosition;
     }
 
+    public setTilePosition(tilePosition: Point): void {
+        this.tilePosition = tilePosition;
+    }
+
     public checkAction(): Actions {
         return InputManager.getInstance().getActionInput() || Actions.STAND;
     }
 
-    public async animate(nextPosition: Point, direction?: Directions): Promise<void> {
-        if (nextPosition.isEqualTo(this.tilePosition)) {
-            return ;
-        }
-        const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(nextPosition);
-        this.tilePosition = nextPosition;
+    public async animate(spritePosition: Point, orientation?: Directions): Promise<void> {
         return new Promise<void>((resolve) => {
-            const heroMovement = this.heroAnimator.getAnimation(spritePosition, direction);
+            const heroMovement = this.heroAnimator.getAnimation(spritePosition, orientation);
             if (heroMovement) {
                 this.tweens!.add({
                     ...heroMovement.tween,

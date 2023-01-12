@@ -9,11 +9,11 @@ import {configuration} from '@/game/constants/configuration';
 export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly scene: Phaser.Scene;
-    private readonly tilePosition: Point;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly orientation: Directions;
     private covered: boolean;
+    private tilePosition: Point;
 
     constructor(config: GameActorConfig) {
         this.orientation = config.orientation;
@@ -68,6 +68,10 @@ export class SpringActor implements GameActor {
 
     public getTilePosition(): Point {
         return this.tilePosition;
+    }
+
+    public setTilePosition(tilePosition: Point): void {
+        this.tilePosition = tilePosition;
     }
 
     public getOrientation(): Directions | undefined {

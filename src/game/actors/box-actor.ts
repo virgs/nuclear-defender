@@ -14,11 +14,9 @@ export class BoxActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
-    private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
     private readonly scene: Phaser.Scene;
 
     constructor(config: GameActorConfig) {
-        this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
@@ -31,6 +29,10 @@ export class BoxActor implements GameActor {
         return this.tilePosition;
     }
 
+    public setTilePosition(tilePosition: Point): void {
+        this.tilePosition = tilePosition;
+    }
+
     public getSprite(): Phaser.GameObjects.Sprite {
         return this.sprite;
     }
@@ -39,9 +41,7 @@ export class BoxActor implements GameActor {
         return this.id;
     }
 
-    public async animate(nextPosition: Point, direction?: Directions) {
-        const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(nextPosition);
-        this.tilePosition = nextPosition;
+    public async animate(spritePosition: Point, direction?: Directions) {
         return new Promise<void>(resolve => {
             const tween = {
                 x: spritePosition.x,

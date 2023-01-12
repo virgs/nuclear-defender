@@ -11,11 +11,11 @@ export class TargetActor implements GameActor {
     private static readonly LIGHT_COVERED_COLOR: number = Phaser.Display.Color.HexStringToColor(configuration.colors.controlled).color;
     private static readonly LIGHT_RADIUS: number = configuration.world.tileSize.horizontal * 3;
 
-    private readonly tilePosition: Point;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly scene: Phaser.Scene;
     private readonly id: number;
+    private tilePosition: Point;
     private covered: boolean;
 
     constructor(config: GameActorConfig) {
@@ -69,6 +69,10 @@ export class TargetActor implements GameActor {
 
     public getTilePosition() {
         return this.tilePosition;
+    }
+
+    public setTilePosition(tilePosition: Point): void {
+        this.tilePosition = tilePosition;
     }
 
     public cover(tile: GameActor): void {

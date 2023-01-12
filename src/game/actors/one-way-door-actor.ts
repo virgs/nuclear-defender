@@ -7,10 +7,10 @@ import {configuration} from '@/game/constants/configuration';
 
 export class OneWayDoorActor implements GameActor {
     private readonly scene: Phaser.Scene;
-    private readonly tilePosition: Point;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private covered: boolean;
+    private tilePosition: Point;
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
@@ -46,6 +46,10 @@ export class OneWayDoorActor implements GameActor {
 
     public getTilePosition(): Point {
         return this.tilePosition;
+    }
+
+    public setTilePosition(tilePosition: Point): void {
+        this.tilePosition = tilePosition;
     }
 
     public getOrientation(): Directions | undefined {

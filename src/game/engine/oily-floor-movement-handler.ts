@@ -27,7 +27,8 @@ export class OilyFloorMovementHandler implements FeatureMovementHandler {
                     point: nextTilePosition,
                     orientation: movementDirection
                 });
-                if (featuresBlockingMoveIntoPosition.length <= 0) {
+                const somethingElseMovedThisBlockThisRound = boxToMove.currentPosition.isDifferentOf(boxToMove.nextPosition);
+                if (featuresBlockingMoveIntoPosition.length <= 0 && !somethingElseMovedThisBlockThisRound) {
                     this.coordinator.moveFeature(boxToMove, movementDirection);
                     mapChanged = true;
                 }
