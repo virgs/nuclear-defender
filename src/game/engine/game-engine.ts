@@ -112,7 +112,7 @@ export class GameEngine {
 
     private registerPlayerMove(heroAction: Actions, actionResult: MovementOrchestratorOutput) {
         let moveLetter = mapActionToString(heroAction);
-        if (heroAction !== Actions.STAND) {
+        if (heroAction !== Actions.STAND) { //undo related stuff
             if (this.lastActionResult?.boxes
                 .some(box => box.currentPosition.isDifferentOf(box.nextPosition) &&
                     this.lastActionResult?.hero.nextPosition.isEqualTo(box.currentPosition))) {

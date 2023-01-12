@@ -1,18 +1,19 @@
+import Phaser from 'phaser';
 import {Tiles} from '../tiles/tiles';
 import {Point} from '@/game/math/point';
 import {BoxActor} from '@/game/actors/box-actor';
 import {HeroActor} from '@/game/actors/hero-actor';
+import {WallActor} from '@/game/actors/wall-actor';
+import {SpringActor} from '@/game/actors/spring-actor';
 import {TargetActor} from '@/game/actors/target-actor';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {configuration} from '../constants/configuration';
+import {TreadmillActor} from '@/game/actors/treadmill-actor';
 import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
 import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
-import Phaser from 'phaser';
-import {SpringActor} from '@/game/actors/spring-actor';
-import {TreadmillActor} from '@/game/actors/treadmill-actor';
+import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export class GameActorsFactory {
     private readonly scale: number;
@@ -46,6 +47,7 @@ export class GameActorsFactory {
         this.constructorMap.set(Tiles.oily, params => new OilyFloorActor(params));
         this.constructorMap.set(Tiles.oneWayDoor, params => new OneWayDoorActor(params));
         this.constructorMap.set(Tiles.treadmil, params => new TreadmillActor(params));
+        this.constructorMap.set(Tiles.wall, params => new WallActor(params));
 
         this.floorMaskShape = this.scene.make.graphics({});
         this.floorPic = this.scene.add.image(0, 0, configuration.floorTextureKey);
@@ -86,37 +88,30 @@ export class GameActorsFactory {
     }
 
     private createActor(tilePosition: Point, item: OrientedTile, cover: boolean = false) {
-        const sprite = this.createSprite(tilePosition, item.code);
+        const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
         if (this.constructorMap.has(item.code)) {
-
             const gameActor = this.constructorMap.get(item.code)!({
                 scene: this.scene,
                 orientation: item.orientation,
-                sprite: sprite,
+                worldPosition: worldPosition,
                 screenPropertiesCalculator: this.screenPropertiesCalculator,
                 tilePosition: tilePosition,
                 covered: cover,
                 id: this.actorCounter++
             } as GameActorConfig);
+            const sprite = gameActor.getSprite();
+
+            sprite.scale = this.scale;
+            sprite.setOrigin(0);
+            sprite.setDepth(new TileDepthCalculator().calculate(item.code, sprite.y));
+            sprite.setPipeline('Light2D');
+
             this.actorMap.get(item.code)!.push(gameActor);
             return gameActor;
         }
     }
 
-    private createSprite(point: Point, tile: Tiles): Phaser.GameObjects.Sprite {
-        const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(point);
-        const sprite = this.scene.add.sprite(worldPosition.x,
-            worldPosition.y,
-            configuration.tiles.spriteSheetKey, tile);
-        sprite.scale = this.scale;
-        sprite.setOrigin(0);
-        sprite.setDepth(new TileDepthCalculator().calculate(tile, sprite.y));
-        sprite.setPipeline('Light2D');
-        return sprite;
-    }
-
     private createFloorMask(tilePosition: Point) {
-        // this.floorMaskShape.fillStyle(0xFFFFFF);
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
 
         this.floorMaskShape.beginPath();

@@ -17,13 +17,13 @@ export class BoxActor implements GameActor {
     private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
     private readonly scene: Phaser.Scene;
 
-    constructor(boxConfig: GameActorConfig) {
-        this.screenPropertiesCalculator = boxConfig.screenPropertiesCalculator;
-        this.id = boxConfig.id;
-        this.scene = boxConfig.scene;
-        this.tilePosition = boxConfig.tilePosition;
-        this.tweens = boxConfig.scene.tweens;
-        this.sprite = boxConfig.sprite;
+    constructor(config: GameActorConfig) {
+        this.screenPropertiesCalculator = config.screenPropertiesCalculator;
+        this.id = config.id;
+        this.scene = config.scene;
+        this.tilePosition = config.tilePosition;
+        this.tweens = config.scene.tweens;
+        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
         this.isOnTarget = false;
     }
 

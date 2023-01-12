@@ -4,6 +4,7 @@ import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
 import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
 import {sounds} from '@/game/constants/sounds';
+import {configuration} from '@/game/constants/configuration';
 
 
 export class TreadmillActor implements GameActor {
@@ -20,7 +21,7 @@ export class TreadmillActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = config.sprite;
+        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
         this.tweens = config.scene.tweens;
         this.covered = false;
 
@@ -48,12 +49,9 @@ export class TreadmillActor implements GameActor {
         if (tile.getTileCode() === Tiles.box) {
             this.scene.sound.play(sounds.treadmil.key, {volume: 0.2})
         }
-
-        // console.log('treadmil release')
     }
 
     public cover(tile: GameActor): void {
-        // console.log('treadmil engage')
         this.covered = true;
     }
 
@@ -66,7 +64,7 @@ export class TreadmillActor implements GameActor {
     }
 
     public getTileCode(): Tiles {
-        return Tiles.spring;
+        return Tiles.treadmil;
     }
 
     public getTilePosition(): Point {

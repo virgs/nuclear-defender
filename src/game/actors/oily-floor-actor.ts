@@ -4,6 +4,7 @@ import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {sounds} from '@/game/constants/sounds';
+import {configuration} from '@/game/constants/configuration';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
@@ -16,7 +17,7 @@ export class OilyFloorActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = config.sprite;
+        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
         this.covered = false;
     }
 
@@ -45,7 +46,7 @@ export class OilyFloorActor implements GameActor {
     }
 
     public getTileCode(): Tiles {
-        return Tiles.spring;
+        return Tiles.oily;
     }
 
     public getTilePosition(): Point {

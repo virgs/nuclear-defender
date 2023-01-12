@@ -4,6 +4,7 @@ import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import {sounds} from '@/game/constants/sounds';
+import {configuration} from '@/game/constants/configuration';
 
 export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
@@ -19,7 +20,7 @@ export class SpringActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = config.sprite;
+        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
         this.tweens = config.scene.tweens;
         this.covered = false;
 

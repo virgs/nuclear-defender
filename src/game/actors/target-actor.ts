@@ -23,16 +23,16 @@ export class TargetActor implements GameActor {
         this.scene = config.scene;
         this.covered = false;
         this.tilePosition = config.tilePosition;
-        this.sprite = config.sprite;
+        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
         this.tweens = config.scene.tweens;
         this.covered = config.covered;
 
 
-        this.addLight(config);
+        this.addLight();
     }
 
-    private addLight(config: { tilePosition: Point; sprite: Phaser.GameObjects.Sprite; scene: Phaser.Scene }) {
-        const light = config.scene.lights.addLight(this.sprite.x, this.sprite.y, TargetActor.LIGHT_RADIUS,
+    private addLight() {
+        const light = this.scene.lights.addLight(this.sprite.x, this.sprite.y, TargetActor.LIGHT_RADIUS,
             TargetActor.LIGHT_UNCOVERED_COLOR, TargetActor.UNCOVERED_LIGHT_INTENSITY);
 
         const pathRadius = new Point(configuration.world.tileSize.horizontal * 0.1, configuration.world.tileSize.horizontal * 0.1);
@@ -42,7 +42,7 @@ export class TargetActor implements GameActor {
             pathRadius.x, pathRadius.y));
 
         const follower = {t: 0, vec: new Phaser.Math.Vector2()};
-        config.scene.tweens.add({
+        this.scene.tweens.add({
             targets: follower,
             t: 1,
             ease: 'Linear',
