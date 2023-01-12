@@ -30,6 +30,7 @@ animationMap.set(Directions.RIGHT, {walking: HeroAnimation.RIGHT, idle: HeroAnim
 animationMap.set(Directions.UP, {walking: HeroAnimation.UP, idle: HeroAnimation.IDLE_UP});
 
 export class HeroAnimator {
+    //split tween and animation. Tween is only for movement
     public getAnimation(spritePosition: Point, direction: Directions | undefined): HeroMovement {
         const animation: HeroMovement = {
             walking: HeroAnimation.DOWN,

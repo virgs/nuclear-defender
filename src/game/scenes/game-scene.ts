@@ -21,6 +21,35 @@ export class GameScene extends Phaser.Scene {
 
     public preload() {
         this.load.image(configuration.floorTextureKey, configuration.floorTexture);
+//        this.load.json('characters', './assets/images/characters.json');
+
+        //on actor
+        //        Object.keys(this.map.animations)
+        //              .forEach((animation: string) => this.sprite.anims.load('mole-' + animation));
+        //        this.map = scene.cache.json.get('characters');
+        //        this.sprite.anims.play(`${this.characterConfig.name}-hit`)
+        //             .once('animationcomplete', () => {
+        //                 this.hole.setAvailable();
+        //                 this.destroy();
+        //             });
+        //     }
+
+        //        this.sprite.anims.play(`${this.characterConfig.name}-raise`)
+        //             .once('animationcomplete', () => {
+        //                 this.sprite.anims.play(`${this.characterConfig.name}-alive`);
+        //             })
+
+        //           this.sprite.anims.play(`${this.characterConfig.name}-hit`)
+        //                     .once('animationcomplete', () => {
+        //                         this.hole.setAvailable();
+        //                         this.destroy();
+        //                     });
+
+
+        //anim config
+        //{name: 'mole', events: {hit: Events.MOLE_HIT, miss: Events.MOLE_MISS}}
+        //{name: 'rabbit', events: {hit: Events.RABBIT_HIT, miss: Events.RABBIT_MISS}}
+        //{name: 'star', events: {hit: Events.STAR_HIT, miss: Events.STAR_MISS}}
 
         this.load.spritesheet({
             key: configuration.tiles.spriteSheetKey,

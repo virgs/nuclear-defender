@@ -74,5 +74,7 @@ export class TreadmillActor implements GameActor {
     public getOrientation(): Directions | undefined {
         return this.orientation;
     }
+    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    }
 
 }

@@ -74,4 +74,6 @@ export class SpringActor implements GameActor {
         return this.orientation;
     }
 
+    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    }
 }

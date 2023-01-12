@@ -3,6 +3,7 @@
 
 import {Store} from '@/store';
 import {useRouter} from 'vue-router';
+import type {Level} from '@/game/levels/levels';
 import {levels} from '@/game/levels/levels';
 import {computed, onMounted, reactive} from "vue";
 import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
@@ -32,22 +33,12 @@ function optionsChanged(valid: boolean) {
   console.log();
 }
 
-async function runSolutionsAlgorithm() {
+async function runSolutionsAlgorithm(levelsToSolve: Level[]) {
   let solutionOutput: any = undefined;
 
   console.log('running algorithms');
   let solutions: any[] = [];
-  await Promise.all(levels
-      .filter((_, index) => index > 0) //skip test level
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index > 4) //skip first 4 levels
-      .filter((_, index) => index < 5) //only first n levels
+  await Promise.all(levelsToSolve
       .map(async level => {
         console.log(level.title);
         const map = new StandardSokobanAnnotationTranslator()
@@ -87,7 +78,7 @@ async function runSolutionsAlgorithm() {
   a.download = 'sokoban-levels-solutions.json';
   document.body.appendChild(a);
   console.log(solutions);
-  a.click();
+  // a.click();
   setTimeout(function () {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
@@ -112,7 +103,26 @@ async function playButtonClick() {
   store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
   store.features = output.removedFeatures;
   store.router = router;
-  store.solution = await runSolutionsAlgorithm();
+  // store.solution = await runSolutionsAlgorithm([levels[data.currentSelectedIndex]]);
+  //     .filter((_, index) => index > 0) //skip test level
+  // .filter((_, index) => index > 4) //skip first 4 levels
+  // .filter((_, index) => index < 5) //only first n levels
+
+  // store.solution = {
+  //   boxesLine: 0, featureUsed: 0,
+  //   actions: [Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.STAND,
+  //     Actions.STAND, Actions.UP, Actions.LEFT], iterations: 0, totalTime: 0
+  //
+  // };
 
   await router.push('/game');
 }

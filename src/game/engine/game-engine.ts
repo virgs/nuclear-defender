@@ -117,7 +117,7 @@ export class GameEngine {
                 .some(box => box.currentPosition.isDifferentOf(box.nextPosition) &&
                     this.lastActionResult?.hero.nextPosition.isEqualTo(box.currentPosition))) {
                 moveLetter = moveLetter.toUpperCase();
-                this.scene.sound.play(sounds.pushingBox.key, {volume: 0.1})
+                this.scene.sound.play(sounds.pushingBox.key, {volume: 0.1});
                 this.boxPushMementos.push(actionResult);
             }
         }
@@ -132,19 +132,20 @@ export class GameEngine {
             .map(async movedBox => {
                 const spriteBoxMoved = this.boxes
                     .find(tileBox => movedBox.id === tileBox.getId())!;
-                await spriteBoxMoved?.move(movedBox.nextPosition);
+                await spriteBoxMoved?.animate(movedBox.nextPosition);
             }));
 
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
-            if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
-                await this.hero!.move(hero.nextPosition, hero.direction);
-            }
+            await this.hero!.animate(hero.nextPosition, hero.direction);
         };
         animationsPromises.push(heroAnimationPromise());
 
         this.updateActorsCoveringSituation(lastAction.boxes, this.boxes);
         this.updateActorsCoveringSituation([lastAction.hero], [this.hero]);
+
+        animationsPromises.push(...this.staticActors
+            .map(actor => actor.animate(actor.getTilePosition())));
         await Promise.all(animationsPromises);
 
         this.animationsAreOver = true;

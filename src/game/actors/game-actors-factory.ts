@@ -70,36 +70,58 @@ export class GameActorsFactory {
                         if (tile.code === Tiles.floor) {
                             this.createFloorMask(tilePosition);
                         } else {
-                            const boxCover = this.actorMap.get(Tiles.box)!
-                                .find(box => box.getTilePosition().isEqualTo(tilePosition));
-                            const heroCover = this.dynamicFeatures.get(Tiles.hero)!
-                                .some(box => box.isEqualTo(tilePosition));
-                            const gameActor = this.createActor(tilePosition, tile, !!boxCover || heroCover)!;
-                            boxCover?.cover(gameActor);
+                            this.createActor(tilePosition, tile);
                         }
-
                     })));
 
         const mask = this.floorMaskShape.createGeometryMask();
-        // mask.invertAlpha = true
         this.floorPic!.setMask(mask);
 
         return this.actorMap;
     }
 
-    private createActor(tilePosition: Point, item: OrientedTile, cover: boolean = false) {
+    private getTilesAround(x: number, y: number): OrientedTile[][][] {
+        const contentAround: OrientedTile[][][] = [];
+        for (let vertical = -1; vertical < 2; ++vertical) {
+            const line = [];
+            for (let horizontal = -1; horizontal < 2; ++horizontal) {
+                const h = horizontal + x;
+                const v = vertical + y;
+                if (v >= 0 && h >= 0 &&
+                    v < this.strippedMatrix.height &&
+                    h < this.strippedMatrix.width) {
+                    line.push(this.strippedMatrix.strippedFeatureLayeredMatrix[v][h]);
+                } else {
+                    line.push([]);
+                }
+            }
+            contentAround.push(line);
+        }
+
+        return contentAround;
+    }
+
+    private createActor(tilePosition: Point, item: OrientedTile) {
+        const tilesAround = this.getTilesAround(tilePosition.x, tilePosition.y);
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
         if (this.constructorMap.has(item.code)) {
+            const boxCover = this.actorMap.get(Tiles.box)!
+                .find(box => box.getTilePosition().isEqualTo(tilePosition));
+            const heroCover = this.dynamicFeatures.get(Tiles.hero)!
+                .some(box => box.isEqualTo(tilePosition));
+
             const gameActor = this.constructorMap.get(item.code)!({
                 scene: this.scene,
                 orientation: item.orientation,
                 worldPosition: worldPosition,
                 screenPropertiesCalculator: this.screenPropertiesCalculator,
                 tilePosition: tilePosition,
-                covered: cover,
+                coveredByDynamicFeature: heroCover || !!boxCover,
+                contentAround: tilesAround,
                 id: this.actorCounter++
             } as GameActorConfig);
             const sprite = gameActor.getSprite();
+            boxCover?.cover(gameActor);
 
             sprite.scale = this.scale;
             sprite.setOrigin(0);
@@ -107,16 +129,16 @@ export class GameActorsFactory {
             sprite.setPipeline('Light2D');
 
             this.actorMap.get(item.code)!.push(gameActor);
-            return gameActor;
         }
     }
 
     private createFloorMask(tilePosition: Point) {
+        const verticalBuffer = 10;
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
 
         this.floorMaskShape.beginPath();
         this.floorMaskShape.fillRectShape(new Phaser.Geom.Rectangle(worldPosition.x, worldPosition.y,
-            configuration.world.tileSize.horizontal, configuration.world.tileSize.vertical));
+            configuration.world.tileSize.horizontal, configuration.world.tileSize.vertical + verticalBuffer));
     }
 
     private static initializeActorMap() {

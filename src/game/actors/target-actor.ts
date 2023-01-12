@@ -25,7 +25,7 @@ export class TargetActor implements GameActor {
         this.tilePosition = config.tilePosition;
         this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
         this.tweens = config.scene.tweens;
-        this.covered = config.covered;
+        this.covered = config.coveredByDynamicFeature;
 
 
         this.addLight();
@@ -97,6 +97,9 @@ export class TargetActor implements GameActor {
 
     public getOrientation(): Directions | undefined {
         return undefined;
+    }
+
+    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
     }
 
 }

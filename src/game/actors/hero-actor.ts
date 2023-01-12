@@ -43,7 +43,10 @@ export class HeroActor implements GameActor {
         return InputManager.getInstance().getActionInput() || Actions.STAND;
     }
 
-    public async move(nextPosition: Point, direction?: Directions): Promise<void> {
+    public async animate(nextPosition: Point, direction?: Directions): Promise<void> {
+        if (nextPosition.isEqualTo(this.tilePosition)) {
+            return ;
+        }
         const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(nextPosition);
         this.tilePosition = nextPosition;
         return new Promise<void>((resolve) => {

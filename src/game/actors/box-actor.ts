@@ -39,7 +39,7 @@ export class BoxActor implements GameActor {
         return this.id;
     }
 
-    public async move(nextPosition: Point) {
+    public async animate(nextPosition: Point, direction?: Directions) {
         const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(nextPosition);
         this.tilePosition = nextPosition;
         return new Promise<void>(resolve => {

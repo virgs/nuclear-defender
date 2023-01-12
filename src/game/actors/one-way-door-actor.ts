@@ -52,4 +52,6 @@ export class OneWayDoorActor implements GameActor {
         return undefined;
     }
 
+    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    }
 }
