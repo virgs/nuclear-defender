@@ -1,10 +1,10 @@
 import type Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
+import {sounds} from '@/game/constants/sounds';
+import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
-import {sounds} from '@/game/constants/sounds';
-import {configuration} from '@/game/constants/configuration';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
@@ -17,7 +17,7 @@ export class OilyFloorActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
+        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
         this.covered = false;
     }
 

@@ -16,7 +16,6 @@ import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-cal
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export class GameActorsFactory {
-    private readonly scale: number;
     private readonly scene: Phaser.Scene;
     private readonly constructorMap: Map<Tiles, (params: any) => GameActor>;
 
@@ -32,7 +31,6 @@ export class GameActorsFactory {
     constructor(config: { screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
         this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.scene = config.scene;
-        this.scale = this.screenPropertiesCalculator.getScale();
         this.dynamicFeatures = config.dynamicFeatures;
         this.strippedMatrix = config.strippedTileMatrix;
         this.actorMap = GameActorsFactory.initializeActorMap();
@@ -119,13 +117,7 @@ export class GameActorsFactory {
                 contentAround: tilesAround,
                 id: this.actorCounter++
             } as GameActorConfig);
-            const sprite = gameActor.getSprite();
             boxCover?.cover(gameActor);
-
-            sprite.scale = this.scale;
-            sprite.setOrigin(0);
-            sprite.setDepth(new TileDepthCalculator().calculate(item.code, sprite.y));
-            sprite.setPipeline('Light2D');
 
             this.actorMap.get(item.code)!.push(gameActor);
         }

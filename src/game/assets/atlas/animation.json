@@ -1,0 +1,21 @@
+{
+  "key": "characters",
+  "objects": [
+    "hero",
+    "spring",
+    "treadmil",
+    "onewaydoor"
+  ],
+  "animations": {
+    "alive": true,
+    "hit": false,
+    "miss": false,
+    "raise": false
+  },
+  "framesPerAnimation": 3,
+  "filename": "./assets/images/characters.png",
+  "dimensions": {
+    "frameWidth": 90,
+    "frameHeight": 90
+  }
+}

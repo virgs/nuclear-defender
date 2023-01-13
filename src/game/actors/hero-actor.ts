@@ -4,10 +4,9 @@ import type {Point} from '@/game/math/point';
 import {InputManager} from '@/game/input/input-manager';
 import type {Directions} from '../constants/directions';
 import {HeroAnimator} from '../animations/hero-animator';
+import {SpriteCreator} from '@/game/actors/sprite-creator';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
-import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import {configuration} from '@/game/constants/configuration';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -27,7 +26,8 @@ export class HeroActor implements GameActor {
         this.cursors = config.scene.input.keyboard.createCursorKeys();
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
 
-        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
+        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
+
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));
         this.tilePosition = config.tilePosition;

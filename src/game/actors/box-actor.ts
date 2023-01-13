@@ -1,12 +1,12 @@
 import type Phaser from 'phaser';
-import type {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
+import type {Point} from '@/game/math/point';
+import {sounds} from '@/game/constants/sounds';
+import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
+import {configuration} from '@/game/constants/configuration';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
-import {configuration} from '@/game/constants/configuration';
-import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import {sounds} from '@/game/constants/sounds';
 
 export class BoxActor implements GameActor {
     private tilePosition: Point;
@@ -21,7 +21,7 @@ export class BoxActor implements GameActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.sprite = config.scene.add.sprite(config.worldPosition.x, config.worldPosition.y, configuration.tiles.spriteSheetKey, this.getTileCode());
+        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
         this.isOnTarget = false;
     }
 
