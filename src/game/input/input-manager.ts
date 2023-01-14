@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
-import {Actions} from '@/game/constants/actions';
+import {EventEmitter, EventName} from '@/event-emitter';
+import type {Directions} from '@/game/constants/directions';
+import {Actions, mapDirectionToAction} from '@/game/constants/actions';
 
 export class InputManager {
     private static readonly TIME_TO_LIVE = 150;
@@ -14,6 +16,10 @@ export class InputManager {
         this.inputMap = new Map<Actions, () => boolean>();
         this.actionLiveness = 0;
         this.deltaAcc = 0;
+
+        EventEmitter.listenToEvent(EventName.DIRECTION_BUTTON_CLICKED, (direction: Directions) => {
+            this.actionInputBuffer = mapDirectionToAction(direction)
+        })
     }
 
     public static getInstance(): InputManager {

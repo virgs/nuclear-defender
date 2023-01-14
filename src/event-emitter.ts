@@ -1,5 +1,6 @@
 export enum EventName {
-    UNDO_BUTTON_CLICKED
+    UNDO_BUTTON_CLICKED,
+    DIRECTION_BUTTON_CLICKED,
 }
 
 type EventListener = (args: any) => any;
