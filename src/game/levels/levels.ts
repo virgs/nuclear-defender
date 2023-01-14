@@ -41,6 +41,20 @@ export const levels: Level[] = [
         title: 'Baby welcome', //boxesline = 4
     }, {
         map: `
+4-3#
+5#[$ds]##
+#@$[rwo][.o]o #
+# $[rwo][.o]o #
+# $[rwo][.o]o #
+# $[rwo][.o]o #
+# $[rwo][.o]o #
+# $[rwo][.o]o #
+5#[.us]##
+4-3#
+`,
+        title: 'every fool can see',
+    }, {
+        map: `
 6-3#
 7#ds#
 #5 rw[.o]#
@@ -84,8 +98,7 @@ export const levels: Level[] = [
         map: `
 5-5#
 5-# ds[$ls]#
-5-##[@o]##
-7#o#
+7#[@o]##
 #[$rt]4o[.rwo][dt]#
 #[.o]5#[dwo]#
 #o#---#o#
@@ -172,7 +185,7 @@ export const levels: Level[] = [
 # #us## #
 8#
 `,
-        title: 'Oldschool' 
+        title: 'Oldschool punk'
     },
     {
         map: `

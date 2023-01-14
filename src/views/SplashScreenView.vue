@@ -77,7 +77,6 @@ async function runSolutionsAlgorithm(levelsToSolve: Level[]) {
   a.href = url;
   a.download = 'sokoban-levels-solutions.json';
   document.body.appendChild(a);
-  console.log(solutions);
   // a.click();
   setTimeout(function () {
     document.body.removeChild(a);
@@ -103,7 +102,7 @@ async function playButtonClick() {
   store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
   store.features = output.removedFeatures;
   store.router = router;
-  // store.solution = await runSolutionsAlgorithm([levels[data.currentSelectedIndex]]);
+  store.solution = await runSolutionsAlgorithm([levels[data.currentSelectedIndex]]);
   //     .filter((_, index) => index > 0) //skip test level
   // .filter((_, index) => index > 4) //skip first 4 levels
   // .filter((_, index) => index < 5) //only first n levels

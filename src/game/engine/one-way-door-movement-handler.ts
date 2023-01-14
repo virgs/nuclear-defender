@@ -24,7 +24,7 @@ export class OneWayDoorMovementHandler implements FeatureMovementHandler {
     }
 
     public allowLeavingMovement(direction: Directions): boolean {
-        return this.orientation === direction;
+        return true;
     }
 
     public getTile(): Tiles {

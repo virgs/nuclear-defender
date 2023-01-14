@@ -129,6 +129,7 @@ export class SokobanSolver {
     private async checkSolution(candidate: Solution): Promise<Solution | undefined> {
         if (await this.metricEmitter.measureTime(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
             this.candidatesVisitedSet.add(candidate.hash!);
+            // console.log(candidate.hash, Actions[candidate.actions[candidate.actions.length - 1]])
 
             if (this.candidateSolvesMap(candidate.boxes)) {
                 return candidate;
@@ -148,7 +149,8 @@ export class SokobanSolver {
 
             if (afterAction.mapChanged) {
                 const analysis = await this.metricEmitter.measureTime(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
-                const heroMovementCost = action === Actions.STAND ? 95 : 100;
+                const moveCost = 100;
+                const heroMovementCost = action === Actions.STAND ? moveCost * .95 : moveCost;
                 let currentBoxesLine = 0;
                 if (analysis.lastPushedBox) {
                     if (analysis.lastPushedBox.id !== candidate.lastPushedBox.id || analysis.lastPushedBox.direction !== candidate.lastPushedBox.direction) {
@@ -191,7 +193,8 @@ export class SokobanSolver {
 
     private calculateHashOfSolution(newCandidate: Solution) {
         return `${newCandidate.boxes
-            .map(box => `${box.point.x},${box.point.y}`)
+            .map(box => `${box.point.x},${box.point.y}(${newCandidate.lastActionResult?.boxes
+                .find(same => same.id === box.id)?.direction})`)
             .sort()
             .join(';')}:${newCandidate.hero.point.x},${newCandidate.hero.point.y}`;
     }
