@@ -59,8 +59,9 @@
 <script lang="ts">
 
 import {mapStringToAction} from "@/game/constants/actions";
+import {defineComponent} from 'vue';
 
-export default {
+export default defineComponent({
   name: "SplashScreenAdvancedOptionsComponent",
   emits: ["valid"],
   data() {
@@ -93,13 +94,12 @@ export default {
       // this.$emit('valid', true);
     },
     //TODO check if it's solvable, compare box and target numbers, check if there's only one hero...
-    validateMap(map) {
+    validateMap(map: string) {
       return true;
     },
-    parseMoves(compressedMoves) {
-      if (compressedMoves) {
-        const movesText = lzString.decompressFromEncodedURIComponent(compressedMoves);
-        if (movesText === null || movesText.length === 0) {
+    parseMoves(movesText: string) {
+      if (movesText) {
+        if (movesText.length === 0) {
           return undefined;
         }
         return movesText.split('')
@@ -110,10 +110,10 @@ export default {
 
   },
   computed: {
-    toastBodyTextName() {
+    toastBodyTextName(): any {
       return this.validLevelPassword ? 'Good job!' : 'Wrong level password. Try again.';
     },
-    toastStyle() {
+    toastStyle(): any {
       return this.validLevelPassword ? {
         'background-color': 'var(--highlight-color)',
         'color': 'var(--foreground-color)'
@@ -124,7 +124,7 @@ export default {
     }
 
   }
-};
+});
 </script>
 
 <style scoped>
