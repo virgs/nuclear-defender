@@ -1,3 +1,20 @@
+//TODO level-generators
+// https://github.com/AnoXDD/sokoban-generator-javascript
+// https://github.com/AlliBalliBaba/Sokoban-Level-Generator
+//https://news.ycombinator.com/item?id=22102297
+//https://www.npmjs.com/package/sokoban-generator
+
+//solvers
+// https://www.cs.huji.ac.il/w~ai/projects/2012/SokobanWP/files/report.pdf
+// https://worksheets.codalab.org/worksheets/0x2412ae8944eb449db74ce9bc0b9463fe/
+//https://timallanwheeler.com/blog/2022/01/19/basic-search-algorithms-on-sokoban/
+//https://healeycodes.com/building-and-solving-sokoban
+//https://github.com/healeycodes/sokoban/blob/main/game/solver.ts
+//https://orbi.uliege.be/bitstream/2268/5895/1/bnaic2008.pdf
+//https://www.sciencedirect.com/science/article/pii/S0925772199000176
+
+
+
 //TODO add thumbnail?
 //TODO show tem as a carrousel instead of a dropdown
 
