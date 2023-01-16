@@ -3,7 +3,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
 import {configuration} from '@/game/constants/configuration';
-import type {GameActorConfig, GameActor} from '@/game/actors/game-actor';
+import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class TargetActor implements GameActor {
     private static readonly UNCOVERED_LIGHT_INTENSITY = .66;
@@ -26,8 +26,6 @@ export class TargetActor implements GameActor {
         this.tilePosition = config.tilePosition;
         this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
         this.tweens = config.scene.tweens;
-        this.covered = config.coveredByDynamicFeature;
-
 
         this.addLight();
     }
@@ -76,13 +74,13 @@ export class TargetActor implements GameActor {
         this.tilePosition = tilePosition;
     }
 
-    public cover(tile: GameActor): void {
-        this.covered = true;
+    public cover(actors: GameActor[]): void {
+        if (actors
+            .some(actor => actor.getTileCode() === Tiles.box || actor.getTileCode() === Tiles.hero)) {
+            this.covered = true;
+        }
     }
 
-    public uncover(tile: GameActor): void {
-        this.covered = false;
-    }
 
     public isCovered(): boolean {
         return this.covered;

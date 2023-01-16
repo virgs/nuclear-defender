@@ -36,10 +36,8 @@ export type MovementOrchestratorInput = {
     lastActionResult?: MovementOrchestratorOutput;
 };
 
-//TODO do not use oriented tile anywhere, replace it with Movement (merge if necessary)
 export class MovementOrchestrator {
-    //TODO create pusher categories as well (spring, player, treadmil)... and us it by treadmil and spring.. you'll see where
-    private readonly blockerTiles: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
+    private static readonly BLOCKER_FEATURES: Set<Tiles> = new Set<Tiles>([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
     public static readonly PUSHER_FEATURES: Set<Tiles> = new Set<Tiles>([Tiles.hero, Tiles.treadmil, Tiles.spring]);
 
     private readonly strippedMap: MultiLayeredMap;
@@ -112,7 +110,7 @@ export class MovementOrchestrator {
         const result: Movement[] = [];
         const dynamicFeaturesAtPosition: Movement[] = this.getFeaturesAtPosition(move.point);
         result.push(...dynamicFeaturesAtPosition
-            .filter(feature => this.blockerTiles.has(feature.code))
+            .filter(feature => MovementOrchestrator.BLOCKER_FEATURES.has(feature.code))
             .map(feature => (feature)));
 
         const staticFeaturesAtPosition: Movement[] = this.getStaticFeaturesAtPosition(move.point);

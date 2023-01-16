@@ -3,6 +3,7 @@ import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
 import type {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
+import {getOppositeDirectionOf} from '@/game/constants/directions';
 
 export class OneWayDoorMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;
@@ -24,7 +25,7 @@ export class OneWayDoorMovementHandler implements FeatureMovementHandler {
     }
 
     public allowLeavingMovement(direction: Directions): boolean {
-        return true;
+        return this.orientation === direction || this.orientation === getOppositeDirectionOf(direction);
     }
 
     public getTile(): Tiles {

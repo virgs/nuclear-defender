@@ -43,15 +43,17 @@ export class TreadmillActor implements GameActor {
         return this.covered;
     }
 
-    public uncover(tile: GameActor): void {
-        this.covered = false;
-        if (tile.getTileCode() === Tiles.box) {
-            this.scene.sound.play(sounds.treadmil.key, {volume: 0.2})
+    public cover(actors: GameActor[]): void {
+        if (actors
+            .some(actor => actor.getTileCode() === Tiles.box)) {
+            this.covered = true;
+            //TODO add particle effect?
+        } else {
+            if (this.covered) {
+                this.covered = false;
+                this.scene.sound.play(sounds.treadmil.key, {volume: 0.35});
+            }
         }
-    }
-
-    public cover(tile: GameActor): void {
-        this.covered = true;
     }
 
     public getId(): number {
@@ -77,6 +79,7 @@ export class TreadmillActor implements GameActor {
     public getOrientation(): Directions | undefined {
         return this.orientation;
     }
+
     public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
     }
 

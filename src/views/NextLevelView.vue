@@ -58,7 +58,7 @@ export default {
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col">
           <h1 class="sokoban-display display-3 fw-normal" style="user-select: none; text-align: left">Level
-            '{{ index }}: {{ currentLevel.title }}'
+            <em>{{ index }}: '{{ currentLevel.title }}'</em>
             complete!</h1>
         </div>
         <div class="col my-1">

@@ -1,7 +1,7 @@
 import {Tiles} from '@/game/tiles/tiles';
 import {DeadLockDetector} from '@/game/solver/dead-lock-detector';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
-import {Directions, getOpositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
+import {Directions, getOppositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 
 //TODO improve to accomodate richer features
 export class BoxClusterDeadlockDetector extends DeadLockDetector {
@@ -37,7 +37,7 @@ export class BoxClusterDeadlockDetector extends DeadLockDetector {
 
         const clockwiseSide = rotateDirectionClockwise(direction);
         const clockwiseTilePosition = movedBox.nextPosition.calculateOffset(clockwiseSide);
-        const otherSide = getOpositeDirectionOf(clockwiseSide);
+        const otherSide = getOppositeDirectionOf(clockwiseSide);
         const counterClowiseTilePosition = movedBox.nextPosition.calculateOffset(otherSide);
         const cwTiles = this.staticMap.strippedFeatureLayeredMatrix[clockwiseTilePosition.y][clockwiseTilePosition.x];
         const ccwTiles = this.staticMap.strippedFeatureLayeredMatrix[counterClowiseTilePosition.y][counterClowiseTilePosition.x];

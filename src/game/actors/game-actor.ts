@@ -7,8 +7,7 @@ export type GameActorConfig = {
     orientation: Directions;
     tilePosition: Point;
     worldPosition: Point;
-    coveredByDynamicFeature: boolean;
-    contentAround: OrientedTile[][][];
+    contentAround: OrientedTile[][][]; //3x3 matrix where 1x1 is the center. The other dimension is the tile layer
     scene: Phaser.Scene,
     id: number
 };
@@ -28,9 +27,7 @@ export interface GameActor {
 
     isCovered(): boolean;
 
-    cover(tile: GameActor): void;
-
-    uncover(tile: GameActor): void;
+    cover(tiles: GameActor[]): void;
 
     animate(tilePosition: Point, orientation?: Directions): Promise<any>;
 }

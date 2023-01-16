@@ -90,10 +90,6 @@ export class HeroActor implements GameActor {
         return false;
     }
 
-    public cover(tile: GameActor): void {
+    public cover(tiles: GameActor[]): void {
     }
-
-    public uncover(tile: GameActor): void {
-    }
-
 }

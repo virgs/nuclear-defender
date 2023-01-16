@@ -21,6 +21,20 @@ export const mapActionToDirection = (action: Actions): Directions | undefined =>
     }
 };
 
+export const mapDirectionToAction = (direction: Directions): Actions => {
+    switch (direction) {
+        case Directions.LEFT:
+            return Actions.LEFT;
+        case Directions.UP:
+            return Actions.UP;
+        case Directions.RIGHT:
+            return Actions.RIGHT;
+        case Directions.DOWN:
+            return Actions.DOWN;
+    }
+    return Actions.STAND;
+};
+
 export const mapStringToAction = (char: string): Actions => {
     switch (char) {
         case 's':
@@ -38,4 +52,4 @@ export const mapStringToAction = (char: string): Actions => {
     return Actions.STAND;
 };
 
-export const mapActionToString = (action: Actions): string => Actions[action].charAt(0).toLowerCase();
+export const mapActionToChar = (action: Actions): string => Actions[action].charAt(0).toLowerCase();

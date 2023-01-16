@@ -25,16 +25,17 @@ export class OilyFloorActor implements GameActor {
         return this.covered;
     }
 
-    public uncover(tile: GameActor): void {
-        this.covered = false;
-        if (tile.getTileCode() === Tiles.box) {
-            this.scene.sound.play(sounds.oil.key, {volume: 0.2})
+    public cover(actors: GameActor[]): void {
+        if (actors
+            .some(actor => actor.getTileCode() === Tiles.box)) {
+            this.covered = true;
+            //TODO add particle effect?
+        } else {
+            if (this.covered) {
+                this.covered = false;
+                this.scene.sound.play(sounds.oil.key, {volume: 0.1});
+            }
         }
-    }
-
-    public cover(tile: GameActor): void {
-        //TODO add particle effect
-        this.covered = true;
     }
 
     public getId(): number {

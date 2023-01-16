@@ -44,14 +44,25 @@ export class SpringActor implements GameActor {
         return this.covered;
     }
 
-    public uncover(tile: GameActor): void {
-        this.covered = false;
-        this.scene.sound.play(sounds.springRelease.key, {volume: 0.2});
-    }
+    public cover(actors: GameActor[]): void {
+        if (actors
+            .some(actor => actor.getTileCode() === Tiles.hero || actor.getTileCode() === Tiles.box)) {
 
-    public cover(tile: GameActor): void {
-        this.covered = true;
-        this.scene.sound.play(sounds.springEngage.key, {volume: 0.2});
+            if (!this.covered) {
+                this.covered = true;
+                this.scene.sound.play(sounds.springEngage.key, {volume: 0.15});
+            }
+        } else {
+            //TODO add smoke effect?
+            // https://codepen.io/njmcode/pen/gMryWM
+            // https://blog.ourcade.co/posts/2020/how-to-make-particle-trail-effect-phaser-3/
+            // https://www.html5gamedevs.com/topic/46393-phaser-3-tweens-and-particles/
+            // https://rexrainbow.github.io/phaser3-rex-notes/docs/site/particles/
+            if (this.covered) {
+                this.scene.sound.play(sounds.springRelease.key, {volume: 0.15});
+                this.covered = false;
+            }
+        }
     }
 
     public getId(): number {

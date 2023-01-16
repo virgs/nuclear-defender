@@ -24,11 +24,7 @@ export class OneWayDoorActor implements GameActor {
         return this.covered;
     }
 
-    public uncover(tile: GameActor): void {
-        this.covered = false;
-    }
-
-    public cover(tile: GameActor): void {
+    public cover(tile: GameActor[]): void {
         this.covered = true;
     }
 

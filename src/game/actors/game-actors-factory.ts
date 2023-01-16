@@ -103,21 +103,14 @@ export class GameActorsFactory {
         const tilesAround = this.getTilesAround(tilePosition.x, tilePosition.y);
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
         if (this.constructorMap.has(item.code)) {
-            const boxCover = this.actorMap.get(Tiles.box)!
-                .find(box => box.getTilePosition().isEqualTo(tilePosition));
-            const heroCover = this.dynamicFeatures.get(Tiles.hero)!
-                .some(box => box.isEqualTo(tilePosition));
-
             const gameActor = this.constructorMap.get(item.code)!({
                 scene: this.scene,
                 orientation: item.orientation,
                 worldPosition: worldPosition,
                 tilePosition: tilePosition,
-                coveredByDynamicFeature: heroCover || !!boxCover,
                 contentAround: tilesAround,
                 id: this.actorCounter++
             } as GameActorConfig);
-            boxCover?.cover(gameActor);
 
             this.actorMap.get(item.code)!.push(gameActor);
         }

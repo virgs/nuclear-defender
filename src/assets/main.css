@@ -102,14 +102,14 @@ body {
     background-color: var(--foreground-color);
 }
 
-.sokoban-call-for-action-button:active, .sokoban-call-for-action-button:focus {
-    background-color: var(--background-color);
-}
-
+.sokoban-call-for-action-button:active, .sokoban-call-for-action-button:focus,
+.sokoban-call-for-action-button:hover,
 .sokoban-outlined-button:hover, .sokoban-call-for-action-button:hover,
 .sokoban-outlined-button:focus-visible, .sokoban-call-for-action-button:focus-visible,
 .sokoban-outlined-button:active, .sokoban-call-for-action-button:active {
-    background-color: unset !important;
+    background-color: var(--radioactive-color) !important;
+    border-color: var(--danger-color);
+    color: unset !important;
 }
 
 :root {

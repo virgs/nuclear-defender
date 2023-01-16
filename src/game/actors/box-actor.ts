@@ -9,12 +9,16 @@ import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class BoxActor implements GameActor {
-    private tilePosition: Point;
-    private isOnTarget: boolean;
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly scene: Phaser.Scene;
+    private tilePosition: Point;
+    private isOnTarget: boolean;
+    private currentAnimation?: {
+        tween: Phaser.Tweens.Tween,
+        resolve: () => any
+    };
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
@@ -43,6 +47,13 @@ export class BoxActor implements GameActor {
 
     public async animate(spritePosition: Point, direction?: Directions) {
         return new Promise<void>(resolve => {
+            if (this.currentAnimation) {
+                console.log('abort ', this.id, this.tilePosition);
+                this.currentAnimation?.tween.complete();
+                this.currentAnimation?.tween.stop();
+                this.currentAnimation?.resolve();
+                this.currentAnimation = undefined;
+            }
             const tween = {
                 x: spritePosition.x,
                 y: spritePosition.y,
@@ -51,13 +62,18 @@ export class BoxActor implements GameActor {
                 onInit: () => {
                 },
                 onUpdate: () => {
-                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.sprite.y + 1));
+                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.sprite.y));
                 },
                 onComplete: () => {
                     resolve();
+                    this.currentAnimation = undefined;
                 }
             };
-            this.tweens.add(tween);
+            this.currentAnimation = {
+                tween: this.tweens.add(tween),
+                resolve: resolve
+            };
+
         });
 
     }
@@ -74,18 +90,20 @@ export class BoxActor implements GameActor {
         return false;
     }
 
-    public cover(actor: GameActor): void {
-        if (actor.getTileCode() === Tiles.target) {
+    public cover(actors: GameActor[]): void {
+        if (actors
+            .some(actor => actor.getTileCode() === Tiles.target)) {
             this.sprite.setFrame(Tiles.boxOnTarget);
-            this.isOnTarget = true;
-                this.scene.sound.play(sounds.boxOnTarget.key, {volume: 0.5})
-        }
-    }
 
-    public uncover(actor: GameActor): void {
-        if (actor.getTileCode() === Tiles.target) {
-            this.sprite.setFrame(Tiles.box);
-            this.isOnTarget = false;
+            if (!this.isOnTarget) {
+                this.isOnTarget = true;
+                this.scene.sound.play(sounds.boxOnTarget.key, {volume: 0.5});
+            }
+        } else {
+            if (this.isOnTarget) {
+                this.isOnTarget = false;
+                this.sprite.setFrame(Tiles.box);
+            }
         }
     }
 

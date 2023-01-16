@@ -2,14 +2,14 @@ import Phaser from 'phaser';
 import {Store} from '@/store';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {GameEngine} from '@/game/engine/game-engine';
+import {GameStage} from '@/game/engine/game-stage';
 import {GameActorsFactory} from '../actors/game-actors-factory';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {sounds} from '@/game/constants/sounds';
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
-    private gameEngine?: GameEngine;
+    private gameEngine?: GameStage;
     private initialTime?: number;
 
     constructor() {
@@ -92,7 +92,7 @@ export class GameScene extends Phaser.Scene {
         });
         const actorMap = actorsCreator.create();
 
-        this.gameEngine = new GameEngine({
+        this.gameEngine = new GameStage({
             screenPropertiesCalculator: screenPropertiesCalculator,
             scene: this,
             strippedMap: store.strippedLayeredTileMatrix!,

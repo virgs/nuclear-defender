@@ -5,7 +5,7 @@ export enum Directions {
     DOWN
 }
 
-export const getOpositeDirectionOf = (direction: Directions): Directions => {
+export const getOppositeDirectionOf = (direction: Directions): Directions => {
     switch (direction) {
         case Directions.UP:
             return Directions.DOWN;

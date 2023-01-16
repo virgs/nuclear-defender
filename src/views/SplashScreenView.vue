@@ -12,7 +12,7 @@ import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calcul
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {Tiles} from '@/game/tiles/tiles';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {Actions, mapActionToString} from '@/game/constants/actions';
+import {Actions, mapActionToChar} from '@/game/constants/actions';
 
 const router = useRouter();
 //TODO get it from OptionsComponent
@@ -62,7 +62,7 @@ async function runSolutionsAlgorithm(levelsToSolve: Level[]) {
           map: level.map.replace(/\n/g, '\n'),
           ...solutionOutput,
           actions: solutionOutput.actions
-              ?.map((action: Actions) => mapActionToString(action))
+              ?.map((action: Actions) => mapActionToChar(action))
               .join('')
         };
         solutions.push(data);
@@ -102,7 +102,7 @@ async function playButtonClick() {
   store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
   store.features = output.removedFeatures;
   store.router = router;
-  store.solution = await runSolutionsAlgorithm([levels[data.currentSelectedIndex]]);
+  // store.solution = await runSolutionsAlgorithm([levels[data.currentSelectedIndex]]);
   //     .filter((_, index) => index > 0) //skip test level
   // .filter((_, index) => index > 4) //skip first 4 levels
   // .filter((_, index) => index < 5) //only first n levels
