@@ -8,10 +8,12 @@ import {fileURLToPath, URL} from 'node:url';
 export default defineConfig({
     plugins: [vue()],
     assetsInclude: ["**/*.m4a"],
-    base: "/sokoban-ai/",
+    base: "/sokoban-ai",
     resolve: {
         alias: {
             "@": fileURLToPath(new URL("./src", import.meta.url)),
+            vue: 'vue/dist/vue.esm-bundler.js',
+
         },
     }
 });
