@@ -78,9 +78,10 @@ export class TargetActor implements GameActor {
         if (actors
             .some(actor => actor.getTileCode() === Tiles.box || actor.getTileCode() === Tiles.hero)) {
             this.covered = true;
+        } else {
+            this.covered = false;
         }
     }
-
 
     public isCovered(): boolean {
         return this.covered;

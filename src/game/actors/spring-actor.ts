@@ -1,4 +1,3 @@
-import type Phaser from 'phaser';
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
