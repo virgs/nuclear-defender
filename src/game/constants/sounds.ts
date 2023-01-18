@@ -1,6 +1,5 @@
 import oil from '@/game/assets/sounds/oil.wav';
 import boxOnTarget from '@/game/assets/sounds/boxOnTarget.wav';
-import game from '@/game/assets/sounds/game.wav';
 import pushingBox from '@/game/assets/sounds/pushingBox.wav';
 // @ts-ignore
 import springEngage from '@/game/assets/sounds/spring-engage.m4a';
@@ -15,10 +14,6 @@ export const sounds: {
         resource: any
     }
 } = {
-    game: {
-        key: 'gameKey',
-        resource: game
-    },
     oil: {
         key: 'oilKey',
         resource: oil

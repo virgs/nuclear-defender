@@ -112,6 +112,52 @@ body {
     color: unset !important;
 }
 
+
+.thumbnails .tns-nav-active {
+    background: none;
+    border-color: #000;
+}
+.thumbnails li {
+    width: 50px;
+}
+.thumbnails li {
+    display: inline-block;
+    cursor: pointer;
+    border: 5px solid #fff;
+}
+
+.controls {
+    text-align: center;
+}
+
+.controls .prev {
+    left: 0;
+}
+
+.controls .next {
+    right: 0;
+}
+
+.controls li {
+    display: block;
+    position: absolute;
+    top: 50%;
+    height: 60px;
+    line-height: 60px;
+    margin-top: -30px;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.controls li img {
+    display: inline-block;
+    vertical-align: middle;
+}
+.thumbnails .tns-nav-active {
+    background: none;
+    border-color: #000;
+}
 :root {
     --radioactive-color: #d4fa00;
     --background-color: #d6d6d6;

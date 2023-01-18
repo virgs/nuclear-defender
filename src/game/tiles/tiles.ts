@@ -13,6 +13,8 @@ export enum Tiles {
     // not mapped yet
 }
 
+export const dynamicTiles = [Tiles.hero, Tiles.box]
+
 const tileCharMap = new Map<string, Tiles>();
 tileCharMap.set('-', Tiles.empty);
 tileCharMap.set(' ', Tiles.floor);

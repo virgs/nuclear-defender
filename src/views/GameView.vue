@@ -2,7 +2,7 @@
 import {Store} from '@/store';
 import {computed, onMounted, onUnmounted, ref} from 'vue';
 import PhaserContainer from "@/components/PhaserContainer.vue";
-import {levels} from '@/game/levels/levels';
+import {defaultLevels} from '@/game/levels/defaultLevels';
 import {useRouter} from 'vue-router';
 import {EventEmitter, EventName} from '@/event-emitter';
 import {Directions} from '@/game/constants/directions';
@@ -31,8 +31,9 @@ const forceRerender = () => {
   componentKey.value += 1;
 };
 
-let currentLevelIndex = computed(() => Store.getInstance().currentLevelIndex);
-let currentLevel = computed(() => levels[Store.getInstance().currentLevelIndex]);
+const currentStoredLevel = Store.getInstance().getCurrentStoredLevel()!;
+let currentLevelIndex = computed(() => currentStoredLevel.index);
+let currentLevel = computed(() => defaultLevels[currentStoredLevel.index]);
 let directionalButtonsEnabled = ref(true);
 let totalTime = ref(0);
 

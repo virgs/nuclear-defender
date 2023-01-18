@@ -1,6 +1,5 @@
-import tilesheet0 from '@/game/assets/levels/level-0.json';
-import tilesheet1 from '@/game/assets/levels/level-0.json';
 import tileSheetAsset from '@/game/assets/tiles/sokoban_tilesheet.png';
+
 import tileSheetAssetNormal from '@/game/assets/tiles/sokoban_tilessheet_normal.png';
 import floorTexture from '@/game/assets/tiles/floor-texture.jpg';
 
@@ -17,7 +16,6 @@ export const configuration = {
         verticalSize: tileHeight,
         horizontalSize: tileWidth,
         spriteSheetKey: 'tiles',
-        tilesheets: [tilesheet0, tilesheet1],
         sheetAsset: tileSheetAsset,
         sheetAssetNormal: tileSheetAssetNormal,
         tilemapKey: 'tilemap',

@@ -1,6 +1,6 @@
 <script lang="ts">
 import {Store} from '@/store';
-import {levels} from '@/game/levels/levels';
+import {defaultLevels} from '@/game/levels/defaultLevels';
 
 export default {
   name: "NextLevelView",
@@ -11,7 +11,7 @@ export default {
       codedMoves: store.movesCode,
       index: store.currentLevelIndex,
       router: store.router,
-      currentLevel: levels[store.currentLevelIndex]
+      currentLevel: defaultLevels[store.currentLevelIndex]
     }
   },
   mounted() {

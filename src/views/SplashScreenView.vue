@@ -2,9 +2,10 @@
 // script setup syntax or Composition API
 
 import {Store} from '@/store';
+import type {StoredLevel} from '@/store';
 import {useRouter} from 'vue-router';
-import type {Level} from '@/game/levels/levels';
-import {levels} from '@/game/levels/levels';
+import type {Level} from '@/game/levels/defaultLevels';
+import {defaultLevels} from '@/game/levels/defaultLevels';
 import {computed, onMounted, reactive} from "vue";
 import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
@@ -13,19 +14,18 @@ import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {Tiles} from '@/game/tiles/tiles';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 import {Actions, mapActionToChar} from '@/game/constants/actions';
+import {tns} from 'tiny-slider';
 
 const router = useRouter();
 //TODO get it from OptionsComponent
-const store = Store.getInstance();
-const furthestLevel = levels.length;//store.furthestEnabledLevel;
-store.movesCode = '';
+const furthestLevel = defaultLevels.length;//store.furthestEnabledLevel;
 
 const data = reactive({
   currentSelectedIndex: 0//furthestLevel
 });
 
-const currentLevelName = computed(() => levels[data.currentSelectedIndex].title);
-const availableLevels = computed(() => levels
+const currentLevelName = computed(() => defaultLevels[data.currentSelectedIndex].title);
+const availableLevels = computed(() => defaultLevels
     .filter((level, index) => index <= furthestLevel)
     .map(level => level.title));
 
@@ -93,16 +93,23 @@ async function playButtonClick() {
 
   const store = Store.getInstance();
 
+  // const testMap = defaultLevels[0];
+
   const map = new StandardSokobanAnnotationTranslator()
-      .translate(levels[data.currentSelectedIndex].map);
+      .translate(defaultLevels[data.currentSelectedIndex].map);
   const output = new SokobanMapProcessor(map)
       .strip([Tiles.hero, Tiles.box]);
 
-  store.currentLevelIndex = data.currentSelectedIndex;
-  store.strippedLayeredTileMatrix = output.strippedLayeredTileMatrix;
-  store.features = output.removedFeatures;
+  const newStoredLevel: StoredLevel = {
+    bestTime: -1,
+    dynamicFeatures: output.removedFeatures,
+    index: data.currentSelectedIndex,
+    level: defaultLevels[data.currentSelectedIndex],
+    strippedLayeredTileMatrix: output.strippedLayeredTileMatrix
+  };
+  store.setCurrentStoredLevel(newStoredLevel);
   store.router = router;
-  // store.solution = await runSolutionsAlgorithm([levels[data.currentSelectedIndex]]);
+  // store.solution = await runSolutionsAlgorithm([defaultLevels[data.currentSelectedIndex]]);
   //     .filter((_, index) => index > 0) //skip test level
   // .filter((_, index) => index > 4) //skip first 4 levels
   // .filter((_, index) => index < 5) //only first n levels
@@ -127,6 +134,38 @@ async function playButtonClick() {
 }
 
 onMounted(() => {
+
+  //https://github.com/ganlanyuan/tiny-slider
+  const slider = tns({
+    container: '.my-slider',
+    responsive: {
+      "350": {
+        "edgePadding": 30,
+        items: 1.5
+      },
+      '500': {
+        items: 3.5
+      }
+    },
+    "controls": true,
+    "lazyload": true,
+    "gutter": 5,
+    "fixedWidth": 400,
+    "center": true,
+    slideBy: 'page',
+    autoplay: false,
+    mouseDrag: true,
+    swipeAngle: false,
+    "edgePadding": 10,
+    speed: 400,
+    "startIndex": 3, //TODO furthest level
+    "loop": false,
+    "arrowKeys": true,
+    prevButton: '#prevButton',
+    nextButton: '#nextButton',
+    "navContainer": "#customize-thumbnails",
+  });
+
   [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
       // @ts-ignore
       .map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
@@ -145,6 +184,45 @@ onMounted(() => {
         <span style="display: flex">
           <label class="form-label sokoban-label">Select your level</label>
         </span>
+        <div class="my-slider">
+          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+          </div>
+          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+          </div>
+          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+          </div>
+          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+          </div>
+          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+          </div>
+        </div>
+        <div class="customize-tools" style="    position: relative;">
+          <ul class="thumbnails" id="customize-thumbnails" aria-label="Carousel Pagination">
+            <li data-nav="0" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            </li>
+            <li data-nav="1" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            </li>
+            <li data-nav="2" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            </li>
+            <li data-nav="3" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            </li>
+            <li data-nav="4" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            </li>
+          </ul>
+          <ul class="controls" id="customize-controls" aria-label="Carousel Navigation" tabindex="0">
+            <li class="prev" id="prevButton" aria-controls="customize" tabindex="-1" data-controls="prev">
+              <img src="angle-left.png" alt="" style="max-width: 20px; background-color: red;">
+            </li>
+            <li class="next" id="nextButton" aria-controls="customize" tabindex="-1" data-controls="next">
+              <img src="angle-right.png" alt="" style="max-width: 20px; background-color: red;">
+            </li>
+          </ul>
+        </div>
         <div class="dropdown" style="float: left">
           <button class="btn btn-secondary dropdown-toggle advanved-options-button" type="button"
                   data-bs-toggle="dropdown"

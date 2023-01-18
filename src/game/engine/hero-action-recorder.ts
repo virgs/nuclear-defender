@@ -1,6 +1,5 @@
-import {Tiles} from '@/game/tiles/tiles';
 import type {GameStage} from '@/game/engine/game-stage';
-import {Actions, mapActionToChar} from '@/game/constants/actions';
+import {Actions} from '@/game/constants/actions';
 import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 //
 // type Memento = {
@@ -19,10 +18,9 @@ export class HeroActionRecorder {
         this.mementos = [];
     }
 
-    public getPlayerMoves(): string {
+    public getPlayerMoves(): Actions[] {
         return this.mementos
-            .map(memento => mapActionToChar(memento.heroAction))
-            .join('');
+            .map(memento => memento.heroAction);
     }
 
     public getLastActionResult(): MovementOrchestratorOutput | undefined {
@@ -38,11 +36,11 @@ export class HeroActionRecorder {
         let lastAction: MovementOrchestratorInput | undefined = this.mementos.pop();
         let afterLastAction: MovementOrchestratorInput | undefined;
         while (lastAction && lastAction?.heroAction !== Actions.STAND) {
-            console.log(lastAction)
+            console.log(lastAction);
             afterLastAction = lastAction;
             lastAction = this.mementos.pop();
         }
-        console.log(afterLastAction, lastAction)
+        console.log(afterLastAction, lastAction);
         if (afterLastAction && lastAction) {
             this.lastOutput = lastAction.lastActionResult;
             console.log('undo', afterLastAction);

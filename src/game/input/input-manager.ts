@@ -4,8 +4,7 @@ import type {Directions} from '@/game/constants/directions';
 import {Actions, mapDirectionToAction} from '@/game/constants/actions';
 
 export class InputManager {
-    private static readonly TIME_TO_LIVE = 150;
-    private static readonly instance = new InputManager();
+    private static instance: InputManager;
 
     private readonly inputMap: Map<Actions, () => boolean>;
     private actionLiveness: number;
@@ -18,15 +17,19 @@ export class InputManager {
         this.deltaAcc = 0;
 
         EventEmitter.listenToEvent(EventName.DIRECTION_BUTTON_CLICKED, (direction: Directions) => {
-            this.actionInputBuffer = mapDirectionToAction(direction)
-        })
+            this.actionInputBuffer = mapDirectionToAction(direction);
+        });
     }
 
     public static getInstance(): InputManager {
+        if (!InputManager.instance) {
+            InputManager.instance = new InputManager();
+        }
         return InputManager.instance;
     }
 
-    public static setup(scene: Phaser.Scene): void {
+    public static init(scene: Phaser.Scene): void {
+        InputManager.instance = new InputManager();
         const cursors = scene.input.keyboard.createCursorKeys();
         const setUp = (action: Actions, key: number, cursorKey: Phaser.Input.Keyboard.Key) => {
             // scene.input.keyboard.addKey(key).emitOnRepeat = true;

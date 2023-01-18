@@ -1,19 +1,33 @@
-import type {SolutionOutput} from '@/game/solver/sokoban-solver';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import type {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
+import type {Tiles} from '@/game/tiles/tiles';
+import type {Actions} from '@/game/constants/actions';
+import type {Level} from '@/game/levels/defaultLevels';
 import {configuration} from '@/game/constants/configuration';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+
+export type StoredLevel = {
+    level: Level,
+    index: number,
+    bestTime: number,
+    strippedLayeredTileMatrix: MultiLayeredMap;
+    dynamicFeatures: Map<Tiles, Point[]>
+};
 
 export class Store {
-    private _movesCode: string = '';
-    private _currentLevelIndex: number = -1;
-    private _bestMoves: number[] = [];
+    private currentStoredLevel?: StoredLevel;
+
+    public getCurrentStoredLevel(): StoredLevel | undefined {
+        return this.currentStoredLevel;
+    }
+
+    public setCurrentStoredLevel(newStoredLevel: StoredLevel): void {
+        this.currentStoredLevel = newStoredLevel;
+    }
+
+    private _movesCode: Actions[] = [];
     private _router: any;
-    private _solution?: SolutionOutput;
     private _totalTimeInMs: number = 0;
     private _furthestEnabledLevel: number = 0;
-    private _strippedLayeredTileMatrix?: MultiLayeredMap;
-    private _features: Map<Tiles, Point[]> = new Map<Tiles, Point[]>();
 
     private static _instance: Store = new Store();
 
@@ -32,28 +46,12 @@ export class Store {
         return Store._instance;
     }
 
-    get movesCode(): string {
+    get movesCode(): Actions[] {
         return this._movesCode;
     }
 
-    set movesCode(value: string) {
+    set movesCode(value: Actions[]) {
         this._movesCode = value;
-    }
-
-    get currentLevelIndex(): number {
-        return this._currentLevelIndex;
-    }
-
-    set currentLevelIndex(value: number) {
-        this._currentLevelIndex = value;
-    }
-
-    get bestMoves(): number[] {
-        return this._bestMoves;
-    }
-
-    set bestMoves(value: number[]) {
-        this._bestMoves = value;
     }
 
     get router(): any {
@@ -62,14 +60,6 @@ export class Store {
 
     set router(value: any) {
         this._router = value;
-    }
-
-    get solution(): SolutionOutput {
-        return this._solution!;
-    }
-
-    set solution(value: SolutionOutput) {
-        this._solution = value;
     }
 
     get totalTimeInMs(): number {
@@ -87,22 +77,6 @@ export class Store {
     set furthestEnabledLevel(value: number) {
         localStorage.setItem(configuration.store.furthestEnabledLevelKey, value.toString());
         this._furthestEnabledLevel = value;
-    }
-
-    get strippedLayeredTileMatrix(): MultiLayeredMap | undefined {
-        return this._strippedLayeredTileMatrix;
-    }
-
-    set strippedLayeredTileMatrix(value: MultiLayeredMap | undefined) {
-        this._strippedLayeredTileMatrix = value;
-    }
-
-    get features(): Map<Tiles, Point[]> {
-        return this._features;
-    }
-
-    set features(value: Map<Tiles, Point[]>) {
-        this._features = value;
     }
 
     private static get instance(): Store {

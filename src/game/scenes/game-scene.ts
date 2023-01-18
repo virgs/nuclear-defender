@@ -45,7 +45,6 @@ export class GameScene extends Phaser.Scene {
         //                         this.destroy();
         //                     });
 
-
         //anim config
         //{name: 'mole', events: {hit: Events.MOLE_HIT, miss: Events.MOLE_MISS}}
         //{name: 'rabbit', events: {hit: Events.RABBIT_HIT, miss: Events.RABBIT_MISS}}
@@ -69,12 +68,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create() {
-        this.sound.play(sounds.game.key, {volume: 0.15});
         this.initialTime = new Date().getTime();
-        InputManager.setup(this);
+        InputManager.init(this);
         const store = Store.getInstance();
+        const storedLevel = store.getCurrentStoredLevel()!;
 
-        const screenPropertiesCalculator = new ScreenPropertiesCalculator(store.strippedLayeredTileMatrix!);
+        const screenPropertiesCalculator = new ScreenPropertiesCalculator(storedLevel.strippedLayeredTileMatrix!);
         const scale = screenPropertiesCalculator
             .getScale();
         configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * scale);
@@ -87,17 +86,33 @@ export class GameScene extends Phaser.Scene {
         const actorsCreator = new GameActorsFactory({
             screenPropertiesCalculator: screenPropertiesCalculator,
             scene: this,
-            dynamicFeatures: store.features,
-            strippedTileMatrix: store.strippedLayeredTileMatrix!
+            dynamicFeatures: storedLevel.dynamicFeatures,
+            strippedTileMatrix: storedLevel.strippedLayeredTileMatrix!
         });
         const actorMap = actorsCreator.create();
 
         this.gameEngine = new GameStage({
             screenPropertiesCalculator: screenPropertiesCalculator,
             scene: this,
-            strippedMap: store.strippedLayeredTileMatrix!,
+            strippedMap: storedLevel.strippedLayeredTileMatrix!,
             actorMap: actorMap,
-            solution: store.solution
+            solution: store.movesCode
+        });
+        this.game.renderer.snapshot(image => {
+            console.log('snapshot of the level');
+            const MIME_TYPE = "image/png";
+            // @ts-ignore
+            const imgURL = image.src;
+            const a = document.createElement("a");
+            a.href = imgURL;
+            a.download = 'screenshot.png';
+            a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
+            // a.click();
+            document.body.appendChild(a);
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(imgURL);
+            }, 0);
         });
     }
 
@@ -106,7 +121,7 @@ export class GameScene extends Phaser.Scene {
         if (this.allowUpdates) {
             await this.gameEngine!.update();
             if (this.gameEngine!.isLevelComplete()) {
-                this.sound.play(sounds.victory.key, {volume: 0.75});
+                this.sound.play(sounds.victory.key, {volume: 0.5});
                 this.allowUpdates = false;
                 setTimeout(async () => {
                     this.changeScene();
@@ -116,14 +131,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     private changeScene() {
-        // this.lights.destroy();
+        this.lights.destroy();
 
         const store = Store.getInstance();
         store.totalTimeInMs = new Date().getTime() - this.initialTime!;
         const playerMoves = this.gameEngine!.getPlayerMoves();
         store.movesCode = playerMoves;
         console.log('level complete: ' + playerMoves);
-        // store.router.push('/next-level');
+        store.router.push('/next-level');
     }
 
 }

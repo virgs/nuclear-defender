@@ -1,11 +1,9 @@
-import {Tiles} from '@/game/tiles/tiles';
-import type {Point} from '@/game/math/point';
+import {dynamicTiles, Tiles} from '@/game/tiles/tiles';
 import {Actions} from '@/game/constants/actions';
 import type {BoxActor} from '@/game/actors/box-actor';
 import {EventEmitter, EventName} from '@/event-emitter';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {GameActor} from '@/game/actors/game-actor';
-import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {HeroActionRecorder} from '@/game/engine/hero-action-recorder';
 import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
@@ -27,32 +25,25 @@ export class GameStage {
     private screenPropertiesCalculator: ScreenPropertiesCalculator;
     private mapChangedLastCycle: boolean;
 
-    constructor(config: { solution: SolutionOutput; screenPropertiesCalculator: ScreenPropertiesCalculator; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
+    constructor(config: { solution: Actions[]; screenPropertiesCalculator: ScreenPropertiesCalculator; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
         this.scene = config.scene;
         this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
         this.boxes = config.actorMap.get(Tiles.box)! as BoxActor[];
-        this.staticActors = config.actorMap.get(Tiles.target)!
-            .concat(config.actorMap.get(Tiles.oily)!)
-            .concat(config.actorMap.get(Tiles.spring)!)
-            .concat(config.actorMap.get(Tiles.treadmil)!)
-            .concat(config.actorMap.get(Tiles.oneWayDoor)!);
+
+        this.staticActors = [];
+        for (let [code, actor] of config.actorMap.entries()) {
+            if (!dynamicTiles.includes(code)) {
+                this.staticActors.push(...actor);
+            }
+        }
         this.strippedMap = config.strippedMap;
-        this.nextMoves = config.solution?.actions! || [];
+        this.nextMoves = config.solution || [];
         this.levelComplete = false;
         this.animationsAreOver = true;
-        this.mapChangedLastCycle = false;
+        this.mapChangedLastCycle = true;
         this.heroActionRecorder = new HeroActionRecorder(this);
-
-        const pointMap: Map<Tiles, Point[]> = new Map<Tiles, Point[]>();
-        for (let [tile, actorList] of config.actorMap.entries()) {
-            pointMap.set(tile, actorList
-                .map(actor => actor.getTilePosition()));
-        }
-
-        this.movementCoordinator = new MovementOrchestrator({
-            strippedMap: this.strippedMap
-        });
+        this.movementCoordinator = new MovementOrchestrator({strippedMap: this.strippedMap});
 
         this.updateActorsCoveringSituation();
         EventEmitter.listenToEvent(EventName.UNDO_BUTTON_CLICKED, async () => this.heroActionRecorder.undo());
@@ -62,7 +53,7 @@ export class GameStage {
         return this.levelComplete;
     }
 
-    public getPlayerMoves(): string {
+    public getPlayerMoves(): Actions[] {
         return this.heroActionRecorder.getPlayerMoves();
     }
 
@@ -98,9 +89,14 @@ export class GameStage {
 
     public async updateAnimations(lastAction: MovementOrchestratorOutput) {
         this.animationsAreOver = false;
-        const animationsPromises: Promise<any>[] = [];
-        animationsPromises.push(...lastAction.boxes
-            .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition))
+        const boxesThatMoved = lastAction.boxes
+            .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition));
+        boxesThatMoved
+            .forEach(movedBox =>
+                this.boxes
+                    .find(tileBox => movedBox.id === tileBox.getId())?.setTilePosition(movedBox.nextPosition));
+
+        const animationsPromises: Promise<any>[] = boxesThatMoved
             .map(async movedBox => {
                 const spriteBoxMoved = this.boxes
                     .find(tileBox => movedBox.id === tileBox.getId())!;
@@ -109,9 +105,8 @@ export class GameStage {
                 // this.scene.sound.play(sounds.pushingBox.key, {volume: 0.1});
 
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-                spriteBoxMoved?.setTilePosition(movedBox.nextPosition);
                 await spriteBoxMoved?.animate(spritePosition);
-            }));
+            });
 
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
@@ -134,13 +129,13 @@ export class GameStage {
 
     private updateActorsCoveringSituation() {
         const dynamicActors = (this.boxes as GameActor[]).concat(this.hero as GameActor);
-        this.staticActors
-            .forEach((staticActor: GameActor) => {
-                const coveringDynamicActors: GameActor[] = dynamicActors
-                    .filter(dynamicActor => dynamicActor.getTilePosition().isEqualTo(staticActor.getTilePosition()));
-                staticActor.cover(coveringDynamicActors);
-                coveringDynamicActors
-                    .forEach(dynamicActor => dynamicActor.cover([staticActor]));
+        dynamicActors
+            .forEach((dynamicActor: GameActor) => {
+                const coveringStaticActors: GameActor[] = this.staticActors
+                    .filter(staticActor => staticActor.getTilePosition().isEqualTo(dynamicActor.getTilePosition()));
+                dynamicActor.cover(coveringStaticActors);
+                coveringStaticActors
+                    .forEach(dynamicActor => dynamicActor.cover([dynamicActor]));
             });
     }
 
