@@ -13,6 +13,7 @@ export class GameScene extends Phaser.Scene {
     private gameEngine?: GameStage;
     private initialTime?: number;
     private store?: Store;
+    private playableMode?: boolean;
 
     constructor() {
         super('game');
@@ -69,11 +70,12 @@ export class GameScene extends Phaser.Scene {
         this.allowUpdates = true;
     }
 
-    public async create(store: Store) {
-        this.store = store;
+    public async create(config: {store: Store, playable: boolean}) {
+        this.playableMode = config.playable
+        this.store = config.store;
         this.initialTime = new Date().getTime();
         InputManager.init(this);
-        const storedLevel = store.getCurrentStoredLevel()!;
+        const storedLevel = this.store.getCurrentStoredLevel()!;
 
         const screenPropertiesCalculator = new ScreenPropertiesCalculator(storedLevel.strippedLayeredTileMatrix!);
         const scale = screenPropertiesCalculator
@@ -121,7 +123,7 @@ export class GameScene extends Phaser.Scene {
 
     public async update(time: number, delta: number) {
         InputManager.getInstance().update();
-        if (this.allowUpdates) {
+        if (this.allowUpdates && this.playableMode) {
             await this.gameEngine!.update();
             if (this.gameEngine!.isLevelComplete()) {
                 this.sound.play(sounds.victory.key, {volume: 0.5});

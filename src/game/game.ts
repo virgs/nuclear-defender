@@ -20,7 +20,7 @@ if (directionalButtonsContainer) {
     gameViewButtonsContainer.style.height = configuration.gameHeight + 'px';
 }
 
-const launch = (containerId: string, store: Store) => {
+const launch = (containerId: string, store: Store, playable: boolean) => {
     const game = new Phaser.Game({
         type: Phaser.AUTO,
         parent: containerId,
@@ -35,7 +35,7 @@ const launch = (containerId: string, store: Store) => {
         },
         scene: [GameScene]
     });
-    game.scene.start('game', store)
+    game.scene.start('game', {store, playable})
     return game;
 };
 

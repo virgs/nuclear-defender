@@ -181,7 +181,7 @@ onMounted(() => {
         <h1 class="sokoban-display display-2 fw-normal" style="user-select: none">SOKOBAN</h1>
       </div>
       <div class="col">
-        <span style="display: flex">
+        <span style="display: flex;">
           <label class="form-label sokoban-label">Select your level</label>
         </span>
         <ul class="carousel-controls" id="customize-controls" tabindex="0">
@@ -192,14 +192,14 @@ onMounted(() => {
             <i class="fa-solid fa-chevron-right"></i>
           </li>
         </ul>
-        <div id="carousel-slider">
+        <div id="carousel-slider" style=" max-height: 200px">
           <div v-for="(item, index) in availableLevels"
                :class="[index === data.currentSelectedIndex ? 'selected-slider' : '', 'tns-item']">
-            <h2 style="text-transform: capitalize">{{index + 1}}</h2>
+            <h4 class="level-number">{{ index + 1}}</h4>
             <img alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
         </div>
-        <h5 class="mt-2" style="text-transform: capitalize">{{availableLevels[data.currentSelectedIndex].title}}</h5>
+        <h3 class="mt-2" style="text-transform: capitalize">{{availableLevels[data.currentSelectedIndex].title}}</h3>
 <!--        <div>-->
 <!--          <ul class="carousel-thumbnail" id="carousel-thumbnails-container">-->
 <!--            <li v-for="(item, index) in availableLevels"-->
@@ -233,5 +233,14 @@ onMounted(() => {
 .advanved-options-button {
   background-color: var(--radioactive-color);
   color: var(--foreground-color);
+}
+
+.level-number {
+  text-transform: capitalize;
+  font-weight: bolder;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 </style>

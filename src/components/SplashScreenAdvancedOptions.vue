@@ -12,12 +12,12 @@
     </div>
   </div>
   <button class="btn btn-primary advanced-options-button" type="button" data-bs-toggle="collapse"
-          data-bs-target="#collapseExample"
-          aria-expanded="false" aria-controls="collapseExample">
+          data-bs-target="#collapsibleOptions" @click="onCollapseToggle"
+          aria-expanded="false" aria-controls="collapsibleOptions">
     <i class="fa-solid fa-circle-radiation"></i>
     Options
   </button>
-  <div class="collapse p-0" id="collapseExample">
+  <div class="collapse p-0" id="collapsibleOptions">
     <div class="card card-body px-0" style="background-color: transparent">
       <div class="container splash-screen-advanced text-center">
         <div class="row row-cols-1 gy-3">
@@ -37,30 +37,8 @@
             <input type="text" class="form-control" placeholder="Insert moves" aria-label="Moves code"
                    @change="notifyParent" v-model="movesCode">
           </div>
-          <div class="col-12 col-lg-6">
-            <label class="form-label sokoban-label">
-              Design your own map
-              <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip"
-                 data-bs-placement="right"
-                 data-bs-html="true"
-                 data-bs-custom-class="sokoban-tooltip"
-                 :data-bs-title="mapTooltipText"
-              ></i>
-            </label>
-            <textarea class="form-control map-text-area" rows="10" v-model="codedMapText"
-                      @change="() => notifyParent()"></textarea>
-          </div>
-          <div class="col-12 col-lg-6 align-self-end">
-            <label class="form-label sokoban-label">
-              Render
-            </label>
-            <canvas>
-
-            </canvas>
-            <button class="btn btn-outline-secondary" type="button" id="toastBtn"
-                    style="background-color: var(--radioactive-color); float: right">Save map
-            </button>
-
+          <div class="col-12">
+            <MapEditor :visible="toggleCollapse" @save="mapEditorSaved"></MapEditor>
           </div>
         </div>
       </div>
@@ -70,59 +48,37 @@
 
 <script lang="ts">
 
-import {mapStringToAction} from "@/game/constants/actions";
 import {defineComponent} from 'vue';
+import MapEditor from '@/components/MapEditor.vue';
 
 export default defineComponent({
   name: "SplashScreenAdvancedOptionsComponent",
+  components: {MapEditor},
   emits: ["valid"],
   data() {
     return {
-      mapTooltipText: `'-': empty<br>
-' ': floor<br>
-'#': wall<br>
-'.': target<br>
-'$': box<br>
-'*': boxOnTarget<br>
-'@': hero<br>
-'+': heroOnTarget`,
       furthestLevelEnabled: 0,
       validLevelPassword: false,
       levelPassword: '',
-      codedMapText: '',
-      movesCode: ''
+      movesCode: '',
+      toggleCollapse: false
     };
   },
   watch: {
-    codedMapText() {
-      this.notifyParent()
-    },
     movesCode() {
-      this.notifyParent()
+      this.notifyParent();
     }
   },
-  mounted() {
-    console.log(document.getElementsByTagName('canvas')[0].clientHeight)
-    console.log(document.getElementsByTagName('textarea')[0].clientHeight)
-  },
   methods: {
+    mapEditorSaved(map: string) {
+      console.log(map)
+    },
+    onCollapseToggle() {
+      this.toggleCollapse = !this.toggleCollapse;
+    },
     notifyParent() {
       // this.$emit('valid', true);
     },
-    //TODO check if it's solvable, compare box and target numbers, check if there's only one hero...
-    validateMap(map: string) {
-      return true;
-    },
-    parseMoves(movesText: string) {
-      if (movesText) {
-        if (movesText.length === 0) {
-          return undefined;
-        }
-        return movesText.split('')
-            .map(char => mapStringToAction(char));
-      }
-      return [];
-    }
   },
   computed: {
     toastBodyTextName(): any {
