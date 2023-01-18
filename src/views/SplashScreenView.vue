@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // script setup syntax or Composition API
 
-import {Store} from '@/store';
 import type {StoredLevel} from '@/store';
+import {Store} from '@/store';
 import {useRouter} from 'vue-router';
 import type {Level} from '@/game/levels/defaultLevels';
 import {defaultLevels} from '@/game/levels/defaultLevels';
@@ -137,33 +137,33 @@ onMounted(() => {
 
   //https://github.com/ganlanyuan/tiny-slider
   const slider = tns({
-    container: '.my-slider',
+    container: '#carousel-slider',
     responsive: {
-      "350": {
-        "edgePadding": 30,
+      '350': {
+        edgePadding: 30,
         items: 1.5
       },
       '500': {
         items: 3.5
       }
     },
-    "controls": true,
-    "lazyload": true,
-    "gutter": 5,
-    "fixedWidth": 400,
-    "center": true,
+    controls: true,
+    lazyload: true,
+    gutter: 5,
+    fixedWidth: 400,
+    center: true,
     slideBy: 'page',
     autoplay: false,
     mouseDrag: true,
     swipeAngle: false,
-    "edgePadding": 10,
+    edgePadding: 10,
     speed: 400,
-    "startIndex": 3, //TODO furthest level
-    "loop": false,
-    "arrowKeys": true,
+    startIndex: data.currentSelectedIndex,
+    loop: false,
+    arrowKeys: true,
     prevButton: '#prevButton',
     nextButton: '#nextButton',
-    "navContainer": "#customize-thumbnails",
+    navContainer: "#carousel-thumbnails-container",
   });
 
   [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
@@ -184,8 +184,20 @@ onMounted(() => {
         <span style="display: flex">
           <label class="form-label sokoban-label">Select your level</label>
         </span>
-        <div class="my-slider">
-          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+        <ul class="carousel-controls" id="customize-controls" tabindex="0">
+          <li class="prev" id="prevButton" tabindex="-1" data-controls="prev">
+            <i class="fa-solid fa-chevron-left"></i>
+          </li>
+          <li class="next" id="nextButton" tabindex="-1" data-controls="next">
+            <i class="fa-solid fa-chevron-right"></i>
+          </li>
+        </ul>
+
+        <div id="carousel-slider">
+<!--          TODO scale down when the index doesnt match the selected one and move down a bit (transitionX...)-->
+          <div>
+            <h3>{{defaultLevels[0].title}}</h3>
+            <img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
           <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
@@ -196,30 +208,22 @@ onMounted(() => {
           <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
         </div>
-        <div class="customize-tools" style="    position: relative;">
-          <ul class="thumbnails" id="customize-thumbnails" aria-label="Carousel Pagination">
-            <li data-nav="0" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+        <div>
+          <ul class="carousel-thumbnail" id="carousel-thumbnails-container">
+            <li data-nav="0" class="carousel-thumbnail" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath">
             </li>
-            <li data-nav="1" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            <li data-nav="1" class="carousel-thumbnail" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath">
             </li>
-            <li data-nav="2" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            <li data-nav="2" class="carousel-thumbnail" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath">
             </li>
-            <li data-nav="3" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
+            <li data-nav="3" class="carousel-thumbnail" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath">
             </li>
-            <li data-nav="4" aria-label="Carousel Page 1" aria-controls="customize" class="thumbnails" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath" alt="" width="30" height="30">
-            </li>
-          </ul>
-          <ul class="controls" id="customize-controls" aria-label="Carousel Navigation" tabindex="0">
-            <li class="prev" id="prevButton" aria-controls="customize" tabindex="-1" data-controls="prev">
-              <img src="angle-left.png" alt="" style="max-width: 20px; background-color: red;">
-            </li>
-            <li class="next" id="nextButton" aria-controls="customize" tabindex="-1" data-controls="next">
-              <img src="angle-right.png" alt="" style="max-width: 20px; background-color: red;">
+            <li data-nav="4" class="carousel-thumbnail" tabindex="-1">
+              <img :src="defaultLevels[0].thumbnailPath">
             </li>
           </ul>
         </div>
