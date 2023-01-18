@@ -20,9 +20,9 @@
   <div class="collapse p-0" id="collapseExample">
     <div class="card card-body px-0" style="background-color: transparent">
       <div class="container splash-screen-advanced text-center">
-        <div class="row row-cols-1 justify-content-center gy-3">
+        <div class="row row-cols-1 gy-3">
           <div class="col">
-            <label class="form-label sokoban-label">Enter level password</label>
+            <label class="form-label sokoban-label">Level password</label>
             <div class="input-group">
               <input type="text" class="form-control" placeholder="Level password" aria-label="Level password"
                      @change="notifyParent" v-model="levelPassword">
@@ -34,10 +34,10 @@
           </div>
           <div class="col">
             <label class="form-label sokoban-label">Moves code</label>
-            <input type="text" class="form-control" placeholder="Level password" aria-label="Moves code"
+            <input type="text" class="form-control" placeholder="Insert moves" aria-label="Moves code"
                    @change="notifyParent" v-model="movesCode">
           </div>
-          <div class="col">
+          <div class="col-12 col-lg-6">
             <label class="form-label sokoban-label">
               Design your own map
               <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip"
@@ -49,6 +49,18 @@
             </label>
             <textarea class="form-control map-text-area" rows="10" v-model="codedMapText"
                       @change="() => notifyParent()"></textarea>
+          </div>
+          <div class="col-12 col-lg-6 align-self-end">
+            <label class="form-label sokoban-label">
+              Render
+            </label>
+            <canvas>
+
+            </canvas>
+            <button class="btn btn-outline-secondary" type="button" id="toastBtn"
+                    style="background-color: var(--radioactive-color); float: right">Save map
+            </button>
+
           </div>
         </div>
       </div>
@@ -89,6 +101,10 @@ export default defineComponent({
       this.notifyParent()
     }
   },
+  mounted() {
+    console.log(document.getElementsByTagName('canvas')[0].clientHeight)
+    console.log(document.getElementsByTagName('textarea')[0].clientHeight)
+  },
   methods: {
     notifyParent() {
       // this.$emit('valid', true);
@@ -107,7 +123,6 @@ export default defineComponent({
       }
       return [];
     }
-
   },
   computed: {
     toastBodyTextName(): any {
@@ -129,10 +144,10 @@ export default defineComponent({
 
 <style scoped>
 .advanced-options-button {
+  text-align: right;
   background-color: transparent;
   border-radius: 0;
   border: none;
-  text-align: left;
   width: 100%;
 }
 
@@ -145,12 +160,13 @@ export default defineComponent({
   /*border-bottom: 1px solid var(--background-color);*/
 }
 
-.fa-solid {
-  transition: 0.45s ease-out;
+.advanced-options-button:hover .fa-solid {
+  color: var(--radioactive-color);
+  transform: rotate(300deg) scale(1.25);
 }
 
-.advanced-options-button:hover .fa-solid {
-  transform: rotate(300deg);
+.fa-solid {
+  transition: 0.45s ease-out;
 }
 
 </style>

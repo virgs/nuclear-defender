@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import {Store} from '@/store';
-import {computed, onMounted, onUnmounted, ref} from 'vue';
-import PhaserContainer from "@/components/PhaserContainer.vue";
-import {defaultLevels} from '@/game/levels/defaultLevels';
 import {useRouter} from 'vue-router';
 import {EventEmitter, EventName} from '@/event-emitter';
-import {Directions} from '@/game/constants/directions';
+import {defaultLevels} from '@/game/levels/defaultLevels';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
+import PhaserContainer from "@/components/PhaserContainer.vue";
+import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 
 const router = useRouter();
-
-function directionClick(direction: Directions) {
-  EventEmitter.emit(EventName.DIRECTION_BUTTON_CLICKED, direction);
-}
 
 function resetClick() {
   forceRerender();
@@ -34,7 +30,7 @@ const forceRerender = () => {
 const currentStoredLevel = Store.getInstance().getCurrentStoredLevel()!;
 let currentLevelIndex = computed(() => currentStoredLevel.index + 1);
 let currentLevel = computed(() => defaultLevels[currentStoredLevel.index]);
-let directionalButtonsEnabled = ref(true);
+let smallScreenDisplay = ref(true);
 let totalTime = ref(0);
 
 let timer: number;
@@ -47,7 +43,7 @@ onMounted(() => {
   }, interval);
 
   const container = document.getElementById('phaser-container')!;
-  directionalButtonsEnabled.value = container.clientWidth <= 992 / 2; //half of bootstrap 'lg' breakpoint
+  smallScreenDisplay.value = container.clientWidth <= 992 / 2; //half of bootstrap 'lg' breakpoint
 });
 
 onUnmounted(() => {
@@ -86,66 +82,39 @@ onUnmounted(() => {
           <div class="row h-100 mx-2">
             <div class="col-12">
               <div class="row justify-content-center mt-2">
-                <div class="col-auto col-lg-1 d-grid gap-1">
+                <div class="col-auto col-lg-3 d-grid gap-1">
                   <button class="btn btn-primary sokoban-outlined-button"
                           @click="exitClick" type="button">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>
+                      <i class="fa-solid fa-door-open"></i>
+                    </span>
+                    <span v-if="!smallScreenDisplay" class="mx-2">QUIT</span>
                   </button>
                 </div>
-                <div class="col-auto col-lg-1 d-grid gap-2">
+                <div class="col-auto col-lg-3 d-grid gap-2">
                   <button class="btn btn-primary sokoban-outlined-button"
                           @click="resetClick" type="button">
-                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>
+                      <i class="fa-solid fa-circle-xmark"></i>
+                    </span>
+                    <span v-if="!smallScreenDisplay" class="mx-2">RESTART</span>
                   </button>
                 </div>
-                <div class="col-auto col-lg-1 d-grid gap-2">
+                <div class="col-auto col-lg-3 d-grid gap-2">
                   <button class="btn btn-primary sokoban-call-for-action-button"
                           @click="undoClick"
                           type="button">
-                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span>
+                      <i class="fa-solid fa-delete-left"></i>
+                    </span>
+                    <span v-if="!smallScreenDisplay" class="mx-2">UNDO</span>
                   </button>
                 </div>
               </div>
             </div>
-            <div class="col-12 align-self-end mb-4" v-if="directionalButtonsEnabled" id="directional-buttons-container">
-              <div class="row justify-content-center">
-                <div class="col-4">
-                  <button class="btn btn-primary sokoban-call-for-action-button w-100"
-                          @click="directionClick(Directions.UP)"
-                          type="button">
-                    <i class="fa-solid fa-arrow-up"></i>
-                  </button>
-                </div>
-                <div class="w-100 mt-2"></div>
-                <div class="col-4">
-                  <button class="btn btn-primary sokoban-call-for-action-button w-100"
-                          @click="directionClick(Directions.LEFT)"
-                          type="button">
-                    <i class="fa-solid fa-arrow-left"></i>
-                  </button>
-                </div>
-                <div class="col-4">
-                  <button class="btn btn-primary sokoban-call-for-action-button w-100"
-                          @click="directionClick(Directions.DOWN)"
-                          type="button">
-                    <i class="fa-solid fa-arrow-down"></i>
-                  </button>
-                </div>
-                <div class="col-4">
-                  <button class="btn btn-primary sokoban-call-for-action-button w-100"
-                          @click="directionClick(Directions.RIGHT)"
-                          type="button">
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <DirectionalButtonsComponent class="col-12 align-self-end mb-4" v-if="smallScreenDisplay"/>
           </div>
-
-
         </div>
-
-
       </div>
     </div>
   </div>
