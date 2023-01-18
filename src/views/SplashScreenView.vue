@@ -18,16 +18,14 @@ import {tns} from 'tiny-slider';
 
 const router = useRouter();
 //TODO get it from OptionsComponent
-const furthestLevel = defaultLevels.length;//store.furthestEnabledLevel;
+const furthestLevel = 10;//store.furthestEnabledLevel;
 
 const data = reactive({
   currentSelectedIndex: 0//furthestLevel
 });
 
-const currentLevelName = computed(() => defaultLevels[data.currentSelectedIndex].title);
 const availableLevels = computed(() => defaultLevels
-    .filter((level, index) => index <= furthestLevel)
-    .map(level => level.title));
+    .filter((level, index) => index <= furthestLevel));
 
 function optionsChanged(valid: boolean) {
   console.log();
@@ -133,26 +131,21 @@ async function playButtonClick() {
   await router.push('/game');
 }
 
+function updateSelectedIndex (info: any) {
+  data.currentSelectedIndex = info.index;
+}
+
 onMounted(() => {
 
   //https://github.com/ganlanyuan/tiny-slider
   const slider = tns({
     container: '#carousel-slider',
-    responsive: {
-      '350': {
-        edgePadding: 30,
-        items: 1.5
-      },
-      '500': {
-        items: 3.5
-      }
-    },
+    items: 3,
     controls: true,
     lazyload: true,
-    gutter: 5,
-    fixedWidth: 400,
+    gutter: 0,
     center: true,
-    slideBy: 'page',
+    slideBy: 1,
     autoplay: false,
     mouseDrag: true,
     swipeAngle: false,
@@ -163,8 +156,15 @@ onMounted(() => {
     arrowKeys: true,
     prevButton: '#prevButton',
     nextButton: '#nextButton',
-    navContainer: "#carousel-thumbnails-container",
+    // navContainer: "#carousel-thumbnails-container",
+    // navAsThumbnails: true
+    // navContainer: false,
+    // navAsThumbnails: false,
+    nav: false
   });
+
+// bind function to event
+  slider.events.on('indexChanged', updateSelectedIndex);
 
   [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
       // @ts-ignore
@@ -192,55 +192,25 @@ onMounted(() => {
             <i class="fa-solid fa-chevron-right"></i>
           </li>
         </ul>
-
         <div id="carousel-slider">
-<!--          TODO scale down when the index doesnt match the selected one and move down a bit (transitionX...)-->
-          <div>
-            <h3>{{defaultLevels[0].title}}</h3>
-            <img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
-          </div>
-          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
-          </div>
-          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
-          </div>
-          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
-          </div>
-          <div><img class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+          <div v-for="(item, index) in availableLevels"
+               :class="[index === data.currentSelectedIndex ? 'selected-slider' : '', 'tns-item']">
+            <h2 style="text-transform: capitalize">{{index + 1}}</h2>
+            <img alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
         </div>
-        <div>
-          <ul class="carousel-thumbnail" id="carousel-thumbnails-container">
-            <li data-nav="0" class="carousel-thumbnail" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath">
-            </li>
-            <li data-nav="1" class="carousel-thumbnail" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath">
-            </li>
-            <li data-nav="2" class="carousel-thumbnail" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath">
-            </li>
-            <li data-nav="3" class="carousel-thumbnail" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath">
-            </li>
-            <li data-nav="4" class="carousel-thumbnail" tabindex="-1">
-              <img :src="defaultLevels[0].thumbnailPath">
-            </li>
-          </ul>
-        </div>
-        <div class="dropdown" style="float: left">
-          <button class="btn btn-secondary dropdown-toggle advanved-options-button" type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-            {{ data.currentSelectedIndex + 1 }}: {{ currentLevelName }}
-          </button>
-          <ul class="dropdown-menu" style="max-height: 300px; overflow: scroll">
-            <li v-for="(level, index) in availableLevels">
-              <button class="dropdown-item" type="button" @click="data.currentSelectedIndex = index">
-                {{ index + 1 }}: {{ level }}
-              </button>
-            </li>
-          </ul>
-        </div>
+        <h5 class="mt-2" style="text-transform: capitalize">{{availableLevels[data.currentSelectedIndex].title}}</h5>
+<!--        <div>-->
+<!--          <ul class="carousel-thumbnail" id="carousel-thumbnails-container">-->
+<!--            <li v-for="(item, index) in availableLevels"-->
+<!--                v-show="index > data.currentSelectedIndex - 2 && index < data.currentSelectedIndex + 2"-->
+<!--                :data-nav="index"-->
+<!--                class="carousel-thumbnail"-->
+<!--                tabindex="-1">-->
+<!--              <img alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">-->
+<!--            </li>-->
+<!--          </ul>-->
+<!--        </div>-->
       </div>
       <div class="col">
         <SplashScreenAdvancedOptionsComponent @valid="optionsChanged"></SplashScreenAdvancedOptionsComponent>

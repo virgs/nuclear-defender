@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type {Store} from '@/store';
 import {GameScene} from './scenes/game-scene';
 import {configuration} from './constants/configuration';
 
@@ -19,8 +20,8 @@ if (directionalButtonsContainer) {
     gameViewButtonsContainer.style.height = configuration.gameHeight + 'px';
 }
 
-const launch = (containerId: string) => {
-    return new Phaser.Game({
+const launch = (containerId: string, store: Store) => {
+    const game = new Phaser.Game({
         type: Phaser.AUTO,
         parent: containerId,
         width: configuration.gameWidth,
@@ -34,6 +35,8 @@ const launch = (containerId: string) => {
         },
         scene: [GameScene]
     });
+    game.scene.start('game', store)
+    return game;
 };
 
 export default launch;

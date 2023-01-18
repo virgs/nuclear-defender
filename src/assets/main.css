@@ -118,14 +118,27 @@ body {
     border: 2px solid var(--radioactive-color);
     border-radius: 5px;
 }
+
 .carousel-thumbnail li {
     display: inline-block;
     cursor: pointer;
 }
+
 .carousel-thumbnail img {
     width: 50px;
     height: auto;
 }
+
+
+.tns-item {
+    transition: all ease 500ms;
+    transform: scale(.5) translateY(-50px);
+}
+
+.selected-slider {
+    transform: scale(1) translateY(0px);
+}
+
 
 .carousel-controls {
     width: 100%;
@@ -138,10 +151,15 @@ body {
     transition: 100ms all ease;
 }
 
+.carousel-controls :focus-visible {
+    outline: none !important;
+    border: none;
+}
 
 .carousel-controls .prev {
     left: 0;
 }
+
 .carousel-controls .prev:hover {
     transform: scale(1.1);
 }
@@ -149,6 +167,7 @@ body {
 .carousel-controls .next {
     right: 0;
 }
+
 .carousel-controls .next:hover {
     transform: scale(1.1);
 }
@@ -169,10 +188,12 @@ body {
     display: inline-block;
     vertical-align: middle;
 }
+
 .thumbnails .tns-nav-active {
     background: none;
     border-color: #000;
 }
+
 :root {
     --radioactive-color: #d4fa00;
     --background-color: #d6d6d6;

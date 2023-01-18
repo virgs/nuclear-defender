@@ -32,7 +32,7 @@ const forceRerender = () => {
 };
 
 const currentStoredLevel = Store.getInstance().getCurrentStoredLevel()!;
-let currentLevelIndex = computed(() => currentStoredLevel.index);
+let currentLevelIndex = computed(() => currentStoredLevel.index + 1);
 let currentLevel = computed(() => defaultLevels[currentStoredLevel.index]);
 let directionalButtonsEnabled = ref(true);
 let totalTime = ref(0);

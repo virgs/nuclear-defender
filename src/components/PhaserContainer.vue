@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {onMounted, onUnmounted} from "vue";
+import {Store} from '@/store';
 
 let gameInstance: Phaser.Game | null | void = null;
 const containerId = "game-container";
 const game = await import(/* webpackChunkName: "game" */ "@/game/game");
 onMounted(() => {
-  gameInstance = game.launch(containerId);
+  gameInstance = game.launch(containerId, Store.getInstance());
 });
 onUnmounted(() => {
   gameInstance?.destroy(false);

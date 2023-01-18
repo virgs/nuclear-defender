@@ -1,16 +1,18 @@
 import Phaser from 'phaser';
-import {Store} from '@/store';
+import type {Store} from '@/store';
+import {sounds} from '@/game/constants/sounds';
+import {GameStage} from '@/game/engine/game-stage';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {GameStage} from '@/game/engine/game-stage';
+import {mapStringToAction} from '@/game/constants/actions';
 import {GameActorsFactory} from '../actors/game-actors-factory';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import {sounds} from '@/game/constants/sounds';
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
     private gameEngine?: GameStage;
     private initialTime?: number;
+    private store?: Store;
 
     constructor() {
         super('game');
@@ -67,10 +69,10 @@ export class GameScene extends Phaser.Scene {
         this.allowUpdates = true;
     }
 
-    public async create() {
+    public async create(store: Store) {
+        this.store = store;
         this.initialTime = new Date().getTime();
         InputManager.init(this);
-        const store = Store.getInstance();
         const storedLevel = store.getCurrentStoredLevel()!;
 
         const screenPropertiesCalculator = new ScreenPropertiesCalculator(storedLevel.strippedLayeredTileMatrix!);
@@ -96,7 +98,8 @@ export class GameScene extends Phaser.Scene {
             scene: this,
             strippedMap: storedLevel.strippedLayeredTileMatrix!,
             actorMap: actorMap,
-            solution: store.movesCode
+            solution: storedLevel.level.solution?.split('')
+                .map(action => mapStringToAction(action))
         });
         this.game.renderer.snapshot(image => {
             console.log('snapshot of the level');
@@ -133,12 +136,13 @@ export class GameScene extends Phaser.Scene {
     private changeScene() {
         this.lights.destroy();
 
-        const store = Store.getInstance();
-        store.totalTimeInMs = new Date().getTime() - this.initialTime!;
-        const playerMoves = this.gameEngine!.getPlayerMoves();
-        store.movesCode = playerMoves;
-        console.log('level complete: ' + playerMoves);
-        store.router.push('/next-level');
+        this.store!.setLevelCompleteData({
+            movesCode: this.gameEngine!.getPlayerMoves(),
+            totalTime: new Date().getTime() - this.initialTime!
+
+        });
+        console.log('level complete');
+        this.store!.router.push('/next-level');
     }
 
 }

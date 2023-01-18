@@ -1,41 +1,53 @@
 <script lang="ts">
 import {Store} from '@/store';
-import {defaultLevels} from '@/game/levels/defaultLevels';
+import {defineComponent} from 'vue';
+import {mapActionToChar} from '@/game/constants/actions';
 
-export default {
+export default defineComponent({
   name: "NextLevelView",
   data() {
     const store = Store.getInstance();
+
     return {
-      totalTime: store.totalTimeInMs,
-      codedMoves: store.movesCode,
-      index: store.currentLevelIndex,
+      currentSelectedLevel: store.getCurrentStoredLevel()!,
+      levelCompletedData: store.getLevelCompleteData()!,
       router: store.router,
-      currentLevel: defaultLevels[store.currentLevelIndex]
-    }
+    };
   },
   mounted() {
     history.replaceState({urlPath: this.router.currentRoute.fullPath}, "", '/');
 
-    const toastTrigger = document.getElementById('toastBtn');
+    const toastTriggers = document.getElementsByClassName('toastBtn');
     const toastLiveExample = document.getElementById('copy-toast');
-    if (toastTrigger) {
-      // @ts-ignore
-      toastTrigger.addEventListener('click', () => new bootstrap.Toast(toastLiveExample).show());
+    if (toastTriggers) {
+      Array.from(toastTriggers)
+          .forEach(trigger => {
+            // @ts-ignore
+            trigger.addEventListener('click', () => new bootstrap.Toast(toastLiveExample).show());
+          });
+    }
+  },
+  computed: {
+    movesCode() {
+      return this.levelCompletedData.movesCode
+          .map(move => mapActionToChar(move))
+          .join('');
     }
   },
   methods: {
-    async copyMovesCode() {
-      await navigator.clipboard.writeText(this.codedMoves);
+    async copy(text: string) {
+      await navigator.clipboard.writeText(text);
     },
     async continueButton() {
       const store = Store.getInstance();
-      ++store.furthestEnabledLevel
+      if (this.currentSelectedLevel.index === store.furthestEnabledLevel) {
+        ++store.furthestEnabledLevel;
+      }
 
       await this.router.push('/');
     }
   }
-}
+});
 
 
 </script>
@@ -47,7 +59,7 @@ export default {
            aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
         <div class="d-flex sokoban-toast">
           <div class="toast-body">
-            Moves code copied to clipboard
+            Text copied to clipboard
           </div>
           <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
@@ -58,22 +70,33 @@ export default {
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col">
           <h1 class="sokoban-display display-3 fw-normal" style="user-select: none; text-align: left">Level
-            <em>{{ index }}: '{{ currentLevel.title }}'</em>
+            <em>{{ currentSelectedLevel.index + 1 }}: '{{ currentSelectedLevel.level.title }}'</em>
             complete!</h1>
         </div>
         <div class="col my-1">
           <h4 class="sokoban-display fw-normal"
               style="user-select: none; color: var(--background-color); text-align: right">Total time:
-            {{ Math.trunc(totalTime / 100) / 10 }}s
+            {{ Math.trunc(levelCompletedData.totalTime / 100) / 10 }}s
           </h4>
         </div>
-        <div class="col">
+        <div class="col-12">
           <label class="form-label sokoban-label">Moves code</label>
           <div class="input-group">
-            <input type="text" class="form-control" aria-label="Level password" readonly
-                   :value="codedMoves">
-            <button class="btn btn-outline-secondary" type="button" id="toastBtn"
-                    style="background-color: var(--radioactive-color)" @click="copyMovesCode">
+            <input type="text" class="form-control" readonly
+                   :value="movesCode">
+            <button class="btn btn-outline-secondary toastBtn" type="button"
+                    style="background-color: var(--radioactive-color)" @click="copy(movesCode)">
+              Copy
+            </button>
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label sokoban-label">Coded map</label>
+          <div class="input-group">
+            <input type="text" class="form-control" readonly
+                   :value="currentSelectedLevel.level.map">
+            <button class="btn btn-outline-secondary toastBtn" type="button"
+                    style="background-color: var(--radioactive-color)" @click="copy(currentSelectedLevel.level.map)">
               Copy
             </button>
           </div>
