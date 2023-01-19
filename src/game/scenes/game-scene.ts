@@ -72,7 +72,6 @@ export class GameScene extends Phaser.Scene {
 
     public async create(config: { store: Store, playable: boolean }) {
         this.playableMode = config.playable;
-        console.log('play', this.playableMode);
         this.store = config.store;
         const storedLevel = this.store.getCurrentStoredLevel()!;
 

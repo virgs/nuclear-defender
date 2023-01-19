@@ -1,48 +1,59 @@
 <template>
-  <div class="row">
-    <div class="col-12">
-      <label class="form-label sokoban-label">
-        Map editor
-      </label>
-    </div>
-    <div class="col-12 col-lg-6">
-      <label class="form-label sokoban-label">
-        Map
-        <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip"
-           data-bs-placement="right"
-           data-bs-html="true"
-           data-bs-custom-class="sokoban-tooltip"
-           :data-bs-title="mapTooltipText"
-        ></i>
-      </label>
-      <textarea :class="['form-control map-text-area', valid ? 'is-valid' : 'is-invalid']" rows="10"
-                v-model="codedMapText"></textarea>
-      <div class="form-label feedback-label invalid-feedback">
-        {{ invalidError }}
+  <div id="map-editor" class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="border: none">
+        <h2 class="modal-title">Map editor</h2>
       </div>
-    </div>
-    <div class="col-12 col-lg-6">
-      <label class="form-label sokoban-label">
-        Render
-      </label>
-      <div id="phaser-container" style="display: flex" >
-        <Suspense>
-          <PhaserContainer :playable="false" :render="render" :key="editorKey"/>
-          <template #fallback>
-            <div class="spinner-border text-info" role="status">
-              <span class="visually-hidden">Loading...</span>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12 mb-3">
+            <label class="form-label sokoban-label">Level title</label>
+            <input type="text" class="form-control" placeholder="Title" v-model="title">
+          </div>
+          <div class="col-12 col-lg-6">
+            <label class="form-label sokoban-label">
+              Code
+              <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip"
+                 data-bs-placement="right"
+                 data-bs-html="true"
+                 data-bs-custom-class="sokoban-tooltip"
+                 :data-bs-title="mapTooltipText"
+              ></i>
+            </label>
+            <textarea :class="['form-control map-text-area', valid ? 'is-valid' : 'is-invalid']" rows="10"
+                      v-model="codedMapText"></textarea>
+            <div class="form-label feedback-label invalid-feedback">
+              {{ invalidError }}
             </div>
-          </template>
-        </Suspense>
+          </div>
+          <div class="col-12 col-lg-6">
+            <label class="form-label sokoban-label">
+              Render
+            </label>
+            <div id="phaser-container" style="display: flex">
+              <Suspense>
+                <PhaserContainer :playable="false" :render="render" :key="editorKey"/>
+                <template #fallback>
+                  <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </template>
+              </Suspense>
+            </div>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
-              @click="save"
-              :disabled="!valid"
-              style="background-color: var(--radioactive-color); float: right">Save map
-      </button>
+      <div class="modal-footer" style="border: none">
+        <button class="btn sokoban-outlined-button mt-4" type="button" data-bs-dismiss="modal">Close
+        </button>
+        <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
+                @click="save"
+                :disabled="!valid"
+                style="background-color: var(--radioactive-color); float: right">Save
+        </button>
+      </div>
     </div>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -58,10 +69,11 @@ import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban
 export default defineComponent({
   name: "MapEditor",
   components: {PhaserContainer},
+  props: ['toggle'],
   emits: ["save"],
-  props: ['visible'],
   data() {
     return {
+      title: ['Mouse user nightmare'][0],
       invalidError: '',
       render: false,
       valid: true,
@@ -88,24 +100,22 @@ export default defineComponent({
     };
   },
   watch: {
+    toggle() {
+      const modalIsBeingShown = document.getElementsByTagName('body')[0]!.classList.contains('modal-open');
+      if (modalIsBeingShown) {
+        setTimeout(() => {
+          const textArea = document.getElementsByTagName('textarea')[0];
+          const container = document.getElementById('phaser-container')!;
+          container.style.height = textArea.offsetHeight + 'px';
+          container.style.width = '100%';
+          this.refresh();
+          this.render = true;
+        }, 150); //it takes sometime until the container is rendered
+      }
+    },
     codedMapText() {
       this.refresh();
     },
-    visible() {
-      if (this.visible) {
-        const textArea = document.getElementsByTagName('textarea')[0];
-        const container = document.getElementById('phaser-container')!;
-        container.style.height = textArea.offsetHeight + 'px';
-        container.style.width = '100%';
-        this.render = true;
-        console.log(container.style.height, textArea.offsetHeight)
-      }
-    },
-    render() {
-      if (this.render) {
-        this.refresh();
-      }
-    }
   },
   methods: {
     refresh() {
@@ -119,7 +129,7 @@ export default defineComponent({
 
         const newStoredLevel: StoredLevel = {
           bestTime: -1, index: -1, level: {
-            title: 'custom',
+            title: this.title,
             map: this.codedMapText,
           },
           dynamicFeatures: output.removedFeatures,
@@ -136,7 +146,7 @@ export default defineComponent({
       }
     },
     save() {
-      this.$emit('save', this.codedMapText);
+      this.$emit('save', {map: this.codedMapText, title: this.title});
     },
     //TODO check if it's solvable, compare box and target numbers
     validateMap(output: ProcessedMap) {
@@ -159,5 +169,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
+.modal-content {
+  background-color: black;
+  border: 1px solid var(--radioactive-color);
+}
 </style>

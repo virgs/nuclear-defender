@@ -12,7 +12,7 @@
     </div>
   </div>
   <button class="btn btn-primary advanced-options-button" type="button" data-bs-toggle="collapse"
-          data-bs-target="#collapsibleOptions" @click="onCollapseToggle"
+          data-bs-target="#collapsibleOptions"
           aria-expanded="false" aria-controls="collapsibleOptions">
     <i class="fa-solid fa-circle-radiation"></i>
     Options
@@ -44,7 +44,16 @@
             </div>
           </div>
           <div class="col-12">
-            <MapEditor :visible="toggleCollapse" @save="mapEditorSaved"></MapEditor>
+            <label class="form-label sokoban-label">Create map</label>
+            <button class="btn btn-outline-secondary mt-2" type="button" style="float: right"
+                    @click="mapEditorToggle = !mapEditorToggle"
+                    data-bs-toggle="modal" data-bs-target="#mapEditorModal">
+              create
+            </button>
+            <div class="modal fade" id="mapEditorModal" tabindex="-1" role="dialog"
+                 aria-labelledby="mapEditorModalLabel" aria-hidden="true">
+              <MapEditor :toggle="mapEditorToggle" @save="mapEditorSaved"></MapEditor>
+            </div>
           </div>
         </div>
       </div>
@@ -64,11 +73,11 @@ export default defineComponent({
   emits: ["valid"],
   data() {
     return {
+      mapEditorToggle: false,
       furthestLevelEnabled: 0,
       validLevelPassword: false,
       levelPassword: '',
-      movesCode: '',
-      toggleCollapse: false
+      movesCode: ''
     };
   },
   watch: {
@@ -87,11 +96,8 @@ export default defineComponent({
       }
       return [];
     },
-    mapEditorSaved(map: string) {
+    mapEditorSaved(map: any) {
       console.log(map);
-    },
-    onCollapseToggle() {
-      this.toggleCollapse = !this.toggleCollapse;
     },
     notifyParent() {
       // this.$emit('valid', true);
