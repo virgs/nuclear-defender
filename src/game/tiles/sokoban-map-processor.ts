@@ -2,6 +2,12 @@ import {Point} from '@/game/math/point';
 import {Tiles} from '@/game/tiles/tiles';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
+export type ProcessedMap = {
+    removedFeatures: Map<Tiles, Point[]>;
+    strippedLayeredTileMatrix: MultiLayeredMap,
+    pointMap: Map<Tiles, Point[]>
+};
+
 export class SokobanMapProcessor {
     private readonly dressedLayeredTileMatrix: MultiLayeredMap;
 
@@ -9,7 +15,7 @@ export class SokobanMapProcessor {
         this.dressedLayeredTileMatrix = dressedLayeredTileMatrix;
     }
 
-    public strip(featuresToStripOff: Tiles[]): { removedFeatures: Map<Tiles, Point[]>; strippedLayeredTileMatrix: MultiLayeredMap, pointMap: Map<Tiles, Point[]> } {
+    public strip(featuresToStripOff: Tiles[]): ProcessedMap {
         const pointMap: Map<Tiles, Point[]> = new Map();
         Object.keys(Tiles)
             .filter(key => !isNaN(Number(key)))

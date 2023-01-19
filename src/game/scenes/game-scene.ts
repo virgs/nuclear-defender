@@ -10,7 +10,7 @@ import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculat
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
-    private gameEngine?: GameStage;
+    private gameStage?: GameStage;
     private initialTime?: number;
     private store?: Store;
     private playableMode?: boolean;
@@ -70,11 +70,10 @@ export class GameScene extends Phaser.Scene {
         this.allowUpdates = true;
     }
 
-    public async create(config: {store: Store, playable: boolean}) {
-        this.playableMode = config.playable
+    public async create(config: { store: Store, playable: boolean }) {
+        this.playableMode = config.playable;
+        console.log('play', this.playableMode);
         this.store = config.store;
-        this.initialTime = new Date().getTime();
-        InputManager.init(this);
         const storedLevel = this.store.getCurrentStoredLevel()!;
 
         const screenPropertiesCalculator = new ScreenPropertiesCalculator(storedLevel.strippedLayeredTileMatrix!);
@@ -95,14 +94,22 @@ export class GameScene extends Phaser.Scene {
         });
         const actorMap = actorsCreator.create();
 
-        this.gameEngine = new GameStage({
-            screenPropertiesCalculator: screenPropertiesCalculator,
-            scene: this,
-            strippedMap: storedLevel.strippedLayeredTileMatrix!,
-            actorMap: actorMap,
-            solution: storedLevel.level.solution?.split('')
-                .map(action => mapStringToAction(action))
-        });
+        if (this.playableMode) {
+            InputManager.init(this);
+            this.initialTime = new Date().getTime();
+
+            this.gameStage = new GameStage({
+                screenPropertiesCalculator: screenPropertiesCalculator,
+                scene: this,
+                strippedMap: storedLevel.strippedLayeredTileMatrix!,
+                actorMap: actorMap,
+                solution: storedLevel.level.solution?.split('')
+                    .map(action => mapStringToAction(action))
+            });
+        } else {
+            this.input.keyboard.clearCaptures();
+        }
+
         this.game.renderer.snapshot(image => {
             console.log('snapshot of the level');
             const MIME_TYPE = "image/png";
@@ -122,15 +129,17 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async update(time: number, delta: number) {
-        InputManager.getInstance().update();
-        if (this.allowUpdates && this.playableMode) {
-            await this.gameEngine!.update();
-            if (this.gameEngine!.isLevelComplete()) {
-                this.sound.play(sounds.victory.key, {volume: 0.5});
-                this.allowUpdates = false;
-                setTimeout(async () => {
-                    this.changeScene();
-                }, 1500);
+        if (this.playableMode) {
+            InputManager.getInstance().update();
+            if (this.allowUpdates) {
+                await this.gameStage!.update();
+                if (this.gameStage!.isLevelComplete()) {
+                    this.sound.play(sounds.victory.key, {volume: 0.5});
+                    this.allowUpdates = false;
+                    setTimeout(async () => {
+                        this.changeScene();
+                    }, 1500);
+                }
             }
         }
     }
@@ -139,7 +148,7 @@ export class GameScene extends Phaser.Scene {
         this.lights.destroy();
 
         this.store!.setLevelCompleteData({
-            movesCode: this.gameEngine!.getPlayerMoves(),
+            movesCode: this.gameStage!.getPlayerMoves(),
             totalTime: new Date().getTime() - this.initialTime!
 
         });

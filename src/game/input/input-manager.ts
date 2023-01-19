@@ -29,6 +29,9 @@ export class InputManager {
     }
 
     public static init(scene: Phaser.Scene): void {
+        scene.input.keyboard.enabled = true;
+        scene.game.input.enabled = true;
+
         InputManager.instance = new InputManager();
         const cursors = scene.input.keyboard.createCursorKeys();
         const setUp = (action: Actions, key: number, cursorKey: Phaser.Input.Keyboard.Key) => {

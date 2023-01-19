@@ -33,9 +33,15 @@
             </div>
           </div>
           <div class="col">
-            <label class="form-label sokoban-label">Moves code</label>
-            <input type="text" class="form-control" placeholder="Insert moves" aria-label="Moves code"
-                   @change="notifyParent" v-model="movesCode">
+            <label class="form-label sokoban-label">Moves</label>
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Insert moves code" aria-label="Moves code"
+                     @change="notifyParent" v-model="movesCode">
+              <button class="btn btn-outline-secondary" type="button" id="toastBtn"
+                      style="background-color: var(--radioactive-color)"
+                      :disabled="movesCode.length === 0">Insert
+              </button>
+            </div>
           </div>
           <div class="col-12">
             <MapEditor :visible="toggleCollapse" @save="mapEditorSaved"></MapEditor>
@@ -50,6 +56,7 @@
 
 import {defineComponent} from 'vue';
 import MapEditor from '@/components/MapEditor.vue';
+import {mapStringToAction} from '@/game/constants/actions';
 
 export default defineComponent({
   name: "SplashScreenAdvancedOptionsComponent",
@@ -70,8 +77,18 @@ export default defineComponent({
     }
   },
   methods: {
+    parseMoves(movesText: string) {
+      if (movesText) {
+        if (movesText.length === 0) {
+          return undefined;
+        }
+        return movesText.split('')
+            .map(char => mapStringToAction(char));
+      }
+      return [];
+    },
     mapEditorSaved(map: string) {
-      console.log(map)
+      console.log(map);
     },
     onCollapseToggle() {
       this.toggleCollapse = !this.toggleCollapse;

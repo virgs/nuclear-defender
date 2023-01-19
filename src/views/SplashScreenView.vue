@@ -153,7 +153,7 @@ onMounted(() => {
     speed: 400,
     startIndex: data.currentSelectedIndex,
     loop: false,
-    arrowKeys: true,
+    // arrowKeys: false,
     prevButton: '#prevButton',
     nextButton: '#nextButton',
     // navContainer: "#carousel-thumbnails-container",

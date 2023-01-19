@@ -68,7 +68,7 @@ onUnmounted(() => {
       <div class="row mx-auto px-0">
         <div class="col-12 col-md-8 col-lg-12 px-0" id="phaser-container">
           <Suspense>
-            <PhaserContainer :key="componentKey" :playable="true"/>
+            <PhaserContainer :render="true" :key="componentKey" :playable="true"/>
             <template #fallback>
               <div class="spinner-border text-info" role="status">
                 <span class="visually-hidden">Loading...</span>

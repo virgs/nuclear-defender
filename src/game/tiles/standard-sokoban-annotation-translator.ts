@@ -21,7 +21,6 @@ export class StandardSokobanAnnotationTranslator {
             .reduce((acc, item) => item.length > acc ? item.length : acc, 0);
 
         const layeredOrientedTiles = this.createRectangularLayeredMatrix(height, width, irregularTokenizedMatrix);
-        console.log(layeredOrientedTiles);
         return {
             height: height,
             width: width,

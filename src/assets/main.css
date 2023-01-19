@@ -51,6 +51,13 @@ body {
     font-family: Martian Mono, monospace;
 }
 
+.feedback-label {
+    text-align: left;
+    user-select: none;
+    font-family: 'Righteous', serif;
+    font-size: 15px;
+}
+
 .sokoban-label {
     float: left;
     user-select: none;
