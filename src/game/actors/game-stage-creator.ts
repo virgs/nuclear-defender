@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import {Tiles} from '../tiles/tiles';
 import {Point} from '@/game/math/point';
 import {BoxActor} from '@/game/actors/box-actor';
+import {GameStage} from '@/game/engine/game-stage';
 import {HeroActor} from '@/game/actors/hero-actor';
 import {WallActor} from '@/game/actors/wall-actor';
 import {SpringActor} from '@/game/actors/spring-actor';
@@ -15,7 +16,7 @@ import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
-export class GameActorsFactory {
+export class GameStageCreator {
     private readonly scene: Phaser.Scene;
     private readonly constructorMap: Map<Tiles, (params: any) => GameActor>;
 
@@ -28,12 +29,12 @@ export class GameActorsFactory {
 
     private actorCounter: number;
 
-    constructor(config: { screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+    constructor(config: { solution: any; screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
         this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.scene = config.scene;
         this.dynamicFeatures = config.dynamicFeatures;
         this.strippedMatrix = config.strippedTileMatrix;
-        this.actorMap = GameActorsFactory.initializeActorMap();
+        this.actorMap = GameStageCreator.initializeActorMap();
 
         this.actorCounter = 0;
 
@@ -54,7 +55,18 @@ export class GameActorsFactory {
         this.floorPic.setDepth(new TileDepthCalculator().calculate(Tiles.floor, -10));
     }
 
-    public create(): Map<Tiles, GameActor[]> {
+    public createGameStage(): GameStage {
+        this.initialize();
+        this.updateCoveringSituation();
+        return new GameStage({
+            screenPropertiesCalculator: this.screenPropertiesCalculator,
+            scene: this.scene,
+            strippedMap: this.strippedMatrix,
+            actorMap: this.actorMap,
+        });
+    }
+
+    private initialize(): void {
         this.dynamicFeatures
             .forEach((value, key) =>
                 value
@@ -74,8 +86,6 @@ export class GameActorsFactory {
 
         const mask = this.floorMaskShape.createGeometryMask();
         this.floorPic!.setMask(mask);
-
-        return this.actorMap;
     }
 
     private getTilesAround(x: number, y: number): OrientedTile[][][] {
@@ -113,6 +123,7 @@ export class GameActorsFactory {
             } as GameActorConfig);
 
             this.actorMap.get(item.code)!.push(gameActor);
+            return gameActor;
         }
     }
 
@@ -134,4 +145,21 @@ export class GameActorsFactory {
         return indexedMap;
     }
 
+    private updateCoveringSituation(): void {
+        const staticActors: GameActor[] = [];
+        this.actorMap.forEach((actors: GameActor[], tile: Tiles) => {
+            if (tile !== Tiles.hero && tile !== Tiles.box) {
+                staticActors.push(...actors);
+            }
+        });
+        this.actorMap.get(Tiles.box)!.concat(this.actorMap.get(Tiles.hero)!)
+            .forEach((dynamicActor: GameActor) => {
+                const coveringStaticActors = staticActors
+                    .filter(staticActor => staticActor.getTilePosition().isEqualTo(dynamicActor.getTilePosition()));
+                dynamicActor.cover(coveringStaticActors);
+                coveringStaticActors
+                    .forEach(dynamicActor => dynamicActor.cover([dynamicActor]));
+            });
+
+    }
 }

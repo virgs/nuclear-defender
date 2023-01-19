@@ -28,7 +28,7 @@
           </div>
           <div class="col-12 col-lg-6" style="text-align: left">
             <label class="form-label sokoban-label" style="float: none">
-              Render
+              Simulation
             </label>
             <div id="phaser-container">
               <PhaserContainer :playable="false" :render="render" :key="editorKey"/>

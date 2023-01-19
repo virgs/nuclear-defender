@@ -25,7 +25,7 @@ export class GameStage {
     private screenPropertiesCalculator: ScreenPropertiesCalculator;
     private mapChangedLastCycle: boolean;
 
-    constructor(config: { solution?: Actions[]; screenPropertiesCalculator: ScreenPropertiesCalculator; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
+    constructor(config: { screenPropertiesCalculator: ScreenPropertiesCalculator; actorMap: Map<Tiles, GameActor[]>; strippedMap: MultiLayeredMap; scene: Phaser.Scene }) {
         this.scene = config.scene;
         this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.hero = config.actorMap.get(Tiles.hero)![0] as HeroActor;
@@ -38,7 +38,8 @@ export class GameStage {
             }
         }
         this.strippedMap = config.strippedMap;
-        this.nextMoves = config.solution || [];
+        // this.nextMoves = config.solution || [];
+        this.nextMoves = [];
         this.levelComplete = false;
         this.animationsAreOver = true;
         this.mapChangedLastCycle = true;

@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import type {Store} from '@/store';
 import {sounds} from '@/game/constants/sounds';
-import {GameStage} from '@/game/engine/game-stage';
+import type {GameStage} from '@/game/engine/game-stage';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
 import {mapStringToAction} from '@/game/constants/actions';
-import {GameActorsFactory} from '../actors/game-actors-factory';
+import {GameStageCreator} from '../actors/game-stage-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 
 export class GameScene extends Phaser.Scene {
@@ -85,38 +85,31 @@ export class GameScene extends Phaser.Scene {
         this.lights.enable()
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
-        const actorsCreator = new GameActorsFactory({
+        const gameStageCreator = new GameStageCreator({
             screenPropertiesCalculator: screenPropertiesCalculator,
             scene: this,
             dynamicFeatures: storedLevel.dynamicFeatures,
-            strippedTileMatrix: storedLevel.strippedLayeredTileMatrix!
-        });
-        const actorMap = actorsCreator.create();
-        this.gameStage = new GameStage({
-            screenPropertiesCalculator: screenPropertiesCalculator,
-            scene: this,
-            strippedMap: storedLevel.strippedLayeredTileMatrix!,
-            actorMap: actorMap,
+            strippedTileMatrix: storedLevel.strippedLayeredTileMatrix!,
             solution: storedLevel.level.solution?.split('')
                 .map(action => mapStringToAction(action))
         });
+        this.gameStage = gameStageCreator.createGameStage();
 
         if (this.playableMode) {
             InputManager.init(this);
-
             this.initialTime = new Date().getTime();
         } else {
             this.input.keyboard.clearCaptures();
         }
 
         this.game.renderer.snapshot(image => {
-            console.log('snapshot of the level');
             const MIME_TYPE = "image/png";
             // @ts-ignore
             const imgURL = image.src;
             const a = document.createElement("a");
             a.href = imgURL;
-            a.download = 'screenshot.png';
+            a.download = storedLevel.level.title.toLowerCase().replace(/ /g, '-').concat('.png');
+            console.log('snapshot of level: ' + a.download);
             a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
             // a.click();
             document.body.appendChild(a);

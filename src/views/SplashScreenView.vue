@@ -1,20 +1,16 @@
 <script setup lang="ts">
 // script setup syntax or Composition API
 
-import type {StoredLevel} from '@/store';
 import {Store} from '@/store';
-import {useRouter} from 'vue-router';
-import type {Level} from '@/game/levels/defaultLevels';
-import {defaultLevels} from '@/game/levels/defaultLevels';
-import {computed, onMounted, reactive} from "vue";
-import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
-import {SokobanSolver} from '@/game/solver/sokoban-solver';
-import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
-import {Tiles} from '@/game/tiles/tiles';
-import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
-import {Actions, mapActionToChar} from '@/game/constants/actions';
 import {tns} from 'tiny-slider';
+import {useRouter} from 'vue-router';
+import type {StoredLevel} from '@/store';
+import {Tiles} from '@/game/tiles/tiles';
+import {computed, onMounted, reactive} from "vue";
+import {defaultLevels} from '@/game/levels/defaultLevels';
+import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
+import SplashScreenAdvancedOptionsComponent from '@/components/SplashScreenAdvancedOptions.vue';
+import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 const router = useRouter();
 //TODO get it from OptionsComponent
@@ -31,58 +27,6 @@ function optionsChanged(valid: boolean) {
   console.log();
 }
 
-async function runSolutionsAlgorithm(levelsToSolve: Level[]) {
-  let solutionOutput: any = undefined;
-
-  console.log('running algorithms');
-  let solutions: any[] = [];
-  await Promise.all(levelsToSolve
-      .map(async level => {
-        console.log(level.title);
-        const map = new StandardSokobanAnnotationTranslator()
-            .translate(level.map);
-        const output = new SokobanMapProcessor(map)
-            .strip([Tiles.hero, Tiles.box]);
-
-        const solver = new SokobanSolver({
-          strippedMap: output.strippedLayeredTileMatrix,
-          staticFeatures: output.pointMap,
-          cpu: {
-            sleepingCycle: 5000,
-            sleepForInMs: 25
-          },
-          distanceCalculator: new ManhattanDistanceCalculator()
-        });
-
-        solutionOutput = await solver.solve(output.removedFeatures);
-        const data = {
-          title: level.title,
-          map: level.map.replace(/\n/g, '\n'),
-          ...solutionOutput,
-          actions: solutionOutput.actions
-              ?.map((action: Actions) => mapActionToChar(action))
-              .join('')
-        };
-        solutions.push(data);
-        console.log(data);
-
-      }));
-  console.log('saving file');
-  const file = new Blob([JSON.stringify(solutions)], {type: 'text/plain'});
-
-  const a = document.createElement("a"),
-      url = URL.createObjectURL(file);
-  a.href = url;
-  a.download = 'sokoban-levels-solutions.json';
-  document.body.appendChild(a);
-  // a.click();
-  setTimeout(function () {
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  }, 0);
-
-  return solutionOutput;
-}
 
 async function playButtonClick() {
   // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
@@ -90,9 +34,6 @@ async function playButtonClick() {
   //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 
   const store = Store.getInstance();
-
-  // const testMap = defaultLevels[0];
-
   const map = new StandardSokobanAnnotationTranslator()
       .translate(defaultLevels[data.currentSelectedIndex].map);
   const output = new SokobanMapProcessor(map)
@@ -107,27 +48,6 @@ async function playButtonClick() {
   };
   store.setCurrentStoredLevel(newStoredLevel);
   store.router = router;
-  // store.solution = await runSolutionsAlgorithm([defaultLevels[data.currentSelectedIndex]]);
-  //     .filter((_, index) => index > 0) //skip test level
-  // .filter((_, index) => index > 4) //skip first 4 levels
-  // .filter((_, index) => index < 5) //only first n levels
-
-  // store.solution = {
-  //   boxesLine: 0, featureUsed: 0,
-  //   actions: [Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.STAND,
-  //     Actions.STAND, Actions.UP, Actions.LEFT], iterations: 0, totalTime: 0
-  //
-  // };
-
   await router.push('/game');
 }
 
@@ -153,13 +73,8 @@ onMounted(() => {
     speed: 400,
     startIndex: data.currentSelectedIndex,
     loop: false,
-    // arrowKeys: false,
     prevButton: '#prevButton',
     nextButton: '#nextButton',
-    // navContainer: "#carousel-thumbnails-container",
-    // navAsThumbnails: true
-    // navContainer: false,
-    // navAsThumbnails: false,
     nav: false
   });
 
@@ -200,17 +115,6 @@ onMounted(() => {
           </div>
         </div>
         <h3 class="mt-2" style="text-transform: capitalize">{{availableLevels[data.currentSelectedIndex].title}}</h3>
-<!--        <div>-->
-<!--          <ul class="carousel-thumbnail" id="carousel-thumbnails-container">-->
-<!--            <li v-for="(item, index) in availableLevels"-->
-<!--                v-show="index > data.currentSelectedIndex - 2 && index < data.currentSelectedIndex + 2"-->
-<!--                :data-nav="index"-->
-<!--                class="carousel-thumbnail"-->
-<!--                tabindex="-1">-->
-<!--              <img alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">-->
-<!--            </li>-->
-<!--          </ul>-->
-<!--        </div>-->
       </div>
       <div class="col">
         <SplashScreenAdvancedOptionsComponent @valid="optionsChanged"></SplashScreenAdvancedOptionsComponent>
