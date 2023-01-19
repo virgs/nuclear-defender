@@ -26,19 +26,15 @@
               {{ invalidError }}
             </div>
           </div>
-          <div class="col-12 col-lg-6">
-            <label class="form-label sokoban-label">
+          <div class="col-12 col-lg-6" style="text-align: left">
+            <label class="form-label sokoban-label" style="float: none">
               Render
             </label>
-            <div id="phaser-container" style="display: flex">
-              <Suspense>
-                <PhaserContainer :playable="false" :render="render" :key="editorKey"/>
-                <template #fallback>
-                  <div class="spinner-border text-info" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                </template>
-              </Suspense>
+            <div id="phaser-container">
+              <PhaserContainer :playable="false" :render="render" :key="editorKey"/>
+            </div>
+            <div v-if="loading" style="position: absolute; top: 50%; left: 50%; color: var(--radioactive-color)"
+                 class="spinner-border" role="status">
             </div>
           </div>
         </div>
@@ -65,6 +61,9 @@ import PhaserContainer from "@/components/PhaserContainer.vue";
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {SokobanSolver} from '@/game/solver/sokoban-solver';
+import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import {Actions, mapActionToChar} from '@/game/constants/actions';
 
 export default defineComponent({
   name: "MapEditor",
@@ -73,6 +72,7 @@ export default defineComponent({
   emits: ["save"],
   data() {
     return {
+      loading: false,
       title: ['Mouse user nightmare'][0],
       invalidError: '',
       render: false,
@@ -103,14 +103,18 @@ export default defineComponent({
     toggle() {
       const modalIsBeingShown = document.getElementsByTagName('body')[0]!.classList.contains('modal-open');
       if (modalIsBeingShown) {
-        setTimeout(() => {
+        const adjustCanvasDimensions = () => {
           const textArea = document.getElementsByTagName('textarea')[0];
-          const container = document.getElementById('phaser-container')!;
-          container.style.height = textArea.offsetHeight + 'px';
-          container.style.width = '100%';
+          if (textArea.offsetHeight === 0) {
+            return setTimeout(adjustCanvasDimensions, 50);
+          }
+          // const container = document.getElementById('phaser-container')!;
+          // container.style.height = textArea.offsetHeight + 'px';
+          // container.style.width = '100%';
           this.refresh();
           this.render = true;
-        }, 150); //it takes sometime until the container is rendered
+        };
+        setTimeout(adjustCanvasDimensions, 50); //it takes sometime until the container is rendered
       }
     },
     codedMapText() {
@@ -118,9 +122,12 @@ export default defineComponent({
     },
   },
   methods: {
-    refresh() {
+    async refresh() {
       this.render = true;
       try {
+        this.invalidError = '';
+        this.valid = false;
+        this.loading = true;
         const store = Store.getInstance();
         const map = new StandardSokobanAnnotationTranslator()
             .translate(this.codedMapText);
@@ -135,10 +142,11 @@ export default defineComponent({
           dynamicFeatures: output.removedFeatures,
           strippedLayeredTileMatrix: output.strippedLayeredTileMatrix
         };
-        this.validateMap(output);
-
         store.setCurrentStoredLevel(newStoredLevel);
         ++this.editorKey;
+        this.loading = false;
+
+        await this.validateMap(output);
         this.valid = true;
       } catch (exc: any) {
         this.invalidError = exc.message;
@@ -148,8 +156,7 @@ export default defineComponent({
     save() {
       this.$emit('save', {map: this.codedMapText, title: this.title});
     },
-    //TODO check if it's solvable, compare box and target numbers
-    validateMap(output: ProcessedMap) {
+    async validateMap(output: ProcessedMap) {
       const heroNumber = output.removedFeatures.get(Tiles.hero)!.length;
       if (heroNumber > 1) {
         throw new Error('Map can only have one hero. Found: ' + heroNumber);
@@ -162,8 +169,34 @@ export default defineComponent({
         throw new Error(`Number of boxes (${boxNumber}) different of number of targets (${targetNumber})`);
       }
 
+      await this.tryToSolveMap(output);
+
       return true;
+    },
+    async tryToSolveMap(output: ProcessedMap) {
+      const solver = new SokobanSolver({
+        strippedMap: output.strippedLayeredTileMatrix,
+        staticFeatures: output.pointMap,
+        cpu: {
+          sleepingCycle: 5000,
+          sleepForInMs: 25
+        },
+        distanceCalculator: new ManhattanDistanceCalculator()
+      });
+
+      const solutionOutput = await solver.solve(output.removedFeatures);
+      const data = {
+        ...solutionOutput,
+        actions: solutionOutput.actions
+            ?.map((action: Actions) => mapActionToChar(action))
+            .join('')
+      };
+      if (!solutionOutput.actions) {
+        throw new Error('Map is not solvable');
+      }
+      console.log(data);
     }
+
   }
 });
 </script>

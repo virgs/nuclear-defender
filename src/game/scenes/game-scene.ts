@@ -92,19 +92,19 @@ export class GameScene extends Phaser.Scene {
             strippedTileMatrix: storedLevel.strippedLayeredTileMatrix!
         });
         const actorMap = actorsCreator.create();
+        this.gameStage = new GameStage({
+            screenPropertiesCalculator: screenPropertiesCalculator,
+            scene: this,
+            strippedMap: storedLevel.strippedLayeredTileMatrix!,
+            actorMap: actorMap,
+            solution: storedLevel.level.solution?.split('')
+                .map(action => mapStringToAction(action))
+        });
 
         if (this.playableMode) {
             InputManager.init(this);
-            this.initialTime = new Date().getTime();
 
-            this.gameStage = new GameStage({
-                screenPropertiesCalculator: screenPropertiesCalculator,
-                scene: this,
-                strippedMap: storedLevel.strippedLayeredTileMatrix!,
-                actorMap: actorMap,
-                solution: storedLevel.level.solution?.split('')
-                    .map(action => mapStringToAction(action))
-            });
+            this.initialTime = new Date().getTime();
         } else {
             this.input.keyboard.clearCaptures();
         }

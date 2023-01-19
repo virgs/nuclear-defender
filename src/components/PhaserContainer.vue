@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref, toRefs, watch} from "vue";
 import {Store} from '@/store';
-const game = await import(/* webpackChunkName: "game" */ "@/game/game");
+import * as game from "@/game/game";
+import {onMounted, onUnmounted} from "vue";
 
 const props = defineProps({
   key: Number,
