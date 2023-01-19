@@ -200,6 +200,22 @@ body {
     background: none;
     border-color: #000;
 }
+.popover {
+    max-width: 50%;
+    margin-top: 20px !important;
+}
+.popover-header {
+    font-size: 1.5rem;
+    background-color: var(--foreground-color) !important;
+    user-select: none;
+    font-family: 'Righteous', serif;
+}
+.popover ul li b {
+    font-family: 'Martian Mono', serif;
+    font-weight: bolder;
+    font-size: 1rem;
+    color: var(--danger-color);
+}
 
 :root {
     --radioactive-color: #d4fa00;
