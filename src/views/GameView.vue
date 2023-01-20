@@ -22,6 +22,7 @@ function exitClick() {
   router.push('/');
 }
 
+const render = ref(false);
 const componentKey = ref(0);
 const forceRerender = () => {
   componentKey.value += 1;
@@ -32,6 +33,7 @@ let currentLevelIndex = computed(() => currentStoredLevel.index + 1);
 let currentLevel = computed(() => defaultLevels[currentStoredLevel.index]);
 let smallScreenDisplay = ref(true);
 let totalTime = ref(0);
+let confirmationButton = ref((() => undefined) as any);
 
 let timer: number;
 
@@ -44,6 +46,8 @@ onMounted(() => {
 
   const container = document.getElementById('phaser-container')!;
   smallScreenDisplay.value = container.clientWidth <= 992 / 2; //half of bootstrap 'lg' breakpoint
+  render.value = true;
+  forceRerender();
 });
 
 onUnmounted(() => {
@@ -67,17 +71,18 @@ onUnmounted(() => {
       </div>
       <div class="row mx-auto px-0">
         <div class="col-12 col-md-8 col-lg-12 px-0" id="phaser-container">
-          <PhaserContainer :render="true" :key="componentKey" :playable="true"/>
+          <PhaserContainer :render="render" :key="componentKey" :playable="true"/>
         </div>
 
 
         <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-1" id="game-view-buttons">
-          <div class="row h-100 mx-2">
+          <div class="row mx-2" id="gameview-buttons-container">
             <div class="col-12">
               <div class="row justify-content-center mt-2">
                 <div class="col-auto col-lg-3 d-grid gap-2">
                   <button class="btn btn-primary sokoban-outlined-button"
-                          @click="exitClick" type="button">
+                          data-bs-toggle="modal" data-bs-target="#confirmation-modal"
+                          @click="confirmationButton = exitClick" type="button">
                     <span>
                       <i class="fa-solid fa-door-open"></i>
                     </span>
@@ -86,7 +91,8 @@ onUnmounted(() => {
                 </div>
                 <div class="col-auto col-lg-3 d-grid gap-2">
                   <button class="btn btn-primary sokoban-outlined-button"
-                          @click="resetClick" type="button">
+                          data-bs-toggle="modal" data-bs-target="#confirmation-modal"
+                          @click="confirmationButton = resetClick" type="button">
                     <span>
                       <i class="fa-solid fa-circle-xmark"></i>
                     </span>
@@ -110,8 +116,36 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="confirmation-modal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Are you sure?</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary sokoban-outlined-button" data-bs-dismiss="modal">No</button>
+            <button type="button" class="btn btn-primary sokoban-call-for-action-button" data-bs-dismiss="modal"
+                    @click="confirmationButton()">Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+
+.modal-header, .modal-footer {
+  border: none;
+}
+
+.modal-content {
+  background-color: black;
+  border: 1px solid var(--radioactive-color);
+}
+
 </style>

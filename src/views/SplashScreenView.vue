@@ -136,7 +136,7 @@ onMounted(() => {
 <style>
 
 .splash-view {
-  height: 99vh;
+  min-height: 99vh;
   max-width: 720px;
   font-family: Martian Mono, monospace;
   background-image: url("radioactive-symbol3.jpg");

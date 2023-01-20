@@ -14,10 +14,11 @@ const launch = (containerId: string, store: Store, playable: boolean) => {
     const idealScreen = Math.trunc(container.clientWidth * configuration.screenRatio);
     const realScreen = document.body.clientHeight * .95 - (timeHeight + titleHeight);
     configuration.gameHeight = Math.min(idealScreen, realScreen);
-    const directionalButtonsContainer = document.getElementById('directional-buttons-container')!;
+    const directionalButtonsContainer = document.getElementById('directional-buttons-container');
     if (directionalButtonsContainer) {
-        const gameViewButtonsContainer = document.getElementById('game-view-buttons')!;
-        gameViewButtonsContainer.style.height = configuration.gameHeight + 'px';
+        console.log('directionalButtonsContainer')
+        const gameviewButtonsContainer = document.getElementById('gameview-buttons-container')!;
+        gameviewButtonsContainer.style.height = configuration.gameHeight + 'px';
     }
 
     const game = new Phaser.Game({
