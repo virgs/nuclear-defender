@@ -2,6 +2,7 @@
 import {Store} from '@/store';
 import {defineComponent} from 'vue';
 import {mapActionToChar} from '@/game/constants/actions';
+import {defaultLevels} from '@/game/levels/defaultLevels';
 
 export default defineComponent({
   name: "NextLevelView",
@@ -34,7 +35,20 @@ export default defineComponent({
           .join('');
     },
     password() {
-      return this.currentSelectedLevel.level.title.toLowerCase().replace(/ /g, '-')
+      const currentIndex = this.currentSelectedLevel.index;
+      const indexIsNumber = !isNaN(currentIndex);
+      if (indexIsNumber && currentIndex > 0) {
+        const nextLevelIndex = currentIndex + 1;
+        const nextLevel = defaultLevels[nextLevelIndex];
+        if (nextLevel) {
+          return nextLevel.title.toLowerCase().replace(/ /g, '-');
+        }
+      }
+    },
+    codedMap() {
+      return this.currentSelectedLevel.level.map
+          .replace(/\n\n/g, '\n')
+          .replace(/^\n/g, '');
     }
   },
   methods: {
@@ -72,9 +86,8 @@ export default defineComponent({
     <div class="container my-5 next-level-view text-center">
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
-          <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">Level
-            {{ currentSelectedLevel.index + 1 }}
-            complete!</h1>
+          <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">
+            Level '{{ currentSelectedLevel.index + 1 }}' complete!</h1>
         </div>
         <div class="col my-1">
           <h4 class="sokoban-display fw-normal"
@@ -82,7 +95,7 @@ export default defineComponent({
             {{ Math.trunc(levelCompletedData.totalTime / 100) / 10 }}s
           </h4>
         </div>
-        <div class="col-12">
+        <div class="col-12" v-if="password">
           <label class="form-label sokoban-label">Password</label>
           <div class="input-group">
             <input type="text" class="form-control" readonly
@@ -94,7 +107,7 @@ export default defineComponent({
           </div>
         </div>
         <div class="col-12">
-          <label class="form-label sokoban-label">Moves code</label>
+          <label class="form-label sokoban-label">Player actions</label>
           <div class="input-group">
             <input type="text" class="form-control" readonly
                    :value="movesCode">
@@ -105,12 +118,13 @@ export default defineComponent({
           </div>
         </div>
         <div class="col-12">
-          <label class="form-label sokoban-label">Coded map</label>
+          <label class="form-label sokoban-label">Map</label>
           <div class="input-group">
-            <input type="text" class="form-control" readonly
-                   :value="currentSelectedLevel.level.map">
+            <textarea class="form-control map-text-area" rows="10"
+                      readonly
+                      v-model="codedMap"></textarea>
             <button class="btn btn-outline-secondary toastBtn" type="button"
-                    style="background-color: var(--radioactive-color)" @click="copy(currentSelectedLevel.level.map)">
+                    style="background-color: var(--radioactive-color)" @click="copy(codedMap)">
               Copy
             </button>
           </div>

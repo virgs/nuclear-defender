@@ -7,12 +7,12 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-12 mb-3">
-            <label class="form-label sokoban-label">Level title</label>
+            <label class="form-label sokoban-label">Title</label>
             <input type="text" class="form-control" placeholder="Title" v-model="title">
           </div>
           <div class="col-12 col-lg-4">
             <label class="form-label sokoban-label">
-              Code
+              Editor
               <a tabindex="0" class="btn btn-lg btn-danger px-1" role="button" data-bs-toggle="popover"
                  style="background-color: transparent; border: none"
                  title="Dismissible popover"
@@ -30,7 +30,7 @@
           </div>
           <div class="col-12 col-lg-6" style="text-align: left">
             <label class="form-label sokoban-label" style="float: none">
-              Simulation
+              Result
             </label>
             <div id="phaser-container">
               <PhaserContainer :playable="false" :render="render" :key="editorKey"/>
@@ -96,7 +96,7 @@ export default defineComponent({
       legendText: `
 <h5>Instructions</h5>
 <ul>
-<li>Each line represents a game line</li>
+<li>Each text line represents a line in the map</li>
 <li>Every feature is represented by a letter. Sometimes an orientation letter is needed</li>
 <li>Use <b>[</b> and <b>]</b> to put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>)</li>
 <li>Number multiply next feature: <b>4$</b> means four boxes in a row. The same as <b>$$$$</b> </li>

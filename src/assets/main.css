@@ -60,6 +60,7 @@ body {
 }
 
 .sokoban-display {
+    font-weight: bold;
     font-family: 'Poppins', serif;
     color: var(--radioactive-color);
 }

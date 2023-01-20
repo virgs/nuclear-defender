@@ -33,9 +33,19 @@
             </div>
           </div>
           <div class="col">
-            <label class="form-label sokoban-label">Moves</label>
+            <label class="form-label sokoban-label">Player actions
+              <a tabindex="0" class="btn btn-lg btn-danger px-1"
+                 role="button" data-bs-toggle="popover"
+                 style="background-color: transparent; border: none"
+                 title="Dismissible popover"
+                 data-bs-trigger="focus"
+                 :data-bs-html="true"
+                 :data-bs-content="actionsLegentText">
+                <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
+              </a>
+            </label>
             <div class="input-group">
-              <input type="text" class="form-control" placeholder="Insert moves code" aria-label="Moves code"
+              <input type="text" class="form-control" placeholder="Insert moves code" aria-label="Insert player actions"
                      @change="notifyParent" v-model="movesCode">
               <button class="btn btn-outline-secondary" type="button" id="toastBtn"
                       style="background-color: var(--radioactive-color)"
@@ -77,7 +87,21 @@ export default defineComponent({
       furthestLevelEnabled: 0,
       validLevelPassword: false,
       levelPassword: '',
-      movesCode: ''
+      movesCode: '',
+      actionsLegentText: `
+      <h5>Instructions</h5>
+<ul>
+<li>Each character represents a player action</li>
+</ul>
+
+<h5>Actions list</h5>
+<ul>
+<li><b>l</b> go left</li>
+<li><b>r</b> go right</li>
+<li><b>u</b> go up</li>
+<li><b>d</b> go down</li>
+<li><b>s</b> do nothing</li>
+</ul>`
     };
   },
   watch: {
@@ -125,6 +149,7 @@ export default defineComponent({
 .card-body {
   border: none;
 }
+
 .advanced-options-button {
   text-align: right;
   background-color: transparent;
