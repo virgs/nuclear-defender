@@ -35,7 +35,7 @@ export const mapDirectionToAction = (direction: Directions): Actions => {
     return Actions.STAND;
 };
 
-export const mapStringToAction = (char: string): Actions => {
+export const mapStringToAction = (char: string): Actions | undefined => {
     switch (char) {
         case 's':
             return Actions.STAND;
@@ -48,8 +48,7 @@ export const mapStringToAction = (char: string): Actions => {
         case 'd':
             return Actions.DOWN;
     }
-    console.log(`Action not identified (${char}). Converting it to 'STAND'`);
-    return Actions.STAND;
+    return undefined;
 };
 
 export const mapActionToChar = (action: Actions): string => Actions[action].charAt(0).toLowerCase();

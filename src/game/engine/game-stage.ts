@@ -16,11 +16,11 @@ export class GameStage {
     private readonly movementCoordinator: MovementOrchestrator;
     private readonly hero: HeroActor;
     private readonly boxes: BoxActor[];
-    private readonly nextMoves: Actions[];
     private readonly staticActors: GameActor[];
     private readonly scene: Phaser.Scene;
     private readonly heroActionRecorder: HeroActionRecorder;
 
+    private nextMoves: Actions[];
     private levelComplete: boolean = false;
     private animationsAreOver: boolean;
     private screenPropertiesCalculator: ScreenPropertiesCalculator;
@@ -52,6 +52,11 @@ export class GameStage {
 
     public isLevelComplete(): boolean {
         return this.levelComplete;
+    }
+
+    public setInitialPlayerActions(playerActions: Actions[]): void {
+        this.nextMoves = playerActions;
+
     }
 
     public getPlayerMoves(): Actions[] {
@@ -148,5 +153,4 @@ export class GameStage {
         this.levelComplete = this.boxes
             .every(box => box.getIsOnTarget());
     }
-
 }

@@ -4,10 +4,9 @@ import {sounds} from '@/game/constants/sounds';
 import type {GameStage} from '@/game/engine/game-stage';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {mapStringToAction} from '@/game/constants/actions';
+import {Actions, mapStringToAction} from '@/game/constants/actions';
 import {GameStageCreator} from '../actors/game-stage-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import {EventEmitter} from '@/event-emitter';
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
@@ -91,13 +90,12 @@ export class GameScene extends Phaser.Scene {
             scene: this,
             dynamicFeatures: storedLevel.dynamicFeatures,
             strippedTileMatrix: storedLevel.strippedLayeredTileMatrix!,
-            solution: storedLevel.level.solution?.split('')
-                .map(action => mapStringToAction(action))
         });
         this.gameStage = gameStageCreator.createGameStage();
 
         if (this.playableMode) {
             new InputManager().init(this);
+            this.gameStage.setInitialPlayerActions(storedLevel.playerActions);
             this.initialTime = new Date().getTime();
         } else {
             this.input.keyboard.clearCaptures();

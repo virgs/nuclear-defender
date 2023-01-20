@@ -9,6 +9,7 @@ export type StoredLevel = {
     level: Level,
     index: number,
     bestTime: number,
+    playerActions: Actions[],
     strippedLayeredTileMatrix: MultiLayeredMap;
     dynamicFeatures: Map<Tiles, Point[]>
 };

@@ -32,27 +32,6 @@
               </button>
             </div>
           </div>
-          <div class="col">
-            <label class="form-label sokoban-label">Player actions
-              <a tabindex="0" class="btn btn-lg btn-danger px-1"
-                 role="button" data-bs-toggle="popover"
-                 style="background-color: transparent; border: none"
-                 title="Dismissible popover"
-                 data-bs-trigger="focus"
-                 :data-bs-html="true"
-                 :data-bs-content="actionsLegentText">
-                <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
-              </a>
-            </label>
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Insert moves code" aria-label="Insert player actions"
-                     @change="notifyParent" v-model="movesCode">
-              <button class="btn btn-outline-secondary" type="button" id="toastBtn"
-                      style="background-color: var(--radioactive-color)"
-                      :disabled="movesCode.length === 0">Insert
-              </button>
-            </div>
-          </div>
           <div class="col-12">
             <label class="form-label sokoban-label">Create map</label>
             <button class="btn btn-outline-secondary mt-2" type="button" style="float: right"
@@ -84,42 +63,11 @@ export default defineComponent({
   data() {
     return {
       mapEditorToggle: false,
-      furthestLevelEnabled: 0,
       validLevelPassword: false,
       levelPassword: '',
-      movesCode: '',
-      actionsLegentText: `
-      <h5>Instructions</h5>
-<ul>
-<li>Each character represents a player action</li>
-</ul>
-
-<h5>Actions list</h5>
-<ul>
-<li><b>l</b> go left</li>
-<li><b>r</b> go right</li>
-<li><b>u</b> go up</li>
-<li><b>d</b> go down</li>
-<li><b>s</b> do nothing</li>
-</ul>`
     };
   },
-  watch: {
-    movesCode() {
-      this.notifyParent();
-    }
-  },
   methods: {
-    parseMoves(movesText: string) {
-      if (movesText) {
-        if (movesText.length === 0) {
-          return undefined;
-        }
-        return movesText.split('')
-            .map(char => mapStringToAction(char));
-      }
-      return [];
-    },
     mapEditorSaved(map: any) {
       console.log(map);
     },

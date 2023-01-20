@@ -29,7 +29,7 @@ export class GameStageCreator {
 
     private actorCounter: number;
 
-    constructor(config: { solution: any; screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+    constructor(config: { screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
         this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.scene = config.scene;
         this.dynamicFeatures = config.dynamicFeatures;
