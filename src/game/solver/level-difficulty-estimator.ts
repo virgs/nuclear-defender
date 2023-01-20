@@ -1,5 +1,6 @@
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import Phaser from 'phaser';
+import {mapActionToChar} from '@/game/constants/actions';
 
 type DifficultFactor = {
     value: number,
@@ -29,6 +30,7 @@ export class LevelDifficultyEstimator {
         if (!this.solution.actions) {
             return undefined;
         }
+        console.log(this.solution.actions.map(a => mapActionToChar(a)).join(''));
         console.log(this.solution);
         const reduce = this.factors.reduce((acc, factor) => {
             const difficultFactor = factor();

@@ -14,6 +14,8 @@ export class InputManager {
 
         this.shortcutKeys = new Map();
         this.shortcutKeys.set('z', EventName.UNDO_BUTTON_CLICKED);
+        this.shortcutKeys.set('r', EventName.RESTART_LEVEL);
+        this.shortcutKeys.set('q', EventName.QUIT_LEVEL);
     }
 
     public init(scene: Phaser.Scene): void {
@@ -25,10 +27,8 @@ export class InputManager {
             if (this.heroWatchingKeys.has(key)) {
                 EventEmitter.emit(EventName.HERO_DIRECTION_INPUT, this.heroWatchingKeys.get(key));
             }
-            if (event.metaKey || event.ctrlKey) {
-                if (this.shortcutKeys.has(key)) {
-                    EventEmitter.emit(this.shortcutKeys.get(key)!);
-                }
+            if (this.shortcutKeys.has(key)) {
+                EventEmitter.emit(this.shortcutKeys.get(key)!);
             }
         });
 

@@ -1,6 +1,8 @@
 export enum EventName {
     UNDO_BUTTON_CLICKED,
     HERO_DIRECTION_INPUT,
+    RESTART_LEVEL,
+    QUIT_LEVEL,
 }
 
 type EventListener = (args: any) => any;
@@ -16,16 +18,15 @@ export class EventEmitter {
             .forEach(event => this.eventListener.set(event, []));
     }
 
-    public static listenToEvent(eventName: EventName, callback: EventListener): void {
+    public static listenToEvent(eventName: EventName, callback: EventListener): EventEmitter {
         EventEmitter.instance.eventListener.get(eventName)!.push(callback);
+        return EventEmitter.instance;
     }
 
-    public static emit(eventName: EventName, args?: any): void {
+    public static emit(eventName: EventName, args?: any): EventEmitter {
         EventEmitter.instance.eventListener.get(eventName)!
             .forEach(callback => callback(args));
+        return EventEmitter.instance;
     }
 
-    public static reinit() {
-        EventEmitter.instance = new EventEmitter();
-    }
 }

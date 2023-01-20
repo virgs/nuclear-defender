@@ -305,13 +305,13 @@ export const defaultLevels: Level[] = [
         title: 'bee hive behavior'
     }, {
         map: `
-  #######
-  #  .*@#
+--#######
+--#  .*@#
 ###  $$ #
 #  $ # ####
 #    # $ .#
 ####..  ###
-   ######
+---######
 `,
         title: 'wooden icecream'
     }, {

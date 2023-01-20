@@ -9,6 +9,15 @@ import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 
 const router = useRouter();
 
+EventEmitter
+    .listenToEvent(EventName.RESTART_LEVEL, () => {
+      resetClick();
+    });
+EventEmitter
+    .listenToEvent(EventName.QUIT_LEVEL, () => {
+      exitClick();
+    });
+
 function resetClick() {
   forceRerender();
   totalTime.value = 0;
