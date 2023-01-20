@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/heap": "0.2.31",
+    "canvas-gauges": "2.1.7",
     "heap": "0.2.7",
     "phaser": "3.55.2",
     "tiny-slider": "2.9.4",

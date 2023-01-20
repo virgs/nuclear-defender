@@ -11,7 +11,7 @@ import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 import type {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
-type Solution = {
+type SolutionCandidate = {
     actions: Actions[],
     hero: { id: number, point: Point },
     boxes: { id: number, point: Point }[],
@@ -28,7 +28,7 @@ export type SolutionOutput = {
     iterations: number;
     totalTime: number;
     boxesLine: number;
-    featureUsed: number;
+    featuresUsed: number;
 }
 
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
@@ -40,7 +40,7 @@ export class SokobanSolver {
 
     private movementCoordinator: MovementOrchestrator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
-    private candidatesToVisit: Heap<Solution> = new Heap((a: Solution, b: Solution) => a.distanceSum - b.distanceSum);
+    private candidatesToVisit: Heap<SolutionCandidate> = new Heap((a: SolutionCandidate, b: SolutionCandidate) => a.distanceSum - b.distanceSum);
     private candidatesVisitedSet: Set<string> = new Set();
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementAnalyser: MovementAnalyser;
@@ -73,7 +73,7 @@ export class SokobanSolver {
         this.startTime = new Date().getTime();
         const {actions, iterations, boxesLine, featureUsed} = await this.startAlgorithm(dynamicMap);
         return {
-            featureUsed: featureUsed,
+            featuresUsed: featureUsed,
             boxesLine: boxesLine,
             actions: actions,
             iterations: iterations,
@@ -84,7 +84,7 @@ export class SokobanSolver {
     private async startAlgorithm(dynamicMap: Map<Tiles, Point[]>) {
         const hero = dynamicMap.get(Tiles.hero)![0];
         const boxes = dynamicMap.get(Tiles.box)!;
-        const initialCandidate: Solution = {
+        const initialCandidate: SolutionCandidate = {
             featureUsed: 0,
             boxesLine: 0,
             lastPushedBox: {id: -1, direction: Directions.UP},
@@ -99,8 +99,8 @@ export class SokobanSolver {
 
         let iterations = 0;
         let cpuBreath = 0;
-        let foundSolution: Solution | undefined = undefined;
-        let candidate: Solution | undefined = this.candidatesToVisit.pop();
+        let foundSolution: SolutionCandidate | undefined = undefined;
+        let candidate: SolutionCandidate | undefined = this.candidatesToVisit.pop();
         while (candidate) {
             ++iterations;
             ++cpuBreath;
@@ -126,7 +126,7 @@ export class SokobanSolver {
         };
     }
 
-    private async checkSolution(candidate: Solution): Promise<Solution | undefined> {
+    private async checkSolution(candidate: SolutionCandidate): Promise<SolutionCandidate | undefined> {
         if (await this.metricEmitter.measureTime(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash!))) {
             this.candidatesVisitedSet.add(candidate.hash!);
             // console.log(candidate.hash, Actions[candidate.actions[candidate.actions.length - 1]])
@@ -138,7 +138,7 @@ export class SokobanSolver {
         }
     }
 
-    private async applyMoreActions(candidate: Solution) {
+    private async applyMoreActions(candidate: SolutionCandidate) {
         for (const action of SokobanSolver.actionsList) {
             const afterAction = this.movementCoordinator.update({
                 heroAction: action,
@@ -160,7 +160,7 @@ export class SokobanSolver {
                 const featuresUsed = analysis.events
                     .filter((event: MovementEvents) => event === MovementEvents.BOX_MOVED_ONTO_FEATURE)
                     .length;
-                const newCandidate: Solution = {
+                const newCandidate: SolutionCandidate = {
                     featureUsed: candidate.featureUsed + featuresUsed,
                     lastPushedBox: analysis.lastPushedBox || candidate.lastPushedBox,
                     boxesLine: candidate.boxesLine + currentBoxesLine,
@@ -191,7 +191,7 @@ export class SokobanSolver {
         return this.candidatesVisitedSet.has(newCandidateHash);
     }
 
-    private calculateHashOfSolution(newCandidate: Solution) {
+    private calculateHashOfSolution(newCandidate: SolutionCandidate) {
         return `${newCandidate.boxes
             .map(box => `${box.point.x},${box.point.y}(${newCandidate.lastActionResult?.boxes
                 .find(same => same.id === box.id)?.direction})`)

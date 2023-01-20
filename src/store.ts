@@ -21,6 +21,7 @@ type LevelCompleteData = {
 export class Store {
     private currentSelectedLevel?: StoredLevel;
     private levelCompletedData?: LevelCompleteData;
+    private customLevel?: StoredLevel;
 
     public getCurrentStoredLevel(): StoredLevel | undefined {
         return this.currentSelectedLevel;
@@ -37,6 +38,16 @@ export class Store {
     public setLevelCompleteData(data: LevelCompleteData): void {
         this.levelCompletedData = data;
     }
+
+    public getCustomLevel(): StoredLevel | undefined {
+        return this.customLevel;
+    }
+
+    public setCustomLevel(newCustom: StoredLevel): void {
+        this.customLevel = newCustom;
+    }
+
+
 
     private _router: any;
     private _furthestEnabledLevel: number = 0;

@@ -32,6 +32,9 @@ export default defineComponent({
       return this.levelCompletedData.movesCode
           .map(move => mapActionToChar(move))
           .join('');
+    },
+    password() {
+      return this.currentSelectedLevel.level.title.toLowerCase().replace(/ /g, '-')
     }
   },
   methods: {
@@ -66,11 +69,11 @@ export default defineComponent({
       </div>
     </div>
 
-    <div class="container my-5 splash-view text-center">
+    <div class="container my-5 next-level-view text-center">
       <div class="row row-cols-1 justify-content-end gy-3">
-        <div class="col">
-          <h1 class="sokoban-display display-3 fw-normal" style="user-select: none; text-align: left">Level
-            <em>{{ currentSelectedLevel.index + 1 }}: '{{ currentSelectedLevel.level.title }}'</em>
+        <div class="col" style="text-align: center">
+          <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">Level
+            {{ currentSelectedLevel.index + 1 }}
             complete!</h1>
         </div>
         <div class="col my-1">
@@ -78,6 +81,17 @@ export default defineComponent({
               style="user-select: none; color: var(--background-color); text-align: right">Total time:
             {{ Math.trunc(levelCompletedData.totalTime / 100) / 10 }}s
           </h4>
+        </div>
+        <div class="col-12">
+          <label class="form-label sokoban-label">Password</label>
+          <div class="input-group">
+            <input type="text" class="form-control" readonly
+                   :value="password">
+            <button class="btn btn-outline-secondary toastBtn" type="button"
+                    style="background-color: var(--radioactive-color)" @click="copy(password)">
+              Copy
+            </button>
+          </div>
         </div>
         <div class="col-12">
           <label class="form-label sokoban-label">Moves code</label>
@@ -115,5 +129,9 @@ export default defineComponent({
 </template>
 
 <style scoped>
+.next-level-view {
+  height: 99vh;
+  max-width: 720px;
+}
 
 </style>

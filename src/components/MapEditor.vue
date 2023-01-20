@@ -10,7 +10,7 @@
             <label class="form-label sokoban-label">Level title</label>
             <input type="text" class="form-control" placeholder="Title" v-model="title">
           </div>
-          <div class="col-12 col-lg-6">
+          <div class="col-12 col-lg-4">
             <label class="form-label sokoban-label">
               Code
               <a tabindex="0" class="btn btn-lg btn-danger px-1" role="button" data-bs-toggle="popover"
@@ -21,11 +21,10 @@
                  :data-bs-content="legendText">
                 <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
               </a>
-
             </label>
             <textarea :class="['form-control map-text-area', valid ? 'is-valid' : 'is-invalid']" rows="10"
                       v-model="codedMapText"></textarea>
-            <div class="form-label feedback-label invalid-feedback">
+            <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
               {{ invalidError }}
             </div>
           </div>
@@ -40,6 +39,12 @@
                  class="spinner-border" role="status">
             </div>
           </div>
+          <div class="col-12 col-lg-2" style="text-align: left;">
+            <label class="form-label sokoban-label" style="float: none">
+              Difficulty
+            </label>
+            <map-difficulty-gauge :solution="solution"></map-difficulty-gauge>
+          </div>
         </div>
       </div>
       <div class="modal-footer" style="border: none">
@@ -47,6 +52,7 @@
         </button>
         <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
                 @click="save"
+                data-bs-dismiss="modal"
                 :disabled="!valid"
                 style="background-color: var(--radioactive-color); float: right">Save
         </button>
@@ -56,13 +62,14 @@
 </template>
 
 <script lang="ts">
-import type {StoredLevel} from '@/store';
 import {Store} from '@/store';
 import {defineComponent} from 'vue';
+import type {StoredLevel} from '@/store';
 import {Tiles} from '@/game/tiles/tiles';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
-import {Actions, mapActionToChar} from '@/game/constants/actions';
+import type {SolutionOutput} from '@/game/solver/sokoban-solver';
+import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
@@ -70,10 +77,11 @@ import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban
 
 export default defineComponent({
   name: "MapEditor",
-  components: {PhaserContainer},
+  components: {MapDifficultyGauge, PhaserContainer},
   props: ['toggle'],
   emits: ["save"],
   data() {
+    const customLevel = Store.getInstance().getCustomLevel();
     return {
       loading: false,
       title: ['Mouse user nightmare'][0],
@@ -81,6 +89,9 @@ export default defineComponent({
       render: false,
       valid: true,
       editorKey: 0,
+      solution: undefined as SolutionOutput | undefined,
+      estimatedDifficulty: -1,
+      codedMapText: customLevel?.level.map || '######\n#@   #\n# $ .#\n######',
       legendText: `
 <h5>Instructions</h5>
 <ul>
@@ -112,7 +123,6 @@ export default defineComponent({
 <li><b>r</b> right</li>
 </ul>
 `,
-      codedMapText: '######\n#@   #\n# $ .#\n######',
     };
   },
   mounted() {
@@ -146,6 +156,7 @@ export default defineComponent({
     async refresh() {
       this.render = true;
       try {
+        this.solution = undefined;
         this.invalidError = '';
         this.valid = false;
         this.loading = true;
@@ -170,6 +181,7 @@ export default defineComponent({
         await this.validateMap(output);
         this.valid = true;
       } catch (exc: any) {
+        this.solution = undefined;
         this.invalidError = exc.message;
         this.valid = false;
       }
@@ -206,16 +218,11 @@ export default defineComponent({
       });
 
       const solutionOutput = await solver.solve(output.removedFeatures);
-      const data = {
-        ...solutionOutput,
-        actions: solutionOutput.actions
-            ?.map((action: Actions) => mapActionToChar(action))
-            .join('')
-      };
       if (!solutionOutput.actions) {
         throw new Error('Map is not solvable');
       }
-      console.log(data);
+
+      this.solution = solutionOutput;
     }
 
   }

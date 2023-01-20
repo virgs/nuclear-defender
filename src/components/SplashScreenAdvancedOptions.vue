@@ -122,6 +122,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.card-body {
+  border: none;
+}
 .advanced-options-button {
   text-align: right;
   background-color: transparent;
@@ -131,12 +134,10 @@ export default defineComponent({
 }
 
 .advanced-options-button:active, .advanced-options-button:focus, .advanced-options-button:focus-visible {
-  /*border-bottom: 1px solid var(--highlight-color);*/
   background-color: transparent !important;
 }
 
 .advanced-options-button:hover {
-  /*border-bottom: 1px solid var(--background-color);*/
 }
 
 .advanced-options-button:hover .fa-solid {

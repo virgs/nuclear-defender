@@ -38,13 +38,6 @@ body {
     transition: all 2000ms;
 }
 
-
-.splash-view {
-    max-width: 720px;
-    /*height: 100vh;*/
-    font-family: Martian Mono, monospace;
-}
-
 .game-view {
     max-width: 720px;
     height: 100%;
@@ -215,6 +208,10 @@ body {
     font-weight: bolder;
     font-size: 1rem;
     color: var(--danger-color);
+}
+
+h1, h2, h3, h4, h5, h6, a, p {
+    user-select: none;
 }
 
 :root {

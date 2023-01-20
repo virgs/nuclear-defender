@@ -42,7 +42,7 @@ async function playButtonClick() {
   const newStoredLevel: StoredLevel = {
     bestTime: -1,
     dynamicFeatures: output.removedFeatures,
-    index: data.currentSelectedIndex,
+    index: data.currentSelectedIndex, //TODO add 1 here?
     level: defaultLevels[data.currentSelectedIndex],
     strippedLayeredTileMatrix: output.strippedLayeredTileMatrix
   };
@@ -114,7 +114,7 @@ onMounted(() => {
             <img alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
         </div>
-        <h3 class="mt-2" style="text-transform: capitalize">{{availableLevels[data.currentSelectedIndex].title}}</h3>
+        <h3 class="mt-2 level-title">{{availableLevels[data.currentSelectedIndex].title}}</h3>
       </div>
       <div class="col">
         <SplashScreenAdvancedOptionsComponent @valid="optionsChanged"></SplashScreenAdvancedOptionsComponent>
@@ -133,11 +133,7 @@ onMounted(() => {
 </template>
 
 
-<style scoped>
-.advanved-options-button {
-  background-color: var(--radioactive-color);
-  color: var(--foreground-color);
-}
+<style>
 
 .level-number {
   text-transform: capitalize;
@@ -146,5 +142,24 @@ onMounted(() => {
   top: 0;
   left: 0;
   z-index: 1000;
+}
+
+
+.splash-view {
+  height: 99vh;
+  max-width: 720px;
+  font-family: Martian Mono, monospace;
+  background-image: url("radioactive-symbol3.jpg");
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-attachment: fixed;
+}
+
+.level-title {
+  font-size: xx-large;
+  font-weight: bolder;
+  text-transform: capitalize;
+  color: var(--background-color);
+  text-shadow: 2px 2px 1px var(--radioactive-color);
 }
 </style>
