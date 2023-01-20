@@ -43,7 +43,7 @@
             <label class="form-label sokoban-label" style="float: none">
               Difficulty
             </label>
-            <map-difficulty-gauge :solution="solution"></map-difficulty-gauge>
+            <map-difficulty-gauge :estimative="estimative"></map-difficulty-gauge>
           </div>
         </div>
       </div>
@@ -62,18 +62,18 @@
 </template>
 
 <script lang="ts">
+import type {StoredLevel} from '@/store';
 import {Store} from '@/store';
 import {defineComponent} from 'vue';
-import type {StoredLevel} from '@/store';
 import {Tiles} from '@/game/tiles/tiles';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
-import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
 
 export default defineComponent({
   name: "MapEditor",
@@ -89,7 +89,7 @@ export default defineComponent({
       render: false,
       valid: true,
       editorKey: 0,
-      solution: undefined as SolutionOutput | undefined,
+      estimative: undefined as number | undefined,
       estimatedDifficulty: -1,
       codedMapText: customLevel?.level.map || '######\n#@   #\n# $ .#\n######',
       legendText: `
@@ -156,7 +156,7 @@ export default defineComponent({
     async refresh() {
       this.render = true;
       try {
-        this.solution = undefined;
+        this.estimative = undefined;
         this.invalidError = '';
         this.valid = false;
         this.loading = true;
@@ -181,7 +181,7 @@ export default defineComponent({
         await this.validateMap(output);
         this.valid = true;
       } catch (exc: any) {
-        this.solution = undefined;
+        this.estimative = undefined;
         this.invalidError = exc.message;
         this.valid = false;
       }
@@ -222,7 +222,7 @@ export default defineComponent({
         throw new Error('Map is not solvable');
       }
 
-      this.solution = solutionOutput;
+      this.estimative = new LevelDifficultyEstimator(solutionOutput).estimate();
     }
 
   }

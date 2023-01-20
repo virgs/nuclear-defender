@@ -1,7 +1,7 @@
 <template>
-  <div id="map-difficulty-gauge" :style="{filter: solution ? 'opacity(1)' : 'opacity(0)'}">
+  <div id="map-difficulty-gauge" :style="{filter: estimative !== undefined ? 'opacity(1)' : 'opacity(0)'}">
   </div>
-  <div v-if="!solution" style="position: absolute; top: 50%; left: 35%; color: var(--radioactive-color)"
+  <div v-if="estimative === undefined" style="position: absolute; top: 50%; left: 35%; color: var(--radioactive-color)"
        class="spinner-border" role="status">
   </div>
 </template>
@@ -13,18 +13,17 @@ import {RadialGauge} from 'canvas-gauges';
 export default defineComponent({
   name: "MapDifficultyGauge",
   components: {},
-  props: ['solution'],
+  props: ['estimative'],
   data() {
     return {
       gauge: undefined as any,
       dimensionsUpdated: false,
-      difficulty: 50,
       animation: undefined as any
     };
   },
   watch: {
     solution() {
-      if (this.solution) {
+      if (this.estimative) {
         this.refreshGauge();
       }
     },
@@ -45,7 +44,7 @@ export default defineComponent({
         height: '10',
         valueBox: false,
 
-        value: this.difficulty,
+        value: this.estimative || 0,
         minValue: 0,
         maxValue: 100,
         startAngle: 0,
@@ -93,24 +92,8 @@ export default defineComponent({
       return gauge;
     },
     refreshGauge() {
-      //Estimate difficulty
-      // actions
-      //     (3) [4, 3, 3]
-      // boxesLine
-      //     1
-      // featuresUsed
-      //     0
-      // iterations
-      //     10
-      // totalTime
-      //     12
-
-      // this.difficulty = Math.random() * 100;
-
-      // const actionsdifficulty =
-
-      const valuesToUpdate: any = {
-        value: this.difficulty
+        const valuesToUpdate: any = {
+        value: this.estimative
       };
       if (!this.dimensionsUpdated) {
         this.dimensionsUpdated = true;
@@ -119,7 +102,7 @@ export default defineComponent({
         valuesToUpdate.width = parent.clientWidth * 1.75 + '';
         this.animation = setInterval(() => {
           const variation = 3;
-          this.gauge!.update({value: this.difficulty + (Math.random() * variation) - (variation * .5)});
+          this.gauge!.update({value: this.estimative + (Math.random() * variation) - (variation * .5)});
         }, 125);
       }
       this.gauge!.update(valuesToUpdate);
