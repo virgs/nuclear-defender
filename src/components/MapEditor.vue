@@ -82,9 +82,10 @@ export default defineComponent({
   emits: ["save"],
   data() {
     const customLevel = Store.getInstance().getCustomLevel();
+    Math.random();
     return {
       loading: false,
-      title: ['Mouse user nightmare'][0],
+      title: customLevel?.level.title || this.createRandomTitle(),
       invalidError: '',
       render: false,
       valid: true,
@@ -153,6 +154,10 @@ export default defineComponent({
     },
   },
   methods: {
+    createRandomTitle() {
+      const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
+      return titles[Math.floor(Math.random() * titles.length)];
+    },
     async refresh() {
       this.render = true;
       try {

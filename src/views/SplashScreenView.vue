@@ -14,7 +14,7 @@ import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban
 
 const router = useRouter();
 //TODO get it from OptionsComponent
-const furthestLevel = 10;//store.furthestEnabledLevel;
+const furthestLevel = 20;//store.furthestEnabledLevel;
 
 const data = reactive({
   currentSelectedIndex: 0//furthestLevel
@@ -111,7 +111,7 @@ onMounted(() => {
           <div v-for="(item, index) in availableLevels"
                :class="[index === data.currentSelectedIndex ? 'selected-slider' : '', 'tns-item']">
             <h4 class="level-number">{{ index + 1}}</h4>
-            <img alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">
+            <img height="160" alt="" class="img-fluid" :src="defaultLevels[0].thumbnailPath">
           </div>
         </div>
         <h3 class="mt-2 level-title">{{availableLevels[data.currentSelectedIndex].title}}</h3>
@@ -135,16 +135,6 @@ onMounted(() => {
 
 <style>
 
-.level-number {
-  text-transform: capitalize;
-  font-weight: bolder;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-}
-
-
 .splash-view {
   height: 99vh;
   max-width: 720px;
@@ -153,6 +143,18 @@ onMounted(() => {
   background-repeat: no-repeat;
   background-position-x: center;
   background-attachment: fixed;
+}
+
+
+.level-number {
+  text-transform: capitalize;
+  font-weight: bolder;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  color: var(--background-color);
+  text-shadow: 2px 2px 1px var(--radioactive-color);
 }
 
 .level-title {

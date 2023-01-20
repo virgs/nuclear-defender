@@ -90,8 +90,8 @@ export class BoxActor implements GameActor {
         return false;
     }
 
-    public cover(actors: GameActor[]): void {
-        if (actors
+    public cover(staticActors: GameActor[]): void {
+        if (staticActors
             .some(actor => actor.getTileCode() === Tiles.target)) {
             this.sprite.setFrame(Tiles.boxOnTarget);
 

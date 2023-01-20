@@ -22,8 +22,8 @@ export default defineComponent({
     };
   },
   watch: {
-    solution() {
-      if (this.estimative) {
+    estimative() {
+      if (this.estimative !== undefined) {
         this.refreshGauge();
       }
     },

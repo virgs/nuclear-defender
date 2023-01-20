@@ -1,6 +1,6 @@
 export enum EventName {
     UNDO_BUTTON_CLICKED,
-    DIRECTION_BUTTON_CLICKED,
+    HERO_DIRECTION_INPUT,
 }
 
 type EventListener = (args: any) => any;
@@ -25,4 +25,7 @@ export class EventEmitter {
             .forEach(callback => callback(args));
     }
 
+    public static reinit() {
+        EventEmitter.instance = new EventEmitter();
+    }
 }

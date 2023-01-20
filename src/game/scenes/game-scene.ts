@@ -7,6 +7,7 @@ import {configuration} from '../constants/configuration';
 import {mapStringToAction} from '@/game/constants/actions';
 import {GameStageCreator} from '../actors/game-stage-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {EventEmitter} from '@/event-emitter';
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
@@ -71,6 +72,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async create(config: { store: Store, playable: boolean }) {
+        EventEmitter.reinit();
         this.playableMode = config.playable;
         this.store = config.store;
         const storedLevel = this.store.getCurrentStoredLevel()!;
@@ -96,7 +98,7 @@ export class GameScene extends Phaser.Scene {
         this.gameStage = gameStageCreator.createGameStage();
 
         if (this.playableMode) {
-            InputManager.init(this);
+            new InputManager().init(this);
             this.initialTime = new Date().getTime();
         } else {
             this.input.keyboard.clearCaptures();
@@ -120,9 +122,8 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    public async update(time: number, delta: number) {
+    public async update(time: number, delta: number): Promise<void> {
         if (this.playableMode) {
-            InputManager.getInstance().update();
             if (this.allowUpdates) {
                 await this.gameStage!.update();
                 if (this.gameStage!.isLevelComplete()) {

@@ -1,10 +1,10 @@
 import {Tiles} from '@/game/tiles/tiles';
-import {Actions} from '../constants/actions';
 import type {Point} from '@/game/math/point';
-import {InputManager} from '@/game/input/input-manager';
 import type {Directions} from '../constants/directions';
+import {EventEmitter, EventName} from '@/event-emitter';
 import {HeroAnimator} from '../animations/hero-animator';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
+import {Actions, mapDirectionToAction} from '../constants/actions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
@@ -16,6 +16,7 @@ export class HeroActor implements GameActor {
     private tweens: Phaser.Tweens.TweenManager;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
+    private actionInputBuffer?: Actions;
 
     public constructor(config: GameActorConfig) {
         this.id = config.id;
@@ -31,6 +32,11 @@ export class HeroActor implements GameActor {
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));
         this.tilePosition = config.tilePosition;
+
+        EventEmitter.listenToEvent(EventName.HERO_DIRECTION_INPUT, (direction: Directions) => {
+            this.actionInputBuffer = mapDirectionToAction(direction);
+        });
+
     }
 
     public getTilePosition(): Point {
@@ -42,7 +48,9 @@ export class HeroActor implements GameActor {
     }
 
     public checkAction(): Actions {
-        return InputManager.getInstance().getActionInput() || Actions.STAND;
+        const actionInputBuffer = this.actionInputBuffer || Actions.STAND;
+        this.actionInputBuffer = undefined;
+        return actionInputBuffer;
     }
 
     public async animate(spritePosition: Point, orientation?: Directions): Promise<void> {

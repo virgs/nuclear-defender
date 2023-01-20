@@ -56,7 +56,7 @@ export default defineComponent({
       this.directionClick(Directions.DOWN);
     },
     directionClick(direction: Directions) {
-      EventEmitter.emit(EventName.DIRECTION_BUTTON_CLICKED, direction);
+      EventEmitter.emit(EventName.HERO_DIRECTION_INPUT, direction);
     }
   }
 });

@@ -1,65 +1,37 @@
-import Phaser from 'phaser';
+import {Directions} from '@/game/constants/directions';
 import {EventEmitter, EventName} from '@/event-emitter';
-import type {Directions} from '@/game/constants/directions';
-import {Actions, mapDirectionToAction} from '@/game/constants/actions';
 
 export class InputManager {
-    private static instance: InputManager;
+    private readonly heroWatchingKeys: Map<string, Directions>;
+    private readonly shortcutKeys: Map<string, EventName>;
 
-    private readonly inputMap: Map<Actions, () => boolean>;
-    private actionLiveness: number;
-    private deltaAcc: number;
-    private actionInputBuffer?: Actions;
+    public constructor() {
+        this.heroWatchingKeys = new Map();
+        this.heroWatchingKeys.set('ArrowLeft'.toLowerCase(), Directions.LEFT);
+        this.heroWatchingKeys.set('ArrowRight'.toLowerCase(), Directions.RIGHT);
+        this.heroWatchingKeys.set('ArrowDown'.toLowerCase(), Directions.DOWN);
+        this.heroWatchingKeys.set('ArrowUp'.toLowerCase(), Directions.UP);
 
-    private constructor() {
-        this.inputMap = new Map<Actions, () => boolean>();
-        this.actionLiveness = 0;
-        this.deltaAcc = 0;
-
-        EventEmitter.listenToEvent(EventName.DIRECTION_BUTTON_CLICKED, (direction: Directions) => {
-            this.actionInputBuffer = mapDirectionToAction(direction);
-        });
+        this.shortcutKeys = new Map();
+        this.shortcutKeys.set('z', EventName.UNDO_BUTTON_CLICKED);
     }
 
-    public static getInstance(): InputManager {
-        if (!InputManager.instance) {
-            InputManager.instance = new InputManager();
-        }
-        return InputManager.instance;
-    }
-
-    public static init(scene: Phaser.Scene): void {
+    public init(scene: Phaser.Scene): void {
         scene.input.keyboard.enabled = true;
         scene.game.input.enabled = true;
 
-        InputManager.instance = new InputManager();
-        const cursors = scene.input.keyboard.createCursorKeys();
-        const setUp = (action: Actions, key: number, cursorKey: Phaser.Input.Keyboard.Key) => {
-            // scene.input.keyboard.addKey(key).emitOnRepeat = true;
-            // this.instance.inputMap.set(action, () => scene.input.keyboard.addKey(key).isDown);
-            // cursorKey.emitOnRepeat = true
-            // cursorKey.setEmitOnRepeat(true)
-            // cursorKey.on('down', () => console.log('ondown'));
-            this.instance.inputMap.set(action, () => Phaser.Input.Keyboard.JustDown(cursorKey));
-        };
-        setUp(Actions.RIGHT, Phaser.Input.Keyboard.KeyCodes.RIGHT, cursors.right);
-        setUp(Actions.DOWN, Phaser.Input.Keyboard.KeyCodes.DOWN, cursors.down);
-        setUp(Actions.LEFT, Phaser.Input.Keyboard.KeyCodes.LEFT, cursors.left);
-        setUp(Actions.UP, Phaser.Input.Keyboard.KeyCodes.UP, cursors.up);
-    }
-
-    public update() {
-        for (let [action, actionCheckFunction] of this.inputMap.entries()) {
-            if (actionCheckFunction()) {
-                this.actionInputBuffer = action;
-                break;
+        scene.input.keyboard.on('keydown', (event: any) => {
+            const key = event.key.toLowerCase();
+            if (this.heroWatchingKeys.has(key)) {
+                EventEmitter.emit(EventName.HERO_DIRECTION_INPUT, this.heroWatchingKeys.get(key));
             }
-        }
+            if (event.metaKey || event.ctrlKey) {
+                if (this.shortcutKeys.has(key)) {
+                    EventEmitter.emit(this.shortcutKeys.get(key)!);
+                }
+            }
+        });
+
     }
 
-    public getActionInput(): Actions | undefined {
-        const action = this.actionInputBuffer;
-        this.actionInputBuffer = undefined;
-        return action;
-    }
 }

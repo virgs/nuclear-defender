@@ -147,19 +147,25 @@ export class GameStageCreator {
 
     private updateCoveringSituation(): void {
         const staticActors: GameActor[] = [];
-        this.actorMap.forEach((actors: GameActor[], tile: Tiles) => {
-            if (tile !== Tiles.hero && tile !== Tiles.box) {
-                staticActors.push(...actors);
-            }
-        });
-        this.actorMap.get(Tiles.box)!.concat(this.actorMap.get(Tiles.hero)!)
-            .forEach((dynamicActor: GameActor) => {
-                const coveringStaticActors = staticActors
-                    .filter(staticActor => staticActor.getTilePosition().isEqualTo(dynamicActor.getTilePosition()));
-                dynamicActor.cover(coveringStaticActors);
-                coveringStaticActors
-                    .forEach(dynamicActor => dynamicActor.cover([dynamicActor]));
+        this.actorMap
+            .forEach((actors: GameActor[], tile: Tiles) => {
+                if (tile !== Tiles.hero && tile !== Tiles.box) {
+                    staticActors.push(...actors);
+                }
             });
+        const dynamicActors = this.actorMap.get(Tiles.box)!.concat(this.actorMap.get(Tiles.hero)!);
+        this.strippedMatrix.strippedFeatureLayeredMatrix
+            .forEach((line, y) => line
+                .forEach((_: any, x: number) => {
+                    const position = new Point(x, y);
+                    const dynamicActorsInPosition: GameActor[] = dynamicActors
+                        .filter(actor => actor.getTilePosition().isEqualTo(position));
+                    const staticActorsInPosition: GameActor[] = staticActors
+                        .filter(actor => actor.getTilePosition().isEqualTo(position));
+                    const actorsInPosition = dynamicActorsInPosition.concat(staticActorsInPosition);
+                    actorsInPosition
+                        .forEach(actor => actor.cover(actorsInPosition));
+                }));
 
     }
 }

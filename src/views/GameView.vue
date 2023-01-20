@@ -75,7 +75,7 @@ onUnmounted(() => {
           <div class="row h-100 mx-2">
             <div class="col-12">
               <div class="row justify-content-center mt-2">
-                <div class="col-auto col-lg-3 d-grid gap-1">
+                <div class="col-auto col-lg-3 d-grid gap-2">
                   <button class="btn btn-primary sokoban-outlined-button"
                           @click="exitClick" type="button">
                     <span>

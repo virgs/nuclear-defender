@@ -1,14 +1,15 @@
-import {dynamicTiles, Tiles} from '@/game/tiles/tiles';
+import {Point} from '@/game/math/point';
 import {Actions} from '@/game/constants/actions';
 import type {BoxActor} from '@/game/actors/box-actor';
+import {dynamicTiles, Tiles} from '@/game/tiles/tiles';
 import {EventEmitter, EventName} from '@/event-emitter';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import {HeroActionRecorder} from '@/game/engine/hero-action-recorder';
-import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 
 export class GameStage {
     private readonly strippedMap: MultiLayeredMap;
@@ -38,7 +39,6 @@ export class GameStage {
             }
         }
         this.strippedMap = config.strippedMap;
-        // this.nextMoves = config.solution || [];
         this.nextMoves = [];
         this.levelComplete = false;
         this.animationsAreOver = true;
@@ -130,14 +130,18 @@ export class GameStage {
 
     private updateActorsCoveringSituation() {
         const dynamicActors = (this.boxes as GameActor[]).concat(this.hero as GameActor);
-        dynamicActors
-            .forEach((dynamicActor: GameActor) => {
-                const coveringStaticActors: GameActor[] = this.staticActors
-                    .filter(staticActor => staticActor.getTilePosition().isEqualTo(dynamicActor.getTilePosition()));
-                dynamicActor.cover(coveringStaticActors);
-                coveringStaticActors
-                    .forEach(dynamicActor => dynamicActor.cover([dynamicActor]));
-            });
+        this.strippedMap.strippedFeatureLayeredMatrix
+            .forEach((line, y) => line
+                .forEach((_: any, x: number) => {
+                    const position = new Point(x, y);
+                    const dynamicActorsInPosition: GameActor[] = dynamicActors
+                        .filter(actor => actor.getTilePosition().isEqualTo(position));
+                    const staticActorsInPosition: GameActor[] = this.staticActors
+                        .filter(actor => actor.getTilePosition().isEqualTo(position));
+                    const actorsInPosition = dynamicActorsInPosition.concat(staticActorsInPosition);
+                    actorsInPosition
+                        .forEach(actor => actor.cover(actorsInPosition));
+                }));
     }
 
     private checkLevelComplete() {

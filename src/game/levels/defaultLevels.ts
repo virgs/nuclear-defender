@@ -551,27 +551,27 @@ export const defaultLevels: Level[] = [
         title: 'eastern island mistery'
     }, {
         map: `
-  #####
+--#####
 ###   ##
 # .. . #
 # $$ # #
 ## #$$ #
- #.@  ##
- ###  #
-   ####
+-#.@  ##
+-###  #
+---####
 `,
         title: 'run forrest'
     }, {
         map: `
-  #####
+--#####
 ###   #
 #   #.##
 #  *$@ #
 ## * **##
- # # #  #
- #      #
- ###  ###
-   ####
+-# # #  #
+-#      #
+-###  ###
+---####
 `,
         title: 'beauty saloon hair'
     }, {
