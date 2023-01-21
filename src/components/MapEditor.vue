@@ -6,11 +6,15 @@
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-12 mb-3">
+          <div class="col-12 mb-4 order-1">
             <label class="form-label sokoban-label">Title</label>
-            <input type="text" class="form-control" placeholder="Title" v-model="title">
+            <input type="text" :class="['form-control', titleIsValid ? 'is-valid' : 'is-invalid']"
+                   placeholder="Title" v-model="title">
+            <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
+              Title is longer than 25 characters
+            </div>
           </div>
-          <div class="col-9 col-lg-4">
+          <div class="col-9 col-lg-5 order-2">
             <label class="form-label sokoban-label">
               Editor
               <a tabindex="0" class="btn btn-lg btn-danger px-1" role="button" data-bs-toggle="popover"
@@ -22,19 +26,13 @@
                 <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
               </a>
             </label>
-            <textarea :class="['form-control map-text-area', valid ? 'is-valid' : 'is-invalid']" rows="10"
+            <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="9"
                       v-model="codedMapText"></textarea>
             <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
-              {{ invalidError }}
+              {{ editorInvalidError }}
             </div>
           </div>
-          <div class="col-3 col-lg-2" style="text-align: left;">
-            <label class="form-label sokoban-label" style="float: none">
-              Difficulty
-            </label>
-            <map-difficulty-gauge :estimative="estimative"></map-difficulty-gauge>
-          </div>
-          <div class="col-12 col-lg-6" style="text-align: left">
+          <div class="col-12 col-lg-5 order-4 order-lg-3" style="text-align: left">
             <label class="form-label sokoban-label" style="float: none">
               Result
             </label>
@@ -45,6 +43,12 @@
                  class="spinner-border" role="status">
             </div>
           </div>
+          <div class="col-3 col-lg-2 order-3 order-lg-4" style="text-align: left;">
+            <label class="form-label sokoban-label" style="float: none">
+              Difficulty
+            </label>
+            <map-difficulty-gauge :estimative="estimative"></map-difficulty-gauge>
+          </div>
         </div>
       </div>
       <div class="modal-footer" style="border: none">
@@ -53,7 +57,7 @@
         <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
                 @click="saveButtonClick"
                 data-bs-dismiss="modal"
-                :disabled="!valid"
+                :disabled="!titleIsValid || mapIsValid"
                 style="background-color: var(--radioactive-color); float: right">Save
         </button>
       </div>
@@ -62,9 +66,9 @@
 </template>
 
 <script lang="ts">
+import type {StoredLevel} from '@/store';
 import {Store} from '@/store';
 import {defineComponent} from 'vue';
-import type {StoredLevel} from '@/store';
 import {Tiles} from '@/game/tiles/tiles';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
@@ -88,9 +92,9 @@ export default defineComponent({
     return {
       loading: false,
       title: customLevel.level.title,
-      invalidError: '',
+      editorInvalidError: '',
       render: false,
-      valid: true,
+      mapIsValid: true,
       output: undefined as any,
       editorKey: 0,
       estimative: undefined as number | undefined,
@@ -134,6 +138,11 @@ export default defineComponent({
     //@ts-ignore
     [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
   },
+  computed: {
+    titleIsValid() {
+      return this.title.length < 25;
+    }
+  },
   watch: {
     toggle() {
       const modalIsBeingShown = document.getElementsByTagName('body')[0]!.classList.contains('modal-open');
@@ -172,31 +181,32 @@ export default defineComponent({
           .strip([Tiles.hero, Tiles.box]);
 
       this.save(newCustomMap.level.title, newCustomMap.level.map, output);
-      Store.getInstance().getCurrentStoredLevel()
+      Store.getInstance().getCurrentStoredLevel();
       return newCustomMap;
     },
     async refresh(encodedLevel: string) {
-      console.log('refresh')
       this.render = true;
       try {
         this.estimative = undefined;
-        this.invalidError = '';
-        this.valid = false;
+        this.editorInvalidError = '';
+        this.mapIsValid = false;
         this.loading = true;
         const map = new StandardSokobanAnnotationTranslator()
             .translate(encodedLevel);
         this.output = new SokobanMapProcessor(map)
             .strip([Tiles.hero, Tiles.box]);
 
+        this.save(this.title, this.codedMapText, this.output)
+
         ++this.editorKey;
         this.loading = false;
 
         await this.validateMap();
-        this.valid = true;
+        this.mapIsValid = true;
       } catch (exc: any) {
         this.estimative = undefined;
-        this.invalidError = exc.message;
-        this.valid = false;
+        this.editorInvalidError = exc.message;
+        this.mapIsValid = false;
       }
     },
     saveButtonClick() {
