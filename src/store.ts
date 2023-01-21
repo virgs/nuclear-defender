@@ -45,6 +45,7 @@ export class Store {
     }
 
     public setCustomLevel(newCustom: StoredLevel): void {
+        localStorage.setItem(configuration.store.customLevelKey, JSON.stringify(newCustom));
         this.customLevel = newCustom;
     }
 

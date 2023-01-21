@@ -69,7 +69,6 @@ import {Tiles} from '@/game/tiles/tiles';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
-import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -89,6 +88,7 @@ export default defineComponent({
       invalidError: '',
       render: false,
       valid: true,
+      output: undefined as any,
       editorKey: 0,
       estimative: undefined as number | undefined,
       estimatedDifficulty: -1,
@@ -165,25 +165,15 @@ export default defineComponent({
         this.invalidError = '';
         this.valid = false;
         this.loading = true;
-        const store = Store.getInstance();
         const map = new StandardSokobanAnnotationTranslator()
             .translate(this.codedMapText);
-        const output = new SokobanMapProcessor(map)
+        this.output = new SokobanMapProcessor(map)
             .strip([Tiles.hero, Tiles.box]);
 
-        const newStoredLevel: StoredLevel = {
-          bestTime: -1, index: -1, level: {
-            title: this.title,
-            map: this.codedMapText,
-          },
-          dynamicFeatures: output.removedFeatures,
-          strippedLayeredTileMatrix: output.strippedLayeredTileMatrix
-        };
-        store.setCurrentStoredLevel(newStoredLevel);
         ++this.editorKey;
         this.loading = false;
 
-        await this.validateMap(output);
+        await this.validateMap();
         this.valid = true;
       } catch (exc: any) {
         this.estimative = undefined;
@@ -192,29 +182,42 @@ export default defineComponent({
       }
     },
     save() {
+      const store = Store.getInstance();
+      const newStoredLevel: StoredLevel = {
+        playerActions: [],
+        bestTime: -1,
+        index: -1,
+        level: {
+          title: this.title,
+          map: this.codedMapText,
+        },
+        dynamicFeatures: this.output.removedFeatures,
+        strippedLayeredTileMatrix: this.output.strippedLayeredTileMatrix
+      };
+      store.setCustomLevel(newStoredLevel);
       this.$emit('save', {map: this.codedMapText, title: this.title});
     },
-    async validateMap(output: ProcessedMap) {
-      const heroNumber = output.removedFeatures.get(Tiles.hero)!.length;
+    async validateMap() {
+      const heroNumber = this.output.removedFeatures.get(Tiles.hero)!.length;
       if (heroNumber > 1) {
         throw new Error('Map can only have one hero. Found: ' + heroNumber);
       } else if (heroNumber < 0) {
         throw new Error('Map has to have at least one hero');
       }
-      const boxNumber = output.removedFeatures.get(Tiles.box)!.length;
-      const targetNumber = output.pointMap.get(Tiles.target)!.length;
+      const boxNumber = this.output.removedFeatures.get(Tiles.box)!.length;
+      const targetNumber = this.output.pointMap.get(Tiles.target)!.length;
       if (boxNumber !== targetNumber) {
         throw new Error(`Number of boxes (${boxNumber}) different of number of targets (${targetNumber})`);
       }
 
-      await this.tryToSolveMap(output);
+      await this.tryToSolveMap();
 
       return true;
     },
-    async tryToSolveMap(output: ProcessedMap) {
+    async tryToSolveMap() {
       const solver = new SokobanSolver({
-        strippedMap: output.strippedLayeredTileMatrix,
-        staticFeatures: output.pointMap,
+        strippedMap: this.output.strippedLayeredTileMatrix,
+        staticFeatures: this.output.pointMap,
         cpu: {
           sleepingCycle: 5000,
           sleepForInMs: 25
@@ -222,7 +225,7 @@ export default defineComponent({
         distanceCalculator: new ManhattanDistanceCalculator()
       });
 
-      const solutionOutput = await solver.solve(output.removedFeatures);
+      const solutionOutput = await solver.solve(this.output.removedFeatures);
       if (!solutionOutput.actions) {
         throw new Error('Map is not solvable');
       }

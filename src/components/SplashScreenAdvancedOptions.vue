@@ -1,6 +1,7 @@
 <template>
+  <!-- toast -->
   <div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="toast" class="toast" role="alert"
+    <div id="password-toast" class="toast" role="alert"
          style="background-color: transparent"
          aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
       <div class="d-flex sokoban-toast" :style="toastStyle">
@@ -11,6 +12,31 @@
       </div>
     </div>
   </div>
+  <!-- Modal -->
+  <div class="modal fade" id="password-modal" tabindex="-1" aria-labelledby="passwordModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Enter password</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <input type="text" class="form-control"
+                   placeholder="Password"
+                   v-model="levelPassword">
+            <button class="btn btn-outline-secondary toastBtn" type="button"
+                    :disabled="this.levelPassword.length <= 0"
+                    style="background-color: var(--radioactive-color)" @click="checkPassword">
+              Check
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <button class="btn btn-primary advanced-options-button" type="button" data-bs-toggle="collapse"
           data-bs-target="#collapsibleOptions"
           aria-expanded="false" aria-controls="collapsibleOptions">
@@ -19,25 +45,19 @@
   </button>
   <div class="collapse p-0" id="collapsibleOptions">
     <div class="card card-body px-0" style="background-color: transparent">
-      <div class="container splash-screen-advanced text-center">
+      <div class="container splash-screen-advanced px-0">
         <div class="row row-cols-1 gy-3">
-          <div class="col">
-            <label class="form-label sokoban-label">Level password</label>
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Level password" aria-label="Level password"
-                     @change="notifyParent" v-model="levelPassword">
-              <button class="btn btn-outline-secondary" type="button" id="toastBtn"
-                      style="background-color: var(--radioactive-color)"
-                      :disabled="levelPassword.length === 0">Check
-              </button>
-            </div>
+          <div class="col-12 col-lg-6">
+            <button class="btn btn-outline-secondary w-100" type="button"
+                    data-bs-toggle="modal" data-bs-target="#password-modal">
+              Check password
+            </button>
           </div>
-          <div class="col-12">
-            <label class="form-label sokoban-label">Create map</label>
-            <button class="btn btn-outline-secondary mt-2" type="button" style="float: right"
+          <div class="col-12 col-lg-6">
+            <button class="btn btn-outline-secondary w-100" type="button"
                     @click="mapEditorToggle = !mapEditorToggle"
                     data-bs-toggle="modal" data-bs-target="#mapEditorModal">
-              create
+              Edit custom map
             </button>
             <div class="modal fade" id="mapEditorModal" tabindex="-1" role="dialog"
                  aria-labelledby="mapEditorModalLabel" aria-hidden="true">
@@ -54,12 +74,14 @@
 
 import {defineComponent} from 'vue';
 import MapEditor from '@/components/MapEditor.vue';
-import {mapStringToAction} from '@/game/constants/actions';
+import type {Level} from '@/game/levels/defaultLevels';
+import {defaultLevels} from '@/game/levels/defaultLevels';
 
 export default defineComponent({
-  name: "SplashScreenAdvancedOptionsComponent",
+  name: 'SplashScreenAdvancedOptions',
   components: {MapEditor},
-  emits: ["valid"],
+  props: ['greatestAvailableIndex'],
+  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels'],
   data() {
     return {
       mapEditorToggle: false,
@@ -67,21 +89,43 @@ export default defineComponent({
       levelPassword: '',
     };
   },
+  mounted() {
+    const toastTriggers = document.getElementsByClassName('toastBtn');
+    const toast = document.getElementById('password-toast');
+    if (toastTriggers) {
+      Array.from(toastTriggers)
+          .forEach(trigger => {
+            // @ts-ignore
+            trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
+          });
+    }
+  },
   methods: {
     mapEditorSaved(map: any) {
-      console.log(map);
+      this.$emit('mapEditorSaved', map);
     },
-    notifyParent() {
-      // this.$emit('valid', true);
-    },
+    checkPassword() {
+      const unblockedLevelIndex = defaultLevels
+          .findIndex((level: Level) => {
+            return level.title
+                .toLowerCase()
+                .replace(/ /g, '-') === this.levelPassword;
+          });
+      if (unblockedLevelIndex > this.greatestAvailableIndex) {
+        this.validLevelPassword = true;
+        this.$emit('passwordUnblockedNewLevels', unblockedLevelIndex);
+        return;
+      }
+      this.validLevelPassword = false;
+    }
   },
   computed: {
     toastBodyTextName(): any {
-      return this.validLevelPassword ? 'Good job!' : 'Wrong level password. Try again.';
+      return this.validLevelPassword ? 'Good job!' : 'Wrong password.';
     },
     toastStyle(): any {
       return this.validLevelPassword ? {
-        'background-color': 'var(--highlight-color)',
+        'background-color': 'var(--radioactive-color)',
         'color': 'var(--foreground-color)'
       } : {
         'background-color': 'var(--danger-color)',
@@ -103,7 +147,6 @@ export default defineComponent({
   background-color: transparent;
   border-radius: 0;
   border: none;
-  width: 100%;
 }
 
 .advanced-options-button:active, .advanced-options-button:focus, .advanced-options-button:focus-visible {
@@ -111,11 +154,21 @@ export default defineComponent({
 }
 
 .advanced-options-button:hover {
+  color: var(--radioactive-color);
 }
 
 .advanced-options-button:hover .fa-solid {
   color: var(--radioactive-color);
-  transform: rotate(300deg) scale(1.25);
+  transform: rotate(580deg) scale(1.5);
+}
+
+.modal-header, .modal-footer {
+  border: none;
+}
+
+.modal-content {
+  background-color: black;
+  border: 1px solid var(--radioactive-color);
 }
 
 .fa-solid {

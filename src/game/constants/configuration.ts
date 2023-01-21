@@ -43,6 +43,7 @@ export const configuration = {
         gameScene: {}
     },
     store: {
+        customLevelKey: 'customLevelKey',
         furthestEnabledLevelKey: 'furthestEnabledLevel'
     }
 };

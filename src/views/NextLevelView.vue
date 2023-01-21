@@ -19,12 +19,12 @@ export default defineComponent({
     history.replaceState({urlPath: this.router.currentRoute.fullPath}, "", '/');
 
     const toastTriggers = document.getElementsByClassName('toastBtn');
-    const toastLiveExample = document.getElementById('copy-toast');
+    const toast = document.getElementById('copy-toast');
     if (toastTriggers) {
       Array.from(toastTriggers)
           .forEach(trigger => {
             // @ts-ignore
-            trigger.addEventListener('click', () => new bootstrap.Toast(toastLiveExample).show());
+            trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
           });
     }
   },
@@ -82,7 +82,7 @@ export default defineComponent({
         </div>
       </div>
     </div>
-
+<!--TODO add level thumbnail here-->
     <div class="container my-5 next-level-view text-center">
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
