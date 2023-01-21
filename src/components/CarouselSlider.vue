@@ -6,7 +6,7 @@
     <div id="carousel-slider">
       <div v-for="(item, index) in levels"
            :class="[index === currentIndex ? 'selected-slider' : '', 'tns-item']">
-        <h4 class="level-number">{{ index + 1 }}</h4>
+        <h4 class="level-number">{{ item.displayIndex }}</h4>
         <img alt="" class="img-fluid tns-lazy-img" :data-src="levels[0].thumbnailPath" style="user-select: none">
       </div>
     </div>
@@ -28,7 +28,7 @@ import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
 
 export default defineComponent({
-  name: "CarouselSlider",
+  name: 'CarouselSlider',
   props: ['levels', 'index'],
   emits: ['indexChanged'],
   data() {
@@ -51,15 +51,17 @@ export default defineComponent({
       swipeAngle: false,
       edgePadding: 10,
       speed: 400,
-      startIndex: this.currentIndex,
+      startIndex: 0,
       loop: false,
       prevButton: '#prevButton',
       nextButton: '#nextButton',
       nav: false
     });
 
+    slider.goTo(this.currentIndex);
     // bind function to event
     slider.events.on('indexChanged', (info: any) => {
+      console.log(info.index);
       this.currentIndex = info.index;
       this.$emit('indexChanged', info.index);
     });

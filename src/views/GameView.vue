@@ -1,66 +1,62 @@
-<script setup lang="ts">
+<script lang="ts">
 import {Store} from '@/store';
+import {defineComponent} from 'vue';
 import {useRouter} from 'vue-router';
 import {EventEmitter, EventName} from '@/event-emitter';
-import {defaultLevels} from '@/game/levels/defaultLevels';
-import {computed, onMounted, onUnmounted, ref} from 'vue';
-import PhaserContainer from "@/components/PhaserContainer.vue";
-import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
+import PhaserContainer from '@/components/PhaserContainer.vue';
+import DirectionalButtons from '@/components/DirectionalButtons.vue';
 
-const router = useRouter();
+export default defineComponent({
+  name: 'GameView',
+  components: {PhaserContainer, DirectionalButtons},
+  data() {
+    const currentStoredLevel = Store.getInstance().getCurrentStoredLevel()!;
+    return {
+      router: useRouter(),
+      totalTime: 0,
+      confirmationButton: undefined as any,
+      smallScreenDisplay: true,
+      currentLevel: currentStoredLevel,
+      componentKey: 0,
+      render: false,
+      timer: -1,
+    };
+  },
+  mounted() {
+    history.replaceState({urlPath: this.router.currentRoute.fullPath}, "", '/');
+    EventEmitter
+        .listenToEvent(EventName.RESTART_LEVEL, () => this.resetClick());
+    EventEmitter
+        .listenToEvent(EventName.QUIT_LEVEL, () => this.exitClick());
 
-EventEmitter
-    .listenToEvent(EventName.RESTART_LEVEL, () => {
-      resetClick();
-    });
-EventEmitter
-    .listenToEvent(EventName.QUIT_LEVEL, () => {
-      exitClick();
-    });
+    const interval = 100;
+    this.timer = setInterval(() => {
+      this.totalTime += interval;
+    }, interval);
 
-function resetClick() {
-  forceRerender();
-  totalTime.value = 0;
-}
-
-function undoClick() {
-  EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);
-}
-
-function exitClick() {
-  router.push('/');
-}
-
-const render = ref(false);
-const componentKey = ref(0);
-const forceRerender = () => {
-  componentKey.value += 1;
-};
-
-const currentStoredLevel = Store.getInstance().getCurrentStoredLevel()!;
-let currentLevelIndex = computed(() => currentStoredLevel.index + 1);
-let currentLevel = computed(() => defaultLevels[currentStoredLevel.index]);
-let smallScreenDisplay = ref(true);
-let totalTime = ref(0);
-let confirmationButton = ref((() => undefined) as any);
-
-let timer: number;
-
-onMounted(() => {
-  history.replaceState({urlPath: router.currentRoute.value.fullPath}, "", '/');
-  const interval = 100;
-  timer = setInterval(() => {
-    totalTime.value += interval;
-  }, interval);
-
-  const container = document.getElementById('phaser-container')!;
-  smallScreenDisplay.value = container.clientWidth <= 992 / 2; //half of bootstrap 'lg' breakpoint
-  render.value = true;
-  forceRerender();
-});
-
-onUnmounted(() => {
-  clearInterval(timer);
+    const container = document.getElementById('phaser-container')!;
+    this.smallScreenDisplay = container.clientWidth <= 992 / 2; //half of bootstrap 'lg' breakpoint
+    this.render = true;
+    this.forceRerender();
+  },
+  unmounted() {
+    clearInterval(this.timer);
+  },
+  methods: {
+    forceRerender() {
+      this.componentKey += 1;
+    },
+    resetClick() {
+      this.forceRerender();
+      this.totalTime = 0;
+    },
+    undoClick() {
+      EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);
+    },
+    exitClick() {
+      this.router.push('/');
+    }
+  }
 });
 
 </script>
@@ -70,7 +66,7 @@ onUnmounted(() => {
     <div class="row align-items-center mx-0" style="max-width: 100vw">
       <div class="col-12 pt-2 px-4" id="game-view-title-id" style="text-align: left">
         <h1 class="sokoban-display display-6 fw-normal" style="user-select: none">
-          {{ currentLevelIndex }}: {{ currentLevel.title }}
+          {{ currentLevel.displayIndex }}: {{ currentLevel.level.title }}
         </h1>
       </div>
       <div class="col-12 px-4" id="game-view-time-id">
@@ -120,7 +116,7 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
-            <DirectionalButtonsComponent class="col-12 align-self-end mb-4" v-if="smallScreenDisplay"/>
+            <DirectionalButtons class="col-12 align-self-end mb-4" v-if="smallScreenDisplay"/>
           </div>
         </div>
       </div>

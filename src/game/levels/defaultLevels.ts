@@ -21,12 +21,14 @@ import * as testMap from '@/game/assets/levels/test.json';
 export type Level = {
     title: string,
     map: string,
-    estimatedDifficulty?: number, // o -> 100
-    featureUse?: number,
-    boxesLine?: number,
-    solution?: string,
-    iterations?: number //sort by iterationsToFind to determine level order?
-    totalTime?: number //sort by iterationsToFind to determine level order?
+    solution?: {
+        estimatedDifficulty?: number, // o -> 100
+        featureUse?: number,
+        boxesLine?: number,
+        solution?: string,
+        iterations?: number //sort by iterationsToFind to determine level order?
+        timeToFindSolution?: number //sort by iterationsToFind to determine level order?
+    }
     thumbnailPath?: string,
 };
 
@@ -591,10 +593,6 @@ export const defaultLevels: Level[] = [
     }, {
         "title": "mr. lonely",
         "map": "--####\n###[$ds][.o]##\n#dt[$o][@o]o[.ls]#\n#o[$o]oo[.]#\n#rto[$o]##\n##[o.]lt#\n-####\n",
-        "featureUse": 0,
-        "boxesLine": 22,
-        "iterations": 20668,
-        "totalTime": 2820
     },
     {
         map: `

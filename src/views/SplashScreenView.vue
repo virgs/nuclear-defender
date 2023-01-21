@@ -20,10 +20,15 @@ export default defineComponent({
   name: "NextLevelView",
   components: {CarouselSlider, DirectionalButtonsComponent, SplashScreenAdvancedOptions},
   data() {
+    const store = Store.getInstance();
+    const furthestAvailableLevel = store.getFurthestAvailableLevel();
+    const currentSelectedIndex = Math.min(store.getCurrentSelectedIndex(), furthestAvailableLevel);
+    store.setCurrentSelectedIndex(currentSelectedIndex);
+
     return {
       router: useRouter(),
-      furthestLevel: 4, //store.furthestEnabledLevel,
-      currentSelectedIndex: 4 - 2, //furthestLevel
+      furthestLevel: furthestAvailableLevel,
+      currentSelectedIndex: currentSelectedIndex,
       playerActions: '',
       carouselSliderRefreshKey: 0,
       actionsLegentText: `
@@ -48,7 +53,8 @@ export default defineComponent({
   computed: {
     availableLevels(): Level[] {
       return defaultLevels
-          .filter((level, index) => index <= this.furthestLevel);
+          .filter((level, index) => index <= this.furthestLevel)
+          .map((level, index) => ({...level, displayIndex: index + 1}));
     },
     invalidPlayerActionsError(): string {
       if (this.playerActions.length > 0) {
@@ -65,13 +71,15 @@ export default defineComponent({
   },
   methods: {
     indexChanged(currentIndex: number) {
-      console.log('indexChanged', currentIndex);
       this.currentSelectedIndex = currentIndex;
+      Store.getInstance().setCurrentSelectedIndex(currentIndex);
     },
     passwordUnblockedNewLevels(newLevelIndex: number) {
-      console.log('passwordUnblockedNewLevels', newLevelIndex);
+      console.log('password checked');
       this.furthestLevel = newLevelIndex;
       this.currentSelectedIndex = newLevelIndex - 2;
+      Store.getInstance().setCurrentSelectedIndex(this.currentSelectedIndex);
+      Store.getInstance().setFurthestEnabledLevel(newLevelIndex);
       ++this.carouselSliderRefreshKey;
     },
     playButtonClick() {
@@ -80,7 +88,7 @@ export default defineComponent({
       //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 
       const store = Store.getInstance();
-      const currentLevel = defaultLevels[this.currentSelectedIndex];
+      const currentLevel: any = this.availableLevels[this.currentSelectedIndex];
       const map = new StandardSokobanAnnotationTranslator()
           .translate(currentLevel.map);
       const output = new SokobanMapProcessor(map)
@@ -91,10 +99,12 @@ export default defineComponent({
         playerActions: this.playerActions.split('')
             .map(char => mapStringToAction(char) as Actions),
         dynamicFeatures: output.removedFeatures,
-        index: this.currentSelectedIndex, //TODO add 1 here?
+        displayIndex: currentLevel.displayIndex,
+        index: this.currentSelectedIndex,
         level: currentLevel,
         strippedLayeredTileMatrix: output.strippedLayeredTileMatrix
       };
+      console.log(newStoredLevel);
       store.setCurrentStoredLevel(newStoredLevel);
       store.router = this.router;
       this.router.push('/game');

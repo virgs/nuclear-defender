@@ -8,6 +8,7 @@ import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tra
 export type StoredLevel = {
     level: Level,
     index: number,
+    displayIndex: string,
     bestTime: number,
     playerActions: Actions[],
     strippedLayeredTileMatrix: MultiLayeredMap;
@@ -19,10 +20,19 @@ type LevelCompleteData = {
     totalTime: number
 };
 
-export class Store {
+export class Store {    private _router: any;
+
+    private static instance: Store = new Store();
     private currentSelectedLevel?: StoredLevel;
     private levelCompletedData?: LevelCompleteData;
     private customLevel?: StoredLevel;
+
+    private constructor() {
+    }
+
+    public static getInstance(): Store {
+        return Store.instance;
+    }
 
     public getCurrentStoredLevel(): StoredLevel | undefined {
         return this.currentSelectedLevel;
@@ -49,26 +59,20 @@ export class Store {
         this.customLevel = newCustom;
     }
 
-
-
-    private _router: any;
-    private _furthestEnabledLevel: number = 0;
-
-    private static _instance: Store = new Store();
-
-    private constructor() {
-        const item = localStorage.getItem(configuration.store.furthestEnabledLevelKey);
-        if (item !== null) {
-            const parsed = Number(item);
-            if (!isNaN(parsed)) {
-                this.furthestEnabledLevel = parsed;
-            }
-        }
-
+    public setCurrentSelectedIndex(currentIndex: number) {
+        localStorage.setItem(configuration.store.currentSelectedIndexKey, currentIndex + '');
     }
 
-    public static getInstance(): Store {
-        return Store._instance;
+    public getCurrentSelectedIndex(): number {
+        return Number(localStorage.getItem(configuration.store.currentSelectedIndexKey) || 0);
+    }
+
+    public setFurthestEnabledLevel(value: number) {
+        localStorage.setItem(configuration.store.furthestEnabledLevelKey, value + '');
+    }
+
+    public getFurthestAvailableLevel(): number {
+        return Number(localStorage.getItem(configuration.store.furthestEnabledLevelKey) || 0);
     }
 
     get router(): any {
@@ -77,19 +81,6 @@ export class Store {
 
     set router(value: any) {
         this._router = value;
-    }
-
-    get furthestEnabledLevel(): number {
-        return this._furthestEnabledLevel;
-    }
-
-    set furthestEnabledLevel(value: number) {
-        localStorage.setItem(configuration.store.furthestEnabledLevelKey, value.toString());
-        this._furthestEnabledLevel = value;
-    }
-
-    private static get instance(): Store {
-        return this._instance;
     }
 
 }

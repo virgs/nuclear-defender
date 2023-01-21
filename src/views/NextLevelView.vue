@@ -55,13 +55,17 @@ export default defineComponent({
     async copy(text: string) {
       await navigator.clipboard.writeText(text);
     },
-    async continueButton() {
+    continueButton() {
       const store = Store.getInstance();
-      if (this.currentSelectedLevel.index === store.furthestEnabledLevel) {
-        ++store.furthestEnabledLevel;
+      const furthestAvailableLevel = store.getFurthestAvailableLevel();
+      if (this.currentSelectedLevel.index < defaultLevels.length - 1) {
+        store.setCurrentSelectedIndex(this.currentSelectedLevel.index + 1);
+        if (this.currentSelectedLevel.index === furthestAvailableLevel) {
+          store.setFurthestEnabledLevel(furthestAvailableLevel + 1);
+        }
       }
 
-      await this.router.push('/');
+      this.router.push('/');
     }
   }
 });
@@ -82,12 +86,12 @@ export default defineComponent({
         </div>
       </div>
     </div>
-<!--TODO add level thumbnail here-->
+    <!--TODO add level thumbnail here-->
     <div class="container my-5 next-level-view text-center">
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
           <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">
-            Level '{{ currentSelectedLevel.index + 1 }}' complete!</h1>
+            Level '{{ currentSelectedLevel.displayIndex }}' complete!</h1>
         </div>
         <div class="col my-1">
           <h4 class="sokoban-display fw-normal"

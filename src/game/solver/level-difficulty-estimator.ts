@@ -30,8 +30,6 @@ export class LevelDifficultyEstimator {
         if (!this.solution.actions) {
             return undefined;
         }
-        console.log(this.solution.actions.map(a => mapActionToChar(a)).join(''));
-        console.log(this.solution);
         const reduce = this.factors.reduce((acc, factor) => {
             const difficultFactor = factor();
             return {sum: acc.sum + difficultFactor.value, weightSum: acc.weightSum + difficultFactor.weight};

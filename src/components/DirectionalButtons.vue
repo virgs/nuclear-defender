@@ -41,7 +41,7 @@ import {EventEmitter, EventName} from '@/event-emitter';
 import {Directions} from '@/game/constants/directions';
 
 export default defineComponent({
-  name: "DirectionalButtonsComponent",
+  name: 'DirectionalButtons',
   methods: {
     leftClick() {
       this.directionClick(Directions.LEFT);

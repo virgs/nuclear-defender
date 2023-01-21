@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
-import type {Store} from '@/store';
+import type {StoredLevel} from '@/store';
 import {GameScene} from './scenes/game-scene';
 import {configuration} from './constants/configuration';
 
-const launch = (containerId: string, store: Store, playable: boolean) => {
+const launch = (containerId: string, level: StoredLevel, router: any, playable: boolean) => {
     const container = document.getElementById('phaser-container')!;
     const title = document.getElementById('game-view-title-id')!;
     const time = document.getElementById('game-view-time-id')!;
@@ -16,7 +16,6 @@ const launch = (containerId: string, store: Store, playable: boolean) => {
     configuration.gameHeight = Math.min(idealScreen, realScreen);
     const directionalButtonsContainer = document.getElementById('directional-buttons-container');
     if (directionalButtonsContainer) {
-        console.log('directionalButtonsContainer')
         const gameviewButtonsContainer = document.getElementById('gameview-buttons-container')!;
         gameviewButtonsContainer.style.height = configuration.gameHeight + 'px';
     }
@@ -35,7 +34,7 @@ const launch = (containerId: string, store: Store, playable: boolean) => {
         },
         scene: [GameScene]
     });
-    game.scene.start('game', {store, playable})
+    game.scene.start('game', {router, level, playable})
     return game;
 };
 
