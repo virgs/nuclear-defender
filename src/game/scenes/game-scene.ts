@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import {Store} from '@/store';
-import type {StoredLevel} from '@/store';
+import type {SceneConfig} from '@/game/game';
 import {sounds} from '@/game/constants/sounds';
 import type {GameStage} from '@/game/engine/game-stage';
 import {InputManager} from '@/game/input/input-manager';
@@ -12,8 +12,8 @@ export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
     private gameStage?: GameStage;
     private initialTime?: number;
-    private playableMode?: boolean;
     private router: any;
+    private sceneConfig?: SceneConfig;
 
     constructor() {
         super('game');
@@ -70,11 +70,11 @@ export class GameScene extends Phaser.Scene {
         this.allowUpdates = true;
     }
 
-    public async create(config: { router: any, level: StoredLevel, playable: boolean }) {
-        this.playableMode = config.playable;
-        this.router = config.router;
+    public async create(data: { router: any, config: SceneConfig }) {
+        this.sceneConfig = data.config;
+        this.router = data.router;
 
-        const screenPropertiesCalculator = new ScreenPropertiesCalculator(config.level.strippedLayeredTileMatrix!);
+        const screenPropertiesCalculator = new ScreenPropertiesCalculator(data.config.strippedLayeredTileMatrix!);
         const scale = screenPropertiesCalculator
             .getScale();
         configuration.world.tileSize.horizontal = Math.trunc(configuration.tiles.horizontalSize * scale);
@@ -87,14 +87,14 @@ export class GameScene extends Phaser.Scene {
         const gameStageCreator = new GameStageCreator({
             screenPropertiesCalculator: screenPropertiesCalculator,
             scene: this,
-            dynamicFeatures: config.level.dynamicFeatures,
-            strippedTileMatrix: config.level.strippedLayeredTileMatrix!,
+            dynamicFeatures: data.config.dynamicFeatures,
+            strippedTileMatrix: data.config.strippedLayeredTileMatrix!,
         });
         this.gameStage = gameStageCreator.createGameStage();
 
-        if (this.playableMode) {
+        if (this.sceneConfig.playable) {
             new InputManager().init(this);
-            this.gameStage.setInitialPlayerActions(config.level.playerActions);
+            this.gameStage.setInitialPlayerActions(data.config.playerInitialActions);
             this.initialTime = new Date().getTime();
         } else {
             this.input.keyboard.clearCaptures();
@@ -106,7 +106,7 @@ export class GameScene extends Phaser.Scene {
             const imgURL = image.src;
             const a = document.createElement("a");
             a.href = imgURL;
-            a.download = config.level.level.title.toLowerCase().replace(/ /g, '-').concat('.png');
+            a.download = data.config.level.title.toLowerCase().replace(/ /g, '-').concat('.png');
             console.log('snapshot of level: ' + a.download);
             a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
             // a.click();
@@ -119,7 +119,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     public async update(time: number, delta: number): Promise<void> {
-        if (this.playableMode) {
+        if (this.sceneConfig?.playable) {
             if (this.allowUpdates) {
                 await this.gameStage!.update();
                 if (this.gameStage!.isLevelComplete()) {
@@ -135,14 +135,13 @@ export class GameScene extends Phaser.Scene {
 
     private changeScene() {
         this.lights.destroy();
-        const store = Store.getInstance();
-
-        store.setLevelCompleteData({
+        Store.setLevelCompleteData({
+            sceneConfig: this.sceneConfig!,
             movesCode: this.gameStage!.getPlayerMoves(),
             totalTime: new Date().getTime() - this.initialTime!
         });
         console.log('level complete');
-        store.router.push('/next-level');
+        this.router.push('/next-level');
     }
 
 }

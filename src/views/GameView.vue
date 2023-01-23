@@ -1,7 +1,6 @@
 <script lang="ts">
 import {Store} from '@/store';
 import {defineComponent} from 'vue';
-import {useRouter} from 'vue-router';
 import {EventEmitter, EventName} from '@/event-emitter';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import DirectionalButtons from '@/components/DirectionalButtons.vue';
@@ -10,20 +9,22 @@ export default defineComponent({
   name: 'GameView',
   components: {PhaserContainer, DirectionalButtons},
   data() {
-    const currentStoredLevel = Store.getInstance().getCurrentStoredLevel()!;
     return {
-      router: useRouter(),
       totalTime: 0,
+      playerActions: this.$route.params.playerActions,
+      displayNumber: this.$route.params.displayNumber,
+      customLevel: this.$route.params.customLevel,
       confirmationButton: undefined as any,
       smallScreenDisplay: true,
-      currentLevel: currentStoredLevel,
+      scene: Store.getCurrentSceneConfig(),
       componentKey: 0,
       render: false,
       timer: -1,
     };
   },
   mounted() {
-    history.replaceState({urlPath: this.router.currentRoute.fullPath}, "", '/');
+    //@ts-ignore
+    history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/');
     EventEmitter
         .listenToEvent(EventName.RESTART_LEVEL, () => this.resetClick());
     EventEmitter
@@ -54,7 +55,7 @@ export default defineComponent({
       EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);
     },
     exitClick() {
-      this.router.push('/');
+      this.$router.push('/');
     }
   }
 });
@@ -66,7 +67,7 @@ export default defineComponent({
     <div class="row align-items-center mx-0" style="max-width: 100vw">
       <div class="col-12 pt-2 px-4" id="game-view-title-id" style="text-align: left">
         <h1 class="sokoban-display display-6 fw-normal" style="user-select: none">
-          {{ currentLevel.displayIndex }}: {{ currentLevel.level.title }}
+          {{ displayNumber }}: {{ scene.title }}
         </h1>
       </div>
       <div class="col-12 px-4" id="game-view-time-id">
@@ -76,9 +77,9 @@ export default defineComponent({
       </div>
       <div class="row mx-auto px-0">
         <div class="col-12 col-md-8 col-lg-12 px-0" id="phaser-container">
-          <PhaserContainer :render="render" :key="componentKey" :playable="true"/>
+          <PhaserContainer :render="render" :key="componentKey" :playable="true" :scene="scene"
+          :playerInitialActions="playerActions" :display-number="displayNumber" :custom-level="customLevel"/>
         </div>
-
 
         <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-1" id="game-view-buttons">
           <div class="row mx-2" id="gameview-buttons-container">

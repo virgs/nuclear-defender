@@ -1,78 +1,3 @@
-<script lang="ts">
-import {Store} from '@/store';
-import {defineComponent} from 'vue';
-import {mapActionToChar} from '@/game/constants/actions';
-import {defaultLevels} from '@/game/levels/defaultLevels';
-
-export default defineComponent({
-  name: "NextLevelView",
-  data() {
-    const store = Store.getInstance();
-
-    return {
-      currentSelectedLevel: store.getCurrentStoredLevel()!,
-      levelCompletedData: store.getLevelCompleteData()!,
-      router: store.router,
-    };
-  },
-  mounted() {
-    history.replaceState({urlPath: this.router.currentRoute.fullPath}, "", '/');
-
-    const toastTriggers = document.getElementsByClassName('toastBtn');
-    const toast = document.getElementById('copy-toast');
-    if (toastTriggers) {
-      Array.from(toastTriggers)
-          .forEach(trigger => {
-            // @ts-ignore
-            trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
-          });
-    }
-  },
-  computed: {
-    movesCode() {
-      return this.levelCompletedData.movesCode
-          .map(move => mapActionToChar(move))
-          .join('');
-    },
-    password() {
-      const currentIndex = this.currentSelectedLevel.index;
-      const indexIsNumber = !isNaN(currentIndex);
-      if (indexIsNumber && currentIndex > 0) {
-        const nextLevelIndex = currentIndex + 1;
-        const nextLevel = defaultLevels[nextLevelIndex];
-        if (nextLevel) {
-          return nextLevel.title.toLowerCase().replace(/ /g, '-');
-        }
-      }
-    },
-    codedMap() {
-      return this.currentSelectedLevel.level.map
-          .replace(/\n\n/g, '\n')
-          .replace(/^\n/g, '');
-    }
-  },
-  methods: {
-    async copy(text: string) {
-      await navigator.clipboard.writeText(text);
-    },
-    continueButton() {
-      const store = Store.getInstance();
-      const furthestAvailableLevel = store.getFurthestAvailableLevel();
-      if (this.currentSelectedLevel.index < defaultLevels.length - 1) {
-        store.setCurrentSelectedIndex(this.currentSelectedLevel.index + 1);
-        if (this.currentSelectedLevel.index === furthestAvailableLevel) {
-          store.setFurthestEnabledLevel(furthestAvailableLevel + 1);
-        }
-      }
-
-      this.router.push('/');
-    }
-  }
-});
-
-
-</script>
-
 <template>
   <main>
     <div class="toast-container position-fixed top-0 end-0 pt-3">
@@ -91,7 +16,7 @@ export default defineComponent({
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
           <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">
-            Level '{{ currentSelectedLevel.displayIndex }}' complete!</h1>
+            Level '{{ levelCompletedData.sceneConfig.displayNumber }}' complete!</h1>
         </div>
         <div class="col my-1">
           <h4 class="sokoban-display fw-normal"
@@ -145,6 +70,82 @@ export default defineComponent({
     </div>
   </main>
 </template>
+
+<script lang="ts">
+import {Store} from '@/store';
+import {defineComponent} from 'vue';
+import {mapActionToChar} from '@/game/constants/actions';
+import {defaultLevels} from '@/game/levels/defaultLevels';
+
+export default defineComponent({
+  name: 'NextLevelView',
+  data() {
+    return {
+      currentSelectedLevel: Store.getCurrentSceneConfig()!,
+      levelCompletedData: Store.getLevelCompleteData()!,
+    };
+  },
+  mounted() {
+    //@ts-ignore
+    history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/');
+
+    const toastTriggers = document.getElementsByClassName('toastBtn');
+    const toast = document.getElementById('copy-toast');
+    if (toastTriggers) {
+      Array.from(toastTriggers)
+          .forEach(trigger => {
+            // @ts-ignore
+            trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
+          });
+    }
+  },
+  computed: {
+    movesCode() {
+      return this.levelCompletedData.movesCode
+          .map(move => mapActionToChar(move))
+          .join('');
+    },
+    password() {
+      const currentIndex: number = Number(Store.getCurrentSelectedIndex());
+      const indexIsNumber = !isNaN(currentIndex);
+      if (indexIsNumber && currentIndex > 0) {
+        const nextLevelIndex = currentIndex + 1;
+        const nextLevel = defaultLevels[nextLevelIndex];
+        if (nextLevel) {
+          return nextLevel.title.toLowerCase().replace(/ /g, '-');
+        }
+      }
+    },
+    codedMap() {
+      return this.currentSelectedLevel.map
+          .replace(/\n\n/g, '\n')
+          .replace(/^\n/g, '');
+    }
+  },
+  methods: {
+    async copy(text: string) {
+      await navigator.clipboard.writeText(text);
+    },
+    continueButton() {
+      const currentIndex: number = Number(Store.getCurrentSelectedIndex());
+      const indexIsNumber = !isNaN(currentIndex);
+      if (indexIsNumber) {
+        const furthestAvailableLevel = Store.getNumberOfEnabledLevels();
+        if (currentIndex < defaultLevels.length - 1) {
+          Store.setCurrentSelectedIndex(currentIndex + 1);
+          if (currentIndex === furthestAvailableLevel) {
+            Store.setNumberOfEnabledLevels(furthestAvailableLevel + 1);
+          }
+        }
+      }
+
+      this.$router.push('/');
+    }
+  }
+});
+
+
+</script>
 
 <style scoped>
 .next-level-view {

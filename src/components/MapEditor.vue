@@ -14,7 +14,7 @@
               Title is longer than 25 characters
             </div>
           </div>
-          <div class="col-9 col-lg-5 order-2">
+          <div class="col-9 col-lg-5 order-2 mb-4">
             <label class="form-label sokoban-label">
               Editor
               <a tabindex="0" class="btn btn-lg btn-danger px-1" role="button" data-bs-toggle="popover"
@@ -37,7 +37,9 @@
               Result
             </label>
             <div id="phaser-container">
-              <PhaserContainer :playable="false" :render="render" :key="editorKey"/>
+              <PhaserContainer :playable="false" :render="render"
+                               :key="editorRefreshKey" :scene="scene"
+                               @processedMap="processedMap"/>
             </div>
             <div v-if="loading" style="position: absolute; top: 50%; left: 50%; color: var(--radioactive-color)"
                  class="spinner-border" role="status">
@@ -57,7 +59,7 @@
         <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
                 @click="saveButtonClick"
                 data-bs-dismiss="modal"
-                :disabled="!titleIsValid || mapIsValid"
+                :disabled="!titleIsValid || !mapIsValid"
                 style="background-color: var(--radioactive-color); float: right">Save
         </button>
       </div>
@@ -66,40 +68,39 @@
 </template>
 
 <script lang="ts">
-import type {StoredLevel} from '@/store';
 import {Store} from '@/store';
 import {defineComponent} from 'vue';
 import {Tiles} from '@/game/tiles/tiles';
+import type {Level} from '@/game/levels/defaultLevels';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
-import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
-import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export default defineComponent({
-  name: "MapEditor",
+  name: 'MapEditor',
   components: {MapDifficultyGauge, PhaserContainer},
   props: ['toggle'],
-  emits: ["save"],
+  emits: ['save'],
   data() {
-    let customLevel = Store.getInstance().getCustomLevel()!;
+    let customLevel = Store.getCustomLevel()!;
     if (!customLevel) {
       customLevel = this.createCustomLevel();
     }
     return {
       loading: false,
-      title: customLevel.level.title,
+      title: customLevel.title,
+      codedMapText: customLevel.map,
+      scene: customLevel as Level,
       editorInvalidError: '',
       render: false,
       mapIsValid: true,
       output: undefined as any,
-      editorKey: 0,
+      editorRefreshKey: 0,
       estimative: undefined as number | undefined,
       estimatedDifficulty: -1,
-      codedMapText: customLevel.level.map,
       legendText: `
 <h5>Instructions</h5>
 <ul>
@@ -155,79 +156,52 @@ export default defineComponent({
           // const container = document.getElementById('phaser-container')!;
           // container.style.height = textArea.offsetHeight + 'px';
           // container.style.width = '100%';
-          this.refresh(this.codedMapText);
+          this.refresh();
           this.render = true;
         };
         setTimeout(adjustCanvasDimensions, 50); //it takes sometime until the container is rendered
       }
     },
     codedMapText() {
-      this.refresh(this.codedMapText);
+      this.refresh();
     },
   },
   methods: {
     createCustomLevel() {
       const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
       const title = titles[Math.floor(Math.random() * titles.length)];
-      const newCustomMap = {
-        level: {
-          title: title,
-          map: '######\n#@   #\n# $ .#\n######'
-        }
+      return {
+        title: title,
+        map: '######\n#@   #\n# $ .#\n######',
       };
-      const map = new StandardSokobanAnnotationTranslator()
-          .translate(newCustomMap.level.map);
-      const output = new SokobanMapProcessor(map)
-          .strip([Tiles.hero, Tiles.box]);
-
-      this.save(newCustomMap.level.title, newCustomMap.level.map, output);
-      Store.getInstance().getCurrentStoredLevel();
-      return newCustomMap;
     },
-    async refresh(encodedLevel: string) {
+    async refresh() {
       this.render = true;
+      this.estimative = undefined;
+      this.editorInvalidError = '';
+      this.mapIsValid = false;
+      this.loading = true;
+
+      this.scene = {
+        title: this.title,
+        map: this.codedMapText
+      };
+      ++this.editorRefreshKey;
+    },
+    async processedMap(output: ProcessedMap) {
+      this.loading = false;
+      this.output = output;
       try {
-        this.estimative = undefined;
-        this.editorInvalidError = '';
-        this.mapIsValid = false;
-        this.loading = true;
-        const map = new StandardSokobanAnnotationTranslator()
-            .translate(encodedLevel);
-        this.output = new SokobanMapProcessor(map)
-            .strip([Tiles.hero, Tiles.box]);
-
-        this.save(this.title, this.codedMapText, this.output)
-
-        ++this.editorKey;
-        this.loading = false;
-
-        await this.validateMap();
-        this.mapIsValid = true;
+        this.mapIsValid = await this.validateMap();
       } catch (exc: any) {
-        this.estimative = undefined;
         this.editorInvalidError = exc.message;
-        this.mapIsValid = false;
       }
     },
     saveButtonClick() {
-      this.save(this.title, this.codedMapText, this.output);
-    },
-    save(title: string, codedMapText: string, output: ProcessedMap) {
-      const store = Store.getInstance();
-      const newStoredLevel: StoredLevel = {
-        playerActions: [],
-        bestTime: -1,
-        index: -1,
-        displayIndex: 'custom',
-        level: {
-          title: title,
-          map: codedMapText,
-        },
-        dynamicFeatures: output.removedFeatures,
-        strippedLayeredTileMatrix: output.strippedLayeredTileMatrix
-      };
-      store.setCustomLevel(newStoredLevel);
-      this.$emit('save', {map: codedMapText, title: title});
+      const canvas: any = document.querySelector('#phaser-container canvas')!;
+      this.scene.snapshot = canvas.toDataURL();
+      Store.setCustomLevel(this.scene);
+      this.$emit('save', this.scene);
     },
     async validateMap() {
       const heroNumber = this.output.removedFeatures.get(Tiles.hero)!.length;

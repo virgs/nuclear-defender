@@ -56,7 +56,6 @@ export class GameStage {
 
     public setInitialPlayerActions(playerActions: Actions[]): void {
         this.nextMoves = playerActions;
-
     }
 
     public getPlayerMoves(): Actions[] {

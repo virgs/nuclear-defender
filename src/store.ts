@@ -1,86 +1,67 @@
-import type {Point} from '@/game/math/point';
-import type {Tiles} from '@/game/tiles/tiles';
+import type {SceneConfig} from '@/game/game';
 import type {Actions} from '@/game/constants/actions';
 import type {Level} from '@/game/levels/defaultLevels';
 import {configuration} from '@/game/constants/configuration';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
-export type StoredLevel = {
-    level: Level,
-    index: number,
-    displayIndex: string,
-    bestTime: number,
-    playerActions: Actions[],
-    strippedLayeredTileMatrix: MultiLayeredMap;
-    dynamicFeatures: Map<Tiles, Point[]>
-};
+//TODO save it in solved levels array
+type LevelRecords = {
+    totalTime: number,
+    movesCode: Actions[],
+    timestamp: number
+}
 
 type LevelCompleteData = {
+    sceneConfig: SceneConfig,
     movesCode: Actions[],
     totalTime: number
 };
 
-export class Store {    private _router: any;
+export class Store {
+    private static currentSceneConfig?: Level;
+    private static levelCompletedData?: LevelCompleteData;
 
-    private static instance: Store = new Store();
-    private currentSelectedLevel?: StoredLevel;
-    private levelCompletedData?: LevelCompleteData;
-    private customLevel?: StoredLevel;
-
-    private constructor() {
+    public static getCurrentSceneConfig(): Level | undefined {
+        return Store.currentSceneConfig;
     }
 
-    public static getInstance(): Store {
-        return Store.instance;
+    public static setCurrentSceneConfig(level: Level): void {
+        Store.currentSceneConfig = level;
     }
 
-    public getCurrentStoredLevel(): StoredLevel | undefined {
-        return this.currentSelectedLevel;
+    public static getLevelCompleteData(): LevelCompleteData | undefined {
+        return Store.levelCompletedData;
     }
 
-    public setCurrentStoredLevel(newStoredLevel: StoredLevel): void {
-        this.currentSelectedLevel = newStoredLevel;
+    public static setLevelCompleteData(data: LevelCompleteData): void {
+        Store.levelCompletedData = data;
     }
 
-    public getLevelCompleteData(): LevelCompleteData | undefined {
-        return this.levelCompletedData;
+    public static getCustomLevel(): Level | undefined {
+        const item = localStorage.getItem(configuration.store.customLevelKey);
+        if (item) {
+            return JSON.parse(item);
+        }
     }
 
-    public setLevelCompleteData(data: LevelCompleteData): void {
-        this.levelCompletedData = data;
-    }
-
-    public getCustomLevel(): StoredLevel | undefined {
-        return this.customLevel;
-    }
-
-    public setCustomLevel(newCustom: StoredLevel): void {
+    public static setCustomLevel(newCustom: Level): void {
         localStorage.setItem(configuration.store.customLevelKey, JSON.stringify(newCustom));
-        this.customLevel = newCustom;
     }
 
-    public setCurrentSelectedIndex(currentIndex: number) {
-        localStorage.setItem(configuration.store.currentSelectedIndexKey, currentIndex + '');
-    }
-
-    public getCurrentSelectedIndex(): number {
+    public static getCurrentSelectedIndex(): number {
         return Number(localStorage.getItem(configuration.store.currentSelectedIndexKey) || 0);
     }
 
-    public setFurthestEnabledLevel(value: number) {
-        localStorage.setItem(configuration.store.furthestEnabledLevelKey, value + '');
+    public static setCurrentSelectedIndex(currentIndex: number) {
+        localStorage.setItem(configuration.store.currentSelectedIndexKey, currentIndex + '');
     }
 
-    public getFurthestAvailableLevel(): number {
-        return Number(localStorage.getItem(configuration.store.furthestEnabledLevelKey) || 0);
+    public static getNumberOfEnabledLevels(): number {
+        const number = Number(localStorage.getItem(configuration.store.numberOfEnabledLevelsKey) || 0);
+        return Math.max(number, 1);
     }
 
-    get router(): any {
-        return this._router;
-    }
-
-    set router(value: any) {
-        this._router = value;
+    public static setNumberOfEnabledLevels(value: number) {
+        localStorage.setItem(configuration.store.numberOfEnabledLevelsKey, value + '');
     }
 
 }

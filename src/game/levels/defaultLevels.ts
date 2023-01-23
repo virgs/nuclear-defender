@@ -15,21 +15,12 @@
 
 import * as testMap from '@/game/assets/levels/test.json';
 
-//TODO add thumbnail?
-//TODO show tem as a carrousel instead of a dropdown
-
 export type Level = {
     title: string,
     map: string,
-    solution?: {
-        estimatedDifficulty?: number, // o -> 100
-        featureUse?: number,
-        boxesLine?: number,
-        solution?: string,
-        iterations?: number //sort by iterationsToFind to determine level order?
-        timeToFindSolution?: number //sort by iterationsToFind to determine level order?
-    }
     thumbnailPath?: string,
+    snapshot?: string,
+    difficultyEstimative?: number;
 };
 
 export const defaultLevels: Level[] = [
@@ -45,6 +36,7 @@ export const defaultLevels: Level[] = [
 3-3#
 `,
         title: 'Baby welcome', //boxesline = 4
+        "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
     }, {
         map: `
 4-3#
@@ -59,6 +51,7 @@ export const defaultLevels: Level[] = [
 4-3#
 `,
         title: 'every fool can see',
+        "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
     }, {
         map: `
 6-3#

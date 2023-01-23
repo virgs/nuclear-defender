@@ -1,9 +1,23 @@
 import Phaser from 'phaser';
-import type {StoredLevel} from '@/store';
+import type {Point} from '@/game/math/point';
+import type {Tiles} from '@/game/tiles/tiles';
 import {GameScene} from './scenes/game-scene';
+import type {Actions} from '@/game/constants/actions';
+import type {Level} from '@/game/levels/defaultLevels';
 import {configuration} from './constants/configuration';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 
-const launch = (containerId: string, level: StoredLevel, router: any, playable: boolean) => {
+export type SceneConfig = {
+    level: Level,
+    isCustomLevel: boolean,
+    playable: boolean,
+    displayNumber: string,
+    playerInitialActions: Actions[],
+    strippedLayeredTileMatrix: MultiLayeredMap;
+    dynamicFeatures: Map<Tiles, Point[]>
+};
+
+const launch = (containerId: string, config: SceneConfig, router: any) => {
     const container = document.getElementById('phaser-container')!;
     const title = document.getElementById('game-view-title-id')!;
     const time = document.getElementById('game-view-time-id')!;
@@ -25,16 +39,18 @@ const launch = (containerId: string, level: StoredLevel, router: any, playable: 
         parent: containerId,
         width: configuration.gameWidth,
         height: configuration.gameHeight,
+        preserveDrawingBuffer: true,
         // pixelArt: true,
         // physics: {default: 'arcade'},
-        backgroundColor: '#000000',
+        // backgroundColor: '#000000',
+        transparent: true,
         plugins: {},
         dom: {
             // createContainer: true
         },
         scene: [GameScene]
     });
-    game.scene.start('game', {router, level, playable})
+    game.scene.start('game', {router, config: config});
     return game;
 };
 

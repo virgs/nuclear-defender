@@ -43,8 +43,8 @@ export const configuration = {
         gameScene: {}
     },
     store: {
+        numberOfEnabledLevelsKey: 'numberOfEnabledLevelsKey',
         currentSelectedIndexKey: 'currentSelectedIndexKey',
         customLevelKey: 'customLevelKey',
-        furthestEnabledLevelKey: 'furthestEnabledLevel'
     }
 };

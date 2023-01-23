@@ -92,7 +92,7 @@ export default defineComponent({
       return gauge;
     },
     refreshGauge() {
-        const valuesToUpdate: any = {
+      const valuesToUpdate: any = {
         value: this.estimative
       };
       if (!this.dimensionsUpdated) {

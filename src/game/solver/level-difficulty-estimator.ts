@@ -35,8 +35,6 @@ export class LevelDifficultyEstimator {
             return {sum: acc.sum + difficultFactor.value, weightSum: acc.weightSum + difficultFactor.weight};
         }, {sum: 0, weightSum: 0});
         const number = reduce.sum / reduce.weightSum;
-
-        console.log(number * 100);
         return Phaser.Math.Clamp(number * 100, 0, 100);
     }
 

@@ -72,6 +72,7 @@
 
 <script lang="ts">
 
+import {Store} from '@/store';
 import {defineComponent} from 'vue';
 import MapEditor from '@/components/MapEditor.vue';
 import type {Level} from '@/game/levels/defaultLevels';
@@ -80,7 +81,6 @@ import {defaultLevels} from '@/game/levels/defaultLevels';
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',
   components: {MapEditor},
-  props: ['greatestAvailableIndex'],
   emits: ['mapEditorSaved', 'passwordUnblockedNewLevels'],
   data() {
     return {
@@ -101,7 +101,7 @@ export default defineComponent({
     }
   },
   methods: {
-    mapEditorSaved(map: any) {
+    mapEditorSaved(map: Level) {
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
@@ -109,9 +109,12 @@ export default defineComponent({
           .findIndex((level: Level) => {
             return level.title
                 .toLowerCase()
-                .replace(/ /g, '-') === this.levelPassword;
+                .replace(/ /g, '-') === this.levelPassword.toLowerCase();
           });
-      if (unblockedLevelIndex > this.greatestAvailableIndex) {
+      if (unblockedLevelIndex !== -1) {
+        if (unblockedLevelIndex >= Store.getNumberOfEnabledLevels()) {
+          Store.setNumberOfEnabledLevels(unblockedLevelIndex + 1);
+        }
         this.validLevelPassword = true;
         this.$emit('passwordUnblockedNewLevels', unblockedLevelIndex);
         return;

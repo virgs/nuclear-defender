@@ -12,11 +12,15 @@ const router = createRouter({
             meta: {transition: 'slide-left'}
         },
         {
-            path: '/game',
+            path: '/game/:displayNumber/:customLevel?/playerActions?',
             component: GameView,
             meta: {transition: 'slide-left'},
-        }
-        ,
+        },
+        {
+            path: '/game/:displayNumber/:customLevel?',
+            component: GameView,
+            meta: {transition: 'slide-left'},
+        },
         {
             path: '/next-level',
             component: NextLevelView,
