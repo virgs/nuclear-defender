@@ -1,39 +1,29 @@
 import type {SceneConfig} from '@/game/game';
 import type {Actions} from '@/game/constants/actions';
-import type {Level} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/levels';
 import {configuration} from '@/game/constants/configuration';
 
 //TODO save it in solved levels array
-type LevelRecords = {
-    totalTime: number,
-    movesCode: Actions[],
-    timestamp: number
-}
 
 type LevelCompleteData = {
     sceneConfig: SceneConfig,
     movesCode: Actions[],
-    totalTime: number
+    totalTime: number,
+    timestamp: number
 };
 
-export class Store {
-    private static currentSceneConfig?: Level;
-    private static levelCompletedData?: LevelCompleteData;
+export class LongTermStore {
+    public static getLevelCompleteData(): LevelCompleteData[] {
+        const item = localStorage.getItem(configuration.store.resolvedLevelsKey);
+        if (item) {
+            return JSON.parse(item);
+        }
 
-    public static getCurrentSceneConfig(): Level | undefined {
-        return Store.currentSceneConfig;
+        return [];
     }
 
-    public static setCurrentSceneConfig(level: Level): void {
-        Store.currentSceneConfig = level;
-    }
-
-    public static getLevelCompleteData(): LevelCompleteData | undefined {
-        return Store.levelCompletedData;
-    }
-
-    public static setLevelCompleteData(data: LevelCompleteData): void {
-        Store.levelCompletedData = data;
+    public static setLevelCompleteData(data: LevelCompleteData[]): void {
+        localStorage.setItem(configuration.store.resolvedLevelsKey, JSON.stringify(data));
     }
 
     public static getCustomLevel(): Level | undefined {

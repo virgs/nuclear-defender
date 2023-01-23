@@ -23,7 +23,7 @@ export type Level = {
     difficultyEstimative?: number;
 };
 
-export const defaultLevels: Level[] = [
+export const levels: Level[] = [
     testMap,
     {
         map: `

@@ -46,5 +46,7 @@ export const configuration = {
         numberOfEnabledLevelsKey: 'numberOfEnabledLevelsKey',
         currentSelectedIndexKey: 'currentSelectedIndexKey',
         customLevelKey: 'customLevelKey',
+        resolvedLevelsKey: 'resolvedLevelsKey'
+
     }
 };

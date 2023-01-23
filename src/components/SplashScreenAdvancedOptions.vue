@@ -72,11 +72,11 @@
 
 <script lang="ts">
 
-import {Store} from '@/store';
+import {LongTermStore} from '@/store/long-term-store';
 import {defineComponent} from 'vue';
 import MapEditor from '@/components/MapEditor.vue';
-import type {Level} from '@/game/levels/defaultLevels';
-import {defaultLevels} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/levels';
+import {levels} from '@/game/levels/levels';
 
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',
@@ -105,15 +105,15 @@ export default defineComponent({
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
-      const unblockedLevelIndex = defaultLevels
+      const unblockedLevelIndex = levels
           .findIndex((level: Level) => {
             return level.title
                 .toLowerCase()
                 .replace(/ /g, '-') === this.levelPassword.toLowerCase();
           });
       if (unblockedLevelIndex !== -1) {
-        if (unblockedLevelIndex >= Store.getNumberOfEnabledLevels()) {
-          Store.setNumberOfEnabledLevels(unblockedLevelIndex + 1);
+        if (unblockedLevelIndex >= LongTermStore.getNumberOfEnabledLevels()) {
+          LongTermStore.setNumberOfEnabledLevels(unblockedLevelIndex + 1);
         }
         this.validLevelPassword = true;
         this.$emit('passwordUnblockedNewLevels', unblockedLevelIndex);

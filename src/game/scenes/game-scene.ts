@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import {Store} from '@/store';
 import type {SceneConfig} from '@/game/game';
 import {sounds} from '@/game/constants/sounds';
 import type {GameStage} from '@/game/engine/game-stage';
@@ -7,6 +6,7 @@ import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
 import {GameStageCreator} from '../actors/game-stage-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
+import {SessionStore} from '@/store/session-store';
 
 export class GameScene extends Phaser.Scene {
     private allowUpdates?: boolean;
@@ -135,9 +135,11 @@ export class GameScene extends Phaser.Scene {
 
     private changeScene() {
         this.lights.destroy();
-        Store.setLevelCompleteData({
-            sceneConfig: this.sceneConfig!,
+        SessionStore.setNextLevelViewConfig({
             movesCode: this.gameStage!.getPlayerMoves(),
+            isCustomLevel: this.sceneConfig!.isCustomLevel,
+            level: this.sceneConfig?.level!,
+            display: this.sceneConfig?.displayNumber!,
             totalTime: new Date().getTime() - this.initialTime!
         });
         console.log('level complete');

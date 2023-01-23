@@ -16,12 +16,12 @@
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
           <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">
-            Level '{{ levelCompletedData.sceneConfig.displayNumber }}' complete!</h1>
+            Level '{{ config.display }}' complete!</h1>
         </div>
         <div class="col my-1">
           <h4 class="sokoban-display fw-normal"
               style="user-select: none; color: var(--background-color); text-align: right">Total time:
-            {{ Math.trunc(levelCompletedData.totalTime / 100) / 10 }}s
+            {{ Math.trunc(config.totalTime / 100) / 10 }}s
           </h4>
         </div>
         <div class="col-12" v-if="password">
@@ -72,17 +72,17 @@
 </template>
 
 <script lang="ts">
-import {Store} from '@/store';
 import {defineComponent} from 'vue';
+import {levels} from '@/game/levels/levels';
+import {SessionStore} from '@/store/session-store';
+import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
-import {defaultLevels} from '@/game/levels/defaultLevels';
 
 export default defineComponent({
   name: 'NextLevelView',
   data() {
     return {
-      currentSelectedLevel: Store.getCurrentSceneConfig()!,
-      levelCompletedData: Store.getLevelCompleteData()!,
+      config: SessionStore.getNextLevelViewConfig()!,
     };
   },
   mounted() {
@@ -101,23 +101,23 @@ export default defineComponent({
   },
   computed: {
     movesCode() {
-      return this.levelCompletedData.movesCode
+      return this.config.movesCode
           .map(move => mapActionToChar(move))
           .join('');
     },
     password() {
-      const currentIndex: number = Number(Store.getCurrentSelectedIndex());
+      const currentIndex: number = Number(LongTermStore.getCurrentSelectedIndex());
       const indexIsNumber = !isNaN(currentIndex);
       if (indexIsNumber && currentIndex > 0) {
         const nextLevelIndex = currentIndex + 1;
-        const nextLevel = defaultLevels[nextLevelIndex];
+        const nextLevel = levels[nextLevelIndex];
         if (nextLevel) {
           return nextLevel.title.toLowerCase().replace(/ /g, '-');
         }
       }
     },
     codedMap() {
-      return this.currentSelectedLevel.map
+      return this.config.level.map
           .replace(/\n\n/g, '\n')
           .replace(/^\n/g, '');
     }
@@ -127,14 +127,14 @@ export default defineComponent({
       await navigator.clipboard.writeText(text);
     },
     continueButton() {
-      const currentIndex: number = Number(Store.getCurrentSelectedIndex());
+      const currentIndex: number = Number(LongTermStore.getCurrentSelectedIndex());
       const indexIsNumber = !isNaN(currentIndex);
       if (indexIsNumber) {
-        const furthestAvailableLevel = Store.getNumberOfEnabledLevels();
-        if (currentIndex < defaultLevels.length - 1) {
-          Store.setCurrentSelectedIndex(currentIndex + 1);
+        const furthestAvailableLevel = LongTermStore.getNumberOfEnabledLevels();
+        if (currentIndex < levels.length - 1) {
+          LongTermStore.setCurrentSelectedIndex(currentIndex + 1);
           if (currentIndex === furthestAvailableLevel) {
-            Store.setNumberOfEnabledLevels(furthestAvailableLevel + 1);
+            LongTermStore.setNumberOfEnabledLevels(furthestAvailableLevel + 1);
           }
         }
       }

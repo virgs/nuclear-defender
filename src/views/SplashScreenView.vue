@@ -53,13 +53,14 @@
 // script setup syntax or Composition API
 // options API
 
-import {Store} from '@/store';
+import {LongTermStore} from '@/store/long-term-store';
 import {defineComponent} from 'vue';
 import CarouselSlider from '@/components/CarouselSlider.vue';
 import {mapStringToAction} from '@/game/constants/actions';
 import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
-import type {Level} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/levels';
+import {SessionStore} from '@/store/session-store';
 
 export default defineComponent({
   name: 'SplashScreenView',
@@ -68,7 +69,7 @@ export default defineComponent({
     return {
       carouselSliderRefreshKey: 0,
       playerActions: '',
-      customLevel: Store.getCustomLevel(),
+      customLevel: LongTermStore.getCustomLevel(),
       currentLevel: undefined as Level | undefined,
       displayNumber: '',
       isCustomLevel: false,
@@ -120,8 +121,13 @@ export default defineComponent({
       // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
       //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 
-      Store.setCurrentSceneConfig(this.currentLevel!);
-      this.$router.push(`/game/${this.displayNumber}/${this.isCustomLevel}/${this.playerActions}`);
+      SessionStore.setGameViewConfig({
+        display: this.displayNumber,
+        isCustom: this.isCustomLevel,
+        playerInitialActions: this.playerActions,
+        level: this.currentLevel!
+      });
+      this.$router.push(`/game`);
     },
     mapEditorSaved(level: Level) {
       this.customLevel = level;

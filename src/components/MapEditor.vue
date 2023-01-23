@@ -68,10 +68,10 @@
 </template>
 
 <script lang="ts">
-import {Store} from '@/store';
+import {LongTermStore} from '@/store/long-term-store';
 import {defineComponent} from 'vue';
 import {Tiles} from '@/game/tiles/tiles';
-import type {Level} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/levels';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
@@ -85,7 +85,7 @@ export default defineComponent({
   props: ['toggle'],
   emits: ['save'],
   data() {
-    let customLevel = Store.getCustomLevel()!;
+    let customLevel = LongTermStore.getCustomLevel()!;
     if (!customLevel) {
       customLevel = this.createCustomLevel();
     }
@@ -200,7 +200,7 @@ export default defineComponent({
     saveButtonClick() {
       const canvas: any = document.querySelector('#phaser-container canvas')!;
       this.scene.snapshot = canvas.toDataURL();
-      Store.setCustomLevel(this.scene);
+      LongTermStore.setCustomLevel(this.scene);
       this.$emit('save', this.scene);
     },
     async validateMap() {

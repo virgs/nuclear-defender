@@ -31,11 +31,11 @@
 
 <script lang="ts">
 
-import {Store} from '@/store';
+import {LongTermStore} from '@/store/long-term-store';
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/defaultLevels';
-import {defaultLevels} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/levels';
+import {levels} from '@/game/levels/levels';
 
 export default defineComponent({
   name: 'CarouselSlider',
@@ -43,8 +43,8 @@ export default defineComponent({
   emits: ['currentLevelChanged'],
   data() {
     return {
-      currentIndex: Store.getCurrentSelectedIndex(),
-      enabledLevels: Store.getNumberOfEnabledLevels()
+      currentIndex: LongTermStore.getCurrentSelectedIndex(),
+      enabledLevels: LongTermStore.getNumberOfEnabledLevels()
     };
   },
   mounted() {
@@ -77,12 +77,12 @@ export default defineComponent({
   },
   computed: {
     levels(): Level[] {
-      const levels = defaultLevels
+      const availableLevels = levels
           .filter((_, index) => index < this.enabledLevels);
       if (this.customLevel) {
-        levels.unshift(this.customLevel);
+        availableLevels.unshift(this.customLevel);
       }
-      return levels;
+      return availableLevels;
     },
     currentDisplayIndex(): (index: number) => string {
       return (index: number): string => {
@@ -120,7 +120,7 @@ export default defineComponent({
   },
   methods: {
     updateIndex(index: number) {
-      Store.setCurrentSelectedIndex(index);
+      LongTermStore.setCurrentSelectedIndex(index);
       this.currentIndex = index;
       let level = this.levels[index];
       if (index === 0 && this.customLevel) {

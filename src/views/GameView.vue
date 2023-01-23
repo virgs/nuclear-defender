@@ -1,6 +1,6 @@
 <script lang="ts">
-import {Store} from '@/store';
 import {defineComponent} from 'vue';
+import {SessionStore} from '@/store/session-store';
 import {EventEmitter, EventName} from '@/event-emitter';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import DirectionalButtons from '@/components/DirectionalButtons.vue';
@@ -9,14 +9,15 @@ export default defineComponent({
   name: 'GameView',
   components: {PhaserContainer, DirectionalButtons},
   data() {
+    const gameViewConfig = SessionStore.getGameViewConfig()!;
     return {
       totalTime: 0,
-      playerActions: this.$route.params.playerActions,
-      displayNumber: this.$route.params.displayNumber,
-      customLevel: this.$route.params.customLevel,
+      playerActions: gameViewConfig.playerInitialActions,
+      display: gameViewConfig.display,
+      customLevel: gameViewConfig.isCustom,
       confirmationButton: undefined as any,
       smallScreenDisplay: true,
-      scene: Store.getCurrentSceneConfig(),
+      scene: gameViewConfig.level,
       componentKey: 0,
       render: false,
       timer: -1,
@@ -67,7 +68,7 @@ export default defineComponent({
     <div class="row align-items-center mx-0" style="max-width: 100vw">
       <div class="col-12 pt-2 px-4" id="game-view-title-id" style="text-align: left">
         <h1 class="sokoban-display display-6 fw-normal" style="user-select: none">
-          {{ displayNumber }}: {{ scene.title }}
+          {{ display }}: {{ scene.title }}
         </h1>
       </div>
       <div class="col-12 px-4" id="game-view-time-id">
@@ -78,7 +79,8 @@ export default defineComponent({
       <div class="row mx-auto px-0">
         <div class="col-12 col-md-8 col-lg-12 px-0" id="phaser-container">
           <PhaserContainer :render="render" :key="componentKey" :playable="true" :scene="scene"
-          :playerInitialActions="playerActions" :display-number="displayNumber" :custom-level="customLevel"/>
+                           :playerInitialActions="playerActions" :display-number="display"
+                           :custom-level="customLevel"/>
         </div>
 
         <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-1" id="game-view-buttons">
