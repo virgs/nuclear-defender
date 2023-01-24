@@ -24,7 +24,6 @@ export type Level = {
 };
 
 export const levels: Level[] = [
-    testMap,
     {
         map: `
 2-3#|2-#.#
@@ -52,7 +51,9 @@ export const levels: Level[] = [
 `,
         title: 'every fool can see',
         "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
-    }, {
+    },
+    testMap,
+    {
         map: `
 6-3#
 7#ds#
@@ -76,7 +77,7 @@ export const levels: Level[] = [
 # .$  oo.#
 10#
 `,
-        title: 'Minidevotron', //boxesLine = 14
+        title: 'Minidevotron poket', //boxesLine = 14
     }, {
         map: `
 --####

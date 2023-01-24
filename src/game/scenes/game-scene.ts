@@ -100,22 +100,6 @@ export class GameScene extends Phaser.Scene {
             this.input.keyboard.clearCaptures();
         }
 
-        this.game.renderer.snapshot(image => {
-            const MIME_TYPE = "image/png";
-            // @ts-ignore
-            const imgURL = image.src;
-            const a = document.createElement("a");
-            a.href = imgURL;
-            a.download = data.config.level.title.toLowerCase().replace(/ /g, '-').concat('.png');
-            console.log('snapshot of level: ' + a.download);
-            a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
-            // a.click();
-            document.body.appendChild(a);
-            setTimeout(function () {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(imgURL);
-            }, 0);
-        });
     }
 
     public async update(time: number, delta: number): Promise<void> {
@@ -127,7 +111,7 @@ export class GameScene extends Phaser.Scene {
                     this.allowUpdates = false;
                     setTimeout(async () => {
                         this.changeScene();
-                    }, 1500);
+                    }, 500);
                 }
             }
         }

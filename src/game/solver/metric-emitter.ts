@@ -9,8 +9,10 @@ export enum Metrics {
 
 export class MetricEmitter {
     private readonly metricMap: Map<Metrics, number>;
+    private readonly startTime: number;
 
     constructor() {
+        this.startTime = new Date().getTime()
         this.metricMap = new Map();
     }
 
@@ -24,7 +26,7 @@ export class MetricEmitter {
     }
 
     public log(): void {
-        console.log('Metrics');
+        console.log(`Metrics (${new Date().getTime() - this.startTime}ms)`);
         let totalTime = 0;
         this.metricMap
             .forEach(time => totalTime += time);

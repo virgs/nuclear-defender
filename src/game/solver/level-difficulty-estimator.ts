@@ -1,6 +1,6 @@
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import Phaser from 'phaser';
-import {mapActionToChar} from '@/game/constants/actions';
+import {Actions} from '@/game/constants/actions';
 
 type DifficultFactor = {
     value: number,
@@ -8,33 +8,42 @@ type DifficultFactor = {
 }
 
 export class LevelDifficultyEstimator {
-    private readonly solution: SolutionOutput;
-    private readonly factors: (() => DifficultFactor)[];
+    private readonly factors: ((solution: SolutionOutput) => DifficultFactor)[];
 
-    constructor(solution: SolutionOutput) {
-        this.solution = solution;
+    constructor() {
 
         this.factors = [
-            () => ({value: this.getDifficulty(this.solution.actions!.length, 200), weight: .3}),
-            () => ({value: this.getDifficulty(this.solution.boxesLine, 100), weight: .5}),
-            () => ({value: this.getDifficulty(this.solution.totalTime, 60000), weight: .75}),
-            () => ({value: this.getDifficulty(this.solution.iterations, 500000), weight: .75}),
-            () => ({value: this.getDifficulty(this.solution.featuresUsed, 100), weight: .25}),
+            (solution: SolutionOutput) => ({
+                value: this.getDifficulty(solution.actions!
+                    .filter(action => action !== Actions.STAND)
+                    .length, 200), weight: .2
+            }),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine, 100), weight: .75}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 60000), weight: .35}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 2000000), weight: .65}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.featuresUsed, 1000), weight: .15}),
         ];
     }
 
     //0 -> easy piece
     //100 -> nightmare
     //undefined -> impossible. literally
-    public estimate(): number | undefined {
-        if (!this.solution.actions) {
+    public estimate(solution: SolutionOutput): number | undefined {
+        console.log(solution);
+        if (!solution.actions) {
             return undefined;
         }
-        const reduce = this.factors.reduce((acc, factor) => {
-            const difficultFactor = factor();
-            return {sum: acc.sum + difficultFactor.value, weightSum: acc.weightSum + difficultFactor.weight};
-        }, {sum: 0, weightSum: 0});
-        const number = reduce.sum / reduce.weightSum;
+        const sums = this.factors.reduce((acc, factor) => {
+            const difficultFactor = factor(solution);
+            return {
+                value: acc.value + (difficultFactor.value * difficultFactor.weight),
+                weight: acc.weight + difficultFactor.weight
+            };
+        }, {
+            value: 0,
+            weight: 0
+        });
+        const number = sums.value / sums.weight;
         return Phaser.Math.Clamp(number * 100, 0, 100);
     }
 

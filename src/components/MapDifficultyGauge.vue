@@ -32,7 +32,7 @@ export default defineComponent({
     this.gauge = this.createGauge();
   },
   unmounted() {
-    clearInterval(this.animation);
+    clearTimeout(this.animation);
   },
   methods: {
     createGauge() {
@@ -44,7 +44,7 @@ export default defineComponent({
         height: '10',
         valueBox: false,
 
-        value: this.estimative || 0,
+        value: this.estimative || 50,
         minValue: 0,
         maxValue: 100,
         startAngle: 0,
@@ -95,15 +95,18 @@ export default defineComponent({
       const valuesToUpdate: any = {
         value: this.estimative
       };
+
       if (!this.dimensionsUpdated) {
         this.dimensionsUpdated = true;
         const parent = document.getElementById('map-difficulty-gauge')!;
         valuesToUpdate.height = parent.clientHeight + '';
         valuesToUpdate.width = parent.clientWidth * 1.75 + '';
-        this.animation = setInterval(() => {
+        const updateAnimationHandler = () => {
           const variation = 3;
           this.gauge!.update({value: this.estimative + (Math.random() * variation) - (variation * .5)});
-        }, 125);
+          this.animation = setTimeout(updateAnimationHandler, 125);
+        };
+        this.animation = setTimeout(updateAnimationHandler, 0);
       }
       this.gauge!.update(valuesToUpdate);
     }
