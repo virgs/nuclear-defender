@@ -4,7 +4,7 @@ import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-
 
 export type ProcessedMap = {
     removedFeatures: Map<Tiles, Point[]>;
-    strippedLayeredTileMatrix: MultiLayeredMap,
+    raw: MultiLayeredMap,
     pointMap: Map<Tiles, Point[]>
 };
 
@@ -41,7 +41,7 @@ export class SokobanMapProcessor {
                             })));
         return {
             pointMap: pointMap,
-            strippedLayeredTileMatrix: deepCopy,
+            raw: deepCopy,
             removedFeatures: removed
         };
     }

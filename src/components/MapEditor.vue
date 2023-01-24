@@ -93,13 +93,12 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import {Tiles} from '@/game/tiles/tiles';
 import type {Level} from '@/game/levels/levels';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
-import type {SolutionOutput} from '@/game/solver/sokoban-solver';
-import {SokobanSolver} from '@/game/solver/sokoban-solver';
+import {MapValidator} from '@/game/solver/map-validator';
 import PhaserContainer from '@/components/PhaserContainer.vue';
+import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
@@ -132,13 +131,13 @@ export default defineComponent({
 <li>Each text line represents a line in the map</li>
 <li>Every feature is represented by a letter. Sometimes an orientation letter is needed</li>
 <li>Use <b>[</b> and <b>]</b> to put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>)</li>
-<li>Number multiply next feature: <b>4$</b> means four boxes in a row. The same as <b>$$$$</b> </li>
+<li>Number multiply next feature: <b>4$</b> means four barrels in a row. The same as <b>$$$$</b> </li>
 </ul>
 
 <h5>Features list</h5>
 <ul>
 <li><b>@</b> hero</li>
-<li><b>$</b> box</li>
+<li><b>$</b> barrels</li>
 <li><b>-</b> empty</li>
 <li><b>&nbsp</b> floor</li>
 <li><b>#</b> wall</li>
@@ -160,7 +159,6 @@ export default defineComponent({
     };
   },
   mounted() {
-    console.log('mounted');
     const toastTriggers = document.getElementsByClassName('copyToastBtn');
     const toast = document.getElementById('copy-toast');
     if (toastTriggers) {
@@ -177,7 +175,6 @@ export default defineComponent({
   },
   computed: {
     titleIsValid() {
-      console.log('titleIsValid');
       return this.title.length < 25;
     },
     stringActions() {
@@ -188,7 +185,6 @@ export default defineComponent({
   },
   watch: {
     toggle() {
-      console.log('toggle');
       const modalIsBeingShown = document.getElementsByTagName('body')[0]!.classList.contains('modal-open');
       if (modalIsBeingShown) {
         const adjustCanvasDimensions = () => {
@@ -206,16 +202,14 @@ export default defineComponent({
       }
     },
     codedMapText() {
-      console.log('codedMapText');
       this.refresh();
     },
   },
   methods: {
-    // copyStringActions() {
-    //   navigator.clipboard.writeText(this.stringActions);
-    // },
+    copyStringActions() {
+      navigator.clipboard.writeText(this.stringActions);
+    },
     createCustomLevel() {
-      console.log('createCustomLevel');
       const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
       const title = titles[Math.floor(Math.random() * titles.length)];
       return {
@@ -224,7 +218,6 @@ export default defineComponent({
       };
     },
     async refresh() {
-      console.log('refresh');
       this.render = true;
       this.estimative = undefined;
       this.solution = undefined;
@@ -239,61 +232,24 @@ export default defineComponent({
       ++this.editorRefreshKey;
     },
     async processedMap(output: ProcessedMap) {
-      console.log('processedMap');
       this.loading = false;
       try {
-        await this.validateMap(output);
+        const solutionOutput = await new MapValidator().validate(output);
+        this.solution = solutionOutput;
+        this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
+
         this.mapIsValid = true;
       } catch (exc: any) {
-        console.log('catch (exc: any) ');
-        console.error(exc);
+        console.error(exc)
         this.editorInvalidError = exc.message;
       }
     },
     saveButtonClick() {
-      console.log('saveButtonClick');
       const canvas: any = document.querySelector('#phaser-container canvas')!;
       this.scene.snapshot = canvas.toDataURL();
       LongTermStore.setCustomLevel(this.scene);
       this.$emit('save', this.scene);
     },
-    async validateMap(output: ProcessedMap) {
-      console.log('validateMap');
-      const heroNumber = output.removedFeatures.get(Tiles.hero)!.length;
-      if (heroNumber > 1) {
-        throw new Error('Map can only have one player. Found ' + heroNumber);
-      } else if (heroNumber < 0) {
-        throw new Error(`Can't find player in the map`);
-      }
-      const boxNumber = output.removedFeatures.get(Tiles.box)!.length;
-      const targetNumber = output.pointMap.get(Tiles.target)!.length;
-      const wallNumber = output.pointMap.get(Tiles.wall)!.length;
-      //TODO the first and last item of every line and column has to be a wall
-      if (wallNumber <= 4) {
-        throw new Error(`Map is not wrapped in walls`);
-      } else if (boxNumber === 0) {
-        throw new Error(`Number of boxes has to be greater than zero`);
-      } else if (targetNumber === 0) {
-        throw new Error(`Number of targets has to be greater than zero`);
-      } else if (boxNumber !== targetNumber) {
-        throw new Error(`Number of boxes (${boxNumber}) different than number of targets (${targetNumber})`);
-      }
-
-      const solver = new SokobanSolver({
-        strippedMap: output.strippedLayeredTileMatrix,
-        staticFeatures: output.pointMap,
-      });
-
-      console.log('solving it', output);
-      const solutionOutput = await solver.solve(output.removedFeatures);
-      console.log('done');
-      if (!solutionOutput.aborted && !solutionOutput.actions) {
-        throw new Error('Map is not solvable');
-      }
-
-      this.solution = solutionOutput;
-      this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
-    }
 
   }
 });

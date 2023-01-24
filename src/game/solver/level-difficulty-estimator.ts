@@ -16,12 +16,12 @@ export class LevelDifficultyEstimator {
             (solution: SolutionOutput) => ({
                 value: this.getDifficulty(solution.actions!
                     .filter(action => action !== Actions.STAND)
-                    .length, 200), weight: .2
+                    .length, 200), weight: .3
             }),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine, 100), weight: .75}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 60000), weight: .35}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 2000000), weight: .65}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.featuresUsed, 1000), weight: .15}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine, 80), weight: .75}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 30000), weight: .35}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 200000), weight: .5}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.featuresUsed, 1000), weight: .1}),
         ];
     }
 

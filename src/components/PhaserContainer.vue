@@ -37,7 +37,7 @@ export default defineComponent({
         displayNumber: this.displayNumber || '',
         level: this.scene,
         dynamicFeatures: processedMap.removedFeatures,
-        strippedLayeredTileMatrix: processedMap.strippedLayeredTileMatrix
+        strippedLayeredTileMatrix: processedMap.raw
       };
 
       this.gameInstance?.destroy(false);

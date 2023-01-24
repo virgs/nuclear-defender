@@ -23,6 +23,7 @@ export default defineComponent({
   },
   watch: {
     estimative() {
+      console.log(this.estimative)
       if (this.estimative !== undefined) {
         this.refreshGauge();
       }
