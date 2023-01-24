@@ -14,7 +14,7 @@
         <img alt="" class="img-fluid tns-lazy-img" :data-src="thumbnail(index)"
              style="user-select: none">
         <img v-if="customItem(index)" class="img-fluid level-stamp" src="custom-stamp.png">
-        <img v-else class="img-fluid level-stamp" src="solved.png">
+        <img v-else-if="index !== levels.length - 1" class="img-fluid level-stamp" src="solved.png">
       </div>
     </div>
     <ul class="carousel-controls" id="customize-controls" tabindex="0">
@@ -88,7 +88,7 @@ export default defineComponent({
       return (index: number): string => {
         if (this.customLevel) {
           if (index === 0) {
-            return '-';
+            return 'custom';
           }
           return index.toString();
         }
@@ -127,7 +127,7 @@ export default defineComponent({
         level = this.customLevel;
       }
       this.$emit('currentLevelChanged', level, this.currentDisplayIndex(index),
-          this.customLevel && index === 0);
+          this.customLevel && index === 0, index);
     }
   }
 
@@ -158,9 +158,36 @@ export default defineComponent({
 
 .level-stamp {
   rotate: 40deg;
-  width: 50%;
+  width: 40%;
   position: absolute;
-  top: 10%;
-  right: 0;
+  top: 15%;
+  right: 5%;
+
+  z-index: 100;
+}
+
+.selected-slider .level-stamp {
+  animation: shake 2.5s;
+
+  /* When the animation is finished, start again */
+  animation-iteration-count: infinite;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: rotate(-2deg);
+  }
+  90% {
+    transform: scale(.9);
+  }
 }
 </style>

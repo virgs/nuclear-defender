@@ -5,12 +5,14 @@ export type GameViewConfig = {
     level: Level;
     display: string;
     isCustom: boolean;
+    levelIndex: number;
     playerInitialActions: string;
 };
 
 export type NextLevelViewConfig = {
     level: Level;
     isCustomLevel: boolean;
+    levelIndex: number;
     totalTime: number;
     display: string;
     movesCode: Actions[];

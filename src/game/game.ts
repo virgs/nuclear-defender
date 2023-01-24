@@ -11,6 +11,7 @@ export type SceneConfig = {
     level: Level,
     isCustomLevel: boolean,
     playable: boolean,
+    levelIndex: number,
     displayNumber: string,
     playerInitialActions: Actions[],
     strippedLayeredTileMatrix: MultiLayeredMap;

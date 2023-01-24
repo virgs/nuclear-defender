@@ -135,11 +135,13 @@ export class GameScene extends Phaser.Scene {
 
     private changeScene() {
         this.lights.destroy();
+        const sceneConfig = this.sceneConfig!;
         SessionStore.setNextLevelViewConfig({
             movesCode: this.gameStage!.getPlayerMoves(),
-            isCustomLevel: this.sceneConfig!.isCustomLevel,
-            level: this.sceneConfig?.level!,
-            display: this.sceneConfig?.displayNumber!,
+            isCustomLevel: sceneConfig.isCustomLevel,
+            level: sceneConfig.level,
+            display: sceneConfig.displayNumber,
+            levelIndex: sceneConfig.levelIndex,
             totalTime: new Date().getTime() - this.initialTime!
         });
         console.log('level complete');

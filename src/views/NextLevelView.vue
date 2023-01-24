@@ -81,8 +81,10 @@ import {mapActionToChar} from '@/game/constants/actions';
 export default defineComponent({
   name: 'NextLevelView',
   data() {
+    const config = SessionStore.getNextLevelViewConfig()!;
+    console.log(config);
     return {
-      config: SessionStore.getNextLevelViewConfig()!,
+      config: config,
     };
   },
   mounted() {

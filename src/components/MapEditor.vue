@@ -1,5 +1,17 @@
 <template>
   <div id="map-editor" class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="toast-container position-fixed top-0 end-0 pt-3">
+      <div id="copy-toast" class="toast" role="alert" style="background-color: transparent"
+           aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
+        <div class="d-flex sokoban-toast">
+          <div class="toast-body">
+            Text copied to clipboard
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-content">
       <div class="modal-header" style="border: none">
         <h2 class="modal-title" style="font-family: 'Righteous', serif">Map editor</h2>
@@ -51,6 +63,18 @@
             </label>
             <map-difficulty-gauge :estimative="estimative"></map-difficulty-gauge>
           </div>
+
+          <div v-if="title.toLowerCase() === 'mischief managed'" class="col-12 order-5">
+            <label class="form-label sokoban-label">Marauder's map</label>
+            <div class="input-group">
+              <input type="text" class="form-control" readonly :value="stringActions">
+              <button class="btn btn-outline-secondary copyToastBtn" type="button"
+                      style="background-color: var(--radioactive-color)" @click="copyStringActions">
+                Copy
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
       <div class="modal-footer" style="border: none">
@@ -68,16 +92,18 @@
 </template>
 
 <script lang="ts">
-import {LongTermStore} from '@/store/long-term-store';
 import {defineComponent} from 'vue';
 import {Tiles} from '@/game/tiles/tiles';
 import type {Level} from '@/game/levels/levels';
+import {LongTermStore} from '@/store/long-term-store';
+import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import {mapActionToChar} from '@/game/constants/actions';
 
 export default defineComponent({
   name: 'MapEditor',
@@ -97,7 +123,8 @@ export default defineComponent({
       editorInvalidError: '',
       render: false,
       mapIsValid: true,
-      output: undefined as any,
+      output: undefined as unknown as ProcessedMap,
+      solution: undefined as SolutionOutput | undefined,
       editorRefreshKey: 0,
       estimative: undefined as number | undefined,
       estimatedDifficulty: -1,
@@ -135,6 +162,16 @@ export default defineComponent({
     };
   },
   mounted() {
+    const toastTriggers = document.getElementsByClassName('copyToastBtn');
+    const toast = document.getElementById('copy-toast');
+    if (toastTriggers) {
+      Array.from(toastTriggers)
+          .forEach(trigger => {
+            // @ts-ignore
+            trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
+          });
+    }
+
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
     //@ts-ignore
     [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
@@ -142,6 +179,11 @@ export default defineComponent({
   computed: {
     titleIsValid() {
       return this.title.length < 25;
+    },
+    stringActions() {
+      return (this.solution?.actions || [])
+          .map(action => mapActionToChar(action))
+          .join('');
     }
   },
   watch: {
@@ -167,6 +209,9 @@ export default defineComponent({
     },
   },
   methods: {
+    copyStringActions() {
+      navigator.clipboard.writeText(this.stringActions);
+    },
     createCustomLevel() {
       const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
       const title = titles[Math.floor(Math.random() * titles.length)];
@@ -178,6 +223,7 @@ export default defineComponent({
     async refresh() {
       this.render = true;
       this.estimative = undefined;
+      this.solution = undefined;
       this.editorInvalidError = '';
       this.mapIsValid = false;
       this.loading = true;
@@ -235,6 +281,7 @@ export default defineComponent({
       if (!solutionOutput.actions) {
         throw new Error('Map is not solvable');
       }
+      this.solution = solutionOutput;
 
       this.estimative = new LevelDifficultyEstimator(solutionOutput).estimate();
     }

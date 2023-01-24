@@ -14,6 +14,7 @@ export default defineComponent({
       totalTime: 0,
       playerActions: gameViewConfig.playerInitialActions,
       display: gameViewConfig.display,
+      levelIndex: gameViewConfig.levelIndex,
       customLevel: gameViewConfig.isCustom,
       confirmationButton: undefined as any,
       smallScreenDisplay: true,
@@ -80,6 +81,7 @@ export default defineComponent({
         <div class="col-12 col-md-8 col-lg-12 px-0" id="phaser-container">
           <PhaserContainer :render="render" :key="componentKey" :playable="true" :scene="scene"
                            :playerInitialActions="playerActions" :display-number="display"
+                           :level-index="levelIndex"
                            :custom-level="customLevel"/>
         </div>
 

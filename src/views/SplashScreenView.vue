@@ -71,8 +71,6 @@ export default defineComponent({
       playerActions: '',
       customLevel: LongTermStore.getCustomLevel(),
       currentLevel: undefined as Level | undefined,
-      displayNumber: '',
-      isCustomLevel: false,
       actionsLegentText: `
       <h5>Instructions</h5>
 <ul>
@@ -108,25 +106,22 @@ export default defineComponent({
     }
   },
   methods: {
-    currentLevelChanged(currentLevel: Level, displayNumber: string, isCustomLevel: boolean) {
+    currentLevelChanged(currentLevel: Level, displayNumber: string, isCustomLevel: boolean, index: number) {
       this.currentLevel = currentLevel;
-      this.displayNumber = displayNumber;
-      this.isCustomLevel = isCustomLevel;
+      SessionStore.setGameViewConfig({
+        display: displayNumber,
+        isCustom: isCustomLevel,
+        levelIndex: index,
+        playerInitialActions: this.playerActions,
+        level: this.currentLevel!
+      });
     },
     passwordUnblockedNewLevels() {
       ++this.carouselSliderRefreshKey;
     },
     playButtonClick() {
-      // const tileMap = this.make.tilemap({key: configuration.tiles.tilemapKey});
-      // const extracted = new FileLevelExtractor().extractToTileCodeMap(tileMap); // from file
-      //https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
-
-      SessionStore.setGameViewConfig({
-        display: this.displayNumber,
-        isCustom: this.isCustomLevel,
-        playerInitialActions: this.playerActions,
-        level: this.currentLevel!
-      });
+      const gameViewConfig = SessionStore.getGameViewConfig()!;
+      gameViewConfig.playerInitialActions = this.playerActions
       this.$router.push(`/game`);
     },
     mapEditorSaved(level: Level) {
