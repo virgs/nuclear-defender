@@ -39,6 +39,7 @@
               </a>
             </label>
             <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="9"
+                      @keydown.passive.stop="textAreaKeyPress"
                       v-model="codedMapText"></textarea>
             <div class="form-label feedback-label invalid-feedback" style="">
               {{ editorInvalidError }}
@@ -206,6 +207,9 @@ export default defineComponent({
     },
   },
   methods: {
+    textAreaKeyPress() {
+      // prevents carousel from detecting arrow keys inputs
+    },
     copyStringActions() {
       navigator.clipboard.writeText(this.stringActions);
     },
@@ -240,7 +244,7 @@ export default defineComponent({
 
         this.mapIsValid = true;
       } catch (exc: any) {
-        console.error(exc)
+        console.log(exc)
         this.editorInvalidError = exc.message;
       }
     },

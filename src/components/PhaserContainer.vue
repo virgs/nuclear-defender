@@ -3,10 +3,10 @@
 </template>
 
 <script lang="ts">
-import type {SceneConfig} from '@/game/game';
 import * as game from '@/game/game';
 import {defineComponent} from 'vue';
 import {Tiles} from '@/game/tiles/tiles';
+import type {SceneConfig} from '@/game/game';
 import {Actions, mapStringToAction} from '@/game/constants/actions';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
@@ -47,7 +47,6 @@ export default defineComponent({
   },
   unmounted() {
     this.gameInstance?.destroy(false);
-    console.log('unmounted destroyed')
   }
 });
 

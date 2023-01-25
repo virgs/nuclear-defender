@@ -111,8 +111,8 @@ export class MapValidator {
                         if (neighbor.x < 0 || neighbor.y < 0 ||
                             neighbor.x >= output.raw.width ||
                             neighbor.y >= output.raw.height) {
-                            console.log(neighbor);
-                            throw Error(`You have to wrap the whole map in walls so the player doesn't wander aimlessly in this meaningless life. Even diagonals, but that's just because it looks nicer with them`);
+                            throw Error(`You have to wrap the whole map in walls so the player doesn't wander aimlessly in this meaningless life.
+                            Even diagonals, but that's just because it looks nicer with them. Wall missing at (${neighbor.y + 1}, ${neighbor.x + 1})`);
                         }
 
                         const staticItemInThePosition = staticArray
@@ -126,11 +126,14 @@ export class MapValidator {
                     });
             }
 
-            if (staticArray
-                .filter(tile => tile.tile
-                    .every(code => code.code !== Tiles.wall && code.code !== Tiles.empty && code.code !== Tiles.floor))
-                .length > 0) {
-                throw Error(`What's the point of having something outside the levels' walls? Do yourself a favor and put everything inside it.`);
+            const notWrapped = staticArray
+                .filter(tile => tile.tile.length > 0 &&
+                    tile.tile
+                        .some(layer => layer.code !== Tiles.wall &&
+                            layer.code !== Tiles.empty &&
+                            layer.code !== Tiles.floor));
+            if (notWrapped.length > 0) {
+                throw Error(`What's the point of having something outside the levels' walls? Do yourself a favor and put item at (${notWrapped[0].point.y + 1}, ${notWrapped[0].point.x + 1}) inside them.`);
             }
 
         };

@@ -18,6 +18,7 @@ export class TargetActor implements GameActor {
     private readonly id: number;
     private tilePosition: Point;
     private covered: boolean;
+    private intensityModifier: number;
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
@@ -27,6 +28,12 @@ export class TargetActor implements GameActor {
         this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
         this.tweens = config.scene.tweens;
 
+        this.intensityModifier = 2; // it will always have itself as a target
+        config.contentAround
+            .forEach(line => line
+                .forEach(item => item
+                    .filter(layer => layer.code === Tiles.target)
+                    .forEach(() => this.intensityModifier *= .5)));
         this.addLight();
     }
 
@@ -51,10 +58,10 @@ export class TargetActor implements GameActor {
                 const intensity = Math.random() * .25;
                 if (this.covered) {
                     light.setColor(TargetActor.LIGHT_COVERED_COLOR);
-                    light.intensity = TargetActor.COVERED_LIGHT_INTENSITY + intensity;
+                    light.intensity = TargetActor.COVERED_LIGHT_INTENSITY * this.intensityModifier + intensity;
                 } else {
                     light.setColor(TargetActor.LIGHT_UNCOVERED_COLOR);
-                    light.intensity = TargetActor.UNCOVERED_LIGHT_INTENSITY + intensity;
+                    light.intensity = TargetActor.UNCOVERED_LIGHT_INTENSITY * this.intensityModifier + intensity;
                 }
 
                 const point = path.getPoint(follower.t, follower.vec);

@@ -54,7 +54,7 @@ export default defineComponent({
     const visibleItems = this.levels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
     const slider = tns({
       container: '#carousel-slider',
-      items: 2,
+      items: visibleItems,
       controls: true,
       lazyload: true,
       gutter: 0,
@@ -64,6 +64,7 @@ export default defineComponent({
       mouseDrag: true,
       swipeAngle: false,
       edgePadding: 10,
+      arrowKeys: true,
       speed: 400,
       startIndex: 0,
       loop: false,

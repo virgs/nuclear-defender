@@ -112,6 +112,9 @@ export default defineComponent({
           .join('');
     },
     password() {
+      if (this.config.isCustomLevel) {
+        return undefined
+      }
       const currentIndex: number = Number(LongTermStore.getCurrentSelectedIndex());
       const indexIsNumber = !isNaN(currentIndex);
       if (indexIsNumber && currentIndex > 0) {
