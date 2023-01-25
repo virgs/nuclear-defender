@@ -3,12 +3,6 @@ import {configuration} from '@/game/constants/configuration';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
 import Phaser from 'phaser';
 
-export type ScaleOutput = { scale: number, center: Point };
-const scaleLimits = {
-    max: 1.15,
-    min: .25
-};
-
 export class ScreenPropertiesCalculator {
     private readonly scale: number;
     private readonly origin: Point;
@@ -38,6 +32,6 @@ export class ScreenPropertiesCalculator {
     }
 
     private limitValue(value: number): number {
-        return Phaser.Math.Clamp(value, scaleLimits.min, scaleLimits.max);
+        return Phaser.Math.Clamp(value, configuration.world.scaleLimits.min, configuration.world.scaleLimits.max);
     }
 }

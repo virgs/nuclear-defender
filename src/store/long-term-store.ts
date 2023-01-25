@@ -1,12 +1,11 @@
-import type {SceneConfig} from '@/game/game';
-import type {Actions} from '@/game/constants/actions';
 import type {Level} from '@/game/levels/levels';
+import type {Actions} from '@/game/constants/actions';
 import {configuration} from '@/game/constants/configuration';
 
-//TODO save it in solved levels array
-
 type LevelCompleteData = {
-    sceneConfig: SceneConfig,
+    index: number,
+    title: string,
+    map: string,
     movesCode: Actions[],
     totalTime: number,
     timestamp: number

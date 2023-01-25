@@ -138,6 +138,12 @@ export default defineComponent({
     enableNextLevel() {
       const currentIndex: number = LongTermStore.getCurrentSelectedIndex();
       if (!this.config.isCustomLevel) {
+        const previousCompletion = LongTermStore.getLevelCompleteData()[currentIndex];
+        if (previousCompletion) {
+          //TODO compare and get the one that completed it in less time
+        } else {
+          //TODO add it to the completion list
+        }
         const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
         if (currentIndex < levels.length - 1) {
           const nextLevelIndex = currentIndex + 1;

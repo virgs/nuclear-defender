@@ -16,6 +16,7 @@
         <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
              :style="mapStyle(index)">
         <img v-if="customItem(index)" class="img-fluid level-stamp" src="custom-stamp.png">
+        <!-- TODO check if this level was complete-->
         <img v-else-if="index !== levels.length - 1" class="img-fluid level-stamp" src="solved.png">
       </div>
     </div>
@@ -28,6 +29,7 @@
       </li>
     </ul>
     <h3 class="mt-2 level-title">{{ currentTitle }}</h3>
+        <!-- TODO check if this level was complete. if that'the case.. Display when and the time the solution took. A replay button, perharps?-->
   </div>
 </template>
 

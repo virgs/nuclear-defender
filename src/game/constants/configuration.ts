@@ -27,6 +27,10 @@ export const configuration = {
             vertical: Math.trunc(tileHeight * verticalPerspective),
             horizontal: tileWidth
         },
+        scaleLimits: {
+            max: 1.15,
+            min: .25
+        },
         scale: 0
     },
     screenRatio: .7,
