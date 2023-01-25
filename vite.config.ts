@@ -8,7 +8,7 @@ import {fileURLToPath, URL} from 'node:url';
 export default defineConfig({
     plugins: [vue()],
     assetsInclude: ["**/*.m4a"],
-    base: "/sokoban-ai",
+    base: "/chernobyl-defender",
     resolve: {
         alias: {
             "@": fileURLToPath(new URL("./src", import.meta.url)),

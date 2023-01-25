@@ -46,8 +46,12 @@ export class LongTermStore {
     }
 
     public static getNumberOfEnabledLevels(): number {
-        const number = Number(localStorage.getItem(configuration.store.numberOfEnabledLevelsKey) || 0);
-        return Math.max(number, 1);
+        const numberOfEnabledLevels = localStorage.getItem(configuration.store.numberOfEnabledLevelsKey);
+        if (numberOfEnabledLevels === null) {
+            LongTermStore.setNumberOfEnabledLevels(1);
+            return 1;
+        }
+        return Number(numberOfEnabledLevels);
     }
 
     public static setNumberOfEnabledLevels(value: number) {

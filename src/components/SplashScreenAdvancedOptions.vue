@@ -57,7 +57,7 @@
             <button class="btn btn-outline-secondary w-100" type="button"
                     @click="mapEditorToggle = !mapEditorToggle"
                     data-bs-toggle="modal" data-bs-target="#mapEditorModal">
-              Edit custom map
+              {{customMapExists ? 'Edit' : 'Create'}} custom map
             </button>
             <div class="modal fade" id="mapEditorModal" tabindex="-1" role="dialog"
                  aria-labelledby="mapEditorModalLabel" aria-hidden="true">
@@ -84,6 +84,7 @@ export default defineComponent({
   emits: ['mapEditorSaved', 'passwordUnblockedNewLevels'],
   data() {
     return {
+      customMapExists: LongTermStore.getCustomLevel() !== undefined,
       mapEditorToggle: false,
       validLevelPassword: false,
       levelPassword: '',
@@ -102,6 +103,7 @@ export default defineComponent({
   },
   methods: {
     mapEditorSaved(map: Level) {
+      this.customMapExists = true;
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {

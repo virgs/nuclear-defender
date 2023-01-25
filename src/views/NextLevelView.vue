@@ -49,9 +49,13 @@
         <div class="col-12">
           <label class="form-label sokoban-label">Map</label>
           <div class="input-group">
-            <textarea class="form-control map-text-area" rows="10"
-                      readonly
-                      v-model="codedMap"></textarea>
+            <textarea class="form-control map-text-area" readonly
+                      v-model="codedMap"
+                      :rows="codedMap
+                        .split('\n')
+                        .filter(line => line.length > 0)
+                        .length"
+            ></textarea>
             <button class="btn btn-outline-secondary toastBtn" type="button"
                     style="background-color: var(--radioactive-color)" @click="copy(codedMap)">
               Copy
@@ -82,7 +86,6 @@ export default defineComponent({
   name: 'NextLevelView',
   data() {
     const config = SessionStore.getNextLevelViewConfig()!;
-    console.log(config);
     return {
       config: config,
     };
@@ -100,6 +103,7 @@ export default defineComponent({
             trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
           });
     }
+    this.enableNextLevel();
   },
   computed: {
     movesCode() {
@@ -128,19 +132,20 @@ export default defineComponent({
     async copy(text: string) {
       await navigator.clipboard.writeText(text);
     },
-    continueButton() {
-      const currentIndex: number = Number(LongTermStore.getCurrentSelectedIndex());
-      const indexIsNumber = !isNaN(currentIndex);
-      if (indexIsNumber) {
-        const furthestAvailableLevel = LongTermStore.getNumberOfEnabledLevels();
+    enableNextLevel() {
+      const currentIndex: number = LongTermStore.getCurrentSelectedIndex();
+      if (!this.config.isCustomLevel) {
+        const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
         if (currentIndex < levels.length - 1) {
-          LongTermStore.setCurrentSelectedIndex(currentIndex + 1);
-          if (currentIndex === furthestAvailableLevel) {
-            LongTermStore.setNumberOfEnabledLevels(furthestAvailableLevel + 1);
+          const nextLevelIndex = currentIndex + 1;
+          LongTermStore.setCurrentSelectedIndex(nextLevelIndex);
+          if (nextLevelIndex === numberOfEnabledLevels) {
+            LongTermStore.setNumberOfEnabledLevels(numberOfEnabledLevels + 1);
           }
         }
       }
-
+    },
+    continueButton() {
       this.$router.push('/');
     }
   }

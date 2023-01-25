@@ -111,7 +111,7 @@ export class GameScene extends Phaser.Scene {
                     this.allowUpdates = false;
                     setTimeout(async () => {
                         this.changeScene();
-                    }, 500);
+                    }, 1000);
                 }
             }
         }

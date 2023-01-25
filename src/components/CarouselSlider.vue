@@ -3,16 +3,18 @@
     <span style="display: flex;">
       <label class="form-label sokoban-label">Select your level</label>
     </span>
-    <div id="carousel-slider">
+    <div id="carousel-slider" style="">
       <div v-for="(_, index) in levels"
-           :class="{'selected-slider': index === currentIndex,
+           :class="{'carousel-container': true,
+                    'selected-slider': index === currentIndex,
                     'custom-level': index === 0 && customLevel,
-                    'tns-item': true}">
+                    'tns-item': true}"
+           :style="carouselContainerStyle(index)">
         <div style="position:absolute;">
           <h4 class="level-number">{{ currentDisplayIndex(index) }}</h4>
         </div>
-        <img alt="" class="img-fluid tns-lazy-img" :data-src="thumbnail(index)"
-             style="user-select: none">
+        <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
+             :style="mapStyle(index)">
         <img v-if="customItem(index)" class="img-fluid level-stamp" src="custom-stamp.png">
         <img v-else-if="index !== levels.length - 1" class="img-fluid level-stamp" src="solved.png">
       </div>
@@ -52,7 +54,7 @@ export default defineComponent({
     const visibleItems = this.levels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
     const slider = tns({
       container: '#carousel-slider',
-      items: visibleItems,
+      items: 2,
       controls: true,
       lazyload: true,
       gutter: 0,
@@ -75,7 +77,49 @@ export default defineComponent({
     slider.events.on('indexChanged', (info: any) => this.updateIndex(info.index));
     this.updateIndex(this.currentIndex);
   },
+  watch: {
+    customLevel() {
+      console.log(this.customLevel);
+    },
+  },
   computed: {
+    carouselContainerStyle() {
+      return (index: number): any => {
+        let style: any = {
+          // padding: '20px',
+        };
+        if (index === this.currentIndex) {
+          style = {
+            ...style,
+          border: `solid ${this.customLevel && index === 0 ? 'var(--oldstuff-color)' : 'var(--radioactive-color)'}`,
+          'border-width': '6px 7px 6px 8px',
+          'border-radius': '95% 4% 92% 5% / 4% 95% 6% 95%',
+          }
+        }
+        return style;
+      };
+    },
+    mapStyle() {
+      const xModifier = 2;
+      return (index: number): any => {
+        let filterX = xModifier;
+        if (index === this.currentIndex) {
+          filterX = 0;
+        } else if (index < this.currentIndex) {
+          filterX = -xModifier;
+        }
+        let filterColor = 'var(--radioactive-color)';
+        if (this.customLevel && index === 0) {
+          filterColor = 'var(--oldstuff-color)';
+        }
+        return {
+          'min-width': '30%',
+          'user-select': 'none',
+          'filter': `drop-shadow(${filterX}px 2px 3px ${filterColor})`
+        };
+      };
+
+    },
     levels(): Level[] {
       const availableLevels = levels
           .filter((_, index) => index < this.enabledLevels);
@@ -108,7 +152,7 @@ export default defineComponent({
           }
           return this.levels[1].thumbnailPath!;
         }
-        return this.levels[1].thumbnailPath!;
+        return this.levels[0].thumbnailPath!;
       };
     },
     currentTitle(): string {
@@ -167,10 +211,17 @@ export default defineComponent({
 }
 
 .selected-slider .level-stamp {
-  animation: shake 2.5s;
+  animation: shake 2.5s infinite;
+}
 
-  /* When the animation is finished, start again */
-  animation-iteration-count: infinite;
+.carousel-container.selected-slider {
+  animation: border-animation 1s alternate infinite;
+}
+
+@keyframes border-animation {
+  100% {
+    border-radius: 85% 8% 99% 2% / 5% 98% 1% 91%;
+  }
 }
 
 @keyframes shake {
@@ -190,4 +241,5 @@ export default defineComponent({
     transform: scale(.9);
   }
 }
+
 </style>

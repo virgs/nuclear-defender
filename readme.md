@@ -1,4 +1,4 @@
-# sokoban-ai
+# chernobyl-defender
 
 https://github.com/Sun0fABeach/vue-phaser3
 https://github.com/sominator/devtools/tree/master/client

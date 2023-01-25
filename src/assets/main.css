@@ -56,7 +56,7 @@ body {
     user-select: none;
     font-family: 'Righteous', serif;
     color: var(--background-color);
-    font-size: 20px;
+    font-size: 24px;
 }
 
 .sokoban-display {
@@ -124,16 +124,17 @@ body {
 .carousel-thumbnail img {
     width: 50px;
     height: auto;
+    transition: filter 500ms ease;
 }
 
 
 .tns-item {
     transition: all ease 500ms;
-    transform: scale(.5) translateY(-50px);
+    transform: scale(.4) translateY(30%);
 }
 
 .selected-slider {
-    transform: scale(1) translateY(0px);
+    transform: scale(1) translateY(0);
 }
 
 
@@ -213,6 +214,7 @@ h1, h2, h3, h4, h5, h6, a, p {
 
 :root {
     --radioactive-color: #d4fa00;
+    --oldstuff-color: #f3e493;
     --background-color: #d6d6d6;
     --foreground-color: #2c3e50;
     --danger-color: #502c3e;

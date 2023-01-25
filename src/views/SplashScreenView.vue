@@ -4,7 +4,7 @@
       <div class="col mb-lg-5">
         <h1 class="sokoban-display display-3 fw-normal" style="user-select: none">CHERNOBYL DEFENDER</h1>
       </div>
-      <div class="col-12" style="min-height: 100px; max-height: 50vh">
+      <div class="col-12" style="min-height: fit-content;">
         <CarouselSlider :key="carouselSliderRefreshKey"
                         :custom-level="customLevel"
                         @currentLevelChanged="currentLevelChanged">
@@ -139,10 +139,10 @@ export default defineComponent({
   min-height: 99vh;
   max-width: 720px;
   font-family: Martian Mono, monospace;
-  background-image: url("radioactive-symbol2.jpg");
+  background-image: url("radioactive-symbol4.jpg");
   background-repeat: no-repeat;
   background-position-x: center;
-  background-position-y: top;
+  background-position-y: bottom;
   background-attachment: fixed;
 }
 

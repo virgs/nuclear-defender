@@ -47,6 +47,7 @@ export default defineComponent({
   },
   unmounted() {
     this.gameInstance?.destroy(false);
+    console.log('unmounted destroyed')
   }
 });
 

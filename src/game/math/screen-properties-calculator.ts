@@ -14,7 +14,7 @@ export class ScreenPropertiesCalculator {
     private readonly origin: Point;
 
     public constructor(data: MultiLayeredMap) {
-        const gutter = 30;
+        const gutter = 10;
         const map = {
             width: data.width * configuration.tiles.horizontalSize,
             height: data.height * configuration.tiles.verticalSize * configuration.tiles.verticalPerspective

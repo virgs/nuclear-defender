@@ -248,6 +248,7 @@ export default defineComponent({
       const canvas: any = document.querySelector('#phaser-container canvas')!;
       this.scene.snapshot = canvas.toDataURL();
       LongTermStore.setCustomLevel(this.scene);
+      LongTermStore.setCurrentSelectedIndex(0);
       this.$emit('save', this.scene);
     },
 
