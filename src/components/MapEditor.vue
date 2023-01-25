@@ -84,7 +84,8 @@
         <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
                 @click="saveButtonClick"
                 data-bs-dismiss="modal"
-                :disabled="!titleIsValid || !mapIsValid"
+                :disabled="!titleIsValid || !mapIsValid ||
+                (originalCustomLevel?.title === title && originalCustomLevel?.map === codedMapText)"
                 style="background-color: var(--radioactive-color); float: right">Save
         </button>
       </div>
@@ -111,11 +112,13 @@ export default defineComponent({
   emits: ['save'],
   data() {
     let customLevel = LongTermStore.getCustomLevel()!;
+    let originalCustomLevel = customLevel;
     if (!customLevel) {
       customLevel = this.createCustomLevel();
     }
     return {
       loading: false,
+      originalCustomLevel: originalCustomLevel,
       title: customLevel.title,
       codedMapText: customLevel.map,
       scene: customLevel as Level,
@@ -244,7 +247,7 @@ export default defineComponent({
 
         this.mapIsValid = true;
       } catch (exc: any) {
-        console.log(exc)
+        console.log(exc);
         this.editorInvalidError = exc.message;
       }
     },

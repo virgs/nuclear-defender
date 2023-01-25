@@ -6,7 +6,7 @@ import Phaser from 'phaser';
 export type ScaleOutput = { scale: number, center: Point };
 const scaleLimits = {
     max: 1.15,
-    min: .45
+    min: .25
 };
 
 export class ScreenPropertiesCalculator {

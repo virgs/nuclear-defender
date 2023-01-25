@@ -10,6 +10,8 @@ export class MapValidator {
 
     public constructor() {
         this.validators = [
+            this.createMapDimenrionsValidation(),
+            this.createTooManyFeaturesValidation(),
             this.createNoPlayerValidation(),
             this.createTooManyPlayersValidation(),
             this.createNoBoxesValidation(),
@@ -133,7 +135,8 @@ export class MapValidator {
                             layer.code !== Tiles.empty &&
                             layer.code !== Tiles.floor));
             if (notWrapped.length > 0) {
-                throw Error(`What's the point of having something outside the levels' walls? Do yourself a favor and put item at (${notWrapped[0].point.y + 1}, ${notWrapped[0].point.x + 1}) inside them.`);
+                throw Error(`What's the point of having something outside the levels' walls? There can be only one player explorable area.
+                 Do yourself a favor and put everything inside it.`);
             }
 
         };
@@ -151,5 +154,43 @@ export class MapValidator {
             }
         }
         return result;
+    }
+
+    private createMapDimenrionsValidation() {
+        return (output: ProcessedMap) => {
+            const maxLinesDimension = 20;
+            if (output.raw.height > maxLinesDimension) {
+                throw Error(`Try to keep the number of lines less than ${maxLinesDimension}. Right now you have ${output.raw.height}.`);
+            }
+            const maxRowsDimension = 25;
+            if (output.raw.width > maxRowsDimension) {
+                throw Error(`Try to keep the number of rows less than ${maxRowsDimension}. Right now you have ${output.raw.width}.`);
+            }
+        };
+
+    }
+
+    private createTooManyFeaturesValidation() {
+        return (output: ProcessedMap) => {
+            const staticArray: { point: Point, tile: OrientedTile[] }[] = [];
+            output.raw.strippedFeatureLayeredMatrix
+                .forEach((line, y) => line
+                    .forEach((_: any, x: number) => staticArray.push({point: new Point(x, y), tile: output.raw.strippedFeatureLayeredMatrix[y][x]})));
+            const featuresLimit = 30;
+            const numberOfCoolFeatures = staticArray.reduce((acc, item) => {
+                if (item.tile
+                    .some(tile => tile.code !== Tiles.target &&
+                        tile.code !== Tiles.floor &&
+                        tile.code !== Tiles.wall &&
+                        tile.code !== Tiles.empty)) {
+                    console.log(item)
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+            if (numberOfCoolFeatures > featuresLimit) {
+                throw Error(`For performance concerns, try to keep the number cool feature less than ${featuresLimit}. Right now you have ${numberOfCoolFeatures}, I don't think your browser can handle it.`);
+            }
+        };
     }
 }

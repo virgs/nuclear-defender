@@ -48,13 +48,13 @@
       <div class="container splash-screen-advanced px-0">
         <div class="row row-cols-1 gy-3">
           <div class="col-12 col-lg-6">
-            <button class="btn btn-outline-secondary w-100" type="button"
+            <button class="btn btn-outline-secondary options-buttons w-100" type="button"
                     data-bs-toggle="modal" data-bs-target="#password-modal">
               Check password
             </button>
           </div>
           <div class="col-12 col-lg-6">
-            <button class="btn btn-outline-secondary w-100" type="button"
+            <button class="btn btn-outline-secondary options-buttons w-100" type="button"
                     @click="mapEditorToggle = !mapEditorToggle"
                     data-bs-toggle="modal" data-bs-target="#mapEditorModal">
               {{customMapExists ? 'Edit' : 'Create'}} custom map
@@ -180,4 +180,11 @@ export default defineComponent({
   transition: 0.45s ease-out;
 }
 
+.options-buttons {
+  color: var(--background-color);
+  background-color: var(--foreground-color);
+}
+.options-buttons:hover {
+  background-color: var(--danger-color);
+}
 </style>
