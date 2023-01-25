@@ -40,7 +40,7 @@
             </label>
             <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="9"
                       v-model="codedMapText"></textarea>
-            <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
+            <div class="form-label feedback-label invalid-feedback" style="">
               {{ editorInvalidError }}
             </div>
           </div>

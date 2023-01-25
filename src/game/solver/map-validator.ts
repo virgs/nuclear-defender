@@ -2,7 +2,8 @@ import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {Tiles} from '@/game/tiles/tiles';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
-import type {OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {Point} from '@/game/math/point';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export class MapValidator {
     private readonly validators: ((ouput: ProcessedMap) => void)[];
@@ -91,58 +92,61 @@ export class MapValidator {
 
     private createMapNotWrappedInWallsValidation() {
         return (output: ProcessedMap) => {
-            const extremityItem: OrientedTile[][] = [];
-            for (let line = 0; line < output.raw.height; ++line) {
-                let firstItemDetected = false;
-                let lastItem: OrientedTile[] | undefined = undefined;
-                for (let column = 0; column < output.raw.width; ++column) {
-                    const item: OrientedTile[] = output.raw.strippedFeatureLayeredMatrix[line][column];
-                    if (!firstItemDetected && item
-                        .some(layer => layer.code !== Tiles.empty && layer.code !== Tiles.floor)) {
-                        extremityItem.push(item);
-                        firstItemDetected = true;
-                    } else if (firstItemDetected) {
-                        if (item.length === 0 || item
-                            .every(layer => layer.code === Tiles.empty)) {
-                            extremityItem.push(lastItem!);
-                            break;
-                        } else if (column + 1 === output.raw.width) {
-                            extremityItem.push(item);
+            let staticArray: { point: Point, tile: OrientedTile[] }[] = [];
+            output.raw.strippedFeatureLayeredMatrix
+                .forEach((line, y) => line
+                    .forEach((_: any, x: number) => staticArray.push({point: new Point(x, y), tile: output.raw.strippedFeatureLayeredMatrix[y][x]})));
+
+            const heroPosition = output.removedFeatures.get(Tiles.hero)![0];
+            const toInvestigate: Point[] = [heroPosition];
+
+            staticArray = staticArray
+                .filter(staticItem => staticItem.point.isDifferentOf(heroPosition));
+            //Starting from hero position, spread every neighboor position to check the whole area and eliminate it from staticArray.
+            //If some feature is still remaining in the staticArray, it means it is not in the explorableArea
+            while (toInvestigate.length > 0) {
+                const currentPoint = toInvestigate.pop()!;
+                MapValidator.getNeighborsOf(currentPoint, output.raw)
+                    .forEach(neighbor => {
+                        if (neighbor.x < 0 || neighbor.y < 0 ||
+                            neighbor.x >= output.raw.width ||
+                            neighbor.y >= output.raw.height) {
+                            console.log(neighbor);
+                            throw Error(`You have to wrap the whole map in walls so the player doesn't wander aimlessly in this meaningless life. Even diagonals, but that's just because it looks nicer with them`);
                         }
-                    }
-                    lastItem = item;
-                }
+
+                        const staticItemInThePosition = staticArray
+                            .find(staticItem => staticItem.point.isEqualTo(neighbor));
+                        if (staticItemInThePosition?.tile
+                            .every(tile => tile.code !== Tiles.wall)) {
+                            toInvestigate.push(neighbor);
+                            staticArray = staticArray
+                                .filter(staticItem => staticItem.point.isDifferentOf(neighbor));
+                        }
+                    });
             }
 
-            for (let column = 0; column < output.raw.width; ++column) {
-                let firstItemDetected = false;
-                let lastItem: OrientedTile[] | undefined = undefined;
-                for (let line = 0; line < output.raw.height; ++line) {
-                    const item = output.raw.strippedFeatureLayeredMatrix[line][column];
-                    if (!firstItemDetected && item
-                        .some(layer => layer.code !== Tiles.empty && layer.code !== Tiles.floor)) {
-                        extremityItem.push(item);
-                        firstItemDetected = true;
-                    } else if (firstItemDetected) {
-                        if (item.length === 0 || item
-                            .every(layer => layer.code === Tiles.empty)) {
-                            extremityItem.push(lastItem!);
-                            break;
-                        } else if (column + 1 === output.raw.width) {
-                            extremityItem.push(item);
-                        }
-                    }
-                    lastItem = item;
-                }
-
-            }
-
-            if (extremityItem
-                .some(item => !item.every(layer => layer.code === Tiles.wall))) {
-
-                throw Error(`You have to wrap the whole map in walls so the player doesn't wander aimlessly in this meaningless life.`);
+            if (staticArray
+                .filter(tile => tile.tile
+                    .every(code => code.code !== Tiles.wall && code.code !== Tiles.empty && code.code !== Tiles.floor))
+                .length > 0) {
+                throw Error(`What's the point of having something outside the levels' walls? Do yourself a favor and put everything inside it.`);
             }
 
         };
+    }
+
+    private static getNeighborsOf(point: Point, raw: MultiLayeredMap): Point[] {
+        const result: Point[] = [];
+        for (let vertical = -1; vertical < 2; ++vertical) {
+            for (let horizontal = -1; horizontal < 2; ++horizontal) {
+                const h = horizontal + point.x;
+                const v = vertical + point.y;
+                if (vertical !== 0 || horizontal !== 0) {
+                    result.push(new Point(h, v));
+                }
+            }
+        }
+        return result;
     }
 }

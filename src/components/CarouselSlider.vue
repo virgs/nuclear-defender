@@ -100,7 +100,7 @@ export default defineComponent({
       };
     },
     mapStyle() {
-      const xModifier = 2;
+      const xModifier = 10;
       return (index: number): any => {
         let filterX = xModifier;
         if (index === this.currentIndex) {
@@ -115,7 +115,7 @@ export default defineComponent({
         return {
           'min-width': '30%',
           'user-select': 'none',
-          'filter': `drop-shadow(${filterX}px 2px 3px ${filterColor})`
+          'filter': `drop-shadow(${filterX}px 5px 3px ${filterColor})`
         };
       };
 
