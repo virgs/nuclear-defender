@@ -13,6 +13,7 @@
 //https://orbi.uliege.be/bitstream/2268/5895/1/bnaic2008.pdf
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
 
+// @ts-nocheck
 import * as testMap from '@/game/assets/levels/test.json';
 
 export type Level = {
@@ -20,9 +21,12 @@ export type Level = {
     map: string,
     thumbnailPath?: string,
     snapshot?: string,
-    difficultyEstimative?: number;
+    difficultyEstimative: number;
+    solution: string;
 };
 
+
+// @ts-nocheck
 export const levels: Level[] = [
     {
         map: `

@@ -10,10 +10,9 @@
 
 
 ## Next steps
+- Remove unnecessary movement analysys logic
 - Build it for production (webpack?)
-- Fix Undo logic (create its own class)
-- Understand why it gets laggy when it has a lot of initial steps and then it is played
-- Save resolved levels. Add stamps. Best time...
+- Fix Undo logic
 
         //Note needed only when loading from file
 

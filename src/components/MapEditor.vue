@@ -62,7 +62,7 @@
             <label class="form-label sokoban-label" style="float: none">
               Difficulty
             </label>
-            <map-difficulty-gauge :estimative="estimative"></map-difficulty-gauge>
+            <map-difficulty-gauge :estimative="estimative" :toggle="toggle"></map-difficulty-gauge>
           </div>
 
           <div v-if="title.toLowerCase() === 'mischief managed'" class="col-12 order-5">
@@ -100,7 +100,6 @@ import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
 import {MapValidator} from '@/game/solver/map-validator';
 import PhaserContainer from '@/components/PhaserContainer.vue';
-import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
@@ -120,15 +119,15 @@ export default defineComponent({
       loading: false,
       originalCustomLevel: originalCustomLevel,
       title: customLevel.title,
+      validator: new MapValidator(),
       codedMapText: customLevel.map,
       scene: customLevel as Level,
+      stringActions: customLevel?.solution as string | undefined,
+      estimative: customLevel?.difficultyEstimative as number | undefined,
       editorInvalidError: '',
       render: false,
       mapIsValid: true,
-      solution: undefined as SolutionOutput | undefined,
       editorRefreshKey: 0,
-      estimative: undefined as number | undefined,
-      estimatedDifficulty: -1,
       legendText: `
 <h5>Instructions</h5>
 <ul>
@@ -163,6 +162,22 @@ export default defineComponent({
     };
   },
   mounted() {
+    const mapModal = document.getElementById('mapEditorModal')!;
+    mapModal.addEventListener('show.bs.modal', () => {
+      this.render = true;
+
+      let customLevel = LongTermStore.getCustomLevel()!;
+      this.codedMapText = customLevel.map;
+      this.scene = customLevel;
+      this.stringActions = customLevel?.solution;
+      this.estimative = customLevel?.difficultyEstimative;
+
+      ++this.editorRefreshKey;
+    });
+    mapModal.addEventListener('hide.bs.modal', () => {
+      this.validator.abort();
+    });
+
     const toastTriggers = document.getElementsByClassName('copyToastBtn');
     const toast = document.getElementById('copy-toast');
     if (toastTriggers) {
@@ -181,11 +196,6 @@ export default defineComponent({
     titleIsValid() {
       return this.title.length < 25;
     },
-    stringActions() {
-      return (this.solution?.actions || [])
-          .map(action => mapActionToChar(action))
-          .join('');
-    }
   },
   watch: {
     toggle() {
@@ -196,16 +206,14 @@ export default defineComponent({
           if (textArea.offsetHeight === 0) {
             return setTimeout(adjustCanvasDimensions, 50);
           }
-          // const container = document.getElementById('phaser-container')!;
-          // container.style.height = textArea.offsetHeight + 'px';
-          // container.style.width = '100%';
-          this.refresh();
           this.render = true;
+          this.refresh();
         };
         setTimeout(adjustCanvasDimensions, 50); //it takes sometime until the container is rendered
       }
     },
     codedMapText() {
+      this.estimative = undefined;
       this.refresh();
     },
   },
@@ -214,24 +222,35 @@ export default defineComponent({
       // prevents carousel from detecting arrow keys inputs
     },
     copyStringActions() {
-      navigator.clipboard.writeText(this.stringActions);
+      navigator.clipboard.writeText(this.stringActions!);
     },
     createCustomLevel() {
       const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
       const title = titles[Math.floor(Math.random() * titles.length)];
-      return {
+      const newLevel: Level = {
+        difficultyEstimative: 0.1,
+        solution: 'drr',
         title: title,
-        map: '######\n#@   #\n# $ .#\n######',
+        map: '######\n#@   #\n# $ .#\n######'
       };
+      LongTermStore.setCustomLevel(newLevel);
+      return newLevel;
     },
-    async refresh() {
+    refresh() {
+      if (this.estimative !== undefined) {
+        console.log(this.estimative);
+        this.render = true;
+        ++this.editorRefreshKey;
+        return;
+      }
       this.render = true;
       this.estimative = undefined;
-      this.solution = undefined;
-      this.editorInvalidError = 'Verifying solution';
+      this.stringActions = undefined;
+      this.editorInvalidError = 'Verifying solution. It may take a few minutes.';
       this.mapIsValid = false;
       this.loading = true;
 
+      //@ts-ignore
       this.scene = {
         title: this.title,
         map: this.codedMapText
@@ -239,11 +258,19 @@ export default defineComponent({
       ++this.editorRefreshKey;
     },
     async processedMap(output: ProcessedMap) {
+      console.log('processedMap');
+      if (this.estimative !== undefined) {
+        this.mapIsValid = true;
+        return;
+      }
+      console.log('recalculating stuff');
       this.loading = false;
       try {
-        const solutionOutput = await new MapValidator().validate(output);
-        this.solution = solutionOutput;
+        const solutionOutput = await this.validator.validate(output);
         this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
+        this.stringActions = solutionOutput.actions!
+            .map(action => mapActionToChar(action))
+            .join('');
 
         this.mapIsValid = true;
       } catch (exc: any) {
@@ -255,6 +282,8 @@ export default defineComponent({
       const canvas: any = document.querySelector('#phaser-container canvas')!;
       this.scene.title = this.title;
       this.scene.snapshot = canvas.toDataURL();
+      this.scene.difficultyEstimative = this.estimative!;
+      this.scene.solution = this.stringActions!;
       LongTermStore.setCustomLevel(this.scene);
       LongTermStore.setCurrentSelectedIndex(0);
       this.$emit('save', this.scene);

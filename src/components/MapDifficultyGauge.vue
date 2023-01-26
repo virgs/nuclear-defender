@@ -1,9 +1,9 @@
 <template>
   <div id="map-difficulty-gauge" :style="{filter: estimative !== undefined ? 'opacity(1)' : 'opacity(0.25)'}">
   </div>
-  <!--  <div v-if="estimative === undefined" style="position: absolute; top: 40%; left: 35%; color: var(&#45;&#45;radioactive-color)"-->
-  <!--       class="spinner-border" role="status">-->
-  <!--  </div>-->
+  <div v-if="estimative === undefined" style="position: absolute; top: 40%; left: 35%; color: var(--radioactive-color)"
+       class="spinner-border" role="status">
+  </div>
 </template>
 
 <script lang="ts">
@@ -13,7 +13,7 @@ import {RadialGauge} from 'canvas-gauges';
 export default defineComponent({
   name: 'MapDifficultyGauge',
   components: {},
-  props: ['estimative'],
+  props: ['estimative', 'toggle'],
   data() {
     return {
       gauge: undefined as any,
@@ -22,14 +22,27 @@ export default defineComponent({
     };
   },
   watch: {
+    toggle() {
+      const refresher = () => {
+        const parent = document.getElementById('map-difficulty-gauge')!;
+        if (parent?.offsetHeight) {
+          this.refreshGauge();
+        } else {
+          setTimeout(refresher, 50);
+        }
+      };
+      setTimeout(refresher, 50);
+    },
     estimative() {
-      // if (this.estimative !== undefined) {
       this.refreshGauge();
-      // }
     },
   },
   mounted() {
     this.gauge = this.createGauge();
+    setTimeout(() => {
+      // this.refreshGauge()
+
+    }, 100);
   },
   unmounted() {
     clearTimeout(this.animation);
@@ -93,7 +106,7 @@ export default defineComponent({
     },
     refreshGauge() {
       const valuesToUpdate: any = {
-        value: this.estimative
+        value: this.estimative || 0
       };
 
       if (!this.dimensionsUpdated) {

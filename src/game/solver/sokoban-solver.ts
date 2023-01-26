@@ -55,8 +55,8 @@ export class SokobanSolver {
         staticFeatures: Map<Tiles, Point[]>;
         strippedMap: MultiLayeredMap
     }) {
-        this.sleepForInMs = 25;
-        this.sleepingCycle = 5000;
+        this.sleepForInMs = 20;
+        this.sleepingCycle = 1000;
         this.strippedMap = input.strippedMap;
 
         this.aborted = false;
@@ -71,10 +71,13 @@ export class SokobanSolver {
     }
 
     public abort() {
+        console.log('aborting previous solution')
         this.aborted = true;
+        this.candidatesToVisit.clear();
     }
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
+        console.log('solving map')
         this.startTime = new Date().getTime();
         const {actions, iterations, boxesLine, featureUsed} = await this.startAlgorithm(dynamicMap);
         return {

@@ -7,6 +7,7 @@ import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-
 
 export class MapValidator {
     private readonly validators: ((ouput: ProcessedMap) => void)[];
+    private solver?: SokobanSolver;
 
     public constructor() {
         this.validators = [
@@ -17,21 +18,26 @@ export class MapValidator {
             this.createNoBoxesValidation(),
             this.createNoTargetsValidation(),
             this.createNumberOfTargetsAndWallsNotEqualValidation(),
-            this.createNotSolvedYetMapValidation(),
+            this.createalreadySolvedMapValidation(),
             this.createMapNotWrappedInWallsValidation(),
         ];
+    }
+
+    public abort() {
+        this.solver?.abort();
     }
 
     public async validate(output: ProcessedMap): Promise<SolutionOutput> {
         this.validators
             .forEach(validator => validator(output));
 
-        const solver = new SokobanSolver({
+        this.solver?.abort();
+        this.solver = new SokobanSolver({
             strippedMap: output.raw,
             staticFeatures: output.pointMap,
         });
 
-        const solutionOutput = await solver.solve(output.removedFeatures);
+        const solutionOutput = await this.solver.solve(output.removedFeatures);
         if (!solutionOutput.aborted && !solutionOutput.actions) {
             throw new Error('Bravo! This map is not solvable.');
         }
@@ -81,7 +87,7 @@ export class MapValidator {
         };
     }
 
-    private createNotSolvedYetMapValidation() {
+    private createalreadySolvedMapValidation() {
         return (output: ProcessedMap) => {
             const targets = output.pointMap.get(Tiles.target)!;
             if (output.removedFeatures.get(Tiles.box)!
