@@ -86,6 +86,7 @@ export default defineComponent({
   name: 'NextLevelView',
   data() {
     const config = SessionStore.getNextLevelViewConfig()!;
+    console.log(config);
     return {
       config: config,
     };
@@ -113,16 +114,17 @@ export default defineComponent({
     },
     password() {
       if (this.config.isCustomLevel) {
-        return undefined
+        return undefined;
       }
-      const currentIndex: number = Number(LongTermStore.getCurrentSelectedIndex());
-      const indexIsNumber = !isNaN(currentIndex);
-      if (indexIsNumber && currentIndex > 0) {
-        const nextLevelIndex = currentIndex + 1;
-        const nextLevel = levels[nextLevelIndex];
-        if (nextLevel) {
-          return nextLevel.title.toLowerCase().replace(/ /g, '-');
-        }
+      const currentIndex: number = this.config.levelIndex;
+      const customLevelAdded = !!LongTermStore.getCustomLevel();
+      let nextLevelIndex = currentIndex;
+      if (!customLevelAdded) {
+        nextLevelIndex += 1;
+      }
+      const nextLevel = levels[nextLevelIndex];
+      if (nextLevel) {
+        return nextLevel.title.toLowerCase().replace(/ /g, '-');
       }
     },
     codedMap() {
@@ -135,16 +137,37 @@ export default defineComponent({
     async copy(text: string) {
       await navigator.clipboard.writeText(text);
     },
-    enableNextLevel() {
-      const currentIndex: number = LongTermStore.getCurrentSelectedIndex();
-      if (!this.config.isCustomLevel) {
-        const previousCompletion = LongTermStore.getLevelCompleteData()[currentIndex];
-        if (previousCompletion) {
-          //TODO compare and get the one that completed it in less time
-        } else {
-          //TODO add it to the completion list
+    storeRecord(): void {
+      let levelCompleteData = LongTermStore.getLevelCompleteData();
+      const previousCompletionData = levelCompleteData
+          .find(data => data.index === this.config.levelIndex);
+      const currentData = {
+        map: this.codedMap,
+        timestamp: new Date().getTime(),
+        index: this.config.levelIndex,
+        title: this.config.level.title,
+        movesCode: this.config.movesCode,
+        totalTime: this.config.totalTime
+      };
+      if (previousCompletionData) {
+        if (previousCompletionData.totalTime > currentData.totalTime) {
+          levelCompleteData = levelCompleteData
+              .filter(data => data.index !== this.config.levelIndex);
+          levelCompleteData.push(currentData);
+          LongTermStore.setLevelCompleteData(levelCompleteData);
+
         }
+      } else {
+        levelCompleteData.push(currentData);
+        LongTermStore.setLevelCompleteData(levelCompleteData);
+      }
+    },
+    enableNextLevel() {
+      const currentIndex: number = this.config.levelIndex;
+      if (!this.config.isCustomLevel) {
+        this.storeRecord();
         const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
+        console.log(currentIndex, numberOfEnabledLevels, levels.length);
         if (currentIndex < levels.length - 1) {
           const nextLevelIndex = currentIndex + 1;
           LongTermStore.setCurrentSelectedIndex(nextLevelIndex);
@@ -158,6 +181,7 @@ export default defineComponent({
       this.$router.push('/');
     }
   }
+
 });
 
 

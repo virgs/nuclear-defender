@@ -26,7 +26,7 @@
               Title is longer than 25 characters
             </div>
           </div>
-          <div class="col-9 col-lg-5 order-2 mb-4">
+          <div class="col-8 col-lg-5 order-2 mb-4">
             <label class="form-label sokoban-label">
               Editor
               <a tabindex="0" class="btn btn-lg btn-danger px-1" role="button" data-bs-toggle="popover"
@@ -38,10 +38,10 @@
                 <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
               </a>
             </label>
-            <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="9"
+            <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
                       @keydown.passive.stop="textAreaKeyPress"
                       v-model="codedMapText"></textarea>
-            <div class="form-label feedback-label invalid-feedback" style="">
+            <div class="form-label feedback-label invalid-feedback" style="position: absolute">
               {{ editorInvalidError }}
             </div>
           </div>
@@ -58,7 +58,7 @@
                  class="spinner-border" role="status">
             </div>
           </div>
-          <div class="col-3 col-lg-2 order-3 order-lg-4" style="text-align: left;">
+          <div class="col-4 col-lg-2 order-3 order-lg-4" style="text-align: left;">
             <label class="form-label sokoban-label" style="float: none">
               Difficulty
             </label>
@@ -78,7 +78,7 @@
 
         </div>
       </div>
-      <div class="modal-footer" style="border: none">
+      <div class="modal-footer mt-lg-5" style="border: none">
         <button class="btn sokoban-outlined-button mt-4" type="button" data-bs-dismiss="modal">Close
         </button>
         <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
@@ -253,6 +253,7 @@ export default defineComponent({
     },
     saveButtonClick() {
       const canvas: any = document.querySelector('#phaser-container canvas')!;
+      this.scene.title = this.title;
       this.scene.snapshot = canvas.toDataURL();
       LongTermStore.setCustomLevel(this.scene);
       LongTermStore.setCurrentSelectedIndex(0);

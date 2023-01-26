@@ -3,10 +3,10 @@
 </template>
 
 <script lang="ts">
-import * as game from '@/game/game';
+import * as game from '@/game/game-launcher';
 import {defineComponent} from 'vue';
 import {Tiles} from '@/game/tiles/tiles';
-import type {SceneConfig} from '@/game/game';
+import type {SceneConfig} from '@/game/game-launcher';
 import {Actions, mapStringToAction} from '@/game/constants/actions';
 import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
 import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';

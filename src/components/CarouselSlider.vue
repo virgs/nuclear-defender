@@ -15,9 +15,8 @@
         </div>
         <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
              :style="mapStyle(index)">
-        <img v-if="customItem(index)" class="img-fluid level-stamp" src="custom-stamp.png">
-        <!-- TODO check if this level was complete-->
-        <img v-else-if="index !== levels.length - 1" class="img-fluid level-stamp" src="solved.png">
+        <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="custom-stamp.png">
+        <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="solved.png">
       </div>
     </div>
     <ul class="carousel-controls" id="customize-controls" tabindex="0">
@@ -29,7 +28,7 @@
       </li>
     </ul>
     <h3 class="mt-2 level-title">{{ currentTitle }}</h3>
-        <!-- TODO check if this level was complete. if that'the case.. Display when and the time the solution took. A replay button, perharps?-->
+    <h3 class="mt-2 level-solution-data">{{ currentSolutionData }}</h3>
   </div>
 </template>
 
@@ -80,11 +79,6 @@ export default defineComponent({
     slider.events.on('indexChanged', (info: any) => this.updateIndex(info.index));
     this.updateIndex(this.currentIndex);
   },
-  watch: {
-    customLevel() {
-      console.log(this.customLevel);
-    },
-  },
   computed: {
     carouselContainerStyle() {
       return (index: number): any => {
@@ -94,10 +88,10 @@ export default defineComponent({
         if (index === this.currentIndex) {
           style = {
             ...style,
-          border: `solid ${this.customLevel && index === 0 ? 'var(--oldstuff-color)' : 'var(--radioactive-color)'}`,
-          'border-width': '6px 7px 6px 8px',
-          'border-radius': '95% 4% 92% 5% / 4% 95% 6% 95%',
-          }
+            border: `solid ${this.customLevel && index === 0 ? 'var(--oldstuff-color)' : 'var(--radioactive-color)'}`,
+            'border-width': '6px 7px 6px 8px',
+            'border-radius': '95% 4% 92% 5% / 4% 95% 6% 95%',
+          };
         }
         return style;
       };
@@ -135,7 +129,7 @@ export default defineComponent({
       return (index: number): string => {
         if (this.customLevel) {
           if (index === 0) {
-            return 'custom';
+            return '';
           }
           return index.toString();
         }
@@ -163,6 +157,38 @@ export default defineComponent({
         return this.customLevel.title;
       }
       return this.levels[this.currentIndex].title;
+    },
+    levelWasComplete(): (index: number) => boolean {
+      return (index: number): boolean => {
+        let realIndex = index;
+        if (!this.customLevel) {
+          realIndex += 1;
+        }
+        if (!this.customLevel || index !== 0) {
+          return !!LongTermStore.getLevelCompleteData()
+              .find(item => item.index === realIndex);
+        }
+        return false;
+      };
+    },
+    currentSolutionData(): string | undefined {
+      if (!this.customLevel || this.currentIndex !== 0) {
+        let realIndex = this.currentIndex;
+        if (!this.customLevel) {
+          realIndex += 1;
+        }
+
+        const solution = LongTermStore.getLevelCompleteData()
+            .find(item => item.index === realIndex);
+        if (solution) {
+          const date = new Date(solution.timestamp);
+          const stringDate = `${date.getDate()}/${date
+              .toLocaleString('en-US', {month: 'long'}).substring(0, 3)}/${date
+              .getFullYear()}`;
+          return `solved on ${stringDate} in ${Math.trunc(solution.totalTime / 100) / 10}s`;
+        }
+      }
+      return '';
     }
   },
   methods: {
@@ -173,7 +199,15 @@ export default defineComponent({
       if (index === 0 && this.customLevel) {
         level = this.customLevel;
       }
-      this.$emit('currentLevelChanged', level, this.currentDisplayIndex(index),
+
+      let title = index.toString();
+      if (!this.customLevel) {
+        title = (index + 1).toString();
+      } else if (index === 0) {
+        title = 'custom';
+      }
+
+      this.$emit('currentLevelChanged', level, title,
           this.customLevel && index === 0, index);
     }
   }
@@ -193,6 +227,7 @@ export default defineComponent({
 }
 
 .level-title {
+  font-family: 'Poppins', serif;
   font-size: xx-large;
   font-weight: bolder;
   text-transform: capitalize;
@@ -200,20 +235,35 @@ export default defineComponent({
   text-shadow: 2px 2px 1px var(--radioactive-color);
 }
 
-.custom-level {
+.level-solution-data {
+  min-height: 20px;
+  margin-right: 10px !important;
+  font-weight: bolder;
+  font-size: .75rem;
+  text-align: right;
+  color: var(--background-color);
+}
+
+.custom-made-stamp {
+  rotate: -20deg;
+  width: 50%;
+  position: absolute;
+  top: 5%;
+  left: 5%;
 }
 
 .level-stamp {
   rotate: 40deg;
-  width: 40%;
+  width: 70%;
   position: absolute;
-  top: 15%;
+  top: 25%;
   right: 5%;
 
   z-index: 100;
 }
 
-.selected-slider .level-stamp {
+.selected-slider .level-stamp,
+.selected-slider .custom-made-stamp {
   animation: shake 2.5s infinite;
 }
 
@@ -235,7 +285,7 @@ export default defineComponent({
     transform: rotate(3deg);
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.25);
   }
   70% {
     transform: rotate(-2deg);

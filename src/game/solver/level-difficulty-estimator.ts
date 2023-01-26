@@ -16,11 +16,11 @@ export class LevelDifficultyEstimator {
             (solution: SolutionOutput) => ({
                 value: this.getDifficulty(solution.actions!
                     .filter(action => action !== Actions.STAND)
-                    .length, 200), weight: .3
+                    .length, 200), weight: .15
             }),
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine, 80), weight: .75}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 30000), weight: .35}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 200000), weight: .5}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 60000), weight: .25}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 750000), weight: .35}),
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.featuresUsed, 1000), weight: .1}),
         ];
     }
@@ -29,12 +29,13 @@ export class LevelDifficultyEstimator {
     //100 -> nightmare
     //undefined -> impossible. literally
     public estimate(solution: SolutionOutput): number | undefined {
-        console.log(solution);
+        // console.log(solution);
         if (!solution.actions) {
             return undefined;
         }
         const sums = this.factors.reduce((acc, factor) => {
             const difficultFactor = factor(solution);
+            console.log(difficultFactor);
             return {
                 value: acc.value + (difficultFactor.value * difficultFactor.weight),
                 weight: acc.weight + difficultFactor.weight
@@ -48,6 +49,6 @@ export class LevelDifficultyEstimator {
     }
 
     private getDifficulty(value: number, max: number) {
-        return Math.min(value / max, 1);
+        return Math.min(value / max, 1.25);
     }
 }

@@ -1,9 +1,9 @@
 <template>
-  <div id="map-difficulty-gauge" :style="{filter: estimative !== undefined ? 'opacity(1)' : 'opacity(0)'}">
+  <div id="map-difficulty-gauge" :style="{filter: estimative !== undefined ? 'opacity(1)' : 'opacity(0.25)'}">
   </div>
-  <div v-if="estimative === undefined" style="position: absolute; top: 50%; left: 35%; color: var(--radioactive-color)"
-       class="spinner-border" role="status">
-  </div>
+  <!--  <div v-if="estimative === undefined" style="position: absolute; top: 40%; left: 35%; color: var(&#45;&#45;radioactive-color)"-->
+  <!--       class="spinner-border" role="status">-->
+  <!--  </div>-->
 </template>
 
 <script lang="ts">
@@ -11,7 +11,7 @@ import {defineComponent} from 'vue';
 import {RadialGauge} from 'canvas-gauges';
 
 export default defineComponent({
-  name: "MapDifficultyGauge",
+  name: 'MapDifficultyGauge',
   components: {},
   props: ['estimative'],
   data() {
@@ -23,10 +23,9 @@ export default defineComponent({
   },
   watch: {
     estimative() {
-      console.log(this.estimative)
-      if (this.estimative !== undefined) {
-        this.refreshGauge();
-      }
+      // if (this.estimative !== undefined) {
+      this.refreshGauge();
+      // }
     },
   },
   mounted() {
@@ -45,7 +44,7 @@ export default defineComponent({
         height: '10',
         valueBox: false,
 
-        value: this.estimative || 50,
+        value: this.estimative || Math.random() * 100,
         minValue: 0,
         maxValue: 100,
         startAngle: 0,
@@ -57,9 +56,9 @@ export default defineComponent({
         strokeTicks: true,
         highlights: [
           {
-            from: 50,
+            from: 25,
             to: 75,
-            color: "rgba(0,255,255,0.57)"
+            color: "rgba(14,255,255,0.7)"
           },
           {
             from: 75,
@@ -85,8 +84,8 @@ export default defineComponent({
         colorNeedleCircleInner: '#D4FA00FF',
         needleCircleOuter: true,
         needleCircleInner: true,
-        animationDuration: 1500,
-        animationRule: 'bounce',
+        animationDuration: 150,
+        animationRule: 'quad',
         borders: false,
       });
       parent!.appendChild(gauge.options.renderTo);
@@ -100,15 +99,16 @@ export default defineComponent({
       if (!this.dimensionsUpdated) {
         this.dimensionsUpdated = true;
         const parent = document.getElementById('map-difficulty-gauge')!;
-        valuesToUpdate.height = parent.clientHeight + '';
+        valuesToUpdate.height = parent.clientHeight * .75 + '';
         valuesToUpdate.width = parent.clientWidth * 1.75 + '';
-        const updateAnimationHandler = () => {
-          const variation = 3;
-          this.gauge!.update({value: this.estimative + (Math.random() * variation) - (variation * .5)});
-          this.animation = setTimeout(updateAnimationHandler, 125);
-        };
-        this.animation = setTimeout(updateAnimationHandler, 0);
       }
+      const updateAnimationHandler = () => {
+        const variation = 3;
+        const value = this.estimative !== undefined ? this.estimative : Math.random() * 50 + 25;
+        this.gauge!.update({value: value + (Math.random() * variation) - (variation * .5)});
+        this.animation = setTimeout(updateAnimationHandler, 150);
+      };
+      this.animation = setTimeout(updateAnimationHandler, 0);
       this.gauge!.update(valuesToUpdate);
     }
   }

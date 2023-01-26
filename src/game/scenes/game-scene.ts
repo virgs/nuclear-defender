@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type {SceneConfig} from '@/game/game';
+import type {SceneConfig} from '@/game/game-launcher';
 import {sounds} from '@/game/constants/sounds';
 import type {GameStage} from '@/game/engine/game-stage';
 import {InputManager} from '@/game/input/input-manager';
@@ -14,9 +14,11 @@ export class GameScene extends Phaser.Scene {
     private initialTime?: number;
     private router: any;
     private sceneConfig?: SceneConfig;
+    private readonly inputManager: InputManager;
 
     constructor() {
         super('game');
+        this.inputManager = new InputManager();
     }
 
     public init() {
@@ -93,7 +95,7 @@ export class GameScene extends Phaser.Scene {
         this.gameStage = gameStageCreator.createGameStage();
 
         if (this.sceneConfig.playable) {
-            new InputManager().init(this);
+            this.inputManager.init(this);
             this.gameStage.setInitialPlayerActions(data.config.playerInitialActions);
             this.initialTime = new Date().getTime();
         } else {
@@ -107,6 +109,7 @@ export class GameScene extends Phaser.Scene {
             if (this.allowUpdates) {
                 await this.gameStage!.update();
                 if (this.gameStage!.isLevelComplete()) {
+                    this.inputManager.clear();
                     this.sound.play(sounds.victory.key, {volume: 0.5});
                     this.allowUpdates = false;
                     setTimeout(async () => {

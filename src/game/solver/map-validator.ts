@@ -183,7 +183,6 @@ export class MapValidator {
                         tile.code !== Tiles.floor &&
                         tile.code !== Tiles.wall &&
                         tile.code !== Tiles.empty)) {
-                    console.log(item)
                     return acc + 1;
                 }
                 return acc;

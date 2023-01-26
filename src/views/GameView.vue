@@ -12,6 +12,7 @@ export default defineComponent({
     const gameViewConfig = SessionStore.getGameViewConfig()!;
     return {
       totalTime: 0,
+      startTime: Date.now(),
       playerActions: gameViewConfig.playerInitialActions,
       display: gameViewConfig.display,
       levelIndex: gameViewConfig.levelIndex,
@@ -34,7 +35,7 @@ export default defineComponent({
 
     const interval = 100;
     this.timer = setInterval(() => {
-      this.totalTime += interval;
+      this.totalTime = Date.now() - this.startTime;
     }, interval);
 
     const container = document.getElementById('phaser-container')!;

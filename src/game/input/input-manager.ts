@@ -34,4 +34,9 @@ export class InputManager {
 
     }
 
+    public clear(): void {
+        this.shortcutKeys.clear();
+        this.heroWatchingKeys.clear();
+    }
+
 }
