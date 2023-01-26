@@ -21,7 +21,6 @@ export class LevelDifficultyEstimator {
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine, 80), weight: .75}),
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 60000), weight: .25}),
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 750000), weight: .35}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.featuresUsed, 1000), weight: .1}),
         ];
     }
 

@@ -3,11 +3,11 @@ import {Tiles} from '../tiles/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
 import {Directions} from '@/game/constants/directions';
-import type {PushedBox} from '@/game/solver/movement-analyser';
-import {MovementAnalyser, MovementEvents} from '@/game/solver/movement-analyser';
+import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
-import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
+import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
+import type {MovementAnalysis, PushedBox} from '@/game/solver/movement-analyser';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
@@ -19,7 +19,6 @@ type SolutionCandidate = {
     distanceSum: number,
     hash?: string,
     boxesLine: number,
-    featureUsed: number,
     lastPushedBox: PushedBox;
 };
 
@@ -28,7 +27,6 @@ export type SolutionOutput = {
     iterations: number;
     totalTime: number;
     boxesLine: number;
-    featuresUsed: number;
     aborted: boolean;
 }
 
@@ -71,17 +69,16 @@ export class SokobanSolver {
     }
 
     public abort() {
-        console.log('aborting previous solution')
+        console.log('aborting current solution finding');
         this.aborted = true;
         this.candidatesToVisit.clear();
     }
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
-        console.log('solving map')
+        console.log('solving map');
         this.startTime = new Date().getTime();
-        const {actions, iterations, boxesLine, featureUsed} = await this.startAlgorithm(dynamicMap);
+        const {actions, iterations, boxesLine} = await this.startAlgorithm(dynamicMap);
         return {
-            featuresUsed: featureUsed,
             boxesLine: boxesLine,
             actions: actions,
             iterations: iterations,
@@ -94,7 +91,6 @@ export class SokobanSolver {
         const hero = dynamicMap.get(Tiles.hero)![0];
         const boxes = dynamicMap.get(Tiles.box)!;
         const initialCandidate: SolutionCandidate = {
-            featureUsed: 0,
             boxesLine: 0,
             lastPushedBox: {id: -1, direction: Directions.UP},
             actions: [],
@@ -135,7 +131,6 @@ export class SokobanSolver {
             actions: foundSolution?.actions,
             iterations,
             boxesLine: foundSolution?.boxesLine || 0,
-            featureUsed: foundSolution?.featureUsed || 0
         };
     }
 
@@ -160,21 +155,17 @@ export class SokobanSolver {
             });
 
             if (afterAction.mapChanged) {
-                const analysis = await this.metricEmitter.measureTime(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
+                const analysis: MovementAnalysis = await this.metricEmitter.measureTime(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
                 const moveCost = 100;
                 const heroMovementCost = action === Actions.STAND ? moveCost * .95 : moveCost;
                 let currentBoxesLine = 0;
-                if (analysis.lastPushedBox) {
-                    if (analysis.lastPushedBox.id !== candidate.lastPushedBox.id || analysis.lastPushedBox.direction !== candidate.lastPushedBox.direction) {
+                if (analysis.pushedBox) {
+                    if (analysis.pushedBox.id !== candidate.lastPushedBox.id || analysis.pushedBox.direction !== candidate.lastPushedBox.direction) {
                         currentBoxesLine = 1;
                     }
                 }
-                const featuresUsed = analysis.events
-                    .filter((event: MovementEvents) => event === MovementEvents.BOX_MOVED_ONTO_FEATURE)
-                    .length;
                 const newCandidate: SolutionCandidate = {
-                    featureUsed: candidate.featureUsed + featuresUsed,
-                    lastPushedBox: analysis.lastPushedBox || candidate.lastPushedBox,
+                    lastPushedBox: analysis.pushedBox || candidate.lastPushedBox,
                     boxesLine: candidate.boxesLine + currentBoxesLine,
                     boxes: afterAction.boxes
                         .map(box => ({point: box.nextPosition, id: box.id})),

@@ -1,0 +1,7 @@
+{
+  "difficultyEstimative": 0.01,
+  "solution": "drr",
+  "title": "title",
+  "map": "######\n#@   #\n# $ .#\n######",
+  "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
+}

@@ -7,7 +7,7 @@
       <div v-for="(_, index) in levels"
            :class="{'carousel-container': true,
                     'selected-slider': index === currentIndex,
-                    'custom-level': index === 0 && customLevel,
+                    'custom-level': index === 0,
                     'tns-item': true}"
            :style="carouselContainerStyle(index)">
         <div style="position:absolute;">
@@ -42,21 +42,21 @@ import {levels} from '@/game/levels/levels';
 
 export default defineComponent({
   name: 'CarouselSlider',
-  props: ['customLevel'],
   emits: ['currentLevelChanged'],
   data() {
     return {
       currentIndex: LongTermStore.getCurrentSelectedIndex(),
-      enabledLevels: LongTermStore.getNumberOfEnabledLevels()
+      enabledLevels: LongTermStore.getNumberOfEnabledLevels(),
+      slider: undefined as any
     };
   },
   mounted() {
     //https://github.com/ganlanyuan/tiny-slider
     const visibleItems = this.levels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
-    const slider = tns({
+    this.slider = tns({
       container: '#carousel-slider',
       items: visibleItems,
-      controls: true,
+      controls: false,
       lazyload: true,
       gutter: 0,
       center: true,
@@ -65,7 +65,7 @@ export default defineComponent({
       mouseDrag: true,
       swipeAngle: false,
       edgePadding: 10,
-      arrowKeys: true,
+      // arrowKeys: true,
       speed: 400,
       startIndex: 0,
       loop: false,
@@ -74,10 +74,13 @@ export default defineComponent({
       nav: false
     });
 
-    slider.goTo(this.currentIndex);
+    this.slider.goTo(this.currentIndex);
     // bind function to event
-    slider.events.on('indexChanged', (info: any) => this.updateIndex(info.index));
+    this.slider.events.on('indexChanged', (info: any) => this.updateIndex(info.index));
     this.updateIndex(this.currentIndex);
+  },
+  unmounted() {
+    this.slider.destroy()
   },
   computed: {
     carouselContainerStyle() {
@@ -88,7 +91,7 @@ export default defineComponent({
         if (index === this.currentIndex) {
           style = {
             ...style,
-            border: `solid ${this.customLevel && index === 0 ? 'var(--oldstuff-color)' : 'var(--radioactive-color)'}`,
+            border: `solid ${index === 0 ? 'var(--oldstuff-color)' : 'var(--radioactive-color)'}`,
             'border-width': '6px 7px 6px 8px',
             'border-radius': '95% 4% 92% 5% / 4% 95% 6% 95%',
           };
@@ -106,7 +109,7 @@ export default defineComponent({
           filterX = -xModifier;
         }
         let filterColor = 'var(--radioactive-color)';
-        if (this.customLevel && index === 0) {
+        if (index === 0) {
           filterColor = 'var(--oldstuff-color)';
         }
         return {
@@ -118,53 +121,34 @@ export default defineComponent({
 
     },
     levels(): Level[] {
-      const availableLevels = levels
-          .filter((_, index) => index < this.enabledLevels);
-      if (this.customLevel) {
-        availableLevels.unshift(this.customLevel);
-      }
-      return availableLevels;
+      return [LongTermStore.getCustomLevel(), ...levels
+          .filter((_, index) => index < this.enabledLevels)];
     },
     currentDisplayIndex(): (index: number) => string {
       return (index: number): string => {
-        if (this.customLevel) {
-          if (index === 0) {
-            return '';
-          }
-          return index.toString();
+        if (index === 0) {
+          return '';
         }
-        return (index + 1).toString();
+        return index.toString();
       };
     },
     customItem(): (index: number) => boolean {
       return (index: number): boolean => {
-        return !!(this.customLevel && index === 0);
+        return index === 0;
       };
     },
     thumbnail() {
       return (index: number): string => {
-        if (this.customLevel) {
-          if (index === 0) {
-            return this.customLevel.snapshot;
-          }
-          return this.levels[1].thumbnailPath!;
-        }
-        return this.levels[0].thumbnailPath!;
+        return this.levels[index].snapshot || this.levels[1].thumbnailPath!;
       };
     },
     currentTitle(): string {
-      if (this.currentIndex === 0 && this.customLevel) {
-        return this.customLevel.title;
-      }
       return this.levels[this.currentIndex].title;
     },
     levelWasComplete(): (index: number) => boolean {
       return (index: number): boolean => {
         let realIndex = index;
-        if (!this.customLevel) {
-          realIndex += 1;
-        }
-        if (!this.customLevel || index !== 0) {
+        if (index !== 0) {
           return !!LongTermStore.getLevelCompleteData()
               .find(item => item.index === realIndex);
         }
@@ -172,12 +156,8 @@ export default defineComponent({
       };
     },
     currentSolutionData(): string | undefined {
-      if (!this.customLevel || this.currentIndex !== 0) {
+      if (this.currentIndex !== 0) {
         let realIndex = this.currentIndex;
-        if (!this.customLevel) {
-          realIndex += 1;
-        }
-
         const solution = LongTermStore.getLevelCompleteData()
             .find(item => item.index === realIndex);
         if (solution) {
@@ -193,22 +173,16 @@ export default defineComponent({
   },
   methods: {
     updateIndex(index: number) {
+      console.log(index)
       LongTermStore.setCurrentSelectedIndex(index);
       this.currentIndex = index;
       let level = this.levels[index];
-      if (index === 0 && this.customLevel) {
-        level = this.customLevel;
-      }
-
       let title = index.toString();
-      if (!this.customLevel) {
-        title = (index + 1).toString();
-      } else if (index === 0) {
-        title = 'custom';
+      if (index === 0) {
+        title = '(custom)';
       }
 
-      this.$emit('currentLevelChanged', level, title,
-          this.customLevel && index === 0, index);
+      this.$emit('currentLevelChanged', level, title, index === 0, index);
     }
   }
 

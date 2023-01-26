@@ -104,7 +104,10 @@ export default defineComponent({
             trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
           });
     }
-    this.enableNextLevel();
+    if (!this.config.isCustomLevel) {
+      console.log('Not a custom level');
+      this.enableNextLevel();
+    }
   },
   computed: {
     movesCode() {
@@ -163,18 +166,17 @@ export default defineComponent({
       }
     },
     enableNextLevel() {
+      this.storeRecord();
       const currentIndex: number = this.config.levelIndex;
-      if (!this.config.isCustomLevel) {
-        this.storeRecord();
-        const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
-        console.log(currentIndex, numberOfEnabledLevels, levels.length);
-        if (currentIndex < levels.length - 1) {
-          const nextLevelIndex = currentIndex + 1;
-          LongTermStore.setCurrentSelectedIndex(nextLevelIndex);
-          if (nextLevelIndex === numberOfEnabledLevels) {
-            LongTermStore.setNumberOfEnabledLevels(numberOfEnabledLevels + 1);
-          }
+      const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
+      console.log(currentIndex, numberOfEnabledLevels, levels.length);
+
+      if (currentIndex < levels.length) { //There are still more levels to enable
+        if (currentIndex === numberOfEnabledLevels) {
+          LongTermStore.setNumberOfEnabledLevels(currentIndex + 1);
         }
+        console.log(`LongTermStore.setCurrentSelectedIndex(currentIndex + 1)`)
+        LongTermStore.setCurrentSelectedIndex(currentIndex + 1);
       }
     },
     continueButton() {

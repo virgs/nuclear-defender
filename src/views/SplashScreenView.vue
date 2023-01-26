@@ -6,7 +6,6 @@
       </div>
       <div class="col-12" style="min-height: fit-content;">
         <CarouselSlider :key="carouselSliderRefreshKey"
-                        :custom-level="customLevel"
                         @currentLevelChanged="currentLevelChanged">
         </CarouselSlider>
       </div>
@@ -53,14 +52,13 @@
 // script setup syntax or Composition API
 // options API
 
-import {LongTermStore} from '@/store/long-term-store';
 import {defineComponent} from 'vue';
-import CarouselSlider from '@/components/CarouselSlider.vue';
-import {mapStringToAction} from '@/game/constants/actions';
-import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
-import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
 import type {Level} from '@/game/levels/levels';
 import {SessionStore} from '@/store/session-store';
+import {mapStringToAction} from '@/game/constants/actions';
+import CarouselSlider from '@/components/CarouselSlider.vue';
+import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
+import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
 
 export default defineComponent({
   name: 'SplashScreenView',
@@ -69,7 +67,6 @@ export default defineComponent({
     return {
       carouselSliderRefreshKey: 0,
       playerActions: '',
-      customLevel: LongTermStore.getCustomLevel(),
       currentLevel: undefined as Level | undefined,
       actionsLegentText: `
       <h5>Instructions</h5>
@@ -121,11 +118,10 @@ export default defineComponent({
     },
     playButtonClick() {
       const gameViewConfig = SessionStore.getGameViewConfig()!;
-      gameViewConfig.playerInitialActions = this.playerActions
+      gameViewConfig.playerInitialActions = this.playerActions;
       this.$router.push(`/game`);
     },
-    mapEditorSaved(level: Level) {
-      this.customLevel = level;
+    mapEditorSaved() {
       ++this.carouselSliderRefreshKey;
     }
 

@@ -25,7 +25,6 @@ export type Level = {
     solution: string;
 };
 
-
 // @ts-nocheck
 export const levels: Level[] = [
     {

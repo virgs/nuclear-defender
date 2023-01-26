@@ -15,7 +15,8 @@ export type MultiLayeredMap = {
 export class StandardSokobanAnnotationTranslator {
     public translate(encodedLevel: string): MultiLayeredMap {
         const lines: string[] = this.splitInLines(replaceImplicitLayeredTiles(encodedLevel.toLowerCase()));
-        const irregularTokenizedMatrix = this.removeMetaChars(lines);
+        const noFloorBeforeWalls: string[] = this.removeFloorsBeforeWalls(lines);
+        const irregularTokenizedMatrix = this.removeMetaChars(noFloorBeforeWalls);
         const height = irregularTokenizedMatrix.length;
         const width = irregularTokenizedMatrix
             .reduce((acc, item) => item.length > acc ? item.length : acc, 0);
@@ -45,6 +46,16 @@ export class StandardSokobanAnnotationTranslator {
         return encodedLevel
             .split(/[\n|]/)
             .filter(line => line.length > 0);
+    }
+
+    private removeFloorsBeforeWalls(lines: string[]): string[] {
+        return lines
+            .map(line =>
+                line.replace(/^( )+/g, (match) => {
+                    return new Array(match.length)
+                        .fill('-')
+                        .join('');
+                }));
     }
 
     private removeMetaChars(metamap: string[]): OrientedTile[][][] {

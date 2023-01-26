@@ -16,7 +16,7 @@
       <div class="modal-header" style="border: none">
         <h2 class="modal-title" style="font-family: 'Righteous', serif">Map editor</h2>
       </div>
-      <div class="modal-body">
+      <div class="modal-body mb-lg-5">
         <div class="row">
           <div class="col-12 mb-4 order-1">
             <label class="form-label sokoban-label">Title</label>
@@ -39,7 +39,6 @@
               </a>
             </label>
             <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
-                      @keydown.passive.stop="textAreaKeyPress"
                       v-model="codedMapText"></textarea>
             <div class="form-label feedback-label invalid-feedback" style="position: absolute">
               {{ editorInvalidError }}
@@ -65,7 +64,7 @@
             <map-difficulty-gauge :estimative="estimative" :toggle="toggle"></map-difficulty-gauge>
           </div>
 
-          <div v-if="title.toLowerCase() === 'mischief managed'" class="col-12 order-5">
+          <div v-if="title.toLowerCase() === 'mischief managed'" class="col-12 order-5 mt-5">
             <label class="form-label sokoban-label">Marauder's map</label>
             <div class="input-group">
               <input type="text" class="form-control" readonly :value="stringActions">
@@ -78,14 +77,13 @@
 
         </div>
       </div>
-      <div class="modal-footer mt-lg-5" style="border: none">
+      <div class="modal-footer" style="border: none">
         <button class="btn sokoban-outlined-button mt-4" type="button" data-bs-dismiss="modal">Close
         </button>
         <button class="btn btn-outline-secondary mt-4" type="button" id="toastBtn"
                 @click="saveButtonClick"
                 data-bs-dismiss="modal"
-                :disabled="!titleIsValid || !mapIsValid ||
-                (originalCustomLevel?.title === title && originalCustomLevel?.map === codedMapText)"
+                :disabled="!titleIsValid || !mapIsValid"
                 style="background-color: var(--radioactive-color); float: right">Save
         </button>
       </div>
@@ -110,20 +108,15 @@ export default defineComponent({
   props: ['toggle'],
   emits: ['save'],
   data() {
-    let customLevel = LongTermStore.getCustomLevel()!;
-    let originalCustomLevel = customLevel;
-    if (!customLevel) {
-      customLevel = this.createCustomLevel();
-    }
+    const customLevel = LongTermStore.getCustomLevel()!;
     return {
       loading: false,
-      originalCustomLevel: originalCustomLevel,
       title: customLevel.title,
       validator: new MapValidator(),
       codedMapText: customLevel.map,
       scene: customLevel as Level,
-      stringActions: customLevel?.solution as string | undefined,
-      estimative: customLevel?.difficultyEstimative as number | undefined,
+      stringActions: customLevel.solution as string | undefined,
+      estimative: customLevel.difficultyEstimative as number | undefined,
       editorInvalidError: '',
       render: false,
       mapIsValid: true,
@@ -166,10 +159,10 @@ export default defineComponent({
     mapModal.addEventListener('show.bs.modal', () => {
       this.render = true;
 
-      let customLevel = LongTermStore.getCustomLevel()!;
+      const customLevel = LongTermStore.getCustomLevel()!;
       this.codedMapText = customLevel.map;
       this.scene = customLevel;
-      this.stringActions = customLevel?.solution;
+      this.stringActions = customLevel.solution;
       this.estimative = customLevel?.difficultyEstimative;
 
       ++this.editorRefreshKey;
@@ -218,23 +211,13 @@ export default defineComponent({
     },
   },
   methods: {
-    textAreaKeyPress() {
+    textAreaKeyPress(event: any) {
+      // console.log(event)
+      // event.preventDefault()
       // prevents carousel from detecting arrow keys inputs
     },
     copyStringActions() {
       navigator.clipboard.writeText(this.stringActions!);
-    },
-    createCustomLevel() {
-      const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
-      const title = titles[Math.floor(Math.random() * titles.length)];
-      const newLevel: Level = {
-        difficultyEstimative: 0.1,
-        solution: 'drr',
-        title: title,
-        map: '######\n#@   #\n# $ .#\n######'
-      };
-      LongTermStore.setCustomLevel(newLevel);
-      return newLevel;
     },
     refresh() {
       if (this.estimative !== undefined) {

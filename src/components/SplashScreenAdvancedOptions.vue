@@ -28,6 +28,7 @@
                    v-model="levelPassword">
             <button class="btn btn-outline-secondary toastBtn" type="button"
                     :disabled="this.levelPassword.length <= 0"
+                    @keyup.enter="checkPassword"
                     style="background-color: var(--radioactive-color)" @click="checkPassword">
               Check
             </button>
@@ -57,7 +58,7 @@
             <button class="btn btn-outline-secondary options-buttons w-100" type="button"
                     @click="mapEditorToggle = !mapEditorToggle"
                     data-bs-toggle="modal" data-bs-target="#mapEditorModal">
-              {{customMapExists ? 'Edit' : 'Create'}} custom map
+              {{ customMapExists ? 'Edit' : 'Create' }} custom map
             </button>
             <div class="modal fade" id="mapEditorModal" tabindex="-1" role="dialog"
                  aria-labelledby="mapEditorModalLabel" aria-hidden="true">
@@ -81,7 +82,7 @@ import {levels} from '@/game/levels/levels';
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',
   components: {MapEditor},
-  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels'],
+  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels', 'modalShown', 'modalHidden'],
   data() {
     return {
       customMapExists: LongTermStore.getCustomLevel() !== undefined,
@@ -91,6 +92,13 @@ export default defineComponent({
     };
   },
   mounted() {
+    const passwordModal = document.getElementById('password-modal')!;
+    const mapModal = document.getElementById('mapEditorModal')!;
+    mapModal.addEventListener('show.bs.modal', () => this.$emit('modalShown'));
+    mapModal.addEventListener('hide.bs.modal', () => this.$emit('modalHidden'));
+    passwordModal.addEventListener('hide.bs.modal', () => this.$emit('modalHidden'));
+    passwordModal.addEventListener('show.bs.modal', () => this.$emit('modalShown'));
+
     const toastTriggers = document.getElementsByClassName('toastBtn');
     const toast = document.getElementById('password-toast');
     if (toastTriggers) {
@@ -184,6 +192,7 @@ export default defineComponent({
   color: var(--background-color);
   background-color: var(--foreground-color);
 }
+
 .options-buttons:hover {
   background-color: var(--danger-color);
 }
