@@ -82,7 +82,7 @@ import {levels} from '@/game/levels/levels';
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',
   components: {MapEditor},
-  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels', 'modalShown', 'modalHidden'],
+  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels', 'advancedOptionsVisibilityChanged'],
   data() {
     return {
       customMapExists: LongTermStore.getCustomLevel() !== undefined,
@@ -94,10 +94,10 @@ export default defineComponent({
   mounted() {
     const passwordModal = document.getElementById('password-modal')!;
     const mapModal = document.getElementById('mapEditorModal')!;
-    mapModal.addEventListener('show.bs.modal', () => this.$emit('modalShown'));
-    mapModal.addEventListener('hide.bs.modal', () => this.$emit('modalHidden'));
-    passwordModal.addEventListener('hide.bs.modal', () => this.$emit('modalHidden'));
-    passwordModal.addEventListener('show.bs.modal', () => this.$emit('modalShown'));
+    mapModal.addEventListener('show.bs.modal', () => this.$emit('advancedOptionsVisibilityChanged', true));
+    mapModal.addEventListener('hide.bs.modal', () => this.$emit('advancedOptionsVisibilityChanged', false));
+    passwordModal.addEventListener('show.bs.modal', () => this.$emit('advancedOptionsVisibilityChanged', true));
+    passwordModal.addEventListener('hide.bs.modal', () => this.$emit('advancedOptionsVisibilityChanged', false));
 
     const toastTriggers = document.getElementsByClassName('toastBtn');
     const toast = document.getElementById('password-toast');
@@ -115,6 +115,7 @@ export default defineComponent({
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
+      console.log('dasdasd')
       const unblockedLevelIndex = levels
           .findIndex((level: Level) => {
             return level.title

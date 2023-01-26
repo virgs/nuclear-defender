@@ -43,6 +43,7 @@ import {levels} from '@/game/levels/levels';
 export default defineComponent({
   name: 'CarouselSlider',
   emits: ['currentLevelChanged'],
+  props: ['visible'],
   data() {
     return {
       currentIndex: LongTermStore.getCurrentSelectedIndex(),
@@ -51,12 +52,13 @@ export default defineComponent({
     };
   },
   mounted() {
+    //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
     const visibleItems = this.levels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
     this.slider = tns({
       container: '#carousel-slider',
       items: visibleItems,
-      controls: false,
+      controls: true,
       lazyload: true,
       gutter: 0,
       center: true,
@@ -65,9 +67,9 @@ export default defineComponent({
       mouseDrag: true,
       swipeAngle: false,
       edgePadding: 10,
-      // arrowKeys: true,
+      arrowKeys: this.visible,
       speed: 400,
-      startIndex: 0,
+      startIndex: this.currentIndex,
       loop: false,
       prevButton: '#prevButton',
       nextButton: '#nextButton',
@@ -78,25 +80,31 @@ export default defineComponent({
     // bind function to event
     this.slider.events.on('indexChanged', (info: any) => this.updateIndex(info.index));
     this.updateIndex(this.currentIndex);
+
+    setTimeout(() => {
+      this.$nextTick(() => {
+        const carouselSlider = document.getElementById('carousel-slider')!;
+        const fractionHeight = carouselSlider.clientHeight;
+        const intHeight = Math.ceil(fractionHeight / 10) * 10;
+        console.log(intHeight);
+        carouselSlider.style.height = intHeight + 'px';
+      });
+    }, 50);
   },
   unmounted() {
-    this.slider.destroy()
+    this.slider.destroy();
   },
   computed: {
     carouselContainerStyle() {
       return (index: number): any => {
-        let style: any = {
-          // padding: '20px',
-        };
         if (index === this.currentIndex) {
-          style = {
-            ...style,
+          return {
             border: `solid ${index === 0 ? 'var(--oldstuff-color)' : 'var(--radioactive-color)'}`,
             'border-width': '6px 7px 6px 8px',
             'border-radius': '95% 4% 92% 5% / 4% 95% 6% 95%',
           };
         }
-        return style;
+        return {};
       };
     },
     mapStyle() {
@@ -173,7 +181,6 @@ export default defineComponent({
   },
   methods: {
     updateIndex(index: number) {
-      console.log(index)
       LongTermStore.setCurrentSelectedIndex(index);
       this.currentIndex = index;
       let level = this.levels[index];

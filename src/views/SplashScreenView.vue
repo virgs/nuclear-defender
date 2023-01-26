@@ -6,10 +6,11 @@
       </div>
       <div class="col-12" style="min-height: fit-content;">
         <CarouselSlider :key="carouselSliderRefreshKey"
+                        :visible="carouselIsVisible"
                         @currentLevelChanged="currentLevelChanged">
         </CarouselSlider>
       </div>
-      <div class="col-12">
+      <div class="col-12 mb-4">
         <label class="form-label sokoban-label">Player actions
           <a tabindex="0" class="btn btn-lg btn-danger px-1"
              role="button" data-bs-toggle="popover"
@@ -28,8 +29,9 @@
           {{ invalidPlayerActionsError }}
         </div>
       </div>
-      <div class="col-12" style="text-align: left">
+      <div class="col-12 mt-2" style="text-align: left">
         <SplashScreenAdvancedOptions
+            @advancedOptionsVisibilityChanged="visible => this.carouselIsVisible = !visible"
             @mapEditorSaved="mapEditorSaved"
             @passwordUnblockedNewLevels="passwordUnblockedNewLevels"/>
       </div>
@@ -68,6 +70,7 @@ export default defineComponent({
       carouselSliderRefreshKey: 0,
       playerActions: '',
       currentLevel: undefined as Level | undefined,
+      carouselIsVisible: true,
       actionsLegentText: `
       <h5>Instructions</h5>
 <ul>
@@ -101,6 +104,11 @@ export default defineComponent({
       }
       return '';
     }
+  },
+  watch: {
+    carouselIsVisible() {
+      this.carouselSliderRefreshKey++;
+    },
   },
   methods: {
     currentLevelChanged(currentLevel: Level, displayNumber: string, isCustomLevel: boolean, index: number) {
