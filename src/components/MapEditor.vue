@@ -22,7 +22,7 @@
             <label class="form-label sokoban-label">Title</label>
             <input type="text" :class="['form-control', titleIsValid ? 'is-valid' : 'is-invalid']"
                    placeholder="Title" v-model="title">
-            <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
+            <div class="form-label feedback-label invalid-feedback" style="">
               Title is longer than 25 characters
             </div>
           </div>
@@ -40,7 +40,7 @@
             </label>
             <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
                       v-model="codedMapText"></textarea>
-            <div class="form-label feedback-label invalid-feedback" style="position: absolute">
+            <div class="form-label feedback-label invalid-feedback" style="">
               {{ editorInvalidError }}
             </div>
           </div>
@@ -245,6 +245,7 @@ export default defineComponent({
         this.stringActions = solutionOutput.actions!
             .map(action => mapActionToChar(action))
             .join('');
+        console.log('map validated');
 
         this.mapIsValid = true;
       } catch (exc: any) {

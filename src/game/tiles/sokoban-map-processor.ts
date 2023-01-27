@@ -54,7 +54,7 @@ export class SokobanMapProcessor {
         //Starting from hero position, spread to every neighboor position to check the whole area and eliminate it from toVisit.
         //If some feature is still remaining in the toVisit, it means it is not in the explorableArea
         while (toInvestigate.length > 0) {
-            const currentPoint = toInvestigate.pop()!;
+            const currentPoint = toInvestigate.shift()!;
             const staticItemInThePosition = toVisit
                 .find(staticItem => staticItem.point.isEqualTo(currentPoint))!;
             toVisit = toVisit
@@ -73,12 +73,9 @@ export class SokobanMapProcessor {
             }
 
             SokobanMapProcessor.getNeighborsOf(currentPoint, matrix)
-                .forEach(neighbor => {
-                    if (toVisit
-                        .find(item => item.point.isEqualTo(neighbor))) {
-                        toInvestigate.push(neighbor);
-                    }
-                });
+                .filter(neighbor => toVisit
+                    .find(item => item.point.isEqualTo(neighbor)))
+                .forEach(neighbor => toInvestigate.push(neighbor));
         }
 
         return {
