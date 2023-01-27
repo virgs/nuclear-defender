@@ -3,6 +3,12 @@ import type {Tiles} from '@/game/tiles/tiles';
 import type {Directions} from '@/game/constants/directions';
 import type {OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
+export type AnimateData = {
+    spritePosition: Point,
+    orientation?: Directions,
+    animationPushedBox?: boolean
+};
+
 export type GameActorConfig = {
     orientation: Directions;
     tilePosition: Point;
@@ -29,5 +35,5 @@ export interface GameActor {
 
     cover(tiles: GameActor[]): void;
 
-    animate(tilePosition: Point, orientation?: Directions): Promise<any>;
+    animate(data: AnimateData): Promise<any>;
 }

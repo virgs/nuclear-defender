@@ -1,6 +1,6 @@
-import type {Point} from '@/game/math/point';
 import {Directions} from '../constants/directions';
 import {configuration} from '../constants/configuration';
+import type {AnimateData} from '@/game/actors/game-actor';
 
 export type HeroMovement = {
     tween: {
@@ -31,18 +31,18 @@ animationMap.set(Directions.UP, {walking: HeroAnimation.UP, idle: HeroAnimation.
 
 export class HeroAnimator {
     //split tween and animation. Tween is only for movement
-    public getAnimation(spritePosition: Point, direction: Directions | undefined): HeroMovement {
+    public getAnimation(data: AnimateData): HeroMovement {
         const animation: HeroMovement = {
             walking: HeroAnimation.DOWN,
             idle: HeroAnimation.IDLE_DOWN,
             tween: {
-                x: spritePosition.x,
-                y: spritePosition.y,
+                x: data.spritePosition.x,
+                y: data.spritePosition.y,
                 duration: configuration.updateCycleInMs,
             }
         };
-        if (direction !== undefined && animationMap.has(direction)) {
-            const animationFromMap = animationMap.get(direction)!;
+        if (data.orientation !== undefined && animationMap.has(data.orientation)) {
+            const animationFromMap = animationMap.get(data.orientation)!;
             animation.walking = animationFromMap.walking;
             animation.idle = animationFromMap.idle;
         }

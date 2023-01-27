@@ -4,7 +4,7 @@ import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
@@ -62,7 +62,7 @@ export class OilyFloorActor implements GameActor {
         return undefined;
     }
 
-    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    public async animate(data: AnimateData): Promise<any> {
     }
 
 }

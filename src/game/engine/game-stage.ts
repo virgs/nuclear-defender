@@ -6,10 +6,10 @@ import {EventEmitter, EventName} from '@/event-emitter';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import {HeroActionRecorder} from '@/game/engine/hero-action-recorder';
+import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
-import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 
 export class GameStage {
     private readonly strippedMap: MultiLayeredMap;
@@ -110,7 +110,7 @@ export class GameStage {
                 // this.scene.sound.play(sounds.pushingBox.key, {volume: 0.1});
 
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-                await spriteBoxMoved?.animate(spritePosition);
+                await spriteBoxMoved?.animate({spritePosition: spritePosition});
             });
 
         const heroAnimationPromise = async () => {
@@ -118,7 +118,10 @@ export class GameStage {
             if (hero.nextPosition.isDifferentOf(this.hero.getTilePosition())) {
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
                 this.hero.setTilePosition(hero.nextPosition);
-                await this.hero!.animate(spritePosition, hero.direction);
+                await this.hero!.animate({
+                    spritePosition, orientation: hero.direction, animationPushedBox: !!boxesThatMoved
+                        .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)
+                });
             }
         };
         animationsPromises.push(heroAnimationPromise());
@@ -126,7 +129,7 @@ export class GameStage {
         this.updateActorsCoveringSituation();
 
         animationsPromises.push(...this.staticActors
-            .map(actor => actor.animate(actor.getTilePosition())));
+            .map(actor => actor.animate({spritePosition: actor.getTilePosition()})));
         await Promise.all(animationsPromises);
 
         this.animationsAreOver = true;

@@ -86,7 +86,6 @@ export default defineComponent({
         const carouselSlider = document.getElementById('carousel-slider')!;
         const fractionHeight = carouselSlider.clientHeight;
         const intHeight = Math.ceil(fractionHeight / 10) * 10;
-        console.log(intHeight);
         carouselSlider.style.height = intHeight + 'px';
       });
     }, 50);

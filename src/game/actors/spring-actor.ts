@@ -2,6 +2,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
 import {Directions} from '@/game/constants/directions';
+import type {AnimateData} from '@/game/actors/game-actor';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
@@ -88,6 +89,6 @@ export class SpringActor implements GameActor {
         return this.orientation;
     }
 
-    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    public async animate(data: AnimateData): Promise<any> {
     }
 }

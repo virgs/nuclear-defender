@@ -3,7 +3,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
 import {configuration} from '@/game/constants/configuration';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class TargetActor implements GameActor {
     private static readonly UNCOVERED_LIGHT_INTENSITY = .66;
@@ -110,7 +110,7 @@ export class TargetActor implements GameActor {
         return undefined;
     }
 
-    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    public async animate(data: AnimateData): Promise<any> {
     }
 
 }

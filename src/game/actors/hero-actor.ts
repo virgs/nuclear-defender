@@ -6,7 +6,7 @@ import {HeroAnimator} from '../animations/hero-animator';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import {Actions, mapDirectionToAction} from '../constants/actions';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
@@ -53,9 +53,9 @@ export class HeroActor implements GameActor {
         return actionInputBuffer;
     }
 
-    public async animate(spritePosition: Point, orientation?: Directions): Promise<void> {
+    public async animate(data: AnimateData): Promise<void> {
         return new Promise<void>((resolve) => {
-            const heroMovement = this.heroAnimator.getAnimation(spritePosition, orientation);
+            const heroMovement = this.heroAnimator.getAnimation(data);
             if (heroMovement) {
                 this.tweens!.add({
                     ...heroMovement.tween,

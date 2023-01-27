@@ -3,7 +3,7 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class WallActor implements GameActor {
     private readonly id: number;
@@ -59,7 +59,7 @@ export class WallActor implements GameActor {
     public cover(tiles: GameActor[]): void {
     }
 
-    public async animate(nextPosition: Point, direction?: Directions): Promise<any> {
+    public async animate(data: AnimateData): Promise<any> {
     }
 
 }

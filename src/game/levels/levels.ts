@@ -601,7 +601,7 @@ export const levels: Level[] = [
 #@$ ols##
 # $  ##
 #  ###
-###
+####
 `,
         title: 'driving license'
     }, {

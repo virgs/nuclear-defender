@@ -6,7 +6,7 @@ import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
 import {configuration} from '@/game/constants/configuration';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class BoxActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
@@ -45,7 +45,7 @@ export class BoxActor implements GameActor {
         return this.id;
     }
 
-    public async animate(spritePosition: Point, direction?: Directions) {
+    public async animate(data: AnimateData) {
         return new Promise<void>(resolve => {
             if (this.currentAnimation) {
                 console.log('abort ', this.id, this.tilePosition);
@@ -55,8 +55,8 @@ export class BoxActor implements GameActor {
                 this.currentAnimation = undefined;
             }
             const tween = {
-                x: spritePosition.x,
-                y: spritePosition.y,
+                x: data.spritePosition.x,
+                y: data.spritePosition.y,
                 duration: configuration.updateCycleInMs,
                 targets: this.sprite,
                 onInit: () => {

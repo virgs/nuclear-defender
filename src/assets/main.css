@@ -110,6 +110,9 @@ body {
 }
 
 
+.carousel-thumbnail {
+    transition: drop-shadow ease 200ms;
+}
 .carousel-thumbnail .tns-nav-active {
     background: none;
     border: 2px solid var(--radioactive-color);
