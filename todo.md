@@ -10,7 +10,6 @@
 
 
 ## Next steps
-- Remove unnecessary movement analysys logic
 - Build it for production (webpack?)
 - Fix Undo logic
 

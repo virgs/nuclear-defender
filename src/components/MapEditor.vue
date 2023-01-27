@@ -69,6 +69,7 @@
             <div class="input-group">
               <input type="text" class="form-control" readonly :value="stringActions">
               <button class="btn btn-outline-secondary copyToastBtn" type="button"
+                      :disabled="!stringActions || stringActions.length <= 0"
                       style="background-color: var(--radioactive-color)" @click="copyStringActions">
                 Copy
               </button>
@@ -112,7 +113,6 @@ export default defineComponent({
     return {
       loading: false,
       title: customLevel.title,
-      validator: new MapValidator(),
       codedMapText: customLevel.map,
       scene: customLevel as Level,
       stringActions: customLevel.solution as string | undefined,
@@ -164,11 +164,9 @@ export default defineComponent({
       this.scene = customLevel;
       this.stringActions = customLevel.solution;
       this.estimative = customLevel?.difficultyEstimative;
-
-      ++this.editorRefreshKey;
     });
     mapModal.addEventListener('hide.bs.modal', () => {
-      this.validator.abort();
+      MapValidator.getInstance().abort();
     });
 
     const toastTriggers = document.getElementsByClassName('copyToastBtn');
@@ -211,17 +209,11 @@ export default defineComponent({
     },
   },
   methods: {
-    textAreaKeyPress(event: any) {
-      // console.log(event)
-      // event.preventDefault()
-      // prevents carousel from detecting arrow keys inputs
-    },
     copyStringActions() {
       navigator.clipboard.writeText(this.stringActions!);
     },
     refresh() {
       if (this.estimative !== undefined) {
-        console.log(this.estimative);
         this.render = true;
         ++this.editorRefreshKey;
         return;
@@ -241,15 +233,14 @@ export default defineComponent({
       ++this.editorRefreshKey;
     },
     async processedMap(output: ProcessedMap) {
-      console.log('processedMap');
       if (this.estimative !== undefined) {
         this.mapIsValid = true;
         return;
       }
-      console.log('recalculating stuff');
       this.loading = false;
       try {
-        const solutionOutput = await this.validator.validate(output);
+        console.log('validating map');
+        const solutionOutput = await MapValidator.getInstance().validate(output);
         this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
         this.stringActions = solutionOutput.actions!
             .map(action => mapActionToChar(action))

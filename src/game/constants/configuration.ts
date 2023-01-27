@@ -1,7 +1,7 @@
-import tileSheetAsset from '@/game/assets/tiles/sokoban_tilesheet.png';
-
-import tileSheetAssetNormal from '@/game/assets/tiles/sokoban_tilessheet_normal.png';
 import floorTexture from '@/game/assets/tiles/floor-texture.jpg';
+import tileSheetAsset from '@/game/assets/tiles/sokoban_tilesheet.png';
+import tileSheetAssetNormal from '@/game/assets/tiles/sokoban_tilessheet_normal.png';
+import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
 const verticalPerspective = .65;
 const tileHeight = 50;
@@ -31,7 +31,11 @@ export const configuration = {
             max: 1.15,
             min: .25
         },
-        scale: 0
+        scale: 0,
+        mapLimits: {
+            lines: 20,
+            rows: 25
+        }
     },
     screenRatio: .7,
     gameWidth: 800,
@@ -51,6 +55,17 @@ export const configuration = {
         currentSelectedIndexKey: 'currentSelectedIndexKey',
         customLevelKey: 'customLevelKey',
         resolvedLevelsKey: 'resolvedLevelsKey'
+
+    },
+    solver: {
+        debug: {
+            metrics: false,
+            iterationNumber: false,
+            estimator: false
+        },
+        sleepForInMs: 10,
+        iterationPeriodToSleep: 100,
+        distanceCalculator: new ManhattanDistanceCalculator()
 
     }
 };

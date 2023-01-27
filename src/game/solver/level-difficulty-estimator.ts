@@ -1,6 +1,7 @@
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import Phaser from 'phaser';
 import {Actions} from '@/game/constants/actions';
+import {configuration} from '@/game/constants/configuration';
 
 type DifficultFactor = {
     value: number,
@@ -34,7 +35,9 @@ export class LevelDifficultyEstimator {
         }
         const sums = this.factors.reduce((acc, factor) => {
             const difficultFactor = factor(solution);
-            console.log(difficultFactor);
+            if (configuration.solver.debug.estimator) {
+                console.log(difficultFactor);
+            }
             return {
                 value: acc.value + (difficultFactor.value * difficultFactor.weight),
                 weight: acc.weight + difficultFactor.weight

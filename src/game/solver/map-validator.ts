@@ -1,26 +1,34 @@
+import {Point} from '@/game/math/point';
+import {Tiles} from '@/game/tiles/tiles';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
-import {Tiles} from '@/game/tiles/tiles';
+import {configuration} from '@/game/constants/configuration';
 import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
-import {Point} from '@/game/math/point';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 export class MapValidator {
+    //Singleton so vue doesnt watch it. It affects performance
+    private static readonly instance: MapValidator = new MapValidator();
     private readonly validators: ((ouput: ProcessedMap) => void)[];
     private solver?: SokobanSolver;
 
-    public constructor() {
+    private constructor() {
         this.validators = [
-            this.createMapDimenrionsValidation(),
+            this.createMapDimensionsValidation(),
             this.createTooManyFeaturesValidation(),
             this.createNoPlayerValidation(),
             this.createTooManyPlayersValidation(),
             this.createNoBoxesValidation(),
             this.createNoTargetsValidation(),
             this.createNumberOfTargetsAndWallsNotEqualValidation(),
-            this.createalreadySolvedMapValidation(),
+            // this.createOverlayedFeaturesMapValidation(),
+            this.createAlreadySolvedMapValidation(),
             this.createMapNotWrappedInWallsValidation(),
         ];
+    }
+
+    public static getInstance(): MapValidator {
+        return MapValidator.instance;
     }
 
     public abort() {
@@ -40,6 +48,10 @@ export class MapValidator {
         const solutionOutput = await this.solver.solve(output.removedFeatures);
         if (!solutionOutput.aborted && !solutionOutput.actions) {
             throw new Error('Bravo! This map is not solvable.');
+        }
+
+        if (configuration.solver.debug.metrics) {
+            console.log(solutionOutput);
         }
 
         return solutionOutput;
@@ -87,7 +99,7 @@ export class MapValidator {
         };
     }
 
-    private createalreadySolvedMapValidation() {
+    private createAlreadySolvedMapValidation() {
         return (output: ProcessedMap) => {
             const targets = output.pointMap.get(Tiles.target)!;
             if (output.removedFeatures.get(Tiles.box)!
@@ -110,7 +122,7 @@ export class MapValidator {
 
             staticArray = staticArray
                 .filter(staticItem => staticItem.point.isDifferentOf(heroPosition));
-            //Starting from hero position, spread every neighboor position to check the whole area and eliminate it from staticArray.
+            //Starting from hero position, spread to every neighboor position to check the whole area and eliminate it from staticArray.
             //If some feature is still remaining in the staticArray, it means it is not in the explorableArea
             while (toInvestigate.length > 0) {
                 const currentPoint = toInvestigate.pop()!;
@@ -141,10 +153,9 @@ export class MapValidator {
                             layer.code !== Tiles.empty &&
                             layer.code !== Tiles.floor));
             if (notWrapped.length > 0) {
-                throw Error(`What's the point of having something outside the levels' walls? There can be only one player explorable area.
+                throw Error(`What's the point of having something at (${notWrapped[0].point.y}, ${notWrapped[0].point.x}), outside the levels' walls? There can be only one player explorable area.
                  Do yourself a favor and put everything inside it.`);
             }
-
         };
     }
 
@@ -152,25 +163,27 @@ export class MapValidator {
         const result: Point[] = [];
         for (let vertical = -1; vertical < 2; ++vertical) {
             for (let horizontal = -1; horizontal < 2; ++horizontal) {
-                const h = horizontal + point.x;
-                const v = vertical + point.y;
+                const x = horizontal + point.x;
+                const y = vertical + point.y;
                 if (vertical !== 0 || horizontal !== 0) {
-                    result.push(new Point(h, v));
+                    if (x >= 0 || y >= 0 ||
+                        x < raw.width ||
+                        y < raw.height) {
+                        result.push(new Point(x, y));
+                    }
                 }
             }
         }
         return result;
     }
 
-    private createMapDimenrionsValidation() {
+    private createMapDimensionsValidation() {
         return (output: ProcessedMap) => {
-            const maxLinesDimension = 20;
-            if (output.raw.height > maxLinesDimension) {
-                throw Error(`Try to keep the number of lines less than ${maxLinesDimension}. Right now you have ${output.raw.height}.`);
+            if (output.raw.height > configuration.world.mapLimits.lines) {
+                throw Error(`Try to keep the number of lines less than ${configuration.world.mapLimits.lines}. Right now you have ${output.raw.height}.`);
             }
-            const maxRowsDimension = 25;
-            if (output.raw.width > maxRowsDimension) {
-                throw Error(`Try to keep the number of rows less than ${maxRowsDimension}. Right now you have ${output.raw.width}.`);
+            if (output.raw.width > configuration.world.mapLimits.rows) {
+                throw Error(`Try to keep the number of rows less than ${configuration.world.mapLimits.rows}. Right now you have ${output.raw.width}.`);
             }
         };
 
@@ -197,5 +210,12 @@ export class MapValidator {
                 throw Error(`For performance concerns, try to keep the number cool feature less than ${featuresLimit}. Right now you have ${numberOfCoolFeatures}, I don't think your browser can handle it.`);
             }
         };
+    }
+
+    private createOverlayedFeaturesMapValidation() {
+        //player cant be in box
+        //features cant be on anoter equal
+        //wall have to be alone
+        //oil cant be in treadmils and springs
     }
 }

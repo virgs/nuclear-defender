@@ -80,7 +80,7 @@ export const levels: Level[] = [
 # .$  oo.#
 10#
 `,
-        title: 'Minidevotron poket', //boxesLine = 14
+        title: 'Minidevotron poket', //7000000 iterations, 8minutes
     }, {
         map: `
 --####
@@ -513,6 +513,7 @@ export const levels: Level[] = [
         map: `
   ########
   #   #  #
+  # . $. #
   # . $. #
  ###$##  #
  #.. ##$##

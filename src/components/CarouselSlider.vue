@@ -14,6 +14,7 @@
           <h4 class="level-number">{{ currentDisplayIndex(index) }}</h4>
         </div>
         <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
+             height="60"
              :style="mapStyle(index)">
         <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="custom-stamp.png">
         <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="solved.png">
@@ -81,14 +82,17 @@ export default defineComponent({
     this.slider.events.on('indexChanged', (info: any) => this.updateIndex(info.index));
     this.updateIndex(this.currentIndex);
 
-    setTimeout(() => {
-      this.$nextTick(() => {
-        const carouselSlider = document.getElementById('carousel-slider')!;
-        const fractionHeight = carouselSlider.clientHeight;
-        const intHeight = Math.ceil(fractionHeight / 10) * 10;
+    const heightAdjuster = () => {
+      const carouselSlider = document.getElementById('carousel-slider')!;
+      const fractionHeight = carouselSlider.clientHeight;
+      const intHeight = Math.ceil(fractionHeight / 10) * 10;
+      if (intHeight > 75) {
         carouselSlider.style.height = intHeight + 'px';
-      });
-    }, 50);
+      } else {
+        setTimeout(heightAdjuster, 50);
+      }
+    };
+    setTimeout(heightAdjuster, 50);
   },
   unmounted() {
     this.slider.destroy();

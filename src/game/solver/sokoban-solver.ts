@@ -3,12 +3,12 @@ import {Tiles} from '../tiles/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
 import {Directions} from '@/game/constants/directions';
+import {configuration} from '@/game/constants/configuration';
+import type {MovementAnalysis, PushedBox} from '@/game/solver/movement-analyser';
 import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
-import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
-import type {MovementAnalysis, PushedBox} from '@/game/solver/movement-analyser';
-import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
+import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
 
 type SolutionCandidate = {
@@ -43,8 +43,6 @@ export class SokobanSolver {
     private candidatesVisitedSet: Set<string> = new Set();
     private readonly strippedMap: MultiLayeredMap;
     private readonly movementAnalyser: MovementAnalyser;
-    private readonly sleepForInMs: number;
-    private readonly sleepingCycle: number;
     private readonly metricEmitter: MetricEmitter;
     private aborted: boolean;
     private startTime?: number;
@@ -53,8 +51,6 @@ export class SokobanSolver {
         staticFeatures: Map<Tiles, Point[]>;
         strippedMap: MultiLayeredMap
     }) {
-        this.sleepForInMs = 20;
-        this.sleepingCycle = 1000;
         this.strippedMap = input.strippedMap;
 
         this.aborted = false;
@@ -63,7 +59,7 @@ export class SokobanSolver {
         this.movementAnalyser = new MovementAnalyser({
             staticFeatures: input.staticFeatures,
             strippedMap: this.strippedMap,
-            distanceCalculator: new ManhattanDistanceCalculator()
+            distanceCalculator: configuration.solver.distanceCalculator
         });
         this.metricEmitter = new MetricEmitter();
     }
@@ -78,6 +74,7 @@ export class SokobanSolver {
         console.log('solving map');
         this.startTime = new Date().getTime();
         const {actions, iterations, boxesLine} = await this.startAlgorithm(dynamicMap);
+        console.log('done solving map');
         return {
             boxesLine: boxesLine,
             actions: actions,
@@ -115,18 +112,23 @@ export class SokobanSolver {
             if (foundSolution) {
                 break;
             }
-            if (cpuBreath > this.sleepingCycle) {
+            if (cpuBreath > configuration.solver.iterationPeriodToSleep) {
                 cpuBreath = 0;
 
                 await this.metricEmitter.measureTime(Metrics.BREATHING_TIME, async () => {
+                    if (configuration.solver.debug.iterationNumber) {
+                        console.log(iterations);
+                    }
                     await new Promise(resolve => setTimeout(() => {
                         resolve(undefined);
-                    }, this.sleepForInMs));
+                    }, configuration.solver.sleepForInMs));
                 });
             }
             candidate = await this.metricEmitter.measureTime(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
-        this.metricEmitter.log();
+        if (configuration.solver.debug.metrics) {
+            this.metricEmitter.log();
+        }
         return {
             actions: foundSolution?.actions,
             iterations,
