@@ -36,10 +36,12 @@ export class MapValidator {
     }
 
     public async validate(output: ProcessedMap): Promise<SolutionOutput> {
+        this.solver?.abort();
+
+        console.log('validating map');
         this.validators
             .forEach(validator => validator(output));
 
-        this.solver?.abort();
         this.solver = new SokobanSolver({
             strippedMap: output.raw,
             staticFeatures: output.pointMap,
@@ -47,13 +49,13 @@ export class MapValidator {
 
         const solutionOutput = await this.solver.solve(output.removedFeatures);
         if (!solutionOutput.aborted && !solutionOutput.actions) {
-            throw new Error('Bravo! This map is not solvable.');
+            throw new Error('Bravo! This map is not solvable. Keep on trying!');
         }
 
         if (configuration.solver.debug.metrics) {
             console.log(solutionOutput);
         }
-
+        console.log('done validating map');
         return solutionOutput;
     }
 
@@ -156,7 +158,6 @@ export class MapValidator {
                 .filter(tile => tile.tile.length > 0 &&
                     tile.tile
                         .some(layer => layer.code !== Tiles.empty));
-            console.log(notWrapped);
             if (notWrapped.length > 0) {
                 throw Error(`What's the point of having something unnecessary at (${notWrapped[0].point.y + 1}, ${notWrapped[0].point.x + 1})? There can be only one player explorable area.
                  Do yourself a favor and put everything inside it.`);

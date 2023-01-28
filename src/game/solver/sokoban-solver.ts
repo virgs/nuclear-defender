@@ -71,10 +71,8 @@ export class SokobanSolver {
     }
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
-        console.log('solving map');
         this.startTime = new Date().getTime();
         const {actions, iterations, boxesLine} = await this.startAlgorithm(dynamicMap);
-        console.log('done solving map');
         return {
             boxesLine: boxesLine,
             actions: actions,

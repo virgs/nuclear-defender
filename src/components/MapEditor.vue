@@ -53,7 +53,7 @@
                                :key="editorRefreshKey" :scene="scene"
                                @processedMap="processedMap"/>
             </div>
-            <div v-if="loading" style="position: absolute; top: 50%; left: 50%; color: var(--radioactive-color)"
+            <div v-if="loading" :style="loadingStyle"
                  class="spinner-border" role="status">
             </div>
           </div>
@@ -184,6 +184,14 @@ export default defineComponent({
     [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
   },
   computed: {
+    loadingStyle() {
+      return {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        color: !this.mapIsValid ? 'var(--danger-color)' : 'var(--radioactive-color)'
+      };
+    },
     titleIsValid() {
       return this.title.length < 25;
     },
@@ -239,8 +247,11 @@ export default defineComponent({
       }
       this.loading = false;
       try {
-        console.log('validating map');
         const solutionOutput = await MapValidator.getInstance().validate(output);
+        if (solutionOutput.aborted) {
+          console.log('ignoring aborted')
+          return
+        }
         this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
         this.stringActions = solutionOutput.actions!
             .map(action => mapActionToChar(action))
