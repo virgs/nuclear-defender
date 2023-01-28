@@ -5,7 +5,7 @@
            aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
         <div class="d-flex sokoban-toast">
           <div class="toast-body">
-            Text copied to clipboard
+            You little rascal.
           </div>
           <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
@@ -68,7 +68,7 @@
             <map-difficulty-gauge :estimative="estimative" :toggle="toggle"></map-difficulty-gauge>
           </div>
 
-          <div v-if="title.toLowerCase() === 'mischief managed'" class="col-12 order-5 mt-5">
+          <div v-show="maraudersMapEnabled" class="col-12 order-5 mt-5">
             <label class="form-label sokoban-label">Marauder's map</label>
             <div class="input-group">
               <input type="text" class="form-control" readonly :value="stringActions">
@@ -179,15 +179,15 @@ export default defineComponent({
     });
 
     const toastTriggers = document.getElementsByClassName('copyToastBtn');
-    const toast = document.getElementById('copy-toast');
+    console.log(this.title, toastTriggers.length);
     if (toastTriggers) {
+      const toast = document.getElementById('copy-toast');
       Array.from(toastTriggers)
           .forEach(trigger => {
             // @ts-ignore
             trigger.addEventListener('click', () => new bootstrap.Toast(toast).show());
           });
     }
-
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
     //@ts-ignore
     [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
@@ -204,6 +204,9 @@ export default defineComponent({
     titleIsValid() {
       return this.title.length < 25;
     },
+    maraudersMapEnabled() {
+      return this.title.toLowerCase() === 'mischief managed';
+    }
   },
   watch: {
     toggle() {
@@ -223,7 +226,7 @@ export default defineComponent({
     codedMapText() {
       this.estimative = undefined;
       this.refresh();
-    },
+    }
   },
   methods: {
     copyStringActions() {
