@@ -1,5 +1,6 @@
 import {Tiles} from '@/game/tiles/tiles';
 import type {Point} from '@/game/math/point';
+import {sounds} from '@/game/constants/sounds';
 import type {Directions} from '../constants/directions';
 import {EventEmitter, EventName} from '@/event-emitter';
 import {HeroAnimator} from '../animations/hero-animator';
@@ -12,14 +13,16 @@ export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
+    private readonly scene: Phaser.Scene;
+    private readonly tweens: Phaser.Tweens.TweenManager;
 
-    private tweens: Phaser.Tweens.TweenManager;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private tilePosition: Point;
     private actionInputBuffer?: Actions;
 
     public constructor(config: GameActorConfig) {
         this.id = config.id;
+        this.scene = config.scene;
 
         this.heroAnimator = new HeroAnimator();
 
@@ -55,6 +58,10 @@ export class HeroActor implements GameActor {
 
     public async animate(data: AnimateData): Promise<void> {
         return new Promise<void>((resolve) => {
+            if (data.animationPushedBox) {
+                this.scene.sound.play(sounds.pushingBox.key, {volume: 0.25});
+            }
+
             const heroMovement = this.heroAnimator.getAnimation(data);
             if (heroMovement) {
                 this.tweens!.add({

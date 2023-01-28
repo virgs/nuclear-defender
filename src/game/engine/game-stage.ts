@@ -106,9 +106,6 @@ export class GameStage {
                 const spriteBoxMoved = this.boxes
                     .find(tileBox => movedBox.id === tileBox.getId())!;
 
-                //TODO check if player pushed it. Checking playerPosition and lastPlayerAction
-                // this.scene.sound.play(sounds.pushingBox.key, {volume: 0.1});
-
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
                 await spriteBoxMoved?.animate({spritePosition: spritePosition});
             });
