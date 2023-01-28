@@ -48,6 +48,27 @@
     <div class="card card-body px-0" style="background-color: transparent">
       <div class="container splash-screen-advanced px-0">
         <div class="row row-cols-1 gy-3">
+
+          <div class="col-12 mb-4">
+            <label class="form-label sokoban-label">Player initial actions
+              <a tabindex="0" class="btn btn-lg btn-danger px-1"
+                 role="button" data-bs-toggle="popover"
+                 style="background-color: transparent; border: none"
+                 title="Player initial actions"
+                 data-bs-trigger="focus"
+                 :data-bs-html="true"
+                 :data-bs-content="actionsLegentText">
+                <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
+              </a>
+            </label>
+            <input type="text" class="form-control" placeholder="Enter actions" aria-label="Insert player actions"
+                   :class="[invalidPlayerActionsError.length <= 0 ? 'is-valid' : 'is-invalid']"
+                   v-model="playerActions">
+            <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
+              {{ invalidPlayerActionsError }}
+            </div>
+          </div>
+
           <div class="col-12 col-lg-6">
             <button class="btn btn-outline-secondary options-buttons w-100" type="button"
                     data-bs-toggle="modal" data-bs-target="#password-modal">
@@ -73,23 +94,58 @@
 
 <script lang="ts">
 
-import {LongTermStore} from '@/store/long-term-store';
 import {defineComponent} from 'vue';
-import MapEditor from '@/components/MapEditor.vue';
 import type {Level} from '@/game/levels/levels';
 import {levels} from '@/game/levels/levels';
+import MapEditor from '@/components/MapEditor.vue';
+import {LongTermStore} from '@/store/long-term-store';
+import {mapStringToAction} from '@/game/constants/actions';
 
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',
   components: {MapEditor},
-  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels', 'advancedOptionsVisibilityChanged'],
+  emits: ['mapEditorSaved', 'passwordUnblockedNewLevels', 'advancedOptionsVisibilityChanged', 'playerActionsChanged'],
   data() {
     return {
       customMapExists: LongTermStore.getCustomLevel() !== undefined,
       mapEditorToggle: false,
       validLevelPassword: false,
       levelPassword: '',
+      playerActions: '',
+      actionsLegentText: `
+      <h5>Instructions</h5>
+<ul>
+<li>Each letter represents a player action</li>
+</ul>
+
+<h5>Actions list</h5>
+<ul>
+<li><b>l</b> go left</li>
+<li><b>r</b> go right</li>
+<li><b>u</b> go up</li>
+<li><b>d</b> go down</li>
+<li><b>s</b> do nothing</li>
+</ul>
+
+<p>
+So, by entering <b>druls</b>, as soon as the game begins, the player would follow this command, step by step:
+<ol>
+<li>go down</li>
+<li>go right</li>
+<li>go up</li>
+<li>go left</li>
+<li>do nothing</li>
+</ol>
+
+<small>PS: If you're wondering what's the pointing of having a feature like this. Bear in mind it's very useful to verify another player's "solution". If you know what I mean.</small>
+</p>
+`
     };
+  },
+  watch: {
+    playerActions() {
+      this.$emit('playerActionsChanged', this.invalidPlayerActionsError.length <= 0 ? this.playerActions : undefined);
+    }
   },
   mounted() {
     const passwordModal = document.getElementById('password-modal')!;
@@ -115,7 +171,7 @@ export default defineComponent({
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
-      console.log('dasdasd')
+      console.log('dasdasd');
       const unblockedLevelIndex = levels
           .findIndex((level: Level) => {
             return level.title
@@ -145,8 +201,19 @@ export default defineComponent({
         'background-color': 'var(--danger-color)',
         'color': 'var(--background-color)'
       };
+    },
+    invalidPlayerActionsError(): string {
+      if (this.playerActions.length > 0) {
+        const split = this.playerActions
+            .split('');
+        const invalidIndex = split
+            .findIndex(char => mapStringToAction(char) === undefined);
+        if (invalidIndex !== -1) {
+          return `Invalid action found (${split[invalidIndex]}) at index ${invalidIndex}`;
+        }
+      }
+      return '';
     }
-
   }
 });
 </script>

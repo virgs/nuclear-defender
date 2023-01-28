@@ -34,7 +34,8 @@ export const configuration = {
         scale: 0,
         mapLimits: {
             lines: 20,
-            rows: 25
+            rows: 25,
+            features: 30
         }
     },
     screenRatio: .7,

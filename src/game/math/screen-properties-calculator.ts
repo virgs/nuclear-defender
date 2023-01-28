@@ -1,6 +1,6 @@
 import {Point} from '@/game/math/point';
 import {configuration} from '@/game/constants/configuration';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 import Phaser from 'phaser';
 
 export class ScreenPropertiesCalculator {

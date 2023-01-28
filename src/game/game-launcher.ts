@@ -5,7 +5,7 @@ import {GameScene} from './scenes/game-scene';
 import type {Level} from '@/game/levels/levels';
 import type {Actions} from '@/game/constants/actions';
 import {configuration} from './constants/configuration';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export type SceneConfig = {
     level: Level,

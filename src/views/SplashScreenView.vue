@@ -10,27 +10,9 @@
                         @currentLevelChanged="currentLevelChanged">
         </CarouselSlider>
       </div>
-      <div class="col-12 mb-4">
-        <label class="form-label sokoban-label">Player actions
-          <a tabindex="0" class="btn btn-lg btn-danger px-1"
-             role="button" data-bs-toggle="popover"
-             style="background-color: transparent; border: none"
-             title="Player actions"
-             data-bs-trigger="focus"
-             :data-bs-html="true"
-             :data-bs-content="actionsLegentText">
-            <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
-          </a>
-        </label>
-        <input type="text" class="form-control" placeholder="Player actions" aria-label="Insert player actions"
-               :class="[invalidPlayerActionsError.length <= 0 ? 'is-valid' : 'is-invalid']"
-               v-model="playerActions">
-        <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
-          {{ invalidPlayerActionsError }}
-        </div>
-      </div>
       <div class="col-12 mt-2" style="text-align: left">
         <SplashScreenAdvancedOptions
+            @playerActionsChanged="playerActionsChanged"
             @advancedOptionsVisibilityChanged="visible => this.carouselIsVisible = !visible"
             @mapEditorSaved="mapEditorSaved"
             @passwordUnblockedNewLevels="passwordUnblockedNewLevels"/>
@@ -41,7 +23,7 @@
           <button class="btn btn-primary"
                   style="background-color: var(--radioactive-color); color: var(--foreground-color); border-color: transparent"
                   @click="playButtonClick"
-                  :disabled="invalidPlayerActionsError.length > 0 || !currentLevel"
+                  :disabled="playerActions === undefined || !currentLevel"
                   type="button">Play
           </button>
         </div>
@@ -57,7 +39,6 @@
 import {defineComponent} from 'vue';
 import type {Level} from '@/game/levels/levels';
 import {SessionStore} from '@/store/session-store';
-import {mapStringToAction} from '@/game/constants/actions';
 import CarouselSlider from '@/components/CarouselSlider.vue';
 import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
@@ -68,42 +49,14 @@ export default defineComponent({
   data() {
     return {
       carouselSliderRefreshKey: 0,
-      playerActions: '',
       currentLevel: undefined as Level | undefined,
       carouselIsVisible: true,
-      actionsLegentText: `
-      <h5>Instructions</h5>
-<ul>
-<li>Each letter represents a player action</li>
-</ul>
-
-<h5>Actions list</h5>
-<ul>
-<li><b>l</b> go left</li>
-<li><b>r</b> go right</li>
-<li><b>u</b> go up</li>
-<li><b>d</b> go down</li>
-<li><b>s</b> do nothing</li>
-</ul>`
+      playerActions: '' as string | undefined,
     };
   },
   mounted() {
     //@ts-ignore
     history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/');
-  },
-  computed: {
-    invalidPlayerActionsError(): string {
-      if (this.playerActions.length > 0) {
-        const split = this.playerActions
-            .split('');
-        const invalidIndex = split
-            .findIndex(char => mapStringToAction(char) === undefined);
-        if (invalidIndex !== -1) {
-          return `Invalide action found (${split[invalidIndex]}) at index ${invalidIndex}`;
-        }
-      }
-      return '';
-    }
   },
   watch: {
     carouselIsVisible() {
@@ -111,6 +64,9 @@ export default defineComponent({
     },
   },
   methods: {
+    playerActionsChanged(actions: string | undefined) {
+      this.playerActions = actions;
+    },
     currentLevelChanged(currentLevel: Level, displayNumber: string, isCustomLevel: boolean, index: number) {
       this.currentLevel = currentLevel;
       SessionStore.setGameViewConfig({

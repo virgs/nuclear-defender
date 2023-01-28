@@ -1,4 +1,3 @@
-import {configuration} from '@/game/constants/configuration';
 import {Directions, getDirectionFromChar} from '@/game/constants/directions';
 import {getTilesFromChar, replaceImplicitLayeredTiles, Tiles} from '@/game/tiles/tiles';
 
@@ -13,18 +12,15 @@ export type MultiLayeredMap = {
     strippedFeatureLayeredMatrix: OrientedTile[][][]
 };
 
-export class StandardSokobanAnnotationTranslator {
+export class StandardSokobanAnnotationTokennizer {
     public translate(encodedLevel: string): MultiLayeredMap {
         const lines: string[] = this.splitInLines(replaceImplicitLayeredTiles(encodedLevel.toLowerCase()));
-        const noFloorBeforeWalls: string[] = this.replaceFloorsBeforeWalls(lines);
-        const trimmedLines: string[] = this.trimLines(noFloorBeforeWalls);
-        const irregularTokenizedMatrix = this.removeMetaChars(trimmedLines);
-        const irregularStrippedMatrix: OrientedTile[][][] = this.removeUnnecessaryEndingEmpties(irregularTokenizedMatrix);
-        const height = irregularStrippedMatrix.length;
-        const width = irregularStrippedMatrix
+        const irregularTokenizedMatrix = this.removeMetaChars(lines);
+        const height = irregularTokenizedMatrix.length;
+        const width = irregularTokenizedMatrix
             .reduce((acc, item) => item.length > acc ? item.length : acc, 0);
 
-        const layeredOrientedTiles = this.createRectangularLayeredMatrix(height, width, irregularStrippedMatrix);
+        const layeredOrientedTiles = this.createRectangularLayeredMatrix(height, width, irregularTokenizedMatrix);
         return {
             height: height,
             width: width,
@@ -47,31 +43,9 @@ export class StandardSokobanAnnotationTranslator {
 
     private splitInLines(encodedLevel: string): string[] {
         return encodedLevel
-            .split(/[\n|]/)
-            .filter(line => line.length > 0);
+            .split(/[\n|]/);
     }
 
-    private replaceFloorsBeforeWalls(lines: string[]): string[] {
-        return lines
-            .map(line =>
-                line.replace(/^( )+/g, (match) => {
-                    return new Array(match.length)
-                        .fill('-')
-                        .join('');
-                }))
-            .filter(line => line
-                .split('')
-                .some(char => char !== ' ' && char !== '-'));
-    }
-
-    private trimLines(noFloorBeforeWalls: string[]): string[] {
-        const unnecessaryChars = noFloorBeforeWalls
-            .reduce((acc, line) =>
-                Math.min(line.search('#'), acc), configuration.world.mapLimits.rows);
-        return noFloorBeforeWalls
-            .map(line => line.substring(unnecessaryChars, line.length))
-            .map(line => line.substring(0, line.lastIndexOf('#') + 1));
-    }
 
     private removeMetaChars(metamap: string[]): OrientedTile[][][] {
         const baseLayerTiles = [Tiles.floor, Tiles.empty, Tiles.wall];
@@ -141,20 +115,4 @@ export class StandardSokobanAnnotationTranslator {
             .fill(orientedTile);
     }
 
-    private removeUnnecessaryEndingEmpties(irregularTokenizedMatrix: OrientedTile[][][]): OrientedTile[][][] {
-        const unnecessaryChars = irregularTokenizedMatrix
-            .reduce((acc, line, i) => {
-                const charsToCutAtTheEnd = line
-                    .reverse()
-                    .findIndex(item => item.some(tile => tile.code === Tiles.wall));
-                line.reverse();
-                return Math.min(charsToCutAtTheEnd, acc);
-            }, configuration.world.mapLimits.rows);
-        return irregularTokenizedMatrix
-            .map(line => line
-                .map((row) => {
-                    return row.filter((_, index) => index < line.length - unnecessaryChars);
-                }));
-
-    }
 }

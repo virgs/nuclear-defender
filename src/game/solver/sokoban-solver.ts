@@ -9,7 +9,7 @@ import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
 import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 type SolutionCandidate = {
     actions: Actions[],

@@ -8,8 +8,8 @@ import * as game from '@/game/game-launcher';
 import {defineComponent} from 'vue';
 import {Tiles} from '@/game/tiles/tiles';
 import {Actions, mapStringToAction} from '@/game/constants/actions';
-import {SokobanMapProcessor} from '@/game/tiles/sokoban-map-processor';
-import {StandardSokobanAnnotationTranslator} from '@/game/tiles/standard-sokoban-annotation-translator';
+import {SokobanMapStripper} from '@/game/tiles/sokoban-map-stripper';
+import {StandardSokobanAnnotationTokennizer} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export default defineComponent({
   name: 'PhaserContainer',
@@ -24,10 +24,9 @@ export default defineComponent({
   mounted() {
     if (this.render) {
       try {
-
-        const map = new StandardSokobanAnnotationTranslator()
+        const map = new StandardSokobanAnnotationTokennizer()
             .translate(this.scene.map);
-        const processedMap = new SokobanMapProcessor(map)
+        const processedMap = new SokobanMapStripper(map)
             .strip([Tiles.hero, Tiles.box]);
         const sceneConfig: SceneConfig = {
           isCustomLevel: !!this.customLevel,
@@ -42,10 +41,11 @@ export default defineComponent({
           strippedLayeredTileMatrix: processedMap.raw
         };
 
-        console.log('rendering')
+        console.log('rendering');
         this.gameInstance?.destroy(false);
         this.gameInstance = game.launch(this.containerId, sceneConfig, this.$router);
-        console.log('rendered')
+        console.log('rendered');
+
         this.$emit('processedMap', processedMap);
       } catch (e) {
         console.log('error creating map', e);

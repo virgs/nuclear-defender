@@ -9,7 +9,7 @@ import {HeroActionRecorder} from '@/game/engine/hero-action-recorder';
 import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export class GameStage {
     private readonly strippedMap: MultiLayeredMap;

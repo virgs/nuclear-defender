@@ -8,7 +8,7 @@ import {TreadmillMovementHandler} from '@/game/engine/treadmill-movement-handler
 import {OilyFloorMovementHandler} from '@/game/engine/oily-floor-movement-handler';
 import type {FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 import {OneWayDoorMovementHandler} from '@/game/engine/one-way-door-movement-handler';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export type Movement = {
     id: number,

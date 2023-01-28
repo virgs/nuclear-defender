@@ -3,8 +3,8 @@ import {Tiles} from '@/game/tiles/tiles';
 import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {configuration} from '@/game/constants/configuration';
-import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
-import type {OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {ProcessedMap} from '@/game/tiles/sokoban-map-stripper';
+import type {OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export class MapValidator {
     //Singleton so vue doesnt watch it. It affects performance
@@ -15,15 +15,16 @@ export class MapValidator {
     private constructor() {
         this.validators = [
             this.createMapDimensionsValidation(),
-            this.createTooManyFeaturesValidation(),
-            this.createNoPlayerValidation(),
-            this.createTooManyPlayersValidation(),
+            this.createNumberOfPlayerValidation(),
             this.createNoBoxesValidation(),
             this.createNoTargetsValidation(),
-            this.createNumberOfTargetsAndWallsNotEqualValidation(),
-            this.createOverlayedFeaturesMapValidation(),
             this.createAlreadySolvedMapValidation(),
+            this.createNumberOfTargetsAndWallsNotEqualValidation(),
+            this.createTooManyFeaturesValidation(),
             this.createMapNotWrappedInWallsValidation(),
+            this.createEmptyLineValidation(),
+            this.createUnnecessaryEmptyTilesValidation(),
+            this.createOverlayedFeaturesMapValidation(),
         ];
     }
 
@@ -38,7 +39,7 @@ export class MapValidator {
     public async validate(output: ProcessedMap): Promise<SolutionOutput> {
         this.solver?.abort();
 
-        console.log('validating map');
+        console.log('validating map structure');
         this.validators
             .forEach(validator => validator(output));
 
@@ -46,6 +47,8 @@ export class MapValidator {
             strippedMap: output.raw,
             staticFeatures: output.pointMap,
         });
+        console.log(this.solver)
+        console.log('checking whether the map is solvable');
 
         const solutionOutput = await this.solver.solve(output.removedFeatures);
         if (!solutionOutput.aborted && !solutionOutput.actions) {
@@ -67,18 +70,13 @@ export class MapValidator {
         };
     }
 
-    private createNoPlayerValidation() {
+    private createNumberOfPlayerValidation() {
         return (output: ProcessedMap) => {
-            if (output.removedFeatures.get(Tiles.hero)!.length === 0) {
-                throw Error('You need at least ONE player to push things around.');
-            }
-        };
-    }
-
-    private createTooManyPlayersValidation() {
-        return (output: ProcessedMap) => {
-            if (output.removedFeatures.get(Tiles.hero)!.length > 1) {
-                throw Error('Playing with more than ONE player may be a future feature, but it is not allowed yet.');
+            const numberOfHeros = output.removedFeatures.get(Tiles.hero)!.length;
+            if (numberOfHeros === 0) {
+                throw Error(`Let's start by adding at least ONE hero to push things around. Shall we?`);
+            } else if (numberOfHeros > 1) {
+                throw Error('Playing with more than ONE hero may be a future feature, but it is not allowed yet.');
             }
         };
     }
@@ -86,7 +84,7 @@ export class MapValidator {
     private createNoTargetsValidation() {
         return (output: ProcessedMap) => {
             if (output.pointMap.get(Tiles.target)!.length === 0) {
-                throw Error('How can a map be solved if there is no target to push barrell to.');
+                throw Error('Let there be light. How can a map be solved if there is no target to push barrells to.');
             }
         };
     }
@@ -96,7 +94,7 @@ export class MapValidator {
             const targetNumber = output.pointMap.get(Tiles.target)!.length;
             const boxNumber = output.removedFeatures.get(Tiles.box)!.length;
             if (targetNumber !== boxNumber) {
-                throw Error(`Number of targets (${targetNumber}) and barrels (${boxNumber}) has to be the same. Help me to help you.`);
+                throw Error(`Numbers of targets (${targetNumber}) and barrels (${boxNumber}) have to be the same. Help me to help you.`);
             }
         };
     }
@@ -114,10 +112,10 @@ export class MapValidator {
 
     private createMapNotWrappedInWallsValidation() {
         return (output: ProcessedMap) => {
-            let toVisit: { point: Point, tile: OrientedTile[] }[] = [];
+            let toVisit: { point: Point, tiles: OrientedTile[] }[] = [];
             output.raw.strippedFeatureLayeredMatrix
                 .forEach((line, y) => line
-                    .forEach((_: any, x: number) => toVisit.push({point: new Point(x, y), tile: output.raw.strippedFeatureLayeredMatrix[y][x]})));
+                    .forEach((_: any, x: number) => toVisit.push({point: new Point(x, y), tiles: output.raw.strippedFeatureLayeredMatrix[y][x]})));
 
             const heroPosition = output.removedFeatures.get(Tiles.hero)![0];
             const toInvestigate: Point[] = [heroPosition];
@@ -126,17 +124,19 @@ export class MapValidator {
             //If some feature is still remaining in the toVisit, it means it is not in the explorableArea
             while (toInvestigate.length > 0) {
                 const currentPoint = toInvestigate.shift()!;
-                // console.log(currentPoint);
                 const staticItemInThePosition = toVisit
                     .find(staticItem => staticItem.point.isEqualTo(currentPoint))!;
                 toVisit = toVisit
                     .filter(item => item.point.isDifferentOf(currentPoint));
-                // console.log(staticItemInThePosition);
                 if (!staticItemInThePosition) { //item visited before
                     continue;
-                } else if (staticItemInThePosition.tile
+                } else if (staticItemInThePosition.tiles
                     .some(tile => tile.code === Tiles.wall)) {
                     continue;
+                } else if (staticItemInThePosition.tiles
+                    .some(tile => tile.code === Tiles.empty)) {
+                    throw Error(`Did you notice there is an empty space at (${currentPoint.y + 1}, ${currentPoint.x + 1}). I did.
+                    It doesn't look cool. Replace it with something more meaningful.`);
                 }
                 MapValidator.getNeighborsOf(currentPoint)
                     .forEach(neighbor => {
@@ -144,7 +144,7 @@ export class MapValidator {
                             neighbor.x >= output.raw.width ||
                             neighbor.y >= output.raw.height) {
                             throw Error(`Our hero is a escapper.
-                            Wrap the whole level in walls otherwise it may be very hard to get the hero back. Put a wall on (${currentPoint.y + 1}, ${currentPoint.x + 1})`);
+                            Wrap the whole level in walls otherwise it may be very hard to get the hero back. Put a wall somewhere around (${currentPoint.y + 1}, ${currentPoint.x + 1})`);
                         }
 
                         if (toVisit
@@ -155,11 +155,11 @@ export class MapValidator {
             }
 
             const notWrapped = toVisit
-                .filter(tile => tile.tile.length > 0 &&
-                    tile.tile
+                .filter(tile => tile.tiles.length > 0 &&
+                    tile.tiles
                         .some(layer => layer.code !== Tiles.empty));
             if (notWrapped.length > 0) {
-                throw Error(`What's the point of having something unnecessary at (${notWrapped[0].point.y + 1}, ${notWrapped[0].point.x + 1})? There can be only one player explorable area.
+                throw Error(`What's the point of having something unnecessary at (${notWrapped[0].point.y + 1}, ${notWrapped[0].point.x + 1})? There can be only one hero explorable area.
                  Do yourself a favor and put everything inside it.`);
             }
         };
@@ -197,7 +197,7 @@ export class MapValidator {
             output.raw.strippedFeatureLayeredMatrix
                 .forEach((line, y) => line
                     .forEach((_: any, x: number) => staticArray.push({point: new Point(x, y), tile: output.raw.strippedFeatureLayeredMatrix[y][x]})));
-            const featuresLimit = 30;
+            const featuresLimit = configuration.world.mapLimits.features;
             const numberOfCoolFeatures = staticArray.reduce((acc, item) => {
                 if (item.tile
                     .some(tile => tile.code !== Tiles.target &&
@@ -209,7 +209,8 @@ export class MapValidator {
                 return acc;
             }, 0);
             if (numberOfCoolFeatures > featuresLimit) {
-                throw Error(`For performance concerns, try to keep the number cool feature less than ${featuresLimit}. Right now you have ${numberOfCoolFeatures}, I don't think your browser can handle it.`);
+                throw Error(`For performance concerns, try to keep the number cool feature less than ${featuresLimit}.
+                Right now you have ${numberOfCoolFeatures}, I don't think your browser can handle it.`);
             }
         };
     }
@@ -220,12 +221,13 @@ export class MapValidator {
             const boxesPosition = output.removedFeatures.get(Tiles.box)!;
             if (boxesPosition
                 .some(box => box.isEqualTo(heroPosition))) {
-                throw Error(`Hero can't be in the same position as a box. Nice try, though. Fix error at (${heroPosition.y}, ${heroPosition.x})`);
+                throw Error(`Hero can't be in the same position as a box. Nice try, though. Fix error at (${heroPosition.y + 1}, ${heroPosition.x + 1})`);
             }
-            if (boxesPosition
-                .some((box, index) => boxesPosition
-                    .some((anotherBox, anotherIndex) => box.isEqualTo(anotherBox) && index !== anotherIndex))) {
-                throw Error(`Two boxes can't share the same position. Be more creative. Fix error at (${heroPosition.y}, ${heroPosition.x})`);
+            const twoBoxesPosition = boxesPosition
+                .find((box, index) => boxesPosition
+                    .some((anotherBox, anotherIndex) => box.isEqualTo(anotherBox) && index !== anotherIndex));
+            if (twoBoxesPosition) {
+                throw Error(`Two boxes can't share the same position. Be more creative. Fix error at (${twoBoxesPosition.y + 1}, ${twoBoxesPosition.x + 1})`);
             }
 
             for (let y = 0; y < output.raw.height; ++y) {
@@ -236,7 +238,7 @@ export class MapValidator {
                         .length;
                     if (repeated > 1) {
                         throw Error(`A position can't contain more than one of the same element. Do you think they would get together and become stronger?
-                         This is not power rangers. Fix it at (${y}, ${x}).`);
+                         This is not power rangers. Fix it at (${y + 1}, ${x + 1}).`);
                     }
                 }
             }
@@ -256,7 +258,7 @@ export class MapValidator {
                     if (wall.isEqualTo(heroPosition) ||
                         boxesPosition
                             .some(box => box.isEqualTo(wall))) {
-                        throw Error(`Walls can't share position with anything else. Do I really have to say this? Fix error at (${heroPosition.y + 1}, ${heroPosition.x + 1}).`);
+                        throw Error(`Walls can't share position with anything else. Do I really have to say this? Fix error at (${wall.y + 1}, ${wall.x + 1}).`);
                     }
                 });
 
@@ -273,4 +275,42 @@ export class MapValidator {
                 });
         };
     }
+
+    private createUnnecessaryEmptyTilesValidation() {
+        return (output: ProcessedMap) => {
+            if (output.raw.strippedFeatureLayeredMatrix
+                .every(line => line[0]
+                    .every(tile => tile.code === Tiles.floor))) {
+                throw Error(`Remove unnecessary empty tile before every line. You're wasting characters`);
+            }
+
+            for (let y = 0; y < output.raw.height; ++y) {
+                for (let x = output.raw.width - 1; x >= 0; --x) {
+                    const tiles = output.raw.strippedFeatureLayeredMatrix[y][x];
+                    if (tiles.every(tile => tile.code === Tiles.wall)) {
+                        break;
+                    }
+                    if (tiles.length > 0 && tiles
+                        .every(tile => tile.code === Tiles.empty || tile.code === Tiles.floor)) {
+                        console.log(tiles, y, x);
+                        throw Error(`Remove unnecessary chars in the end of line ${y + 1}. It makes your map messy. You don't want it, right?`);
+                    }
+                }
+            }
+        };
+    }
+
+    private createEmptyLineValidation() {
+        return (output: ProcessedMap) => {
+            output.raw.strippedFeatureLayeredMatrix
+                .forEach((line, index) => {
+                    if (line
+                        .every(tiles => tiles
+                            .every(layer => layer.code !== Tiles.wall))) {
+                        throw Error(`Line ${index + 1} is pretty much empty. What's the sense of having it?`);
+                    }
+                });
+        };
+    };
+
 }

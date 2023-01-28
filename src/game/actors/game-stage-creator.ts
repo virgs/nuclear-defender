@@ -14,7 +14,7 @@ import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
 import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export class GameStageCreator {
     private readonly scene: Phaser.Scene;

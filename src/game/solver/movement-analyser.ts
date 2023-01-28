@@ -6,7 +6,7 @@ import type {DistanceCalculator} from '@/game/math/distance-calculator';
 import {BoxClusterDeadlockDetector} from '@/game/solver/box-cluster-deadlock-detector';
 import {BoxGluedToWallDetector} from '@/game/solver/box-glued-to-wall-deadlock-detector';
 import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-translator';
+import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
 
 export type PushedBox = { id: number, direction: Directions };
 export type MovementAnalysis = {

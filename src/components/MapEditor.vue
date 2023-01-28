@@ -38,10 +38,14 @@
                 <i class="fa-regular fa-circle-question" style="color: var(--radioactive-color)"></i>
               </a>
             </label>
-            <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
-                      v-model="codedMapText"></textarea>
-            <div class="form-label feedback-label invalid-feedback" style="">
-              {{ editorInvalidError }}
+            <div style="display: inline-block">
+              <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
+                        id="map-editor-text-area"
+                        v-model="codedMapText"></textarea>
+              <small class="cursor-position">{{ cursorPotision.y }}:{{ cursorPotision.x }}</small>
+              <div class="form-label feedback-label invalid-feedback" style="">
+                {{ editorInvalidError }}
+              </div>
             </div>
           </div>
           <div class="col-12 col-lg-5 order-4 order-lg-3" style="text-align: left">
@@ -94,13 +98,14 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
+import {Point} from '@/game/math/point';
 import type {Level} from '@/game/levels/levels';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
 import {MapValidator} from '@/game/solver/map-validator';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
-import type {ProcessedMap} from '@/game/tiles/sokoban-map-processor';
+import type {ProcessedMap} from '@/game/tiles/sokoban-map-stripper';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
 
 export default defineComponent({
@@ -121,6 +126,7 @@ export default defineComponent({
       render: false,
       mapIsValid: true,
       editorRefreshKey: 0,
+      cursorPotision: new Point(0, 0),
       legendText: `
 <h5>Instructions</h5>
 <ul>
@@ -155,6 +161,9 @@ export default defineComponent({
     };
   },
   mounted() {
+    window.addEventListener('keyup', () => this.updateCursorPosition());
+    window.addEventListener('click', () => this.updateCursorPosition());
+
     const mapModal = document.getElementById('mapEditorModal')!;
     mapModal.addEventListener('show.bs.modal', () => {
       this.render = true;
@@ -249,8 +258,8 @@ export default defineComponent({
       try {
         const solutionOutput = await MapValidator.getInstance().validate(output);
         if (solutionOutput.aborted) {
-          console.log('ignoring aborted')
-          return
+          console.log('ignoring aborted');
+          return;
         }
         this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
         this.stringActions = solutionOutput.actions!
@@ -274,7 +283,23 @@ export default defineComponent({
       LongTermStore.setCurrentSelectedIndex(0);
       this.$emit('save', this.scene);
     },
-
+    updateCursorPosition() {
+      const input = document.getElementById('map-editor-text-area');
+      if (input) {
+        //@ts-ignore
+        const selectedChars = input.selectionStart;
+        const line = this.codedMapText
+            .split('')
+            .filter((char, index) => char === '\n' && index < selectedChars)
+            .length;
+        const lastLineBreak = this.codedMapText
+            .substring(0, selectedChars)
+            .lastIndexOf('\n');
+        const col = selectedChars - lastLineBreak - 1;
+        this.cursorPotision.y = line + 1;
+        this.cursorPotision.x = col + 1;
+      }
+    }
   }
 });
 </script>
@@ -285,4 +310,12 @@ export default defineComponent({
   border: 1px solid var(--radioactive-color);
 }
 
+.cursor-position {
+  position: absolute;
+  font-family: 'Martian Mono', serif;
+  font-weight: bolder;
+  color: var(--background-color);
+  top: -25px;
+  right: 10px;
+}
 </style>
