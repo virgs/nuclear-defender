@@ -1,15 +1,15 @@
 import Heap from 'heap';
-import {Tiles} from '../tiles/tiles';
+import {Tiles} from '../levels/tiles';
 import type {Point} from '../math/point';
 import {Actions} from '../constants/actions';
 import {Directions} from '@/game/constants/directions';
 import {configuration} from '@/game/constants/configuration';
-import type {MovementAnalysis, PushedBox} from '@/game/solver/movement-analyser';
-import {MovementAnalyser} from '@/game/solver/movement-analyser';
 import {MetricEmitter, Metrics} from '@/game/solver/metric-emitter';
-import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import {MovementAnalyser} from '@/game/solver/analyser/movement-analyser';
+import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
+import type {MovementAnalysis, PushedBox} from '@/game/solver/analyser/movement-analyser';
+import type {MultiLayeredMap, OrientedTile} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 type SolutionCandidate = {
     actions: Actions[],

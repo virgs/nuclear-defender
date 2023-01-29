@@ -1,6 +1,6 @@
 import {Point} from '@/game/math/point';
-import {Tiles} from '@/game/tiles/tiles';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import {Tiles} from '@/game/levels/tiles';
+import type {MultiLayeredMap, OrientedTile} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export type ProcessedMap = {
     removedFeatures: Map<Tiles, Point[]>;

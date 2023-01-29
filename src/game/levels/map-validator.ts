@@ -1,13 +1,13 @@
 import {Point} from '@/game/math/point';
-import {Tiles} from '@/game/tiles/tiles';
-import type {SolutionOutput} from '@/game/solver/sokoban-solver';
 import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {configuration} from '@/game/constants/configuration';
-import type {ProcessedMap} from '@/game/tiles/sokoban-map-stripper';
-import type {OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import type {SolutionOutput} from '@/game/solver/sokoban-solver';
+import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
+import {Tiles} from '@/game/levels/tiles';
+import type {OrientedTile} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export class MapValidator {
-    //Singleton so vue doesnt watch it. It affects performance
+    //Singleton so vue doesn't watch it. It affects performance
     private static readonly instance: MapValidator = new MapValidator();
     private readonly validators: ((ouput: ProcessedMap) => void)[];
     private solver?: SokobanSolver;

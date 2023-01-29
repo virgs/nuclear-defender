@@ -99,14 +99,14 @@
 <script lang="ts">
 import {defineComponent} from 'vue';
 import {Point} from '@/game/math/point';
-import type {Level} from '@/game/levels/levels';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
-import {MapValidator} from '@/game/solver/map-validator';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
-import type {ProcessedMap} from '@/game/tiles/sokoban-map-stripper';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
+import type {Level} from '@/game/levels/levels';
+import {MapValidator} from '@/game/levels/map-validator';
+import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
 
 export default defineComponent({
   name: 'MapEditor',
@@ -179,7 +179,6 @@ export default defineComponent({
     });
 
     const toastTriggers = document.getElementsByClassName('copyToastBtn');
-    console.log(this.title, toastTriggers.length);
     if (toastTriggers) {
       const toast = document.getElementById('copy-toast');
       Array.from(toastTriggers)
@@ -293,7 +292,7 @@ export default defineComponent({
         const selectedChars = input.selectionStart;
         const line = this.codedMapText
             .split('')
-            .filter((char, index) => char === '\n' && index < selectedChars)
+            .filter((char: string, index: number) => char === '\n' && index < selectedChars)
             .length;
         const lastLineBreak = this.codedMapText
             .substring(0, selectedChars)

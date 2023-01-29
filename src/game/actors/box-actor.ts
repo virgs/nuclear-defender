@@ -1,11 +1,11 @@
 import type Phaser from 'phaser';
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
 import {configuration} from '@/game/constants/configuration';
-import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
+import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
 import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class BoxActor implements GameActor {

@@ -1,4 +1,4 @@
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
 import type {Directions} from '../constants/directions';
@@ -6,7 +6,7 @@ import {EventEmitter, EventName} from '@/event-emitter';
 import {HeroAnimator} from '../animations/hero-animator';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import {Actions, mapDirectionToAction} from '../constants/actions';
-import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
+import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
 import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
 
 export class HeroActor implements GameActor {

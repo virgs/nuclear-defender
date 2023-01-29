@@ -1,5 +1,5 @@
 import {Directions, getDirectionFromChar} from '@/game/constants/directions';
-import {getTilesFromChar, replaceImplicitLayeredTiles, Tiles} from '@/game/tiles/tiles';
+import {getTilesFromChar, replaceImplicitLayeredTiles, Tiles} from '@/game/levels/tiles';
 
 export type OrientedTile = {
     code: Tiles

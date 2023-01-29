@@ -1,5 +1,5 @@
 import type {Point} from '@/game/math/point';
-import type {Tiles} from '@/game/tiles/tiles';
+import type {Tiles} from '@/game/levels/tiles';
 import type {Directions} from '@/game/constants/directions';
 import type {Actions} from '@/game/constants/actions';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';

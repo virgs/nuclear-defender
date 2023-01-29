@@ -6,7 +6,7 @@ export type GameViewConfig = {
     display: string;
     isCustom: boolean;
     levelIndex: number;
-    playerInitialActions: string;
+    playerInitialActions?: string;
 };
 
 export type NextLevelViewConfig = {

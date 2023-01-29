@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
-import type {Tiles} from '@/game/tiles/tiles';
+import type {Tiles} from '@/game/levels/tiles';
 import {GameScene} from './scenes/game-scene';
 import type {Level} from '@/game/levels/levels';
 import type {Actions} from '@/game/constants/actions';
 import {configuration} from './constants/configuration';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import type {MultiLayeredMap} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export type SceneConfig = {
     level: Level,

@@ -1,7 +1,7 @@
 import type {Point} from '@/game/math/point';
-import type {Tiles} from '@/game/tiles/tiles';
+import type {Tiles} from '@/game/levels/tiles';
 import type {Directions} from '@/game/constants/directions';
-import type {OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import type {OrientedTile} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export type AnimateData = {
     spritePosition: Point,

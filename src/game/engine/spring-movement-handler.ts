@@ -1,4 +1,4 @@
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import {Directions, getOppositeDirectionOf} from '@/game/constants/directions';

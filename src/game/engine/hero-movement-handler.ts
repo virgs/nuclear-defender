@@ -1,5 +1,5 @@
 import {Point} from '@/game/math/point';
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Directions} from '@/game/constants/directions';
 import type {ActData, FeatureMovementHandler} from '@/game/engine/feature-movement-handler';
 import type {Movement, MovementOrchestrator, OrientedPoint} from '@/game/engine/movement-orchestrator';

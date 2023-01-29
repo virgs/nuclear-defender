@@ -1,7 +1,7 @@
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import {Directions} from '@/game/constants/directions';
-import {DeadLockDetector} from '@/game/solver/dead-lock-detector';
+import {DeadLockDetector} from '@/game/solver/analyser/dead-lock-detector';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 
 type SegmentAnalysis = { boxes: number; emptiesAhead: number; targets: number };

@@ -1,4 +1,4 @@
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 
 export class TileDepthCalculator {
 

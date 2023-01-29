@@ -108,6 +108,10 @@ export default defineComponent({
       console.log('Not a custom level');
       this.enableNextLevel();
     }
+    window.addEventListener('keyup', this.keyPressed);
+  },
+  unmounted() {
+    window.removeEventListener('keyup', this.keyPressed);
   },
   computed: {
     movesCode() {
@@ -120,12 +124,7 @@ export default defineComponent({
         return undefined;
       }
       const currentIndex: number = this.config.levelIndex;
-      const customLevelAdded = !!LongTermStore.getCustomLevel();
-      let nextLevelIndex = currentIndex;
-      if (!customLevelAdded) {
-        nextLevelIndex += 1;
-      }
-      const nextLevel = levels[nextLevelIndex];
+      const nextLevel = levels[currentIndex];
       if (nextLevel) {
         return nextLevel.title.toLowerCase().replace(/ /g, '-');
       }
@@ -137,6 +136,11 @@ export default defineComponent({
     }
   },
   methods: {
+    keyPressed(key: any) {
+      if (key.code === 'Enter') {
+          this.continueButton();
+      }
+    },
     async copy(text: string) {
       await navigator.clipboard.writeText(text);
     },
@@ -175,7 +179,7 @@ export default defineComponent({
         if (currentIndex === numberOfEnabledLevels) {
           LongTermStore.setNumberOfEnabledLevels(currentIndex + 1);
         }
-        console.log(`LongTermStore.setCurrentSelectedIndex(currentIndex + 1)`)
+        console.log(`LongTermStore.setCurrentSelectedIndex(currentIndex + 1)`);
         LongTermStore.setCurrentSelectedIndex(currentIndex + 1);
       }
     },

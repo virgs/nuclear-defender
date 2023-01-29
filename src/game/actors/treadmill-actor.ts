@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
 import {Directions} from '@/game/constants/directions';

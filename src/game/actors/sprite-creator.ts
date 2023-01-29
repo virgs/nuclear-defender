@@ -1,8 +1,8 @@
 import type Phaser from 'phaser';
 import type {Point} from '@/game/math/point';
-import type {Tiles} from '@/game/tiles/tiles';
+import type {Tiles} from '@/game/levels/tiles';
 import {configuration} from '@/game/constants/configuration';
-import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
+import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
 
 export class SpriteCreator {
     private readonly scene: Phaser.Scene;

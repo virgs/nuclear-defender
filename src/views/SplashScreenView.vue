@@ -57,6 +57,10 @@ export default defineComponent({
   mounted() {
     //@ts-ignore
     history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/');
+    window.addEventListener('keyup', this.keyPressed);
+  },
+  unmounted() {
+    window.removeEventListener('keyup', this.keyPressed);
   },
   watch: {
     carouselIsVisible() {
@@ -64,6 +68,13 @@ export default defineComponent({
     },
   },
   methods: {
+    keyPressed(key: any) {
+      if (this.carouselIsVisible && key.code === 'Enter') {
+        if (this.playerActions !== undefined && this.currentLevel) {
+          this.playButtonClick();
+        }
+      }
+    },
     playerActionsChanged(actions: string | undefined) {
       this.playerActions = actions;
     },

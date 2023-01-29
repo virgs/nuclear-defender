@@ -1,15 +1,15 @@
 import {Point} from '@/game/math/point';
 import {Actions} from '@/game/constants/actions';
 import type {BoxActor} from '@/game/actors/box-actor';
-import {dynamicTiles, Tiles} from '@/game/tiles/tiles';
+import {dynamicTiles, Tiles} from '@/game/levels/tiles';
 import {EventEmitter, EventName} from '@/event-emitter';
 import type {HeroActor} from '@/game/actors/hero-actor';
 import type {GameActor} from '@/game/actors/game-actor';
 import {HeroActionRecorder} from '@/game/engine/hero-action-recorder';
-import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import type {MultiLayeredMap} from '@/game/levels/standard-sokoban-annotation-tokennizer';
+import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 
 export class GameStage {
     private readonly strippedMap: MultiLayeredMap;

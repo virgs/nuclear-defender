@@ -6,10 +6,10 @@
 import type {SceneConfig} from '@/game/game-launcher';
 import * as game from '@/game/game-launcher';
 import {defineComponent} from 'vue';
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import {Actions, mapStringToAction} from '@/game/constants/actions';
-import {SokobanMapStripper} from '@/game/tiles/sokoban-map-stripper';
-import {StandardSokobanAnnotationTokennizer} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import {SokobanMapStripper} from '@/game/levels/sokoban-map-stripper';
+import {StandardSokobanAnnotationTokennizer} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export default defineComponent({
   name: 'PhaserContainer',

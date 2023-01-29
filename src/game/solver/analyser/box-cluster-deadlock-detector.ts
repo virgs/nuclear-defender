@@ -1,5 +1,5 @@
-import {Tiles} from '@/game/tiles/tiles';
-import {DeadLockDetector} from '@/game/solver/dead-lock-detector';
+import {Tiles} from '@/game/levels/tiles';
+import {DeadLockDetector} from '@/game/solver/analyser/dead-lock-detector';
 import type {Movement, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 import {Directions, getOppositeDirectionOf, rotateDirectionClockwise} from '@/game/constants/directions';
 

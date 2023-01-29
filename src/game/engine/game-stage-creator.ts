@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import {Tiles} from '../tiles/tiles';
 import {Point} from '@/game/math/point';
+import {Tiles} from '@/game/levels/tiles';
 import {BoxActor} from '@/game/actors/box-actor';
 import {GameStage} from '@/game/engine/game-stage';
 import {HeroActor} from '@/game/actors/hero-actor';
@@ -11,10 +11,10 @@ import {configuration} from '../constants/configuration';
 import {TreadmillActor} from '@/game/actors/treadmill-actor';
 import {OilyFloorActor} from '@/game/actors/oily-floor-actor';
 import {OneWayDoorActor} from '@/game/actors/one-way-door-actor';
-import {TileDepthCalculator} from '@/game/tiles/tile-depth-calculator';
+import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
 import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
-import type {MultiLayeredMap, OrientedTile} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import type {MultiLayeredMap, OrientedTile} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export class GameStageCreator {
     private readonly scene: Phaser.Scene;

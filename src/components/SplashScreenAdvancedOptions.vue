@@ -95,8 +95,8 @@
 <script lang="ts">
 
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/levels';
 import {levels} from '@/game/levels/levels';
+import type {Level} from '@/game/levels/levels';
 import MapEditor from '@/components/MapEditor.vue';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapStringToAction} from '@/game/constants/actions';

@@ -1,12 +1,12 @@
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import type {Directions} from '@/game/constants/directions';
-import type {DeadLockDetector} from '@/game/solver/dead-lock-detector';
+import type {DeadLockDetector} from '@/game/solver/analyser/dead-lock-detector';
 import type {DistanceCalculator} from '@/game/math/distance-calculator';
-import {BoxClusterDeadlockDetector} from '@/game/solver/box-cluster-deadlock-detector';
-import {BoxGluedToWallDetector} from '@/game/solver/box-glued-to-wall-deadlock-detector';
-import type {Movement, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
+import {BoxClusterDeadlockDetector} from '@/game/solver/analyser/box-cluster-deadlock-detector';
+import {BoxGluedToWallDetector} from '@/game/solver/analyser/box-glued-to-wall-deadlock-detector';
+import type {Movement, MovementOrchestratorOutput} from '../../engine/movement-orchestrator';
+import type {MultiLayeredMap} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export type PushedBox = { id: number, direction: Directions };
 export type MovementAnalysis = {

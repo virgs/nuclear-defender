@@ -1,5 +1,5 @@
 import {Point} from '@/game/math/point';
-import {Tiles} from '@/game/tiles/tiles';
+import {Tiles} from '@/game/levels/tiles';
 import {SpriteCreator} from '@/game/actors/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
 import {configuration} from '@/game/constants/configuration';

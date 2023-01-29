@@ -1,7 +1,7 @@
+import Phaser from 'phaser';
 import {Point} from '@/game/math/point';
 import {configuration} from '@/game/constants/configuration';
-import type {MultiLayeredMap} from '@/game/tiles/standard-sokoban-annotation-tokennizer';
-import Phaser from 'phaser';
+import type {MultiLayeredMap} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
 export class ScreenPropertiesCalculator {
     private readonly scale: number;

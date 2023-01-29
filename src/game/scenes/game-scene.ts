@@ -4,7 +4,7 @@ import {sounds} from '@/game/constants/sounds';
 import type {GameStage} from '@/game/engine/game-stage';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {GameStageCreator} from '../actors/game-stage-creator';
+import {GameStageCreator} from '../engine/game-stage-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {SessionStore} from '@/store/session-store';
 

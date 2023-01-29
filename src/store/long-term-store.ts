@@ -17,7 +17,7 @@ export class LongTermStore {
     public static getLevelCompleteData(): LevelCompleteData[] {
         const item = localStorage.getItem(configuration.store.resolvedLevelsKey);
         if (item) {
-            return JSON.parse(item)
+            return JSON.parse(item);
         }
 
         return [];
@@ -37,7 +37,7 @@ export class LongTermStore {
             return {
                 ...customMap,
                 title: title
-            }
+            };
         }
     }
 
