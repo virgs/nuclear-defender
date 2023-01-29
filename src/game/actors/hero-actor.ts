@@ -30,7 +30,7 @@ export class HeroActor implements GameActor {
         this.cursors = config.scene.input.keyboard.createCursorKeys();
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
 
-        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
+        this.sprite = new SpriteCreator(config).createSprite();
 
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));

@@ -84,7 +84,7 @@ export class MapValidator {
     private createNoTargetsValidation() {
         return (output: ProcessedMap) => {
             if (output.pointMap.get(Tiles.target)!.length === 0) {
-                throw Error('Let there be light. How can a map be solved if there is no target to push barrells to.');
+                throw Error('How can a map be solved if there is no target to push barrells to.');
             }
         };
     }
@@ -144,7 +144,7 @@ export class MapValidator {
                             neighbor.x >= output.raw.width ||
                             neighbor.y >= output.raw.height) {
                             throw Error(`Our hero is a escapper.
-                            Wrap the whole level in walls otherwise it may be very hard to get the hero back. Put a wall somewhere around (${currentPoint.y + 1}, ${currentPoint.x + 1})`);
+                            Wrap the whole level in walls otherwise it may be very hard to get the hero back. Put a wall somewhere around (${currentPoint.y + 1}, ${currentPoint.x + 1}).`);
                         }
 
                         if (toVisit

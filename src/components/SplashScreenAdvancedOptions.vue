@@ -62,6 +62,7 @@
               </a>
             </label>
             <input type="text" class="form-control" placeholder="Enter actions" aria-label="Insert player actions"
+                   id="playerActionsInput"
                    :class="[invalidPlayerActionsError.length <= 0 ? 'is-valid' : 'is-invalid']"
                    v-model="playerActions">
             <div class="form-label feedback-label invalid-feedback" style="position:absolute;">
@@ -95,8 +96,8 @@
 <script lang="ts">
 
 import {defineComponent} from 'vue';
-import {levels} from '@/game/levels/levels';
-import type {Level} from '@/game/levels/levels';
+import type {Level} from '@/game/levels/defaultLevels';
+import {DefaultLevels} from '@/game/levels/defaultLevels';
 import MapEditor from '@/components/MapEditor.vue';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapStringToAction} from '@/game/constants/actions';
@@ -171,8 +172,7 @@ So, by entering <b>druls</b>, as soon as the game begins, the player would follo
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
-      console.log('dasdasd');
-      const unblockedLevelIndex = levels
+      const unblockedLevelIndex = DefaultLevels
           .findIndex((level: Level) => {
             return level.title
                 .toLowerCase()

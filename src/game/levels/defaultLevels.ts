@@ -14,6 +14,7 @@
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
 
 // @ts-nocheck
+import {LongTermStore} from '@/store/long-term-store';
 import * as testMap from '@/game/assets/levels/test.json';
 
 export type Level = {
@@ -26,7 +27,8 @@ export type Level = {
 };
 
 // @ts-nocheck
-export const levels: Level[] = [
+export const DefaultLevels: Level[] = [
+    LongTermStore.getCustomLevel(),
     {
         map: `
 2-3#|2-#.#

@@ -104,7 +104,7 @@ import {mapActionToChar} from '@/game/constants/actions';
 import PhaserContainer from '@/components/PhaserContainer.vue';
 import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
 import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
-import type {Level} from '@/game/levels/levels';
+import type {Level} from '@/game/levels/defaultLevels';
 import {MapValidator} from '@/game/levels/map-validator';
 import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
 

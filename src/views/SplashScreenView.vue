@@ -37,7 +37,7 @@
 // options API
 
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/levels';
+import type {Level} from '@/game/levels/defaultLevels';
 import {SessionStore} from '@/store/session-store';
 import CarouselSlider from '@/components/CarouselSlider.vue';
 import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';

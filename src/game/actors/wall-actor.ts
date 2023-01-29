@@ -16,7 +16,7 @@ export class WallActor implements GameActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
 
-        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
+        this.sprite = new SpriteCreator(config).createSprite();
 
         const wallOnTop: boolean = config.contentAround[0][1]
             .some(item => item.code === Tiles.wall);

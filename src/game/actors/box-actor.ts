@@ -25,7 +25,7 @@ export class BoxActor implements GameActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
+        this.sprite = new SpriteCreator(config).createSprite();
         this.isOnTarget = false;
     }
 

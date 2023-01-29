@@ -1,25 +1,24 @@
 import type Phaser from 'phaser';
-import type {Point} from '@/game/math/point';
-import type {Tiles} from '@/game/levels/tiles';
 import {configuration} from '@/game/constants/configuration';
+import type {GameActorConfig} from '@/game/actors/game-actor';
 import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
 
 export class SpriteCreator {
-    private readonly scene: Phaser.Scene;
-    private readonly tileCode: Tiles;
+    private readonly config: GameActorConfig;
 
-    constructor(config: { code: Tiles; scene: Phaser.Scene }) {
-        this.scene = config.scene;
-        this.tileCode = config.code;
+    constructor(config: GameActorConfig) {
+        this.config = config;
     }
 
-    public createSprite(worldPosition: Point): Phaser.GameObjects.Sprite {
-        const sprite = this.scene.add.sprite(worldPosition.x, worldPosition.y, configuration.tiles.spriteSheetKey, this.tileCode);
+    public createSprite(): Phaser.GameObjects.Sprite {
+        const sprite = this.config.scene.add.sprite(this.config.worldPosition.x, this.config.worldPosition.y,
+            configuration.tiles.spriteSheetKey, this.config.code);
         sprite.scale = configuration.world.scale;
         sprite.setOrigin(0);
-        sprite.setDepth(new TileDepthCalculator().calculate(this.tileCode, sprite.y));
-        sprite.setPipeline('Light2D');
-
+        sprite.setDepth(new TileDepthCalculator().calculate(this.config.code, sprite.y));
+        if (this.config.playable) {
+            sprite.setPipeline('Light2D');
+        }
         return sprite;
     }
 }

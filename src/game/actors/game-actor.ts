@@ -10,6 +10,8 @@ export type AnimateData = {
 };
 
 export type GameActorConfig = {
+    code: Tiles;
+    playable: boolean;
     orientation: Directions;
     tilePosition: Point;
     worldPosition: Point;

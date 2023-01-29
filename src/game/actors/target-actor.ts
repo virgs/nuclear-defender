@@ -25,7 +25,7 @@ export class TargetActor implements GameActor {
         this.scene = config.scene;
         this.covered = false;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
+        this.sprite = new SpriteCreator(config).createSprite();
         this.tweens = config.scene.tweens;
 
         this.intensityModifier = 2; // it will always have itself as a target

@@ -87,6 +87,7 @@ export class GameScene extends Phaser.Scene {
             .setAmbientColor(Phaser.Display.Color.HexStringToColor(configuration.colors.ambientColor).color);
 
         const gameStageCreator = new GameStageCreator({
+            playable: this.sceneConfig.playable,
             screenPropertiesCalculator: screenPropertiesCalculator,
             scene: this,
             dynamicFeatures: data.config.dynamicFeatures,

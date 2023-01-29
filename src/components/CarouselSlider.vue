@@ -4,7 +4,7 @@
       <label class="form-label sokoban-label">Select your level</label>
     </span>
     <div id="carousel-slider" style="">
-      <div v-for="(_, index) in levels"
+      <div v-for="(_, index) in availableLevels"
            :class="{'carousel-container': true,
                     'selected-slider': index === currentIndex,
                     'custom-level': index === 0,
@@ -21,10 +21,10 @@
       </div>
     </div>
     <ul class="carousel-controls" id="customize-controls" tabindex="0">
-      <li class="prev" id="prevButton" tabindex="-1" data-controls="prev">
+      <li class="prev" id="carouselPrevButton" tabindex="-1" data-controls="prev">
         <i class="fa-solid fa-chevron-left"></i>
       </li>
-      <li class="next" id="nextButton" tabindex="-1" data-controls="next">
+      <li class="next" id="carouselNextButton" tabindex="-1" data-controls="next">
         <i class="fa-solid fa-chevron-right"></i>
       </li>
     </ul>
@@ -38,8 +38,8 @@
 import {LongTermStore} from '@/store/long-term-store';
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/levels';
-import {levels} from '@/game/levels/levels';
+import type {Level} from '@/game/levels/defaultLevels';
+import {DefaultLevels} from '@/game/levels/defaultLevels';
 
 export default defineComponent({
   name: 'CarouselSlider',
@@ -48,14 +48,14 @@ export default defineComponent({
   data() {
     return {
       currentIndex: LongTermStore.getCurrentSelectedIndex(),
-      enabledLevels: LongTermStore.getNumberOfEnabledLevels(),
+      numberOfEnabledLevels: LongTermStore.getNumberOfEnabledLevels(),
       slider: undefined as any
     };
   },
   mounted() {
     //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
-    const visibleItems = this.levels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
+    const visibleItems = this.availableLevels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
     this.slider = tns({
       container: '#carousel-slider',
       items: visibleItems,
@@ -72,8 +72,8 @@ export default defineComponent({
       speed: 400,
       startIndex: this.currentIndex,
       loop: false,
-      prevButton: '#prevButton',
-      nextButton: '#nextButton',
+      prevButton: '#carouselPrevButton',
+      nextButton: '#carouselNextButton',
       nav: false
     });
 
@@ -93,9 +93,11 @@ export default defineComponent({
       }
     };
     setTimeout(heightAdjuster, 50);
+    window.addEventListener('keyup', this.keyPressed);
   },
   unmounted() {
     this.slider.destroy();
+    window.removeEventListener('keyup', this.keyPressed);
   },
   computed: {
     carouselContainerStyle() {
@@ -131,9 +133,9 @@ export default defineComponent({
       };
 
     },
-    levels(): Level[] {
-      return [LongTermStore.getCustomLevel(), ...levels
-          .filter((_, index) => index < this.enabledLevels)];
+    availableLevels(): Level[] {
+      return DefaultLevels
+          .filter((_, index) => index < this.numberOfEnabledLevels);
     },
     currentDisplayIndex(): (index: number) => string {
       return (index: number): string => {
@@ -150,11 +152,11 @@ export default defineComponent({
     },
     thumbnail() {
       return (index: number): string => {
-        return this.levels[index].snapshot || this.levels[1].thumbnailPath!;
+        return this.availableLevels[index].snapshot || this.availableLevels[1].thumbnailPath!;
       };
     },
     currentTitle(): string {
-      return this.levels[this.currentIndex].title;
+      return this.availableLevels[this.currentIndex].title;
     },
     levelWasComplete(): (index: number) => boolean {
       return (index: number): boolean => {
@@ -183,10 +185,22 @@ export default defineComponent({
     }
   },
   methods: {
+    keyPressed(key: any) {
+      //@ts-ignore
+      const focusedElementId = document.activeElement.id;
+      const allowedFocuselementIds = ['body', 'carouselPrevButton', 'carouselNextButton'];
+      if (this.visible && allowedFocuselementIds.includes(focusedElementId)) {
+        if (key.code === 'Home') {
+          this.slider.goTo(0);
+        } else if (key.code === 'End') {
+          this.slider.goTo(this.numberOfEnabledLevels - 1);
+        }
+      }
+    },
     updateIndex(index: number) {
       LongTermStore.setCurrentSelectedIndex(index);
       this.currentIndex = index;
-      let level = this.levels[index];
+      let level = this.availableLevels[index];
       let title = index.toString();
       if (index === 0) {
         title = '(custom)';

@@ -17,7 +17,7 @@ export class OilyFloorActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator({scene: config.scene, code: this.getTileCode()}).createSprite(config.worldPosition);
+        this.sprite = new SpriteCreator(config).createSprite();
         this.covered = false;
     }
 

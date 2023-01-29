@@ -16,6 +16,14 @@ import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/game/levels/standard-sokoban-annotation-tokennizer';
 
+type StageCreatorConfig = {
+    playable: boolean;
+    screenPropertiesCalculator: ScreenPropertiesCalculator;
+    strippedTileMatrix: MultiLayeredMap;
+    scene: Phaser.Scene;
+    dynamicFeatures: Map<Tiles, Point[]>
+};
+
 export class GameStageCreator {
     private readonly scene: Phaser.Scene;
     private readonly constructorMap: Map<Tiles, (params: any) => GameActor>;
@@ -26,12 +34,14 @@ export class GameStageCreator {
     private readonly strippedMatrix: MultiLayeredMap;
     private readonly actorMap: Map<Tiles, GameActor[]>;
     private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
+    private readonly playable: boolean;
 
     private actorCounter: number;
 
-    constructor(config: { screenPropertiesCalculator: ScreenPropertiesCalculator; strippedTileMatrix: MultiLayeredMap; scene: Phaser.Scene; dynamicFeatures: Map<Tiles, Point[]> }) {
+    constructor(config: StageCreatorConfig) {
         this.screenPropertiesCalculator = config.screenPropertiesCalculator;
         this.scene = config.scene;
+        this.playable = config.playable;
         this.dynamicFeatures = config.dynamicFeatures;
         this.strippedMatrix = config.strippedTileMatrix;
         this.actorMap = GameStageCreator.initializeActorMap();
@@ -51,7 +61,9 @@ export class GameStageCreator {
         this.floorMaskShape = this.scene.make.graphics({});
         this.floorPic = this.scene.add.image(0, 0, configuration.floorTextureKey);
         this.floorPic.scale = 2 * configuration.gameWidth / this.floorPic.width;
-        this.floorPic.setPipeline('Light2D');
+        if (this.playable) {
+            this.floorPic.setPipeline('Light2D');
+        }
         this.floorPic.setDepth(new TileDepthCalculator().calculate(Tiles.floor, -10));
     }
 
@@ -114,6 +126,8 @@ export class GameStageCreator {
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
         if (this.constructorMap.has(item.code)) {
             const gameActor = this.constructorMap.get(item.code)!({
+                playable: this.playable,
+                code: item.code,
                 scene: this.scene,
                 orientation: item.orientation,
                 worldPosition: worldPosition,
