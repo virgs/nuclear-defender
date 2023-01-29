@@ -17,7 +17,7 @@ export default defineComponent({
   emits: ['processedMap'],
   data() {
     return {
-      gameInstance: undefined as unknown as Phaser.Game,
+      gameInstance: undefined as Phaser.Game | undefined,
       containerId: 'game-container'
     };
   },
@@ -43,6 +43,7 @@ export default defineComponent({
 
         console.log('rendering');
         this.gameInstance?.destroy(false);
+        this.gameInstance = undefined;
         this.gameInstance = game.launch(this.containerId, sceneConfig, this.$router);
         console.log('rendered');
 
@@ -53,7 +54,10 @@ export default defineComponent({
     }
   },
   unmounted() {
+    console.log('destroying');
     this.gameInstance?.destroy(false);
+    this.gameInstance = undefined;
+    console.log('destroyed');
   }
 });
 
