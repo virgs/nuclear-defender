@@ -110,7 +110,7 @@ export default defineComponent({
   min-height: 99vh;
   max-width: 720px;
   font-family: Martian Mono, monospace;
-  background-image: url("radioactive-symbol4.jpg");
+  background-image: url("src/assets/radioactive-symbol4.jpg");
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: bottom;

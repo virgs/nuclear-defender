@@ -46,7 +46,6 @@ export class StandardSokobanAnnotationTokennizer {
             .split(/[\n|]/);
     }
 
-
     private removeMetaChars(metamap: string[]): OrientedTile[][][] {
         const baseLayerTiles = [Tiles.floor, Tiles.empty, Tiles.wall];
         const baseLayer = {code: Tiles.floor};
@@ -71,7 +70,7 @@ export class StandardSokobanAnnotationTokennizer {
                             let repetition = 1;
                             const repetitionTilesMatch = annotation.match(/(\d*)\[(.*?)]/); //'22', '@.usdw'
                             if (!repetitionTilesMatch) {
-                                throw Error(`I have no idea what you meant at line ${index + 1} since I don't find any closing square brackets ']'. I don't think you expressed yourself correctly.`)
+                                throw Error(`I have no idea what you meant at line ${index + 1} since I don't find any closing square brackets ']'. I don't think you expressed yourself correctly.`);
                             }
                             const [_, repetitionStr, tiles] = repetitionTilesMatch;
                             if (repetitionStr) {
@@ -79,7 +78,7 @@ export class StandardSokobanAnnotationTokennizer {
                             }
                             const cellsMatch = tiles.match(tileRegex);
                             if (!cellsMatch) {
-                                throw Error(`There's an empty grouping tag '[]' at line ${index + 1}. Since this is very likely an error. I genlty demand you to fix that.`)
+                                throw Error(`There's an empty grouping tag '[]' at line ${index + 1}. Since this is very likely an error. I genlty demand you to fix that.`);
                             }
                             const cell = cellsMatch
                                 .map(coded => this.getOrientedTilesFromExpression(coded)[0]);

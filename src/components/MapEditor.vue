@@ -101,13 +101,14 @@ import {defineComponent} from 'vue';
 import {Point} from '@/game/math/point';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
-import PhaserContainer from '@/components/PhaserContainer.vue';
-import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
-import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
 import type {Level} from '@/game/levels/availableLevels';
 import {MapValidator} from '@/game/levels/map-validator';
-import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
 import {EventEmitter, EventName} from '@/event-emitter';
+import {CursorLocalizer} from '@/game/levels/cursor-localizer';
+import PhaserContainer from '@/components/PhaserContainer.vue';
+import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
+import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
+import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
 
 export default defineComponent({
   name: 'MapEditor',
@@ -133,8 +134,8 @@ export default defineComponent({
 <ul>
 <li>Each text line represents a line in the map</li>
 <li>Every feature is represented by a letter. Sometimes an orientation letter is needed</li>
-<li>Use <b>[</b> and <b>]</b> to put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>)</li>
-<li>Number multiply next feature: <b>4$</b> means four barrels in a row. The same as <b>$$$$</b> </li>
+<li>Use <b>[</b> and <b>]</b> to put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>); and <b>[@.]</b>: hero positioned on a target.</li>
+<li>Numbers multiply next feature: <b>4$</b> means four barrels in a row. The same as <b>$$$$</b> </li>
 </ul>
 
 <h5>Features list</h5>
@@ -294,32 +295,11 @@ export default defineComponent({
       if (input) {
         //@ts-ignore
         const inputLinearChars = input.selectionStart;
-        const lines = this.codedMapText
-            .split('')
-            .filter((char: string, index: number) => char === '\n' && index < inputLinearChars);
-        const line = lines
-            .length;
-        const lastLineBreak = this.codedMapText
-            .substring(0, inputLinearChars)
-            .lastIndexOf('\n');
-        const col = inputLinearChars - lastLineBreak - 1;
-        const numOfCharsInGrouppingTags = this.countNumbOfElementsInGrouppingTag(this.codedMapText.substring(lastLineBreak, inputLinearChars));
-        this.cursorPotision.y = line + 1;
-        this.cursorPotision.x = col - numOfCharsInGrouppingTags + 1;
-        EventEmitter.emit(EventName.MAP_EDITOR_CURSOR_POSITION_CHANGED, new Point(col - numOfCharsInGrouppingTags, line));
+        const cursor = new CursorLocalizer(inputLinearChars, this.codedMapText).localize();
+        this.cursorPotision.y = cursor.y + 1;
+        this.cursorPotision.x = cursor.x + 1;
+        EventEmitter.emit(EventName.MAP_EDITOR_CURSOR_POSITION_CHANGED, cursor);
       }
-    },
-    countNumbOfElementsInGrouppingTag(text: string): number {
-      const initialGroupping = text.indexOf('[');
-      if (initialGroupping !== -1) {
-        const endingGrouppingTag = text.indexOf(']');
-        if (endingGrouppingTag !== -1) {
-          return endingGrouppingTag - initialGroupping +
-              this.countNumbOfElementsInGrouppingTag(text.substring(endingGrouppingTag));
-        }
-        return text.length - initialGroupping;
-      }
-      return 0;
     }
   }
 });

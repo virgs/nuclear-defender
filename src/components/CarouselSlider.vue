@@ -16,8 +16,8 @@
         <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
              height="60"
              :style="mapStyle(index)">
-        <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="custom-stamp.png">
-        <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="solved.png">
+        <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="src/assets/custom-stamp.png">
+        <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="src/assets/solved.png">
       </div>
     </div>
     <ul class="carousel-controls" id="customize-controls" tabindex="0">

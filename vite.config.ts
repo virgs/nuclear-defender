@@ -7,6 +7,12 @@ import {fileURLToPath, URL} from 'node:url';
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue()],
+    build: {
+        rollupOptions: {
+            external: ["src/assets/custom-stamp.png", "src/assets/solved.png"],
+            inlineDynamicImports: true
+        }
+    },
     assetsInclude: ["**/*.m4a"],
     base: "/nuclear-defender",
     resolve: {
