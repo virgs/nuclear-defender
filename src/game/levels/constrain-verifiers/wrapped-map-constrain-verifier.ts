@@ -29,8 +29,8 @@ export class WrappedMapConstrainVerifier implements MapConstrainVerifier {
                 continue;
             } else if (staticItemInThePosition.tiles
                 .some(tile => tile.code === Tiles.empty)) {
-                throw Error(`Did you notice there is an empty space at (${currentPoint.y + 1}, ${currentPoint.x + 1}). I did.
-                    It doesn't look cool. Replace it with something more meaningful.`);
+                throw Error(`Did you notice there is an empty space at (${currentPoint.y + 1}, ${currentPoint.x + 1}).
+                Well, I did and it doesn't look cool. Replace it with something more meaningful.`);
             }
             WrappedMapConstrainVerifier.getNeighborsOf(currentPoint)
                 .forEach(neighbor => {

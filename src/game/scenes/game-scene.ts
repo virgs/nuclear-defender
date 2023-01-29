@@ -113,9 +113,10 @@ export class GameScene extends Phaser.Scene {
                     this.inputManager.clear();
                     this.sound.play(sounds.victory.key, {volume: 0.5});
                     this.allowUpdates = false;
+                    this.input.keyboard.clearCaptures();
                     setTimeout(async () => {
                         this.changeScene();
-                    }, 1000);
+                    }, 1250);
                 }
             }
         }
