@@ -9,7 +9,7 @@ export default defineConfig({
     plugins: [vue()],
     build: {
         rollupOptions: {
-            external: ["src/assets/custom-stamp.png", "src/assets/solved.png"]
+            external: ["./src/assets/custom-stamp.png", "src/assets/solved.png"]
         },
         outDir: "docs"
     },
