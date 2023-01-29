@@ -56,7 +56,7 @@ export default defineComponent({
   },
   mounted() {
     //@ts-ignore
-    history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/');
+    history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/nuclear-defender');
     window.addEventListener('keyup', this.keyPressed);
   },
   unmounted() {
@@ -110,7 +110,7 @@ export default defineComponent({
   min-height: 99vh;
   max-width: 720px;
   font-family: Martian Mono, monospace;
-  background-image: url("src/assets/radioactive-symbol4.jpg");
+  background-image: url("/src/assets/radioactive-symbol4.jpg");
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: bottom;

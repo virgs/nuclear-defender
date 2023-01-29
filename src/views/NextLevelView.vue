@@ -93,7 +93,7 @@ export default defineComponent({
   },
   mounted() {
     //@ts-ignore
-    history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/');
+    history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/nuclear-defender');
 
     const toastTriggers = document.getElementsByClassName('toastBtn');
     const toast = document.getElementById('copy-toast');
