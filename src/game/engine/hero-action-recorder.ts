@@ -1,5 +1,5 @@
-import type {GameStage} from '@/game/engine/game-stage';
 import {Actions} from '@/game/constants/actions';
+import type {GameStage} from '@/game/stage/game-stage';
 import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/game/engine/movement-orchestrator';
 //
 // type Memento = {

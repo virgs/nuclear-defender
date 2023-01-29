@@ -23,28 +23,32 @@ export default defineComponent({
   },
   mounted() {
     if (this.render) {
-      const map = new StandardSokobanAnnotationTokennizer()
-          .translate(this.scene.map);
-      const processedMap = new SokobanMapStripper(map)
-          .strip([Tiles.hero, Tiles.box]);
-      const sceneConfig: SceneConfig = {
-        isCustomLevel: !!this.customLevel,
-        levelIndex: this.levelIndex,
-        playable: this.playable,
-        playerInitialActions: (this.playerInitialActions || '')
-            .split('')
-            .map((char: string) => mapStringToAction(char) as Actions),
-        displayNumber: this.displayNumber || '',
-        level: this.scene,
-        dynamicFeatures: processedMap.removedFeatures,
-        strippedLayeredTileMatrix: processedMap.raw
-      };
+      try {
+        const map = new StandardSokobanAnnotationTokennizer()
+            .translate(this.scene.map);
+        const processedMap = new SokobanMapStripper(map)
+            .strip([Tiles.hero, Tiles.box]);
+        const sceneConfig: SceneConfig = {
+          isCustomLevel: !!this.customLevel,
+          levelIndex: this.levelIndex,
+          playable: this.playable,
+          playerInitialActions: (this.playerInitialActions || '')
+              .split('')
+              .map((char: string) => mapStringToAction(char) as Actions),
+          displayNumber: this.displayNumber || '',
+          level: this.scene,
+          dynamicFeatures: processedMap.removedFeatures,
+          strippedLayeredTileMatrix: processedMap.raw
+        };
 
-      this.gameInstance?.destroy(false);
-      this.gameInstance = undefined;
-      this.gameInstance = game.launch(this.containerId, sceneConfig, this.$router);
+        this.gameInstance?.destroy(false);
+        this.gameInstance = undefined;
+        this.gameInstance = game.launch(this.containerId, sceneConfig, this.$router);
 
-      this.$emit('processedMap', processedMap);
+        this.$emit('processedMap', {processedMap, map: this.scene.map});
+      } catch (e) {
+        this.$emit('processedMap', {error: e, map: this.scene.map});
+      }
     }
   },
   unmounted() {

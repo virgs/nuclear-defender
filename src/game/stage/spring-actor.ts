@@ -2,9 +2,9 @@ import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
 import {sounds} from '@/game/constants/sounds';
 import {Directions} from '@/game/constants/directions';
-import type {AnimateData} from '@/game/actors/game-actor';
-import {SpriteCreator} from '@/game/actors/sprite-creator';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData} from '@/game/stage/game-actor';
+import {SpriteCreator} from '@/game/stage/sprite-creator';
+import type {GameActor, GameActorConfig} from '@/game/stage/game-actor';
 
 export class SpringActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;

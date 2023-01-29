@@ -50,7 +50,7 @@
           <label class="form-label sokoban-label">Map</label>
           <div class="input-group">
             <textarea class="form-control map-text-area" readonly
-                      v-model="codedMap"
+                      v-model="codedMap" style="font-size: .9rem"
                       :rows="codedMap
                         .split('\n')
                         .filter(line => line.length > 0)

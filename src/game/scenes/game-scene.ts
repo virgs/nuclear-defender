@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import type {SceneConfig} from '@/game/game-launcher';
 import {sounds} from '@/game/constants/sounds';
-import type {GameStage} from '@/game/engine/game-stage';
+import type {GameStage} from '@/game/stage/game-stage';
 import {InputManager} from '@/game/input/input-manager';
 import {configuration} from '../constants/configuration';
-import {GameStageCreator} from '../engine/game-stage-creator';
+import {GameStageCreator} from '../stage/game-stage-creator';
 import {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';
 import {SessionStore} from '@/store/session-store';
 
@@ -26,6 +26,7 @@ export class GameScene extends Phaser.Scene {
 
     public preload() {
         this.load.image(configuration.floorTextureKey, configuration.floorTexture);
+        this.load.image(configuration.selectorTextureKey, configuration.selectorTextureFile);
 //        this.load.json('characters', './assets/images/characters.json');
 
         //on actor

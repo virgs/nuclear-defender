@@ -1,10 +1,10 @@
 import {Point} from '@/game/math/point';
 import {Actions} from '@/game/constants/actions';
-import type {BoxActor} from '@/game/actors/box-actor';
+import type {BoxActor} from '@/game/stage/box-actor';
+import type {HeroActor} from '@/game/stage/hero-actor';
+import type {GameActor} from '@/game/stage/game-actor';
 import {dynamicTiles, Tiles} from '@/game/levels/tiles';
 import {EventEmitter, EventName} from '@/event-emitter';
-import type {HeroActor} from '@/game/actors/hero-actor';
-import type {GameActor} from '@/game/actors/game-actor';
 import {HeroActionRecorder} from '@/game/engine/hero-action-recorder';
 import {MovementOrchestrator} from '@/game/engine/movement-orchestrator';
 import type {ScreenPropertiesCalculator} from '@/game/math/screen-properties-calculator';

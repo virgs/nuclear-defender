@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import {configuration} from '@/game/constants/configuration';
-import type {GameActorConfig} from '@/game/actors/game-actor';
+import type {GameActorConfig} from '@/game/stage/game-actor';
 import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
 
 export class SpriteCreator {

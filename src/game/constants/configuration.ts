@@ -1,5 +1,6 @@
 import floorTexture from '@/game/assets/tiles/floor-texture.jpg';
 import tileSheetAsset from '@/game/assets/tiles/sokoban_tilesheet.png';
+import selectorTexture from '@/game/assets/tiles/transparent-selector.png';
 import tileSheetAssetNormal from '@/game/assets/tiles/sokoban_tilessheet_normal.png';
 import {ManhattanDistanceCalculator} from '@/game/math/manhattan-distance-calculator';
 
@@ -11,6 +12,8 @@ export const configuration = {
     updateCycleInMs: 175,
     floorTextureKey: 'floorTexture',
     floorTexture: floorTexture,
+    selectorTextureKey: 'selectorTextureKey',
+    selectorTextureFile: selectorTexture,
     tiles: { //in tile sheet
         verticalPerspective: verticalPerspective,
         verticalSize: tileHeight,

@@ -6,8 +6,10 @@ import type {MultiLayeredMap} from '@/game/levels/standard-sokoban-annotation-to
 export class ScreenPropertiesCalculator {
     private readonly scale: number;
     private readonly origin: Point;
+    private readonly data: MultiLayeredMap;
 
     public constructor(data: MultiLayeredMap) {
+        this.data = data;
         const gutter = 10;
         const map = {
             width: data.width * configuration.tiles.horizontalSize,
@@ -23,6 +25,10 @@ export class ScreenPropertiesCalculator {
 
     public getScale(): number {
         return this.scale;
+    }
+
+    public getMap(): MultiLayeredMap {
+        return this.data;
     }
 
     public getWorldPositionFromTilePosition(tile: Point): Point {

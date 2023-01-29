@@ -1,10 +1,10 @@
 import type Phaser from 'phaser';
 import {Tiles} from '@/game/levels/tiles';
 import type {Point} from '@/game/math/point';
-import type {AnimateData} from '@/game/actors/game-actor';
-import {SpriteCreator} from '@/game/actors/sprite-creator';
+import type {AnimateData} from '@/game/stage/game-actor';
+import {SpriteCreator} from '@/game/stage/sprite-creator';
 import type {Directions} from '@/game/constants/directions';
-import type {GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {GameActor, GameActorConfig} from '@/game/stage/game-actor';
 
 export class OneWayDoorActor implements GameActor {
     private readonly scene: Phaser.Scene;

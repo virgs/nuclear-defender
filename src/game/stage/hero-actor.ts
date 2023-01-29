@@ -4,10 +4,10 @@ import {sounds} from '@/game/constants/sounds';
 import type {Directions} from '../constants/directions';
 import {EventEmitter, EventName} from '@/event-emitter';
 import {HeroAnimator} from '../animations/hero-animator';
-import {SpriteCreator} from '@/game/actors/sprite-creator';
+import {SpriteCreator} from '@/game/stage/sprite-creator';
 import {Actions, mapDirectionToAction} from '../constants/actions';
 import {TileDepthCalculator} from '@/game/scenes/tile-depth-calculator';
-import type {AnimateData, GameActor, GameActorConfig} from '@/game/actors/game-actor';
+import type {AnimateData, GameActor, GameActorConfig} from '@/game/stage/game-actor';
 
 export class HeroActor implements GameActor {
     private readonly heroAnimator: HeroAnimator;

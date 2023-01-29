@@ -3,13 +3,13 @@ import {SokobanSolver} from '@/game/solver/sokoban-solver';
 import {configuration} from '@/game/constants/configuration';
 import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
 import type {MapConstrainVerifier} from '@/game/levels/constrain-verifiers/map-constrain-verifier';
+import {EmptyLineConstrainVerifier} from '@/game/levels/constrain-verifiers/empty-line-constrain-verifier';
 import {WrappedMapConstrainVerifier} from '@/game/levels/constrain-verifiers/wrapped-map-constrain-verifier';
 import {MapDimensionsConstrainVerifier} from '@/game/levels/constrain-verifiers/map-dimensions-constrain-verifier';
 import {NumberOfHeroesConstrainVerifier} from '@/game/levels/constrain-verifiers/number-of-heroes-constrain-verifier';
+import {FeaturesOverlayConstrainVerifier} from '@/game/levels/constrain-verifiers/features-overlay-constrain-verifier';
 import {TooManyFeaturesConstrainVerifier} from '@/game/levels/constrain-verifiers/too-many-features-constrain-verifier';
 import {NumberOfBoxesAndTargetsConstrainVerifier} from '@/game/levels/constrain-verifiers/number-of-boxes-and-targets-constrain-verifier';
-import {EmptyLineConstrainVerifier} from '@/game/levels/constrain-verifiers/empty-line-constrain-verifier';
-import {FeaturesOverlayConstrainVerifier} from '@/game/levels/constrain-verifiers/features-overlay-constrain-verifier';
 
 export class MapValidator {
     //Singleton so vue doesn't watch it. It affects performance
@@ -48,7 +48,6 @@ export class MapValidator {
             strippedMap: output.raw,
             staticFeatures: output.pointMap,
         });
-        console.log(this.solver);
         console.log('checking whether the map is solvable');
 
         const solutionOutput = await this.solver.solve(output.removedFeatures);

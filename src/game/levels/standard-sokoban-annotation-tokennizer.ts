@@ -63,17 +63,25 @@ export class StandardSokobanAnnotationTokennizer {
         // 4-
         // #
         return metamap
-            .map(line =>
+            .map((line, index) =>
                 (line.match(tileRegex)! || [])
                     .reduce((layer, annotation) => {
                         if (annotation.includes('[')) {
                             //22[@.usdw]
                             let repetition = 1;
-                            const [_, repetitionStr, tiles] = annotation.match(/(\d*)\[(.*?)]/)!; //'22', '@.usdw'
+                            const repetitionTilesMatch = annotation.match(/(\d*)\[(.*?)]/); //'22', '@.usdw'
+                            if (!repetitionTilesMatch) {
+                                throw Error(`I have no idea what you meant at line ${index + 1} since I don't find any closing square brackets ']'. I don't think you expressed yourself correctly.`)
+                            }
+                            const [_, repetitionStr, tiles] = repetitionTilesMatch;
                             if (repetitionStr) {
                                 repetition = Math.max(Number(repetitionStr), repetition);
                             }
-                            const cell = tiles.match(tileRegex)!
+                            const cellsMatch = tiles.match(tileRegex);
+                            if (!cellsMatch) {
+                                throw Error(`There's an empty grouping tag '[]' at line ${index + 1}. Since this is very likely an error. I genlty demand you to fix that.`)
+                            }
+                            const cell = cellsMatch
                                 .map(coded => this.getOrientedTilesFromExpression(coded)[0]);
 
                             if (cell

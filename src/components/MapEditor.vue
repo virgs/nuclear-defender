@@ -40,7 +40,7 @@
             </label>
             <div style="display: inline-block">
               <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
-                        id="map-editor-text-area"
+                        id="map-editor-text-area" style="font-size: .9rem"
                         v-model="codedMapText"></textarea>
               <small class="cursor-position">{{ cursorPotision.y }}:{{ cursorPotision.x }}</small>
               <div class="form-label feedback-label invalid-feedback" style="">
@@ -107,6 +107,7 @@ import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator
 import type {Level} from '@/game/levels/availableLevels';
 import {MapValidator} from '@/game/levels/map-validator';
 import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
+import {EventEmitter, EventName} from '@/event-emitter';
 
 export default defineComponent({
   name: 'MapEditor',
@@ -251,14 +252,18 @@ export default defineComponent({
       };
       ++this.editorRefreshKey;
     },
-    async processedMap(output: ProcessedMap) {
+    async processedMap(output: { processedMap: ProcessedMap, map: string, error: Error }) {
       if (this.estimative !== undefined) {
         this.mapIsValid = true;
         return;
       }
       this.loading = false;
       try {
-        const solutionOutput = await MapValidator.getInstance().validate(output);
+        if (output.error) {
+          throw output.error;
+        }
+
+        const solutionOutput = await MapValidator.getInstance().validate(output.processedMap);
         if (solutionOutput.aborted) {
           console.log('ignoring aborted');
           return;
@@ -271,7 +276,6 @@ export default defineComponent({
 
         this.mapIsValid = true;
       } catch (exc: any) {
-        console.log(exc);
         this.editorInvalidError = exc.message;
       }
     },
@@ -289,18 +293,33 @@ export default defineComponent({
       const input = document.getElementById('map-editor-text-area');
       if (input) {
         //@ts-ignore
-        const selectedChars = input.selectionStart;
-        const line = this.codedMapText
+        const inputLinearChars = input.selectionStart;
+        const lines = this.codedMapText
             .split('')
-            .filter((char: string, index: number) => char === '\n' && index < selectedChars)
+            .filter((char: string, index: number) => char === '\n' && index < inputLinearChars);
+        const line = lines
             .length;
         const lastLineBreak = this.codedMapText
-            .substring(0, selectedChars)
+            .substring(0, inputLinearChars)
             .lastIndexOf('\n');
-        const col = selectedChars - lastLineBreak - 1;
+        const col = inputLinearChars - lastLineBreak - 1;
+        const numOfCharsInGrouppingTags = this.countNumbOfElementsInGrouppingTag(this.codedMapText.substring(lastLineBreak, inputLinearChars));
         this.cursorPotision.y = line + 1;
-        this.cursorPotision.x = col + 1;
+        this.cursorPotision.x = col - numOfCharsInGrouppingTags + 1;
+        EventEmitter.emit(EventName.MAP_EDITOR_CURSOR_POSITION_CHANGED, new Point(col - numOfCharsInGrouppingTags, line));
       }
+    },
+    countNumbOfElementsInGrouppingTag(text: string): number {
+      const initialGroupping = text.indexOf('[');
+      if (initialGroupping !== -1) {
+        const endingGrouppingTag = text.indexOf(']');
+        if (endingGrouppingTag !== -1) {
+          return endingGrouppingTag - initialGroupping +
+              this.countNumbOfElementsInGrouppingTag(text.substring(endingGrouppingTag));
+        }
+        return text.length - initialGroupping;
+      }
+      return 0;
     }
   }
 });
