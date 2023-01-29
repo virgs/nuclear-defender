@@ -9,9 +9,9 @@ export default defineConfig({
     plugins: [vue()],
     build: {
         rollupOptions: {
-            external: ["src/assets/custom-stamp.png", "src/assets/solved.png"],
-            inlineDynamicImports: true
-        }
+            external: ["src/assets/custom-stamp.png", "src/assets/solved.png"]
+        },
+        outDir: "docs"
     },
     assetsInclude: ["**/*.m4a"],
     base: "/nuclear-defender",
