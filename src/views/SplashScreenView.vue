@@ -2,7 +2,7 @@
   <div class="container splash-view text-center pt-3">
     <div class="row row-cols-1 gy-3">
       <div class="col mb-lg-5">
-        <h1 class="sokoban-display display-3 fw-normal" style="user-select: none">CHERNOBYL DEFENDER</h1>
+        <h1 class="sokoban-display display-3 fw-normal" style="user-select: none">NUCLEAR DEFENDER</h1>
       </div>
       <div class="col-12" style="min-height: fit-content;">
         <CarouselSlider :key="carouselSliderRefreshKey"
