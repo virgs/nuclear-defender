@@ -1,4 +1,4 @@
-import type {Level} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/availableLevels';
 import type {Actions} from '@/game/constants/actions';
 
 export type GameViewConfig = {

@@ -96,8 +96,8 @@
 <script lang="ts">
 
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/defaultLevels';
-import {DefaultLevels} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/availableLevels';
+import {AvailableLevels} from '@/game/levels/availableLevels';
 import MapEditor from '@/components/MapEditor.vue';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapStringToAction} from '@/game/constants/actions';
@@ -172,7 +172,7 @@ So, by entering <b>druls</b>, as soon as the game begins, the player would follo
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
-      const unblockedLevelIndex = DefaultLevels
+      const unblockedLevelIndex = AvailableLevels
           .findIndex((level: Level) => {
             return level.title
                 .toLowerCase()

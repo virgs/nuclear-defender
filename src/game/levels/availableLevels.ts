@@ -27,7 +27,7 @@ export type Level = {
 };
 
 // @ts-nocheck
-export const DefaultLevels: Level[] = [
+export const AvailableLevels: Level[] = [
     LongTermStore.getCustomLevel(),
     {
         map: `

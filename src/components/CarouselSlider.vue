@@ -4,7 +4,7 @@
       <label class="form-label sokoban-label">Select your level</label>
     </span>
     <div id="carousel-slider" style="">
-      <div v-for="(_, index) in availableLevels"
+      <div v-for="(_, index) in enabledLevels"
            :class="{'carousel-container': true,
                     'selected-slider': index === currentIndex,
                     'custom-level': index === 0,
@@ -38,8 +38,8 @@
 import {LongTermStore} from '@/store/long-term-store';
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/defaultLevels';
-import {DefaultLevels} from '@/game/levels/defaultLevels';
+import type {Level} from '@/game/levels/availableLevels';
+import {AvailableLevels} from '@/game/levels/availableLevels';
 
 export default defineComponent({
   name: 'CarouselSlider',
@@ -55,7 +55,7 @@ export default defineComponent({
   mounted() {
     //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
-    const visibleItems = this.availableLevels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
+    const visibleItems = this.enabledLevels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
     this.slider = tns({
       container: '#carousel-slider',
       items: visibleItems,
@@ -133,8 +133,8 @@ export default defineComponent({
       };
 
     },
-    availableLevels(): Level[] {
-      return DefaultLevels
+    enabledLevels(): Level[] {
+      return AvailableLevels
           .filter((_, index) => index < this.numberOfEnabledLevels);
     },
     currentDisplayIndex(): (index: number) => string {
@@ -152,11 +152,11 @@ export default defineComponent({
     },
     thumbnail() {
       return (index: number): string => {
-        return this.availableLevels[index].snapshot || this.availableLevels[1].thumbnailPath!;
+        return this.enabledLevels[index].snapshot || this.enabledLevels[1].thumbnailPath!;
       };
     },
     currentTitle(): string {
-      return this.availableLevels[this.currentIndex].title;
+      return this.enabledLevels[this.currentIndex].title;
     },
     levelWasComplete(): (index: number) => boolean {
       return (index: number): boolean => {
@@ -200,7 +200,7 @@ export default defineComponent({
     updateIndex(index: number) {
       LongTermStore.setCurrentSelectedIndex(index);
       this.currentIndex = index;
-      let level = this.availableLevels[index];
+      let level = this.enabledLevels[index];
       let title = index.toString();
       if (index === 0) {
         title = '(custom)';

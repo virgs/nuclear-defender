@@ -77,7 +77,7 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import {DefaultLevels} from '@/game/levels/defaultLevels';
+import {AvailableLevels} from '@/game/levels/availableLevels';
 import {SessionStore} from '@/store/session-store';
 import {LongTermStore} from '@/store/long-term-store';
 import {mapActionToChar} from '@/game/constants/actions';
@@ -124,7 +124,7 @@ export default defineComponent({
         return undefined;
       }
       const currentIndex: number = this.config.levelIndex;
-      const nextLevel = DefaultLevels[currentIndex];
+      const nextLevel = AvailableLevels[currentIndex];
       if (nextLevel) {
         return nextLevel.title.toLowerCase().replace(/ /g, '-');
       }
@@ -173,9 +173,9 @@ export default defineComponent({
       this.storeRecord();
       const currentIndex: number = this.config.levelIndex;
       const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
-      console.log(currentIndex, numberOfEnabledLevels, DefaultLevels.length);
+      console.log(currentIndex, numberOfEnabledLevels, AvailableLevels.length);
 
-      if (currentIndex < DefaultLevels.length) { //There are still more levels to enable
+      if (currentIndex < AvailableLevels.length) { //There are still more levels to enable
         if (currentIndex === numberOfEnabledLevels) {
           LongTermStore.setNumberOfEnabledLevels(currentIndex + 1);
         }
