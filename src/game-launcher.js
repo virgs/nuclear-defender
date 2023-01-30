@@ -21,7 +21,7 @@ const launch = (containerId, config, router) => {
         parent: containerId,
         width: configuration.gameWidth,
         height: configuration.gameHeight,
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: !config.playable,
         // pixelArt: true,
         // physics: {default: 'arcade'},
         // backgroundColor: '#000000',

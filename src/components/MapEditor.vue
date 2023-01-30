@@ -41,7 +41,7 @@
             <div style="display: inline-block">
               <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
                         spellcheck="false"
-                        @change="replaceCodeTokens"
+                        @input="replaceCodeTokens"
                         id="map-editor-text-area" style="font-size: .9rem"
                         v-model="codedMapText"></textarea>
               <small class="cursor-position">{{ cursorPotision.y }}:{{ cursorPotision.x }}</small>
@@ -99,18 +99,19 @@
 </template>
 
 <script lang="ts">
+import {Point} from '@/math/point';
 import {defineComponent} from 'vue';
-import {Point} from '../math/point';
-import {LongTermStore} from '../store/long-term-store';
-import {mapActionToChar} from '../constants/actions';
-import type {Level} from '../levels/availableLevels';
-import {MapValidator} from '../levels/map-validator';
-import {EventEmitter, EventName} from '../events/event-emitter';
-import {CursorLocalizer} from '../levels/cursor-localizer';
+import type {Level} from '@/levels/levels';
+import {getAllLevels} from '@/levels/levels';
+import {mapActionToChar} from '@/constants/actions';
+import {MapValidator} from '@/levels/map-validator';
+import {LongTermStore} from '@/store/long-term-store';
+import {CursorLocalizer} from '@/levels/cursor-localizer';
+import {EventEmitter, EventName} from '@/events/event-emitter';
 import PhaserContainer from '../components/PhaserContainer.vue';
+import type {ProcessedMap} from '@/levels/sokoban-map-stripper';
 import MapDifficultyGauge from '../components/MapDifficultyGauge.vue';
-import type {ProcessedMap} from '../levels/sokoban-map-stripper';
-import {LevelDifficultyEstimator} from '../solver/level-difficulty-estimator';
+import {LevelDifficultyEstimator} from '@/solver/level-difficulty-estimator';
 
 export default defineComponent({
   name: 'MapEditor',
@@ -135,9 +136,9 @@ export default defineComponent({
 <h5>Instructions</h5>
 <ul>
 <li>Each text line represents a line in the map</li>
-<li>Every feature is represented by a letter. Sometimes an orientation letter is needed</li>
-<li>Use <b>[</b> and <b>]</b> to put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>); and <b>[@.]</b>: hero positioned on a target.</li>
-<li>Numbers multiply next feature: <b>4$</b> means four barrels in a row. The same as <b>$$$$</b> </li>
+<li>Every feature is represented by a letter. Sometimes an orientation letter is needed and those are marked with a * in the list bellow</li>
+<li><b>[</b> and <b>]</b> put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>); and <b>[@.]</b>: hero positioned on a target. They don't get nested.</li>
+<li>Numbers multiply next feature: <b>4$</b> means four barrels in a row. The same as <b>$$$$</b>; and <b>3[o.]</b> is the same as <b>[o.][o.][o.]</b> </li>
 </ul>
 
 <h5>Features list</h5>
@@ -208,10 +209,18 @@ export default defineComponent({
       return this.title.length < 25;
     },
     maraudersMapEnabled() {
-      return this.title.toLowerCase() === 'mischief managed';
+      const validTitlesToEnableMaraudersMap = ['mischief managed', 'tom riddles diary']
+      return validTitlesToEnableMaraudersMap.includes(this.title.toLowerCase());
     }
   },
   watch: {
+    title() {
+      if (this.title === 'tom riddles diary') {
+        const index = LongTermStore.getCurrentSelectedIndex();
+        const level = getAllLevels()[index];
+        this.codedMapText = level.map;
+      }
+    },
     toggle() {
       const modalIsBeingShown = document.getElementsByTagName('body')[0]!.classList.contains('modal-open');
       if (modalIsBeingShown) {
@@ -227,13 +236,17 @@ export default defineComponent({
       }
     },
     codedMapText() {
+      //TODO do nbot recalculate solution if its a already found one
       this.estimative = undefined;
       this.refresh();
     }
   },
   methods: {
-    replaceCodeTokens(text: string) {
-      console.log(text, this.codedMapText)
+    replaceCodeTokens(event: any) {
+      this.codedMapText = event.target.value
+          .replace('|', '\n')
+          .replace('*', '[$.]')
+          .replace('+', '[@.]')
     },
     copyStringActions() {
       navigator.clipboard.writeText(this.stringActions!);

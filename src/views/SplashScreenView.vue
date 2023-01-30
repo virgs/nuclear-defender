@@ -6,7 +6,7 @@
       </div>
       <div class="col-12" style="min-height: fit-content;">
         <CarouselSlider :key="carouselSliderRefreshKey"
-                        :visible="carouselIsVisible" :enabled-levels="enabledLevels"
+                        :visible="carouselIsVisible"
                         @currentLevelChanged="currentLevelChanged">
         </CarouselSlider>
       </div>
@@ -38,9 +38,8 @@
 
 import {defineComponent} from 'vue';
 import {SessionStore} from '@/store/session-store';
-import type {Level} from '@/levels/availableLevels';
-import {LongTermStore} from "@/store/long-term-store";
-import {getAvailableLevels} from "@/levels/availableLevels";
+import type {Level} from '@/levels/levels';
+import {getEnabledLevels} from '@/levels/levels';
 import CarouselSlider from '@/components/CarouselSlider.vue';
 import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
@@ -51,7 +50,7 @@ export default defineComponent({
   data() {
     return {
       carouselSliderRefreshKey: 0,
-      levels: getAvailableLevels(),
+      levels: getEnabledLevels(),
       currentLevel: undefined as Level | undefined,
       carouselIsVisible: true,
       playerActions: '' as string | undefined,
@@ -67,14 +66,9 @@ export default defineComponent({
   },
   watch: {
     carouselIsVisible() {
-      this.carouselSliderRefreshKey++;
-    },
-  },
-  computed: {
-    enabledLevels(): Level[] {
-      const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
-      return this.levels
-          .filter((_: Level, index: number) => index < numberOfEnabledLevels);
+      if (this.carouselIsVisible) {
+        this.carouselSliderRefreshKey++;
+      }
     },
   },
   methods: {
@@ -107,7 +101,7 @@ export default defineComponent({
       this.$router.push(`/game`);
     },
     mapEditorSaved() {
-      this.levels = getAvailableLevels();
+      this.levels = getEnabledLevels();
       ++this.carouselSliderRefreshKey;
     }
 
@@ -121,7 +115,7 @@ export default defineComponent({
   min-height: 99vh;
   max-width: 720px;
   font-family: Martian Mono, monospace;
-  background-image: url("/assets/images/radioactive-symbol4.jpg");
+  background-image: url("assets/images/radioactive-symbol4.jpg");
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: bottom;

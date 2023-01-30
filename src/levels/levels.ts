@@ -31,8 +31,14 @@ export type Level = {
     solution: string;
 };
 
+export const getEnabledLevels = (): Level[] => {
+    const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
+    return getAllLevels()
+        .filter((_: Level, index: number) => index < numberOfEnabledLevels);
+}
+
 // @ts-nocheck
-export const getAvailableLevels = (): Level[] => [
+export const getAllLevels = (): Level[] => [
     LongTermStore.getCustomLevel(),
     {
         map: `

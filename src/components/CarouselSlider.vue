@@ -11,13 +11,14 @@
                     'tns-item': true}"
            :style="carouselContainerStyle(index)">
         <div style="position:absolute;">
-          <h4 class="level-number">{{ currentDisplayIndex(index) }}</h4>
+          <h4 class="level
+          -number">{{ currentDisplayIndex(index) }}</h4>
         </div>
         <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
              height="60"
              :style="mapStyle(index)">
-        <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="/assets/images/custom-stamp.png">
-        <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="/assets/images/solved.png">
+        <img v-if="customItem(index)" alt="" class="img-fluid custom-made-stamp" src="/assets/images/custom-stamp.png">
+        <img v-else-if="levelWasComplete(index)" alt="" class="img-fluid level-stamp" src="/assets/images/solved.png">
       </div>
     </div>
     <ul class="carousel-controls" id="customize-controls" tabindex="0">
@@ -37,15 +38,17 @@
 
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import type {LevelCompleteData} from '@/store/long-term-store';
+import {getEnabledLevels} from '@/levels/levels';
 import {LongTermStore} from '@/store/long-term-store';
+import type {LevelCompleteData} from '@/store/long-term-store';
 
 export default defineComponent({
   name: 'CarouselSlider',
   emits: ['currentLevelChanged'],
-  props: ['visible', 'enabledLevels'],
+  props: ['visible'],
   data() {
     return {
+      enabledLevels: getEnabledLevels(),
       currentIndex: LongTermStore.getCurrentSelectedIndex(),
       slider: undefined as any
     };
@@ -53,7 +56,7 @@ export default defineComponent({
   mounted() {
     //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
-    const visibleItems = this.enabledLevels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
+    const visibleItems = this.enabledLevels.length === 2 ? 2 : 3; //it seems the carousel doesn't work properly when there is only 2 items
     this.slider = tns({
       container: '#carousel-slider',
       items: visibleItems,
@@ -222,15 +225,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
-.level-number {
-  text-align: left;
-  text-transform: capitalize;
-  font-weight: bolder;
-  z-index: 1000;
-  color: var(--background-color);
-  text-shadow: 2px 2px 1px var(--radioactive-color);
-}
 
 .level-title {
   font-family: 'Poppins', serif;

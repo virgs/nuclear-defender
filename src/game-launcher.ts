@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type {Point} from './math/point';
 import type {Tiles} from './levels/tiles';
 import {GameScene} from './scenes/game-scene';
-import type {Level} from './levels/availableLevels';
+import type {Level} from './levels/levels';
 import type {Actions} from './constants/actions';
 import {configuration} from './constants/configuration';
 import type {MultiLayeredMap} from './levels/standard-sokoban-annotation-tokennizer';
@@ -40,7 +40,7 @@ const launch = (containerId: string, config: SceneConfig, router: any) => {
         parent: containerId,
         width: configuration.gameWidth,
         height: configuration.gameHeight,
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: !config.playable,
         // pixelArt: true,
         // physics: {default: 'arcade'},
         // backgroundColor: '#000000',

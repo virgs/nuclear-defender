@@ -79,8 +79,8 @@
 import {defineComponent} from 'vue';
 import {SessionStore} from '@/store/session-store';
 import {mapActionToChar} from '@/constants/actions';
+import {getAllLevels} from '@/levels/levels';
 import {LongTermStore} from '@/store/long-term-store';
-import {getAvailableLevels} from '@/levels/availableLevels';
 
 export default defineComponent({
   name: 'NextLevelView',
@@ -122,7 +122,7 @@ export default defineComponent({
     password() {
       const currentIndex: number = this.config.levelIndex;
       if (!this.config.isCustomLevel) {
-        const nextLevel = getAvailableLevels()[currentIndex];
+        const nextLevel = getAllLevels()[currentIndex];
         if (nextLevel) {
           return nextLevel.title.toLowerCase().replace(/ /g, '-');
         }
@@ -173,9 +173,9 @@ export default defineComponent({
       this.storeRecord();
       const currentIndex: number = this.config.levelIndex;
       const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
-      console.log(currentIndex, numberOfEnabledLevels, getAvailableLevels().length);
+      console.log(currentIndex, numberOfEnabledLevels, getAllLevels().length);
 
-      if (currentIndex < getAvailableLevels().length - 2) { //There are still more levels to enable
+      if (currentIndex < getAllLevels().length - 2) { //There are still more levels to enable
         if (currentIndex === numberOfEnabledLevels - 1) {
           LongTermStore.setNumberOfEnabledLevels(currentIndex + 2);
         }

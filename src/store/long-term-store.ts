@@ -1,5 +1,5 @@
 import type {Actions} from '@/constants/actions';
-import type {Level} from '@/levels/availableLevels';
+import type {Level} from '@/levels/levels';
 import {configuration} from '@/constants/configuration';
 // @ts-ignore
 import customMap from '../assets/levels/custom.json';

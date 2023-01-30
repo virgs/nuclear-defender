@@ -18,8 +18,13 @@ import thumbnail from '../assets/levels/thumbnail.png';
 import { LongTermStore } from '@/store/long-term-store';
 import * as testMap from '../assets/levels/test.json';
 import { configuration } from "@/constants/configuration";
+export const getEnabledLevels = () => {
+    const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
+    return getAllLevels()
+        .filter((_, index) => index < numberOfEnabledLevels);
+};
 // @ts-nocheck
-export const getAvailableLevels = () => [
+export const getAllLevels = () => [
     LongTermStore.getCustomLevel(),
     {
         map: `
