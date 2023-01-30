@@ -47,11 +47,11 @@ export class FeaturesOverlayConstrainVerifier {
             .forEach(oil => {
             if (output.pointMap.get(Tiles.treadmil)
                 .some(treadmil => treadmil.isEqualTo(oil))) {
-                throw Error(`Oily floors and treadmils don't go well together. Fix error at (${oil.y + 1}, ${oil.x + 1}).`);
+                throw Error(`Oily floors and treadmils don't go well together. Didn't you go to school?. Fix error at (${oil.y + 1}, ${oil.x + 1}).`);
             }
             if (output.pointMap.get(Tiles.spring)
                 .some(treadmil => treadmil.isEqualTo(oil))) {
-                throw Error(`Oily floors and spring are like oil and a rainbow and something that doesn't like rainbows at all. Fix error at (${oil.y + 1}, ${oil.x + 1}).`);
+                throw Error(`Oily floors and springs are like a rainbow and something that doesn't like rainbows at all. They don't mix. Fix error at (${oil.y + 1}, ${oil.x + 1}).`);
             }
         });
     }

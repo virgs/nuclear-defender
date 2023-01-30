@@ -37,8 +37,8 @@
 
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import {LongTermStore} from '@/store/long-term-store';
 import type {LevelCompleteData} from '@/store/long-term-store';
+import {LongTermStore} from '@/store/long-term-store';
 
 export default defineComponent({
   name: 'CarouselSlider',
@@ -191,10 +191,17 @@ export default defineComponent({
       const focusedElementId = document.activeElement.id;
       const allowedFocuselementIds = ['body', 'carouselPrevButton', 'carouselNextButton'];
       if (this.visible && allowedFocuselementIds.includes(focusedElementId)) {
+        const max = this.enabledLevels.length - 1;
+        const min = 0;
+        const pageSize = 5;
         if (key.code === 'Home') {
-          this.slider.goTo(0);
+          this.slider.goTo(min);
         } else if (key.code === 'End') {
-          this.slider.goTo(this.enabledLevels.length - 1);
+          this.slider.goTo(max);
+        } else if (key.code === 'PageUp') {
+          this.slider.goTo(Phaser.Math.Clamp(this.currentIndex - pageSize, min, max));
+        } else if (key.code === 'PageDown') {
+          this.slider.goTo(Phaser.Math.Clamp(this.currentIndex + pageSize, min, max));
         }
       }
     },

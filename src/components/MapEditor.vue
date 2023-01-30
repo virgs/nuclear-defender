@@ -41,6 +41,7 @@
             <div style="display: inline-block">
               <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
                         spellcheck="false"
+                        @change="replaceCodeTokens"
                         id="map-editor-text-area" style="font-size: .9rem"
                         v-model="codedMapText"></textarea>
               <small class="cursor-position">{{ cursorPotision.y }}:{{ cursorPotision.x }}</small>
@@ -231,6 +232,9 @@ export default defineComponent({
     }
   },
   methods: {
+    replaceCodeTokens(text: string) {
+      console.log(text, this.codedMapText)
+    },
     copyStringActions() {
       navigator.clipboard.writeText(this.stringActions!);
     },

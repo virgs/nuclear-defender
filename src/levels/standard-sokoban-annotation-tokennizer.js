@@ -51,7 +51,7 @@ export class StandardSokobanAnnotationTokennizer {
                 let repetition = 1;
                 const repetitionTilesMatch = annotation.match(/(\d*)\[(.*?)]/); //'22', '@.usdw'
                 if (!repetitionTilesMatch) {
-                    throw Error(`I have no idea what you meant at line ${index + 1} since I don't find any closing square brackets ']'. I don't think you expressed yourself correctly.`);
+                    throw Error(`I have no idea what you meant at line ${index + 1} with the expression '${annotation}'. I don't think you expressed yourself correctly.`);
                 }
                 const [_, repetitionStr, tiles] = repetitionTilesMatch;
                 if (repetitionStr) {

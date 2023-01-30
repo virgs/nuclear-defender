@@ -46,6 +46,9 @@ const launch = (containerId: string, config: SceneConfig, router: any) => {
         // backgroundColor: '#000000',
         transparent: true,
         plugins: {},
+        audio: {
+            disableWebAudio: true
+        },
         dom: {
             // createContainer: true
         },

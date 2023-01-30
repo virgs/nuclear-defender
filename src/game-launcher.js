@@ -27,6 +27,9 @@ const launch = (containerId, config, router) => {
         // backgroundColor: '#000000',
         transparent: true,
         plugins: {},
+        audio: {
+            disableWebAudio: true
+        },
         dom: {
         // createContainer: true
         },

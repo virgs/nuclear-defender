@@ -52,7 +52,7 @@ export default defineComponent({
     },
     resetClick() {
       this.forceRerender();
-      this.startTime = 0;
+      this.startTime = Date.now();
     },
     undoClick() {
       EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);

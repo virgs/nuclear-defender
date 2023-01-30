@@ -1,4 +1,4 @@
-import { Point } from '../math/point';
+import { Point } from '@/math/point';
 export class CursorLocalizer {
     fullText;
     selectedChar;
@@ -15,11 +15,12 @@ export class CursorLocalizer {
         const lastLineBreak = this.fullText
             .substring(0, this.selectedChar)
             .lastIndexOf('\n');
-        const col = this.selectedChar - lastLineBreak - 1;
-        const currentLine = this.fullText.substring(lastLineBreak, this.selectedChar);
+        const currentLine = this.fullText.substring(lastLineBreak, this.selectedChar)
+            .replace(/\n/g, '')
+            .replace(/[lurd]/g, '');
         const numOfCharsInGrouppingTags = this.countNumbersOfElementsInGrouppingTag(currentLine);
         const sumOfNumbers = this.countNumbers(currentLine);
-        const colAfterMetaCharsCounting = col - numOfCharsInGrouppingTags + sumOfNumbers;
+        const colAfterMetaCharsCounting = currentLine.length - numOfCharsInGrouppingTags + sumOfNumbers;
         return new Point(colAfterMetaCharsCounting, line);
     }
     countNumbersOfElementsInGrouppingTag(text) {
