@@ -16,7 +16,6 @@
 // @ts-nocheck
 import {LongTermStore} from '@/store/long-term-store';
 import * as testMap from '@/game/assets/levels/test.json';
-import thumbnailPath from '@/game/assets/levels/thumbnail.png';
 
 export type Level = {
     title: string,
@@ -41,7 +40,7 @@ export const AvailableLevels: Level[] = [
 3-3#
 `,
         title: 'Baby welcome', //boxesline = 4
-        "thumbnailPath": thumbnailPath
+        "thumbnailPath": "./game/assets/levels/thumbnail.png"
     }, {
         map: `
 4-3#
