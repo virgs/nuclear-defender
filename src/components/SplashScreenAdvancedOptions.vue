@@ -96,11 +96,11 @@
 <script lang="ts">
 
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/availableLevels';
-import {AvailableLevels} from '@/game/levels/availableLevels';
+import type {Level} from '../levels/availableLevels';
+import {AvailableLevels} from '../levels/availableLevels';
 import MapEditor from '@/components/MapEditor.vue';
 import {LongTermStore} from '@/store/long-term-store';
-import {mapStringToAction} from '@/game/constants/actions';
+import {mapStringToAction} from '../constants/actions';
 
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',

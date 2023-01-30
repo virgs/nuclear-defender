@@ -37,11 +37,12 @@
 // options API
 
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/availableLevels';
+import type {Level} from '@/levels/availableLevels';
 import {SessionStore} from '@/store/session-store';
 import CarouselSlider from '@/components/CarouselSlider.vue';
 import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
+import type {ProcessedMap} from "@/levels/sokoban-map-stripper";
 
 export default defineComponent({
   name: 'SplashScreenView',
@@ -96,7 +97,8 @@ export default defineComponent({
       gameViewConfig.playerInitialActions = this.playerActions;
       this.$router.push(`/game`);
     },
-    mapEditorSaved() {
+    mapEditorSaved(map: ProcessedMap) {
+      console.log(map)
       ++this.carouselSliderRefreshKey;
     }
 
@@ -110,7 +112,7 @@ export default defineComponent({
   min-height: 99vh;
   max-width: 720px;
   font-family: Martian Mono, monospace;
-  background-image: url("/src/assets/radioactive-symbol4.jpg");
+  background-image: url("/assets/images/radioactive-symbol4.jpg");
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: bottom;

@@ -77,10 +77,10 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import {AvailableLevels} from '@/game/levels/availableLevels';
 import {SessionStore} from '@/store/session-store';
+import {mapActionToChar} from '@/constants/actions';
 import {LongTermStore} from '@/store/long-term-store';
-import {mapActionToChar} from '@/game/constants/actions';
+import {AvailableLevels} from '@/levels/availableLevels';
 
 export default defineComponent({
   name: 'NextLevelView',
@@ -120,14 +120,14 @@ export default defineComponent({
           .join('');
     },
     password() {
-      if (this.config.isCustomLevel) {
-        return undefined;
-      }
       const currentIndex: number = this.config.levelIndex;
-      const nextLevel = AvailableLevels[currentIndex];
-      if (nextLevel) {
-        return nextLevel.title.toLowerCase().replace(/ /g, '-');
+      if (!this.config.isCustomLevel) {
+        const nextLevel = AvailableLevels[currentIndex];
+        if (nextLevel) {
+          return nextLevel.title.toLowerCase().replace(/ /g, '-');
+        }
       }
+      return undefined
     },
     codedMap() {
       return this.config.level.map
@@ -138,7 +138,7 @@ export default defineComponent({
   methods: {
     keyPressed(key: any) {
       if (key.code === 'Enter') {
-          this.continueButton();
+        this.continueButton();
       }
     },
     async copy(text: string) {
@@ -175,9 +175,9 @@ export default defineComponent({
       const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
       console.log(currentIndex, numberOfEnabledLevels, AvailableLevels.length);
 
-      if (currentIndex < AvailableLevels.length) { //There are still more levels to enable
-        if (currentIndex === numberOfEnabledLevels) {
-          LongTermStore.setNumberOfEnabledLevels(currentIndex + 1);
+      if (currentIndex < AvailableLevels.length - 2) { //There are still more levels to enable
+        if (currentIndex === numberOfEnabledLevels - 1) {
+          LongTermStore.setNumberOfEnabledLevels(currentIndex + 2);
         }
         console.log(`LongTermStore.setCurrentSelectedIndex(currentIndex + 1)`);
         LongTermStore.setCurrentSelectedIndex(currentIndex + 1);

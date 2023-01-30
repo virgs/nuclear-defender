@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue';
 import {SessionStore} from '@/store/session-store';
-import {EventEmitter, EventName} from '@/event-emitter';
-import PhaserContainer from '@/components/PhaserContainer.vue';
-import DirectionalButtons from '@/components/DirectionalButtons.vue';
+import {EventEmitter, EventName} from '@/events/event-emitter';
+import PhaserContainer from '../components/PhaserContainer.vue';
+import DirectionalButtons from '../components/DirectionalButtons.vue';
 
 export default defineComponent({
   name: 'GameView',

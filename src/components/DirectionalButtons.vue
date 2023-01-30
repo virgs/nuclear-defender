@@ -37,8 +37,8 @@
 <script lang="ts">
 
 import {defineComponent} from 'vue';
-import {EventEmitter, EventName} from '@/event-emitter';
-import {Directions} from '@/game/constants/directions';
+import {EventEmitter, EventName} from '../events/event-emitter';
+import {Directions} from '../constants/directions';
 
 export default defineComponent({
   name: 'DirectionalButtons',

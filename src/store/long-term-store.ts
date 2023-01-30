@@ -1,10 +1,10 @@
-import type {Level} from '@/game/levels/availableLevels';
-import type {Actions} from '@/game/constants/actions';
-import {configuration} from '@/game/constants/configuration';
+import type {Actions} from '@/constants/actions';
+import type {Level} from '@/levels/availableLevels';
+import {configuration} from '@/constants/configuration';
 // @ts-ignore
-import * as customMap from '@/game/assets/levels/custom.json';
+import * as customMap from '../assets/levels/custom.json';
 
-type LevelCompleteData = {
+export type LevelCompleteData = {
     index: number,
     title: string,
     map: string,

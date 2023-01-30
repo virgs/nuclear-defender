@@ -98,17 +98,17 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import {Point} from '@/game/math/point';
-import {LongTermStore} from '@/store/long-term-store';
-import {mapActionToChar} from '@/game/constants/actions';
-import type {Level} from '@/game/levels/availableLevels';
-import {MapValidator} from '@/game/levels/map-validator';
-import {EventEmitter, EventName} from '@/event-emitter';
-import {CursorLocalizer} from '@/game/levels/cursor-localizer';
-import PhaserContainer from '@/components/PhaserContainer.vue';
-import MapDifficultyGauge from '@/components/MapDifficultyGauge.vue';
-import type {ProcessedMap} from '@/game/levels/sokoban-map-stripper';
-import {LevelDifficultyEstimator} from '@/game/solver/level-difficulty-estimator';
+import {Point} from '../math/point';
+import {LongTermStore} from '../store/long-term-store';
+import {mapActionToChar} from '../constants/actions';
+import type {Level} from '../levels/availableLevels';
+import {MapValidator} from '../levels/map-validator';
+import {EventEmitter, EventName} from '../events/event-emitter';
+import {CursorLocalizer} from '../levels/cursor-localizer';
+import PhaserContainer from '../components/PhaserContainer.vue';
+import MapDifficultyGauge from '../components/MapDifficultyGauge.vue';
+import type {ProcessedMap} from '../levels/sokoban-map-stripper';
+import {LevelDifficultyEstimator} from '../solver/level-difficulty-estimator';
 
 export default defineComponent({
   name: 'MapEditor',

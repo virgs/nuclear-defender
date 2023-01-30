@@ -16,8 +16,8 @@
         <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
              height="60"
              :style="mapStyle(index)">
-        <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="/src/assets/custom-stamp.png">
-        <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="/src/assets/solved.png">
+        <img v-if="customItem(index)" class="img-fluid custom-made-stamp" src="/assets/images/custom-stamp.png">
+        <img v-else-if="levelWasComplete(index)" class="img-fluid level-stamp" src="/assets/images/solved.png">
       </div>
     </div>
     <ul class="carousel-controls" id="customize-controls" tabindex="0">
@@ -35,11 +35,12 @@
 
 <script lang="ts">
 
-import {LongTermStore} from '@/store/long-term-store';
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import type {Level} from '@/game/levels/availableLevels';
-import {AvailableLevels} from '@/game/levels/availableLevels';
+import type {Level} from '@/levels/availableLevels';
+import {LongTermStore} from '@/store/long-term-store';
+import {AvailableLevels} from '@/levels/availableLevels';
+import type {LevelCompleteData} from '@/store/long-term-store';
 
 export default defineComponent({
   name: 'CarouselSlider',
@@ -170,7 +171,7 @@ export default defineComponent({
         let realIndex = index;
         if (index !== 0) {
           return !!LongTermStore.getLevelCompleteData()
-              .find(item => item.index === realIndex);
+              .find((item: LevelCompleteData) => item.index === realIndex);
         }
         return false;
       };
@@ -179,7 +180,7 @@ export default defineComponent({
       if (this.currentIndex !== 0) {
         let realIndex = this.currentIndex;
         const solution = LongTermStore.getLevelCompleteData()
-            .find(item => item.index === realIndex);
+            .find((item: LevelCompleteData) => item.index === realIndex);
         if (solution) {
           const date = new Date(solution.timestamp);
           const stringDate = `${date.getDate()}/${date
