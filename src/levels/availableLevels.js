@@ -12,6 +12,7 @@
 //https://orbi.uliege.be/bitstream/2268/5895/1/bnaic2008.pdf
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
 // @ts-nocheck
+import thumbnail from '../assets/levels/thumbnail.png';
 import { LongTermStore } from '@/store/long-term-store';
 import * as testMap from '../assets/levels/test.json';
 import { configuration } from "@/constants/configuration";
@@ -28,8 +29,8 @@ export const AvailableLevels = [
 3-#.#
 3-3#
 `,
-        title: 'Baby welcome', //boxesline = 4
-        // "thumbnailPath": customMapThumbnail
+        title: 'Baby welcome',
+        "thumbnailPath": thumbnail
     }, {
         map: `
 4-3#

@@ -1,6 +1,6 @@
-import { Tiles } from '../levels/tiles';
-import { sounds } from '../constants/sounds';
-import { SpriteCreator } from '../stage/sprite-creator';
+import { Tiles } from '@/levels/tiles';
+import { sounds } from '@/constants/sounds';
+import { SpriteCreator } from '@/stage/sprite-creator';
 export class OilyFloorActor {
     scene;
     sprite;

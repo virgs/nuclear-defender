@@ -1,10 +1,10 @@
 import type Phaser from 'phaser';
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {sounds} from '../constants/sounds';
-import {SpriteCreator} from '../stage/sprite-creator';
-import type {Directions} from '../constants/directions';
-import type {AnimateData, GameActor, GameActorConfig} from '../stage/game-actor';
+import {Tiles} from '@/levels/tiles';
+import type {Point} from '@/math/point';
+import {sounds} from '@/constants/sounds';
+import {SpriteCreator} from '@/stage/sprite-creator';
+import type {Directions} from '@/constants/directions';
+import type {AnimateData, GameActor, GameActorConfig} from '@/stage/game-actor';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;

@@ -14,6 +14,7 @@
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
 
 // @ts-nocheck
+import thumbnail from '../assets/levels/thumbnail.png';
 import {LongTermStore} from '@/store/long-term-store';
 import * as testMap from '../assets/levels/test.json';
 import {configuration} from "@/constants/configuration";
@@ -41,7 +42,7 @@ export const AvailableLevels: Level[] = [
 3-3#
 `,
         title: 'Baby welcome', //boxesline = 4
-        // "thumbnailPath": customMapThumbnail
+        "thumbnailPath": thumbnail
     }, {
         map: `
 4-3#
