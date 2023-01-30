@@ -2,7 +2,7 @@ import type {Actions} from '@/constants/actions';
 import type {Level} from '@/levels/availableLevels';
 import {configuration} from '@/constants/configuration';
 // @ts-ignore
-import * as customMap from '../assets/levels/custom.json';
+import customMap from '../assets/levels/custom.json';
 
 export type LevelCompleteData = {
     index: number,
@@ -38,7 +38,6 @@ export class LongTermStore {
                 ...customMap,
                 title: title
             };
-            console.log(customLevel)
             LongTermStore.setCustomLevel(customLevel)
             return customLevel;
         }

@@ -37,23 +37,21 @@
 
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
-import type {Level} from '@/levels/availableLevels';
 import {LongTermStore} from '@/store/long-term-store';
-import {AvailableLevels} from '@/levels/availableLevels';
 import type {LevelCompleteData} from '@/store/long-term-store';
 
 export default defineComponent({
   name: 'CarouselSlider',
   emits: ['currentLevelChanged'],
-  props: ['visible'],
+  props: ['visible', 'enabledLevels'],
   data() {
     return {
       currentIndex: LongTermStore.getCurrentSelectedIndex(),
-      numberOfEnabledLevels: LongTermStore.getNumberOfEnabledLevels(),
       slider: undefined as any
     };
   },
   mounted() {
+    console.log('mounted again')
     //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
     const visibleItems = this.enabledLevels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
@@ -134,10 +132,6 @@ export default defineComponent({
       };
 
     },
-    enabledLevels(): Level[] {
-      return AvailableLevels
-          .filter((_, index) => index < this.numberOfEnabledLevels);
-    },
     currentDisplayIndex(): (index: number) => string {
       return (index: number): string => {
         if (index === 0) {
@@ -153,6 +147,7 @@ export default defineComponent({
     },
     thumbnail() {
       return (index: number): string => {
+        console.log(this.enabledLevels)
         if (this.enabledLevels[index]) {
           if (this.enabledLevels[index].snapshot) {
             return this.enabledLevels[index]!.snapshot!;
@@ -201,7 +196,7 @@ export default defineComponent({
         if (key.code === 'Home') {
           this.slider.goTo(0);
         } else if (key.code === 'End') {
-          this.slider.goTo(this.numberOfEnabledLevels - 1);
+          this.slider.goTo(this.enabledLevels.length - 1);
         }
       }
     },

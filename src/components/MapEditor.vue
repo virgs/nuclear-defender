@@ -286,7 +286,6 @@ export default defineComponent({
       this.scene.snapshot = canvas.toDataURL();
       this.scene.difficultyEstimative = this.estimative!;
       this.scene.solution = this.stringActions!;
-      console.log(this.scene.snapshot)
       LongTermStore.setCustomLevel(this.scene);
       LongTermStore.setCurrentSelectedIndex(0);
       this.$emit('save', this.scene);

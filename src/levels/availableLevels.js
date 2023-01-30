@@ -11,13 +11,15 @@
 //https://github.com/healeycodes/sokoban/blob/main/game/solver.ts
 //https://orbi.uliege.be/bitstream/2268/5895/1/bnaic2008.pdf
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
-// import thumbnail from '../assets/levels/thumbnail.png';
+//TODO when final images are in place, remove all thumbnail and replace with snapshots...
+//Or have an import like this (import thumbnail from '../assets/levels/thumbnail.png';) to each level
 // @ts-nocheck
+import thumbnail from '../assets/levels/thumbnail.png';
 import { LongTermStore } from '@/store/long-term-store';
 import * as testMap from '../assets/levels/test.json';
 import { configuration } from "@/constants/configuration";
 // @ts-nocheck
-export const AvailableLevels = [
+export const getAvailableLevels = () => [
     LongTermStore.getCustomLevel(),
     {
         map: `
@@ -30,8 +32,7 @@ export const AvailableLevels = [
 3-3#
 `,
         title: 'Baby welcome',
-        // "thumbnailPath": thumbnail
-        "thumbnailPath": '/nuclear-defender/src/assets/levels/thumbnail.png'
+        "thumbnailPath": thumbnail
     }, {
         map: `
 4-3#

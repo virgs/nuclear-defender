@@ -96,11 +96,11 @@
 <script lang="ts">
 
 import {defineComponent} from 'vue';
-import type {Level} from '../levels/availableLevels';
-import {AvailableLevels} from '../levels/availableLevels';
 import MapEditor from '@/components/MapEditor.vue';
+import type {Level} from '@/levels/availableLevels';
 import {LongTermStore} from '@/store/long-term-store';
-import {mapStringToAction} from '../constants/actions';
+import {mapStringToAction} from '@/constants/actions';
+import {getAvailableLevels} from "@/levels/availableLevels";
 
 export default defineComponent({
   name: 'SplashScreenAdvancedOptions',
@@ -170,7 +170,7 @@ So, by entering <b>druls</b>, as soon as the game begins, the player would follo
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {
-      const unblockedLevelIndex = AvailableLevels
+      const unblockedLevelIndex = getAvailableLevels()
           .findIndex((level: Level) => {
             return level.title
                 .toLowerCase()

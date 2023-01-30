@@ -13,8 +13,11 @@
 //https://orbi.uliege.be/bitstream/2268/5895/1/bnaic2008.pdf
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
 
-// import thumbnail from '../assets/levels/thumbnail.png';
+//TODO when final images are in place, remove all thumbnail and replace with snapshots...
+//Or have an import like this (import thumbnail from '../assets/levels/thumbnail.png';) to each level
+
 // @ts-nocheck
+import thumbnail from '../assets/levels/thumbnail.png';
 import {LongTermStore} from '@/store/long-term-store';
 import * as testMap from '../assets/levels/test.json';
 import {configuration} from "@/constants/configuration";
@@ -29,7 +32,7 @@ export type Level = {
 };
 
 // @ts-nocheck
-export const AvailableLevels: Level[] = [
+export const getAvailableLevels = (): Level[] => [
     LongTermStore.getCustomLevel(),
     {
         map: `
@@ -42,8 +45,7 @@ export const AvailableLevels: Level[] = [
 3-3#
 `,
         title: 'Baby welcome', //boxesline = 4
-        // "thumbnailPath": thumbnail
-        "thumbnailPath": '/nuclear-defender/src/assets/levels/thumbnail.png'
+        "thumbnailPath": thumbnail
     }, {
         map: `
 4-3#

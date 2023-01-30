@@ -6,7 +6,7 @@
       </div>
       <div class="col-12" style="min-height: fit-content;">
         <CarouselSlider :key="carouselSliderRefreshKey"
-                        :visible="carouselIsVisible"
+                        :visible="carouselIsVisible" :enabled-levels="enabledLevels"
                         @currentLevelChanged="currentLevelChanged">
         </CarouselSlider>
       </div>
@@ -37,12 +37,13 @@
 // options API
 
 import {defineComponent} from 'vue';
-import type {Level} from '@/levels/availableLevels';
 import {SessionStore} from '@/store/session-store';
+import type {Level} from '@/levels/availableLevels';
+import {LongTermStore} from "@/store/long-term-store";
+import {getAvailableLevels} from "@/levels/availableLevels";
 import CarouselSlider from '@/components/CarouselSlider.vue';
 import DirectionalButtonsComponent from '@/components/DirectionalButtons.vue';
 import SplashScreenAdvancedOptions from '@/components/SplashScreenAdvancedOptions.vue';
-import type {ProcessedMap} from "@/levels/sokoban-map-stripper";
 
 export default defineComponent({
   name: 'SplashScreenView',
@@ -50,6 +51,7 @@ export default defineComponent({
   data() {
     return {
       carouselSliderRefreshKey: 0,
+      levels: getAvailableLevels(),
       currentLevel: undefined as Level | undefined,
       carouselIsVisible: true,
       playerActions: '' as string | undefined,
@@ -66,6 +68,13 @@ export default defineComponent({
   watch: {
     carouselIsVisible() {
       this.carouselSliderRefreshKey++;
+    },
+  },
+  computed: {
+    enabledLevels(): Level[] {
+      const numberOfEnabledLevels = LongTermStore.getNumberOfEnabledLevels();
+      return this.levels
+          .filter((_: Level, index: number) => index < numberOfEnabledLevels);
     },
   },
   methods: {
@@ -97,8 +106,8 @@ export default defineComponent({
       gameViewConfig.playerInitialActions = this.playerActions;
       this.$router.push(`/game`);
     },
-    mapEditorSaved(map: ProcessedMap) {
-      console.log(map)
+    mapEditorSaved() {
+      this.levels = getAvailableLevels();
       ++this.carouselSliderRefreshKey;
     }
 
