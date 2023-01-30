@@ -3,5 +3,5 @@
   "solution": "drr",
   "title": "title",
   "map": "######\n#@   #\n# $ .#\n######",
-  "thumbnailPath": "./assets/images/thumbnail.png"
+  "thumbnailPath": "/nuclear-defender/src/assets/levels/thumbnail.png"
 }

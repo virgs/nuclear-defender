@@ -29,15 +29,18 @@ export class LongTermStore {
 
     public static getCustomLevel(): Level {
         const item = localStorage.getItem(configuration.store.customLevelKey);
-        if (item) {
+        if (item !== null) {
             return JSON.parse(item);
         } else {
             const titles = ['mug tree nightmare', 'hairy keyboard', 'frozen rule'];
             const title = titles[Math.floor(Math.random() * titles.length)];
-            return {
+            const customLevel = {
                 ...customMap,
                 title: title
             };
+            console.log(customLevel)
+            LongTermStore.setCustomLevel(customLevel)
+            return customLevel;
         }
     }
 

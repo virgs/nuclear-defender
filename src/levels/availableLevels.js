@@ -11,8 +11,8 @@
 //https://github.com/healeycodes/sokoban/blob/main/game/solver.ts
 //https://orbi.uliege.be/bitstream/2268/5895/1/bnaic2008.pdf
 //https://www.sciencedirect.com/science/article/pii/S0925772199000176
+// import thumbnail from '../assets/levels/thumbnail.png';
 // @ts-nocheck
-import thumbnail from '../assets/levels/thumbnail.png';
 import { LongTermStore } from '@/store/long-term-store';
 import * as testMap from '../assets/levels/test.json';
 import { configuration } from "@/constants/configuration";
@@ -30,7 +30,8 @@ export const AvailableLevels = [
 3-3#
 `,
         title: 'Baby welcome',
-        "thumbnailPath": thumbnail
+        // "thumbnailPath": thumbnail
+        "thumbnailPath": '/nuclear-defender/src/assets/levels/thumbnail.png'
     }, {
         map: `
 4-3#
@@ -45,7 +46,7 @@ export const AvailableLevels = [
 4-3#
 `,
         title: 'every fool can see',
-        "thumbnailPath": '../assets/levels/thumbnail.png'
+        "thumbnailPath": '/nuclear-defender/src/assets/levels/thumbnail.png'
     },
     testMap,
     {

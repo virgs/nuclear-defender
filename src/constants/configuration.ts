@@ -1,7 +1,7 @@
 import floorTexture from '../assets/tiles/floor-texture.jpg';
 import tileSheetAsset from '../assets/tiles/sokoban_tilesheet.png';
 import selectorTexture from '../assets/tiles/transparent-selector.png';
-// import thumbnailTexture from '../assets/levels/thumbnail.png';
+import thumbnailTexture from '../assets/levels/thumbnail.png';
 import tileSheetAssetNormal from '../assets/tiles/sokoban_tilessheet_normal.png';
 import {ManhattanDistanceCalculator} from '@/math/manhattan-distance-calculator';
 
@@ -15,8 +15,8 @@ export const configuration = {
     floorTexture: floorTexture,
     selectorTextureKey: 'selectorTextureKey',
     selectorTextureFile: selectorTexture,
-    // thumbnailTextureKey: 'thumbNailTextureKey',
-    // thumbnailTextureFile: thumbnailTexture,
+    thumbnailTextureKey: 'thumbNailTextureKey',
+    thumbnailTextureFile: thumbnailTexture,
     tiles: { //in tile sheet
         verticalPerspective: verticalPerspective,
         verticalSize: tileHeight,
