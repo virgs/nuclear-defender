@@ -3,17 +3,17 @@ import { configuration } from '@/constants/configuration';
 import customMap from '../assets/levels/custom.json';
 export class LongTermStore {
     static getLevelCompleteData() {
-        const item = localStorage.getItem(configuration.store.resolvedLevelsKey);
+        const item = LongTermStore.decodeAndGet(configuration.store.resolvedLevelsKey);
         if (item) {
             return JSON.parse(item);
         }
         return [];
     }
     static setLevelCompleteData(data) {
-        localStorage.setItem(configuration.store.resolvedLevelsKey, JSON.stringify(data));
+        LongTermStore.encodeAndSet(configuration.store.resolvedLevelsKey, JSON.stringify(data));
     }
     static getCustomLevel() {
-        const item = localStorage.getItem(configuration.store.customLevelKey);
+        const item = LongTermStore.decodeAndGet(configuration.store.customLevelKey);
         if (item !== null) {
             return JSON.parse(item);
         }
@@ -29,16 +29,16 @@ export class LongTermStore {
         }
     }
     static setCustomLevel(newCustom) {
-        localStorage.setItem(configuration.store.customLevelKey, JSON.stringify(newCustom));
+        LongTermStore.encodeAndSet(configuration.store.customLevelKey, JSON.stringify(newCustom));
     }
     static getCurrentSelectedIndex() {
-        return Number(localStorage.getItem(configuration.store.currentSelectedIndexKey) || 0);
+        return Number(LongTermStore.decodeAndGet(configuration.store.currentSelectedIndexKey) || 0);
     }
     static setCurrentSelectedIndex(currentIndex) {
-        localStorage.setItem(configuration.store.currentSelectedIndexKey, currentIndex + '');
+        LongTermStore.encodeAndSet(configuration.store.currentSelectedIndexKey, currentIndex + '');
     }
     static getNumberOfEnabledLevels() {
-        const numberOfEnabledLevels = localStorage.getItem(configuration.store.numberOfEnabledLevelsKey);
+        const numberOfEnabledLevels = LongTermStore.decodeAndGet(configuration.store.numberOfEnabledLevelsKey);
         if (numberOfEnabledLevels === null) {
             LongTermStore.setNumberOfEnabledLevels(2);
             return 2; //custom + another
@@ -46,6 +46,16 @@ export class LongTermStore {
         return Number(numberOfEnabledLevels);
     }
     static setNumberOfEnabledLevels(value) {
-        localStorage.setItem(configuration.store.numberOfEnabledLevelsKey, value + '');
+        LongTermStore.encodeAndSet(configuration.store.numberOfEnabledLevelsKey, value + '');
+    }
+    static encodeAndSet(key, value) {
+        //encode item and value
+        //it would be nice to add some browser id immutable related stuff as key
+        //https://pieroxy.net/blog/pages/lz-string/index.html
+        localStorage.setItem(key, value);
+    }
+    static decodeAndGet(key) {
+        //https://pieroxy.net/blog/pages/lz-string/index.html
+        return localStorage.getItem(key);
     }
 }

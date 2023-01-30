@@ -15,7 +15,7 @@ export type LevelCompleteData = {
 
 export class LongTermStore {
     public static getLevelCompleteData(): LevelCompleteData[] {
-        const item = localStorage.getItem(configuration.store.resolvedLevelsKey);
+        const item = LongTermStore.decodeAndGet(configuration.store.resolvedLevelsKey);
         if (item) {
             return JSON.parse(item);
         }
@@ -24,11 +24,11 @@ export class LongTermStore {
     }
 
     public static setLevelCompleteData(data: LevelCompleteData[]): void {
-        localStorage.setItem(configuration.store.resolvedLevelsKey, JSON.stringify(data));
+        LongTermStore.encodeAndSet(configuration.store.resolvedLevelsKey, JSON.stringify(data));
     }
 
     public static getCustomLevel(): Level {
-        const item = localStorage.getItem(configuration.store.customLevelKey);
+        const item = LongTermStore.decodeAndGet(configuration.store.customLevelKey);
         if (item !== null) {
             return JSON.parse(item);
         } else {
@@ -44,19 +44,19 @@ export class LongTermStore {
     }
 
     public static setCustomLevel(newCustom: Level): void {
-        localStorage.setItem(configuration.store.customLevelKey, JSON.stringify(newCustom));
+        LongTermStore.encodeAndSet(configuration.store.customLevelKey, JSON.stringify(newCustom));
     }
 
     public static getCurrentSelectedIndex(): number {
-        return Number(localStorage.getItem(configuration.store.currentSelectedIndexKey) || 0);
+        return Number(LongTermStore.decodeAndGet(configuration.store.currentSelectedIndexKey) || 0);
     }
 
     public static setCurrentSelectedIndex(currentIndex: number) {
-        localStorage.setItem(configuration.store.currentSelectedIndexKey, currentIndex + '');
+        LongTermStore.encodeAndSet(configuration.store.currentSelectedIndexKey, currentIndex + '');
     }
 
     public static getNumberOfEnabledLevels(): number {
-        const numberOfEnabledLevels = localStorage.getItem(configuration.store.numberOfEnabledLevelsKey);
+        const numberOfEnabledLevels = LongTermStore.decodeAndGet(configuration.store.numberOfEnabledLevelsKey);
         if (numberOfEnabledLevels === null) {
             LongTermStore.setNumberOfEnabledLevels(2);
             return 2; //custom + another
@@ -65,7 +65,20 @@ export class LongTermStore {
     }
 
     public static setNumberOfEnabledLevels(value: number) {
-        localStorage.setItem(configuration.store.numberOfEnabledLevelsKey, value + '');
+        LongTermStore.encodeAndSet(configuration.store.numberOfEnabledLevelsKey, value + '');
+    }
+
+    private static encodeAndSet(key: string, value: string): void {
+        //encode item and value
+        //it would be nice to add some browser id immutable related stuff as key
+        //https://pieroxy.net/blog/pages/lz-string/index.html
+        localStorage.setItem(key, value);
+    }
+
+    private static decodeAndGet(key: string): string | null {
+        //https://pieroxy.net/blog/pages/lz-string/index.html
+        return localStorage.getItem(key);
     }
 
 }
+

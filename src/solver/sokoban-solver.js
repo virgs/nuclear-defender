@@ -11,6 +11,7 @@ export class SokobanSolver {
     static actionsList = Object.keys(Actions)
         .filter(key => !isNaN(Number(key)))
         .map(key => Number(key));
+    iterations;
     movementCoordinator;
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     candidatesToVisit = new Heap((a, b) => a.distanceSum - b.distanceSum);
@@ -22,6 +23,7 @@ export class SokobanSolver {
     startTime;
     constructor(input) {
         this.strippedMap = input.strippedMap;
+        this.iterations = 0;
         this.aborted = false;
         this.movementCoordinator = new MovementOrchestrator({ strippedMap: this.strippedMap });
         this.movementAnalyser = new MovementAnalyser({
@@ -38,13 +40,14 @@ export class SokobanSolver {
     }
     async solve(dynamicMap) {
         this.startTime = new Date().getTime();
-        const { actions, iterations, boxesLine } = await this.startAlgorithm(dynamicMap);
+        const solution = await this.startAlgorithm(dynamicMap);
         return {
-            boxesLine: boxesLine,
-            actions: actions,
-            iterations: iterations,
-            totalTime: new Date().getTime() - this.startTime,
-            aborted: this.aborted
+            aborted: this.aborted,
+            actions: solution?.actions,
+            boxesLine: solution?.boxesLine,
+            counterIntuitiveMoves: solution?.counterIntuitiveMoves,
+            iterations: this.iterations,
+            totalTime: Date.now() - this.startTime
         };
     }
     async startAlgorithm(dynamicMap) {
@@ -52,6 +55,7 @@ export class SokobanSolver {
         const boxes = dynamicMap.get(Tiles.box);
         const initialCandidate = {
             boxesLine: 0,
+            counterIntuitiveMoves: 0,
             lastPushedBox: { id: -1, direction: Directions.UP },
             actions: [],
             hero: { point: hero, id: 0 },
@@ -62,12 +66,12 @@ export class SokobanSolver {
         initialCandidate.hash = await this.metricEmitter
             .measureTime(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
         this.candidatesToVisit.push(initialCandidate);
-        let iterations = 0;
+        this.iterations = 0;
         let cpuBreath = 0;
         let foundSolution = undefined;
         let candidate = initialCandidate;
         while (candidate && !this.aborted) {
-            ++iterations;
+            ++this.iterations;
             ++cpuBreath;
             foundSolution = await this.checkSolution(candidate);
             if (foundSolution) {
@@ -77,7 +81,7 @@ export class SokobanSolver {
                 cpuBreath = 0;
                 await this.metricEmitter.measureTime(Metrics.BREATHING_TIME, async () => {
                     if (configuration.solver.debug.iterationNumber) {
-                        console.log(iterations);
+                        console.log(this.iterations);
                     }
                     await new Promise(resolve => setTimeout(() => {
                         resolve(undefined);
@@ -89,11 +93,7 @@ export class SokobanSolver {
         if (configuration.solver.debug.metrics) {
             this.metricEmitter.log();
         }
-        return {
-            actions: foundSolution?.actions,
-            iterations,
-            boxesLine: foundSolution?.boxesLine || 0,
-        };
+        return foundSolution;
     }
     async checkSolution(candidate) {
         if (await this.metricEmitter.measureTime(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash))) {
@@ -123,6 +123,8 @@ export class SokobanSolver {
                         currentBoxesLine = 1;
                     }
                 }
+                const counterIntuitiveMoves = analysis.sumOfEveryBoxToTheClosestTarget >= candidate.distanceSum ?
+                    candidate.counterIntuitiveMoves + 1 : candidate.counterIntuitiveMoves;
                 const newCandidate = {
                     lastPushedBox: analysis.pushedBox || candidate.lastPushedBox,
                     boxesLine: candidate.boxesLine + currentBoxesLine,
@@ -131,8 +133,9 @@ export class SokobanSolver {
                     hero: { point: afterAction.hero.nextPosition, id: afterAction.hero.id },
                     actions: candidate.actions.concat(action),
                     lastActionResult: afterAction,
-                    distanceSum: candidate.distanceSum + heroMovementCost
-                    // distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
+                    counterIntuitiveMoves: counterIntuitiveMoves,
+                    // distanceSum: candidate.distanceSum + heroMovementCost
+                    distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
                 };
                 newCandidate.hash = await this.metricEmitter.measureTime(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(newCandidate));
                 if (!analysis.isDeadLocked) {

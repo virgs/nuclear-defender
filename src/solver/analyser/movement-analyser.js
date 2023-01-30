@@ -1,4 +1,4 @@
-import { Tiles } from '../../levels/tiles';
+import { Tiles } from '@/levels/tiles';
 import { BoxClusterDeadlockDetector } from './box-cluster-deadlock-detector';
 import { BoxGluedToWallDetector } from './box-glued-to-wall-deadlock-detector';
 export class MovementAnalyser {

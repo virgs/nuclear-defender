@@ -97,7 +97,7 @@ export default defineComponent({
                     <span>
                       <i class="fa-solid fa-door-open"></i>
                     </span>
-                    <span v-if="!smallScreenDisplay" class="mx-2">QUIT</span>
+                    <span v-if="!smallScreenDisplay" class="mx-2">Quit</span>
                   </button>
                 </div>
                 <div class="col-auto col-lg-3 d-grid gap-2">
@@ -105,9 +105,9 @@ export default defineComponent({
                           data-bs-toggle="modal" data-bs-target="#confirmation-modal"
                           @click="confirmationButton = resetClick" type="button">
                     <span>
-                      <i class="fa-solid fa-circle-xmark"></i>
+                      <i class="fa-solid fa-arrows-rotate"></i>
                     </span>
-                    <span v-if="!smallScreenDisplay" class="mx-2">RESTART</span>
+                    <span v-if="!smallScreenDisplay" class="mx-2">Restart</span>
                   </button>
                 </div>
                 <div class="col-auto col-lg-3 d-grid gap-2">
@@ -115,9 +115,9 @@ export default defineComponent({
                           @click="undoClick"
                           type="button">
                     <span>
-                      <i class="fa-solid fa-delete-left"></i>
+                      <i class="fa-solid fa-turn-up" style="transform: rotate(-90deg)"></i>
                     </span>
-                    <span v-if="!smallScreenDisplay" class="mx-2">UNDO</span>
+                    <span v-if="!smallScreenDisplay" class="mx-2">Undo</span>
                   </button>
                 </div>
               </div>

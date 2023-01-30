@@ -49,7 +49,6 @@ export class MapValidator {
             strippedMap: output.raw,
             staticFeatures: output.pointMap,
         });
-        console.log(this.solver)
         console.log('checking whether the map is solvable');
 
         const solutionOutput = await this.solver.solve(output.removedFeatures);

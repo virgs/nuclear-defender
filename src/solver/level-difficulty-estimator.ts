@@ -1,13 +1,13 @@
-import type {SolutionOutput} from '../solver/sokoban-solver';
-import Phaser from 'phaser';
-import {Actions} from '../constants/actions';
-import {configuration} from '../constants/configuration';
+import {Actions} from '@/constants/actions';
+import {configuration} from '@/constants/configuration';
+import type {SolutionOutput} from '@/solver/sokoban-solver';
 
 type DifficultFactor = {
     value: number,
     weight: number, //0 to 1
 }
 
+//https://www.fi.muni.cz/~xpelanek/publications/stairs2010-final.pdf
 export class LevelDifficultyEstimator {
     private readonly factors: ((solution: SolutionOutput) => DifficultFactor)[];
 
@@ -19,9 +19,19 @@ export class LevelDifficultyEstimator {
                     .filter(action => action !== Actions.STAND)
                     .length, 200), weight: .15
             }),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine, 80), weight: .75}),
+            (solution: SolutionOutput) => ({
+                value: this.getDifficulty(solution.counterIntuitiveMoves! / solution.actions?.length!, 1),
+                weight: .5
+            }),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine!, 80), weight: .75}),
+            (solution: SolutionOutput) => ({
+                value: this.getDifficulty(solution.actions!
+                    .filter(action => {
+                        return action === Actions.STAND;
+                    }).length / solution.actions!.length, 1), weight: .15
+            }), //timing factor (be it waiting of pressing key at the right time)
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 60000), weight: .25}),
-            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 750000), weight: .35}),
+            (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 750000), weight: .15}),
         ];
     }
 
@@ -29,7 +39,6 @@ export class LevelDifficultyEstimator {
     //100 -> nightmare
     //undefined -> impossible. literally
     public estimate(solution: SolutionOutput): number | undefined {
-        // console.log(solution);
         if (!solution.actions) {
             return undefined;
         }
@@ -51,6 +60,6 @@ export class LevelDifficultyEstimator {
     }
 
     private getDifficulty(value: number, max: number) {
-        return Math.min(value / max, 1.25);
+        return Math.min(value / max, 1.15);
     }
 }

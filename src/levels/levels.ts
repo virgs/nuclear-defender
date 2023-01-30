@@ -37,6 +37,10 @@ export const getEnabledLevels = (): Level[] => {
         .filter((_: Level, index: number) => index < numberOfEnabledLevels);
 }
 
+//http://www.games4brains.de/sokoban-leveldesign.php
+//http://www.game-sokoban.com/index.php?mode=catalog
+//http://www.abelmartin.com/rj/sokoban_colecciones.html
+//http://sneezingtiger.com/sokoban/levels/minicosmosText.html
 // @ts-nocheck
 export const getAllLevels = (): Level[] => [
     LongTermStore.getCustomLevel(),
@@ -193,7 +197,7 @@ export const getAllLevels = (): Level[] => [
     },
     {
         map: `
-8#
+###-####
 #@###  #
 # $..$ #
 # $#.  #

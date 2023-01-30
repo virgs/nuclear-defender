@@ -23,6 +23,10 @@ export const getEnabledLevels = () => {
     return getAllLevels()
         .filter((_, index) => index < numberOfEnabledLevels);
 };
+//http://www.games4brains.de/sokoban-leveldesign.php
+//http://www.game-sokoban.com/index.php?mode=catalog
+//http://www.abelmartin.com/rj/sokoban_colecciones.html
+//http://sneezingtiger.com/sokoban/levels/minicosmosText.html
 // @ts-nocheck
 export const getAllLevels = () => [
     LongTermStore.getCustomLevel(),
@@ -179,7 +183,7 @@ export const getAllLevels = () => [
     },
     {
         map: `
-8#
+###-####
 #@###  #
 # $..$ #
 # $#.  #

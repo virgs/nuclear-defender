@@ -26,9 +26,9 @@ export class CursorLocalizer {
     countNumbersOfElementsInGrouppingTag(text) {
         const initialGroupping = text.indexOf('[');
         if (initialGroupping !== -1) {
-            const endingGrouppingTag = text.indexOf(']');
+            const endingGrouppingTag = text.indexOf(']', initialGroupping);
             if (endingGrouppingTag !== -1) {
-                return endingGrouppingTag - initialGroupping +
+                return endingGrouppingTag +
                     this.countNumbersOfElementsInGrouppingTag(text.substring(endingGrouppingTag));
             }
             return text.length - initialGroupping;

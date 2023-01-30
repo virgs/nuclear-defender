@@ -66,12 +66,12 @@ export const configuration = {
     },
     solver: {
         debug: {
-            metrics: false,
+            metrics: true,
+            estimator: true,
             iterationNumber: false,
-            estimator: false
         },
         sleepForInMs: 10,
-        iterationPeriodToSleep: 100,
+        iterationPeriodToSleep: 500,
         distanceCalculator: new ManhattanDistanceCalculator()
 
     }

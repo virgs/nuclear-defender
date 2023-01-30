@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
-import { Actions } from '../constants/actions';
-import { configuration } from '../constants/configuration';
+import { Actions } from '@/constants/actions';
+import { configuration } from '@/constants/configuration';
+//https://www.fi.muni.cz/~xpelanek/publications/stairs2010-final.pdf
 export class LevelDifficultyEstimator {
     factors;
     constructor() {
@@ -10,16 +10,25 @@ export class LevelDifficultyEstimator {
                     .filter(action => action !== Actions.STAND)
                     .length, 200), weight: .15
             }),
+            (solution) => ({
+                value: this.getDifficulty(solution.counterIntuitiveMoves / solution.actions?.length, 1),
+                weight: .5
+            }),
             (solution) => ({ value: this.getDifficulty(solution.boxesLine, 80), weight: .75 }),
+            (solution) => ({
+                value: this.getDifficulty(solution.actions
+                    .filter(action => {
+                    return action === Actions.STAND;
+                }).length / solution.actions.length, 1), weight: .15
+            }),
             (solution) => ({ value: this.getDifficulty(solution.totalTime, 60000), weight: .25 }),
-            (solution) => ({ value: this.getDifficulty(solution.iterations, 750000), weight: .35 }),
+            (solution) => ({ value: this.getDifficulty(solution.iterations, 750000), weight: .15 }),
         ];
     }
     //0 -> easy piece
     //100 -> nightmare
     //undefined -> impossible. literally
     estimate(solution) {
-        // console.log(solution);
         if (!solution.actions) {
             return undefined;
         }
@@ -40,6 +49,6 @@ export class LevelDifficultyEstimator {
         return Phaser.Math.Clamp(number * 100, 0, 100);
     }
     getDifficulty(value, max) {
-        return Math.min(value / max, 1.25);
+        return Math.min(value / max, 1.15);
     }
 }
