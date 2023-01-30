@@ -1,11 +1,11 @@
-import { Tiles } from '../levels/tiles';
-import { sounds } from '../constants/sounds';
-import { SpriteCreator } from '../stage/sprite-creator';
-import { configuration } from '../constants/configuration';
-import { TileDepthCalculator } from '../scenes/tile-depth-calculator';
+import { Tiles } from '@/levels/tiles';
+import { sounds } from '@/constants/sounds';
+import { GameObjectCreator } from '@/stage/game-object-creator';
+import { configuration } from '@/constants/configuration';
+import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 export class BoxActor {
     tweens;
-    sprite;
+    image;
     id;
     scene;
     tilePosition;
@@ -16,7 +16,7 @@ export class BoxActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.image = new GameObjectCreator(config).createImage();
         this.isOnTarget = false;
     }
     getTilePosition() {
@@ -24,9 +24,6 @@ export class BoxActor {
     }
     setTilePosition(tilePosition) {
         this.tilePosition = tilePosition;
-    }
-    getSprite() {
-        return this.sprite;
     }
     getId() {
         return this.id;
@@ -44,11 +41,11 @@ export class BoxActor {
                 x: data.spritePosition.x,
                 y: data.spritePosition.y,
                 duration: configuration.updateCycleInMs,
-                targets: this.sprite,
+                targets: this.image,
                 onInit: () => {
                 },
                 onUpdate: () => {
-                    this.sprite.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.sprite.y));
+                    this.image.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.image.y));
                 },
                 onComplete: () => {
                     resolve();
@@ -73,7 +70,7 @@ export class BoxActor {
     cover(staticActors) {
         if (staticActors
             .some(actor => actor.getTileCode() === Tiles.target)) {
-            this.sprite.setFrame(Tiles.boxOnTarget);
+            this.image.setFrame(Tiles.boxOnTarget);
             if (!this.isOnTarget) {
                 this.isOnTarget = true;
                 this.scene.sound.play(sounds.boxOnTarget.key, { volume: 0.5 });
@@ -82,7 +79,7 @@ export class BoxActor {
         else {
             if (this.isOnTarget) {
                 this.isOnTarget = false;
-                this.sprite.setFrame(Tiles.box);
+                this.image.setFrame(Tiles.box);
             }
         }
     }

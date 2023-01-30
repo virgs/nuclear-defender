@@ -1,9 +1,9 @@
 import type Phaser from 'phaser';
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {sounds} from '../constants/sounds';
-import {SpriteCreator} from './sprite-creator';
-import {Directions} from '../constants/directions';
+import {Tiles} from '@/levels/tiles';
+import type {Point} from '@/math/point';
+import {sounds} from '@/constants/sounds';
+import {Directions} from '@/constants/directions';
+import {GameObjectCreator} from './game-object-creator';
 import type {GameActor, GameActorConfig} from './game-actor';
 
 export class TreadmillActor implements GameActor {
@@ -19,7 +19,7 @@ export class TreadmillActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
         this.covered = false;
 
         switch (this.orientation) {
@@ -56,10 +56,6 @@ export class TreadmillActor implements GameActor {
 
     public getId(): number {
         return this.id;
-    }
-
-    public getSprite(): Phaser.GameObjects.Sprite {
-        return this.sprite;
     }
 
     public getTileCode(): Tiles {

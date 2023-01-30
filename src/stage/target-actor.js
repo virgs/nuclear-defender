@@ -1,7 +1,7 @@
-import { Point } from '../math/point';
-import { Tiles } from '../levels/tiles';
-import { SpriteCreator } from './sprite-creator';
-import { configuration } from '../constants/configuration';
+import { Point } from '@/math/point';
+import { Tiles } from '@/levels/tiles';
+import { GameObjectCreator } from './game-object-creator';
+import { configuration } from '@/constants/configuration';
 export class TargetActor {
     static UNCOVERED_LIGHT_INTENSITY = .66;
     static COVERED_LIGHT_INTENSITY = .15;
@@ -19,14 +19,16 @@ export class TargetActor {
         this.scene = config.scene;
         this.covered = false;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
         this.intensityModifier = 2; // it will always have itself as a target
         config.contentAround
             .forEach(line => line
             .forEach(item => item
             .filter(layer => layer.code === Tiles.target)
             .forEach(() => this.intensityModifier *= .5)));
-        this.addLight();
+        if (config.playable) {
+            this.addLight();
+        }
     }
     addLight() {
         const light = this.scene.lights.addLight(this.sprite.x, this.sprite.y, TargetActor.LIGHT_RADIUS, TargetActor.LIGHT_UNCOVERED_COLOR, TargetActor.UNCOVERED_LIGHT_INTENSITY);
@@ -74,9 +76,6 @@ export class TargetActor {
     }
     isCovered() {
         return this.covered;
-    }
-    getSprite() {
-        return this.sprite;
     }
     getTileCode() {
         return Tiles.target;

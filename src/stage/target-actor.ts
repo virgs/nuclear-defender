@@ -1,8 +1,8 @@
-import {Point} from '../math/point';
-import {Tiles} from '../levels/tiles';
-import {SpriteCreator} from './sprite-creator';
-import type {Directions} from '../constants/directions';
-import {configuration} from '../constants/configuration';
+import {Point} from '@/math/point';
+import {Tiles} from '@/levels/tiles';
+import type {Directions} from '@/constants/directions';
+import {GameObjectCreator} from './game-object-creator';
+import {configuration} from '@/constants/configuration';
 import type {GameActor, GameActorConfig} from './game-actor';
 
 export class TargetActor implements GameActor {
@@ -24,7 +24,7 @@ export class TargetActor implements GameActor {
         this.scene = config.scene;
         this.covered = false;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
 
         this.intensityModifier = 2; // it will always have itself as a target
         config.contentAround
@@ -32,7 +32,9 @@ export class TargetActor implements GameActor {
                 .forEach(item => item
                     .filter(layer => layer.code === Tiles.target)
                     .forEach(() => this.intensityModifier *= .5)));
-        this.addLight();
+        if (config.playable) {
+            this.addLight();
+        }
     }
 
     private addLight() {
@@ -90,10 +92,6 @@ export class TargetActor implements GameActor {
 
     public isCovered(): boolean {
         return this.covered;
-    }
-
-    public getSprite(): Phaser.GameObjects.Sprite {
-        return this.sprite;
     }
 
     public getTileCode(): Tiles {

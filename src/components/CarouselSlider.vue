@@ -51,7 +51,6 @@ export default defineComponent({
     };
   },
   mounted() {
-    console.log('mounted again')
     //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
     const visibleItems = this.enabledLevels.length === 2 ? 2 : 3; //it seems the carousel doesnt work properly when there is only 2 items
@@ -147,7 +146,6 @@ export default defineComponent({
     },
     thumbnail() {
       return (index: number): string => {
-        console.log(this.enabledLevels)
         if (this.enabledLevels[index]) {
           if (this.enabledLevels[index].snapshot) {
             return this.enabledLevels[index]!.snapshot!;

@@ -25,8 +25,6 @@ export interface GameActor {
 
     setTilePosition(tilePosition: Point): void;
 
-    getSprite(): Phaser.GameObjects.Sprite;
-
     getTileCode(): Tiles;
 
     getId(): number;

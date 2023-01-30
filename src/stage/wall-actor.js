@@ -1,13 +1,13 @@
-import { Tiles } from '../levels/tiles';
-import { SpriteCreator } from './sprite-creator';
+import { Tiles } from '@/levels/tiles';
+import { GameObjectCreator } from '@/stage/game-object-creator';
 export class WallActor {
     id;
-    sprite;
+    picture;
     tilePosition;
     constructor(config) {
         this.id = config.id;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.picture = new GameObjectCreator(config).createImage();
         // const wallOnTop: boolean = config.contentAround[0][1]
         //     .some(item => item.code === Tiles.wall);
         // const wallOnLeft: boolean = config.contentAround[1][0]
@@ -22,9 +22,6 @@ export class WallActor {
     }
     getOrientation() {
         return undefined;
-    }
-    getSprite() {
-        return this.sprite;
     }
     getTileCode() {
         return Tiles.wall;

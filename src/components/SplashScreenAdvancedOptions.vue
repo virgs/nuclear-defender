@@ -24,7 +24,7 @@
         <div class="modal-body">
           <div class="input-group">
             <input type="text" class="form-control"
-                   placeholder="Password"
+                   placeholder="Password" spellcheck="false"
                    v-model="levelPassword">
             <button class="btn btn-outline-secondary toastBtn" type="button"
                     :disabled="this.levelPassword.length <= 0"

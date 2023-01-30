@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div class="toast-container position-fixed top-0 end-0 pt-3">
+    <div class="toast-container position-fixed top-0 end-0 pt-3 disable-dbl-tap-zoom">
       <div id="copy-toast" class="toast" role="alert" style="background-color: transparent"
            aria-live="assertive" aria-atomic="true" data-bs-delay="2500">
         <div class="d-flex sokoban-toast">
@@ -11,7 +11,7 @@
         </div>
       </div>
     </div>
-    <!--TODO add level thumbnail here-->
+    <!--TODO add level thumbnail here?-->
     <div class="container my-5 next-level-view text-center">
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
@@ -62,7 +62,7 @@
             </button>
           </div>
         </div>
-        <div class="col-4 col-lg-3 d-grid gap-2 my-5">
+        <div class="col-auto d-grid gap-2 my-5">
           <button class="btn btn-primary sokoban-call-for-action-button"
                   @click="continueButton"
                   type="button">

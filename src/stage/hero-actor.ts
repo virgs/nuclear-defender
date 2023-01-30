@@ -1,12 +1,12 @@
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {sounds} from '../constants/sounds';
-import {SpriteCreator} from './sprite-creator';
-import type {Directions} from '../constants/directions';
-import {HeroAnimator} from '../animations/hero-animator';
-import {EventEmitter, EventName} from '../events/event-emitter';
-import {Actions, mapDirectionToAction} from '../constants/actions';
-import {TileDepthCalculator} from '../scenes/tile-depth-calculator';
+import {Tiles} from '@/levels/tiles';
+import type {Point} from '@/math/point';
+import {sounds} from '@/constants/sounds';
+import {GameObjectCreator} from './game-object-creator';
+import type {Directions} from '@/constants/directions';
+import {HeroAnimator} from '@/animations/hero-animator';
+import {EventEmitter, EventName} from '@/events/event-emitter';
+import {Actions, mapDirectionToAction} from '@/constants/actions';
+import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
 import type {AnimateData, GameActor, GameActorConfig} from './game-actor';
 
 export class HeroActor implements GameActor {
@@ -22,13 +22,12 @@ export class HeroActor implements GameActor {
     public constructor(config: GameActorConfig) {
         this.id = config.id;
         this.scene = config.scene;
-
         this.heroAnimator = new HeroAnimator();
 
         this.tweens = config.scene.tweens;
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
 
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
 
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));

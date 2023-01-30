@@ -1,5 +1,5 @@
 <template>
-  <div class="container splash-view text-center pt-3">
+  <div class="container disable-dbl-tap-zoom splash-view text-center pt-3">
     <div class="row row-cols-1 gy-3">
       <div class="col mb-lg-5">
         <h1 class="sokoban-display display-3 fw-normal" style="user-select: none">NUCLEAR DEFENDER</h1>

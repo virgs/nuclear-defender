@@ -1,23 +1,21 @@
-import Phaser from 'phaser';
-import {Point} from '../math/point';
-import {Tiles} from '../levels/tiles';
+import {Point} from '@/math/point';
+import {Tiles} from '@/levels/tiles';
 import {BoxActor} from './box-actor';
 import {GameStage} from './game-stage';
 import {HeroActor} from './hero-actor';
 import {WallActor} from './wall-actor';
 import {SpringActor} from './spring-actor';
 import {TargetActor} from './target-actor';
+import {FloorActor} from '@/stage/floor-actor';
 import {TreadmillActor} from './treadmill-actor';
 import {OilyFloorActor} from './oily-floor-actor';
 import {OneWayDoorActor} from './one-way-door-actor';
-import {configuration} from '../constants/configuration';
 import type {GameActor, GameActorConfig} from './game-actor';
-import {TileDepthCalculator} from '../scenes/tile-depth-calculator';
 import {MapEditorCursorFollower} from './map-editor-cursor-follower';
-import type {ScreenPropertiesCalculator} from '../math/screen-properties-calculator';
-import type {MultiLayeredMap, OrientedTile} from '../levels/standard-sokoban-annotation-tokennizer';
+import type {ScreenPropertiesCalculator} from '@/math/screen-properties-calculator';
+import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
-type StageCreatorConfig = {
+export type StageCreatorConfig = {
     playable: boolean;
     screenPropertiesCalculator: ScreenPropertiesCalculator;
     strippedTileMatrix: MultiLayeredMap;
@@ -29,10 +27,9 @@ export class GameStageCreator {
     private readonly scene: Phaser.Scene;
     private readonly constructorMap: Map<Tiles, (params: any) => GameActor>;
 
-    private readonly floorPic: Phaser.GameObjects.Image;
-    private readonly floorMaskShape: Phaser.GameObjects.Graphics;
     private readonly dynamicFeatures: Map<Tiles, Point[]>;
     private readonly strippedMatrix: MultiLayeredMap;
+    private readonly floorActor: FloorActor;
     private readonly actorMap: Map<Tiles, GameActor[]>;
     private readonly screenPropertiesCalculator: ScreenPropertiesCalculator;
     private readonly playable: boolean;
@@ -59,13 +56,7 @@ export class GameStageCreator {
         this.constructorMap.set(Tiles.treadmil, params => new TreadmillActor(params));
         this.constructorMap.set(Tiles.wall, params => new WallActor(params));
 
-        this.floorMaskShape = this.scene.make.graphics({});
-        this.floorPic = this.scene.add.image(0, 0, configuration.floorTextureKey);
-        this.floorPic.scale = 2 * configuration.gameWidth / this.floorPic.width;
-        if (this.playable) {
-            this.floorPic.setPipeline('Light2D');
-        }
-        this.floorPic.setDepth(new TileDepthCalculator().calculate(Tiles.floor, -10));
+        this.floorActor = new FloorActor(config)
     }
 
     public createGameStage(): GameStage {
@@ -91,14 +82,13 @@ export class GameStageCreator {
                     .forEach(tile => {
                         const tilePosition = new Point(x, y);
                         if (tile.code === Tiles.floor) {
-                            this.createFloorMask(tilePosition);
+                            this.floorActor.addTileMask(tilePosition);
                         } else {
                             this.createActor(tilePosition, tile);
                         }
                     })));
 
-        const mask = this.floorMaskShape.createGeometryMask();
-        this.floorPic!.setMask(mask);
+        this.floorActor.createMask();
 
         if (!this.playable) {
             new MapEditorCursorFollower({
@@ -148,15 +138,6 @@ export class GameStageCreator {
             return gameActor;
         }
         return undefined;
-    }
-
-    private createFloorMask(tilePosition: Point) {
-        const verticalBuffer = 10;
-        const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
-
-        this.floorMaskShape.beginPath();
-        this.floorMaskShape.fillRectShape(new Phaser.Geom.Rectangle(worldPosition.x, worldPosition.y,
-            configuration.world.tileSize.horizontal, configuration.world.tileSize.vertical + verticalBuffer));
     }
 
     private static initializeActorMap() {

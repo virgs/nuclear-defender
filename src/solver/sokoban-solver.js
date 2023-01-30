@@ -1,11 +1,11 @@
 import Heap from 'heap';
-import { Tiles } from '../levels/tiles';
-import { Actions } from '../constants/actions';
-import { Directions } from '../constants/directions';
+import { Tiles } from '@/levels/tiles';
+import { Actions } from '@/constants/actions';
+import { Directions } from '@/constants/directions';
 import { MetricEmitter, Metrics } from './metric-emitter';
-import { configuration } from '../constants/configuration';
+import { configuration } from '@/constants/configuration';
 import { MovementAnalyser } from './analyser/movement-analyser';
-import { MovementOrchestrator } from '../engine/movement-orchestrator';
+import { MovementOrchestrator } from '@/engine/movement-orchestrator';
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
 export class SokobanSolver {
     static actionsList = Object.keys(Actions)

@@ -1,7 +1,7 @@
-import {Point} from '../math/point';
-import {EventEmitter, EventName} from '../events/event-emitter';
-import {configuration} from '../constants/configuration';
-import type {ScreenPropertiesCalculator} from '../math/screen-properties-calculator';
+import {Point} from '@/math/point';
+import {configuration} from '@/constants/configuration';
+import {EventEmitter, EventName} from '@/events/event-emitter';
+import type {ScreenPropertiesCalculator} from '@/math/screen-properties-calculator';
 
 type MapEditorCursorFollowerConfig = {
     screenPropertiesCalculator: ScreenPropertiesCalculator;

@@ -1,15 +1,15 @@
 import Heap from 'heap';
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {Actions} from '../constants/actions';
-import {Directions} from '../constants/directions';
+import {Tiles} from '@/levels/tiles';
+import type {Point} from '@/math/point';
+import {Actions} from '@/constants/actions';
+import {Directions} from '@/constants/directions';
 import {MetricEmitter, Metrics} from './metric-emitter';
-import {configuration} from '../constants/configuration';
+import {configuration} from '@/constants/configuration';
 import {MovementAnalyser} from './analyser/movement-analyser';
-import {MovementOrchestrator} from '../engine/movement-orchestrator';
+import {MovementOrchestrator} from '@/engine/movement-orchestrator';
 import type {MovementAnalysis, PushedBox} from './analyser/movement-analyser';
-import type {MovementOrchestratorOutput} from '../engine/movement-orchestrator';
-import type {MultiLayeredMap, OrientedTile} from '../levels/standard-sokoban-annotation-tokennizer';
+import type {MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
+import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
 type SolutionCandidate = {
     actions: Actions[],

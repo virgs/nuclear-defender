@@ -2,13 +2,13 @@ import type Phaser from 'phaser';
 import {Tiles} from '@/levels/tiles';
 import type {Point} from '@/math/point';
 import {sounds} from '@/constants/sounds';
-import {SpriteCreator} from '@/stage/sprite-creator';
+import {GameObjectCreator} from '@/stage/game-object-creator';
 import type {Directions} from '@/constants/directions';
 import type {AnimateData, GameActor, GameActorConfig} from '@/stage/game-actor';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
-    private readonly sprite: Phaser.GameObjects.Sprite;
+    private readonly image: Phaser.GameObjects.Image;
     private readonly id: number;
     private covered: boolean;
     private tilePosition: Point;
@@ -17,7 +17,7 @@ export class OilyFloorActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.image = new GameObjectCreator(config).createImage();
         this.covered = false;
     }
 
@@ -40,10 +40,6 @@ export class OilyFloorActor implements GameActor {
 
     public getId(): number {
         return this.id;
-    }
-
-    public getSprite(): Phaser.GameObjects.Sprite {
-        return this.sprite;
     }
 
     public getTileCode(): Tiles {

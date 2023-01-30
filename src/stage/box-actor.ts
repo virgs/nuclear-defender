@@ -1,16 +1,16 @@
 import type Phaser from 'phaser';
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {sounds} from '../constants/sounds';
-import {SpriteCreator} from '../stage/sprite-creator';
-import type {Directions} from '../constants/directions';
-import {configuration} from '../constants/configuration';
-import {TileDepthCalculator} from '../scenes/tile-depth-calculator';
-import type {AnimateData, GameActor, GameActorConfig} from '../stage/game-actor';
+import {Tiles} from '@/levels/tiles';
+import type {Point} from '@/math/point';
+import {sounds} from '@/constants/sounds';
+import {GameObjectCreator} from '@/stage/game-object-creator';
+import type {Directions} from '@/constants/directions';
+import {configuration} from '@/constants/configuration';
+import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
+import type {AnimateData, GameActor, GameActorConfig} from '@/stage/game-actor';
 
 export class BoxActor implements GameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
-    private readonly sprite: Phaser.GameObjects.Sprite;
+    private readonly image: Phaser.GameObjects.Image;
     private readonly id: number;
     private readonly scene: Phaser.Scene;
     private tilePosition: Point;
@@ -25,7 +25,7 @@ export class BoxActor implements GameActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.image = new GameObjectCreator(config).createImage();
         this.isOnTarget = false;
     }
 
@@ -35,10 +35,6 @@ export class BoxActor implements GameActor {
 
     public setTilePosition(tilePosition: Point): void {
         this.tilePosition = tilePosition;
-    }
-
-    public getSprite(): Phaser.GameObjects.Sprite {
-        return this.sprite;
     }
 
     public getId(): number {
@@ -58,11 +54,11 @@ export class BoxActor implements GameActor {
                 x: data.spritePosition.x,
                 y: data.spritePosition.y,
                 duration: configuration.updateCycleInMs,
-                targets: this.sprite,
+                targets: this.image,
                 onInit: () => {
                 },
                 onUpdate: () => {
-                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.sprite.y));
+                    this.image!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.image.y));
                 },
                 onComplete: () => {
                     resolve();
@@ -93,7 +89,7 @@ export class BoxActor implements GameActor {
     public cover(staticActors: GameActor[]): void {
         if (staticActors
             .some(actor => actor.getTileCode() === Tiles.target)) {
-            this.sprite.setFrame(Tiles.boxOnTarget);
+            this.image.setFrame(Tiles.boxOnTarget);
 
             if (!this.isOnTarget) {
                 this.isOnTarget = true;
@@ -102,7 +98,7 @@ export class BoxActor implements GameActor {
         } else {
             if (this.isOnTarget) {
                 this.isOnTarget = false;
-                this.sprite.setFrame(Tiles.box);
+                this.image.setFrame(Tiles.box);
             }
         }
     }

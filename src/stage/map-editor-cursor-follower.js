@@ -1,6 +1,6 @@
-import { Point } from '../math/point';
-import { EventEmitter, EventName } from '../events/event-emitter';
-import { configuration } from '../constants/configuration';
+import { Point } from '@/math/point';
+import { configuration } from '@/constants/configuration';
+import { EventEmitter, EventName } from '@/events/event-emitter';
 export class MapEditorCursorFollower {
     config;
     sprite;

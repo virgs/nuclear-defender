@@ -44,6 +44,10 @@ body {
     font-family: Martian Mono, monospace;
 }
 
+.disable-dbl-tap-zoom {
+    touch-action: manipulation;
+}
+
 .feedback-label {
     text-align: left;
     user-select: none;

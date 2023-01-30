@@ -1,10 +1,10 @@
-import { Tiles } from '../levels/tiles';
-import { sounds } from '../constants/sounds';
-import { SpriteCreator } from './sprite-creator';
-import { HeroAnimator } from '../animations/hero-animator';
-import { EventEmitter, EventName } from '../events/event-emitter';
-import { Actions, mapDirectionToAction } from '../constants/actions';
-import { TileDepthCalculator } from '../scenes/tile-depth-calculator';
+import { Tiles } from '@/levels/tiles';
+import { sounds } from '@/constants/sounds';
+import { GameObjectCreator } from './game-object-creator';
+import { HeroAnimator } from '@/animations/hero-animator';
+import { EventEmitter, EventName } from '@/events/event-emitter';
+import { Actions, mapDirectionToAction } from '@/constants/actions';
+import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 export class HeroActor {
     heroAnimator;
     sprite;
@@ -19,7 +19,7 @@ export class HeroActor {
         this.heroAnimator = new HeroAnimator();
         this.tweens = config.scene.tweens;
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite.anims.create(item));
         this.tilePosition = config.tilePosition;

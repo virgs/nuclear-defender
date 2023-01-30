@@ -1,5 +1,5 @@
-import { Tiles } from '../levels/tiles';
-import { SpriteCreator } from './sprite-creator';
+import { Tiles } from '@/levels/tiles';
+import { GameObjectCreator } from './game-object-creator';
 export class OneWayDoorActor {
     sprite;
     id;
@@ -8,7 +8,7 @@ export class OneWayDoorActor {
     constructor(config) {
         this.id = config.id;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
         this.covered = false;
     }
     isCovered() {
@@ -19,9 +19,6 @@ export class OneWayDoorActor {
     }
     getId() {
         return this.id;
-    }
-    getSprite() {
-        return this.sprite;
     }
     getTileCode() {
         return Tiles.oneWayDoor;

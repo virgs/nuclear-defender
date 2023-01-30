@@ -1,6 +1,6 @@
-import type {ProcessedMap} from '../../levels/sokoban-map-stripper';
-import type {MapConstrainVerifier} from '../../levels/constrain-verifiers/map-constrain-verifier';
-import {Tiles} from '../../levels/tiles';
+import {Tiles} from '@/levels/tiles';
+import type {ProcessedMap} from '@/levels/sokoban-map-stripper';
+import type {MapConstrainVerifier} from '@/levels/constrain-verifiers/map-constrain-verifier';
 
 export class EmptyLineConstrainVerifier implements MapConstrainVerifier {
     public verify(output: ProcessedMap): void {

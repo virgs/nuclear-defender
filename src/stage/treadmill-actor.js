@@ -1,7 +1,7 @@
-import { Tiles } from '../levels/tiles';
-import { sounds } from '../constants/sounds';
-import { SpriteCreator } from './sprite-creator';
-import { Directions } from '../constants/directions';
+import { Tiles } from '@/levels/tiles';
+import { sounds } from '@/constants/sounds';
+import { Directions } from '@/constants/directions';
+import { GameObjectCreator } from './game-object-creator';
 export class TreadmillActor {
     scene;
     sprite;
@@ -14,7 +14,7 @@ export class TreadmillActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
         this.covered = false;
         switch (this.orientation) {
             case Directions.LEFT:
@@ -48,9 +48,6 @@ export class TreadmillActor {
     }
     getId() {
         return this.id;
-    }
-    getSprite() {
-        return this.sprite;
     }
     getTileCode() {
         return Tiles.treadmil;

@@ -1,9 +1,9 @@
 import { Tiles } from '@/levels/tiles';
 import { sounds } from '@/constants/sounds';
-import { SpriteCreator } from '@/stage/sprite-creator';
+import { GameObjectCreator } from '@/stage/game-object-creator';
 export class OilyFloorActor {
     scene;
-    sprite;
+    image;
     id;
     covered;
     tilePosition;
@@ -11,7 +11,7 @@ export class OilyFloorActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.image = new GameObjectCreator(config).createImage();
         this.covered = false;
     }
     isCovered() {
@@ -32,9 +32,6 @@ export class OilyFloorActor {
     }
     getId() {
         return this.id;
-    }
-    getSprite() {
-        return this.sprite;
     }
     getTileCode() {
         return Tiles.oily;

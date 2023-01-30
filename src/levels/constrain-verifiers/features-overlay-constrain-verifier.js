@@ -1,4 +1,4 @@
-import { Tiles } from '../../levels/tiles';
+import { Tiles } from '@/levels/tiles';
 export class FeaturesOverlayConstrainVerifier {
     verify(output) {
         const heroPosition = output.removedFeatures.get(Tiles.hero)[0];

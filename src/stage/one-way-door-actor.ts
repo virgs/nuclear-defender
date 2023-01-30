@@ -1,7 +1,7 @@
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {SpriteCreator} from './sprite-creator';
-import type {Directions} from '../constants/directions';
+import {Tiles} from '@/levels/tiles';
+import type {Point} from '@/math/point';
+import {GameObjectCreator} from './game-object-creator';
+import type {Directions} from '@/constants/directions';
 import type {GameActor, GameActorConfig} from './game-actor';
 
 export class OneWayDoorActor implements GameActor {
@@ -13,7 +13,7 @@ export class OneWayDoorActor implements GameActor {
     constructor(config: GameActorConfig) {
         this.id = config.id;
         this.tilePosition = config.tilePosition;
-        this.sprite = new SpriteCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite();
         this.covered = false;
     }
 
@@ -27,10 +27,6 @@ export class OneWayDoorActor implements GameActor {
 
     public getId(): number {
         return this.id;
-    }
-
-    public getSprite(): Phaser.GameObjects.Sprite {
-        return this.sprite;
     }
 
     public getTileCode(): Tiles {

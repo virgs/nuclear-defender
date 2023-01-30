@@ -52,7 +52,7 @@ export default defineComponent({
     },
     resetClick() {
       this.forceRerender();
-      this.totalTime = 0;
+      this.startTime = 0;
     },
     undoClick() {
       EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);
@@ -66,7 +66,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="container game-view text-center px-0 mx-auto">
+  <div class="container game-view text-center px-0 mx-auto disable-dbl-tap-zoom">
     <div class="row align-items-center mx-0" style="max-width: 100vw">
       <div class="col-12 pt-2 px-4" id="game-view-title-id" style="text-align: left">
         <h1 class="sokoban-display display-6 fw-normal" style="user-select: none">
@@ -86,7 +86,7 @@ export default defineComponent({
                            :custom-level="customLevel"/>
         </div>
 
-        <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-1" id="game-view-buttons">
+        <div class="col-12 col-md-4 col-lg-12 pt-4 pt-md-0 px-1 disable-dbl-tap-zoom" id="game-view-buttons">
           <div class="row mx-2" id="gameview-buttons-container">
             <div class="col-12">
               <div class="row justify-content-center mt-2">

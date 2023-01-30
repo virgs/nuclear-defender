@@ -21,7 +21,7 @@
           <div class="col-12 mb-4 order-1">
             <label class="form-label sokoban-label">Title</label>
             <input type="text" :class="['form-control', titleIsValid ? 'is-valid' : 'is-invalid']"
-                   placeholder="Title" v-model="title">
+                   placeholder="Title" v-model="title" spellcheck="false">
             <div class="form-label feedback-label invalid-feedback" style="">
               Title is longer than 25 characters
             </div>
@@ -40,6 +40,7 @@
             </label>
             <div style="display: inline-block">
               <textarea :class="['form-control map-text-area', mapIsValid ? 'is-valid' : 'is-invalid']" rows="10"
+                        spellcheck="false"
                         id="map-editor-text-area" style="font-size: .9rem"
                         v-model="codedMapText"></textarea>
               <small class="cursor-position">{{ cursorPotision.y }}:{{ cursorPotision.x }}</small>
