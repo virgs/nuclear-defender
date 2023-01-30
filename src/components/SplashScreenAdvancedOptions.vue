@@ -80,7 +80,7 @@
             <button class="btn btn-outline-secondary options-buttons w-100" type="button"
                     @click="mapEditorToggle = !mapEditorToggle"
                     data-bs-toggle="modal" data-bs-target="#mapEditorModal">
-              {{ customMapExists ? 'Edit' : 'Create' }} custom map
+              Edit custom map
             </button>
             <div class="modal fade" id="mapEditorModal" tabindex="-1" role="dialog"
                  aria-labelledby="mapEditorModalLabel" aria-hidden="true">
@@ -108,7 +108,6 @@ export default defineComponent({
   emits: ['mapEditorSaved', 'passwordUnblockedNewLevels', 'advancedOptionsVisibilityChanged', 'playerActionsChanged'],
   data() {
     return {
-      customMapExists: LongTermStore.getCustomLevel() !== undefined,
       mapEditorToggle: false,
       validLevelPassword: false,
       levelPassword: '',
@@ -168,7 +167,6 @@ So, by entering <b>druls</b>, as soon as the game begins, the player would follo
   },
   methods: {
     mapEditorSaved(map: Level) {
-      this.customMapExists = true;
       this.$emit('mapEditorSaved', map);
     },
     checkPassword() {

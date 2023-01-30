@@ -3,5 +3,5 @@
   "solution": "drr",
   "title": "title",
   "map": "######\n#@   #\n# $ .#\n######",
-  "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
+  "thumbnailPath": "./assets/levels/thumbnail.png"
 }

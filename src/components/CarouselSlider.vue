@@ -152,7 +152,14 @@ export default defineComponent({
     },
     thumbnail() {
       return (index: number): string => {
-        return this.enabledLevels[index].snapshot || this.enabledLevels[1].thumbnailPath!;
+        if (this.enabledLevels[index]) {
+          if (this.enabledLevels[index].snapshot) {
+            return this.enabledLevels[index]!.snapshot!;
+          } else if (this.enabledLevels[index]!.thumbnailPath) {
+            return this.enabledLevels[index]!.thumbnailPath!;
+          }
+        }
+        return this.enabledLevels[1].thumbnailPath!;
       };
     },
     currentTitle(): string {

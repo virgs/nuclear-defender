@@ -40,7 +40,7 @@ export const AvailableLevels: Level[] = [
 3-3#
 `,
         title: 'Baby welcome', //boxesline = 4
-        "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
+        "thumbnailPath": "./assets/levels/thumbnail.png"
     }, {
         map: `
 4-3#
@@ -55,7 +55,7 @@ export const AvailableLevels: Level[] = [
 4-3#
 `,
         title: 'every fool can see',
-        "thumbnailPath": "./src/game/assets/levels/thumbnail.png"
+        "thumbnailPath": "./game/assets/levels/thumbnail.png"
     },
     testMap,
     {
