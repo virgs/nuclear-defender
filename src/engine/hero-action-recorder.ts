@@ -30,15 +30,30 @@ export class HeroActionRecorder {
     }
 
     async undo(): Promise<void> {
+        console.log('mementos: ' + this.mementos.length)
+        let oneAfterTheAfterMemento: Memento | undefined;
+        let oneAfterThisMemento: Memento | undefined;
         for (let index = this.mementos.length - 1; index > 0; --index) {
             const memento = this.mementos.pop();
+            oneAfterTheAfterMemento = oneAfterThisMemento;
+            oneAfterThisMemento = memento;
             if (!memento) {
                 return;
             }
             if (memento.input.heroAction === Actions.STAND) {
                 continue;
             }
-            console.log(memento.input)
+            const oneBeforeThisMemento = this.mementos.pop();
+            if (!oneBeforeThisMemento) {
+                return;
+            }
+            console.log(oneBeforeThisMemento)
+            console.log(memento)
+            console.log(oneAfterThisMemento)
+            console.log(oneAfterTheAfterMemento)
+            await this.engine.updateAnimations(oneBeforeThisMemento.output);
+            // await this.engine.makeMove(afterLastAction);
+            return;
         }
         // let lastAction: MovementOrchestratorInput | undefined = this.mementos.pop();
         // let afterLastAction: MovementOrchestratorInput | undefined;

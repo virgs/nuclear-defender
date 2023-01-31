@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { sounds } from '@/constants/sounds';
 import { InputManager } from '@/input/input-manager';
 import { SessionStore } from '@/store/session-store';
@@ -82,7 +81,7 @@ export class GameScene extends Phaser.Scene {
         });
         this.gameStage = gameStageCreator.createGameStage();
         if (this.sceneConfig.playable) {
-            this.inputManager.init(this);
+            this.inputManager.enable(this);
             this.gameStage.setInitialPlayerActions(data.config.playerInitialActions);
             this.initialTime = new Date().getTime();
         }
@@ -93,6 +92,7 @@ export class GameScene extends Phaser.Scene {
     async update(time, delta) {
         if (this.sceneConfig?.playable) {
             if (this.allowUpdates) {
+                this.inputManager.update();
                 await this.gameStage.update();
                 if (this.gameStage.isLevelComplete()) {
                     this.inputManager.clear();

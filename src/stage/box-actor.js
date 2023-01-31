@@ -10,7 +10,7 @@ export class BoxActor {
     scene;
     tilePosition;
     isOnTarget;
-    currentAnimation;
+    currentTween;
     constructor(config) {
         this.id = config.id;
         this.scene = config.scene;
@@ -22,20 +22,21 @@ export class BoxActor {
     getTilePosition() {
         return this.tilePosition;
     }
-    setTilePosition(tilePosition) {
-        this.tilePosition = tilePosition;
-    }
     getId() {
         return this.id;
     }
     async animate(data) {
         return new Promise(resolve => {
-            if (this.currentAnimation) {
+            this.tilePosition = data.tilePosition;
+            console.log(this.currentTween, this.tweens.getAllTweens().length);
+            if (this.currentTween) {
                 console.log('abort ', this.id, this.tilePosition);
-                this.currentAnimation?.tween.complete();
-                this.currentAnimation?.tween.stop();
-                this.currentAnimation?.resolve();
-                this.currentAnimation = undefined;
+                // this.currentTween?.tween.complete();
+                console.log('stp[[img');
+                this.currentTween?.tween.stop();
+                console.log('stopped');
+                this.currentTween?.resolve();
+                this.currentTween = undefined;
             }
             const tween = {
                 x: data.spritePosition.x,
@@ -49,10 +50,10 @@ export class BoxActor {
                 },
                 onComplete: () => {
                     resolve();
-                    this.currentAnimation = undefined;
+                    this.currentTween = undefined;
                 }
             };
-            this.currentAnimation = {
+            this.currentTween = {
                 tween: this.tweens.add(tween),
                 resolve: resolve
             };

@@ -15,7 +15,7 @@ export class BoxActor implements GameActor {
     private readonly scene: Phaser.Scene;
     private tilePosition: Point;
     private isOnTarget: boolean;
-    private currentAnimation?: {
+    private currentTween?: {
         tween: Phaser.Tweens.Tween,
         resolve: () => any
     };
@@ -33,22 +33,22 @@ export class BoxActor implements GameActor {
         return this.tilePosition;
     }
 
-    public setTilePosition(tilePosition: Point): void {
-        this.tilePosition = tilePosition;
-    }
-
     public getId(): number {
         return this.id;
     }
 
     public async animate(data: AnimateData) {
         return new Promise<void>(resolve => {
-            if (this.currentAnimation) {
+            this.tilePosition = data.tilePosition;
+            console.log(this.currentTween, this.tweens.getAllTweens().length)
+            if (this.currentTween) {
                 console.log('abort ', this.id, this.tilePosition);
-                this.currentAnimation?.tween.complete();
-                this.currentAnimation?.tween.stop();
-                this.currentAnimation?.resolve();
-                this.currentAnimation = undefined;
+                // this.currentTween?.tween.complete();
+                console.log('stp[[img')
+                this.currentTween?.tween.stop();
+                console.log('stopped')
+                this.currentTween?.resolve();
+                this.currentTween = undefined;
             }
             const tween = {
                 x: data.spritePosition.x,
@@ -58,14 +58,14 @@ export class BoxActor implements GameActor {
                 onInit: () => {
                 },
                 onUpdate: () => {
-                    this.image!.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.image.y));
+                    this.image.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.image.y));
                 },
                 onComplete: () => {
                     resolve();
-                    this.currentAnimation = undefined;
+                    this.currentTween = undefined;
                 }
             };
-            this.currentAnimation = {
+            this.currentTween = {
                 tween: this.tweens.add(tween),
                 resolve: resolve
             };

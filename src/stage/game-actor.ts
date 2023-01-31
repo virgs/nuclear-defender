@@ -1,9 +1,10 @@
-import type {Point} from '../math/point';
-import type {Tiles} from '../levels/tiles';
-import type {Directions} from '../constants/directions';
-import type {OrientedTile} from '../levels/standard-sokoban-annotation-tokennizer';
+import type {Point} from '@/math/point';
+import type {Tiles} from '@/levels/tiles';
+import type {Directions} from '@/constants/directions';
+import type {OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
 export type AnimateData = {
+    tilePosition: Point;
     spritePosition: Point,
     orientation?: Directions,
     animationPushedBox?: boolean
@@ -22,8 +23,6 @@ export type GameActorConfig = {
 
 export interface GameActor {
     getTilePosition(): Point;
-
-    setTilePosition(tilePosition: Point): void;
 
     getTileCode(): Tiles;
 

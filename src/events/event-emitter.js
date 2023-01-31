@@ -8,8 +8,8 @@ export var EventName;
 })(EventName || (EventName = {}));
 export class EventEmitter {
     static instance = new EventEmitter();
-    eventListener = new Map();
     lastValues;
+    eventListener = new Map();
     constructor() {
         this.lastValues = {};
         Object.keys(EventName)
@@ -31,5 +31,12 @@ export class EventEmitter {
         EventEmitter.instance.eventListener.get(eventName)
             .forEach(callback => callback(args));
         return EventEmitter.instance;
+    }
+    static clear() {
+        EventEmitter.instance.lastValues = {};
+        Object.keys(EventName)
+            .filter(key => !isNaN(Number(key)))
+            .map(key => Number(key))
+            .forEach(event => EventEmitter.instance.eventListener.set(event, []));
     }
 }

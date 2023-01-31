@@ -1,42 +1,62 @@
-import {Directions} from '../constants/directions';
-import {EventEmitter, EventName} from '../events/event-emitter';
+import {Directions} from '@/constants/directions';
+import {EventEmitter, EventName} from '@/events/event-emitter';
+
+type InputValue = {
+    event: EventName,
+    args?: any
+};
 
 export class InputManager {
-    private readonly heroWatchingKeys: Map<string, Directions>;
-    private readonly shortcutKeys: Map<string, EventName>;
+    private readonly shortcutKeys: Map<Phaser.Input.Keyboard.Key, InputValue>;
 
     public constructor() {
-        this.heroWatchingKeys = new Map();
-        this.heroWatchingKeys.set('ArrowLeft'.toLowerCase(), Directions.LEFT);
-        this.heroWatchingKeys.set('ArrowRight'.toLowerCase(), Directions.RIGHT);
-        this.heroWatchingKeys.set('ArrowDown'.toLowerCase(), Directions.DOWN);
-        this.heroWatchingKeys.set('ArrowUp'.toLowerCase(), Directions.UP);
-
         this.shortcutKeys = new Map();
-        this.shortcutKeys.set('z', EventName.UNDO_BUTTON_CLICKED);
-        this.shortcutKeys.set('r', EventName.RESTART_LEVEL);
-        this.shortcutKeys.set('q', EventName.QUIT_LEVEL);
     }
 
-    public init(scene: Phaser.Scene): void {
+    public enable(scene: Phaser.Scene): void {
         scene.input.keyboard.enabled = true;
         scene.game.input.enabled = true;
 
-        scene.input.keyboard.on('keydown', (event: any) => {
-            const key = event.key.toLowerCase();
-            if (this.heroWatchingKeys.has(key)) {
-                EventEmitter.emit(EventName.HERO_DIRECTION_INPUT, this.heroWatchingKeys.get(key));
-            }
-            if (this.shortcutKeys.has(key)) {
-                EventEmitter.emit(this.shortcutKeys.get(key)!);
-            }
+        //does not accept holding event
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z), {
+            event: EventName.UNDO_BUTTON_CLICKED,
         });
-
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R), {
+            event: EventName.RESTART_LEVEL,
+        });
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q), {
+            event: EventName.QUIT_LEVEL,
+        });
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT), {
+            event: EventName.HERO_DIRECTION_INPUT,
+            args: Directions.LEFT
+        });
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT), {
+            event: EventName.HERO_DIRECTION_INPUT,
+            args: Directions.RIGHT
+        });
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP), {
+            event: EventName.HERO_DIRECTION_INPUT,
+            args: Directions.UP
+        });
+        this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN), {
+            event: EventName.HERO_DIRECTION_INPUT,
+            args: Directions.DOWN
+        });
     }
 
     public clear(): void {
         this.shortcutKeys.clear();
-        this.heroWatchingKeys.clear();
     }
 
+    public update() {
+        Array.from(this.shortcutKeys.entries())
+            .forEach(item => {
+                const [key, value] = item;
+                if (Phaser.Input.Keyboard.JustDown(key)) {
+                    EventEmitter.emit(value.event, value.args)
+                }
+            })
+
+    }
 }

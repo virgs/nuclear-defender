@@ -6,10 +6,10 @@ import {Actions} from '../constants/actions';
 import {dynamicTiles, Tiles} from '../levels/tiles';
 import {EventEmitter, EventName} from '../events/event-emitter';
 import {HeroActionRecorder} from '../engine/hero-action-recorder';
+import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 import {MovementOrchestrator} from '../engine/movement-orchestrator';
 import type {ScreenPropertiesCalculator} from '../math/screen-properties-calculator';
 import type {MultiLayeredMap} from '../levels/standard-sokoban-annotation-tokennizer';
-import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
 
 export class GameStage {
     private readonly strippedMap: MultiLayeredMap;
@@ -92,29 +92,24 @@ export class GameStage {
 
     public async updateAnimations(lastAction: MovementOrchestratorOutput) {
         this.animationsAreOver = false;
-        const boxesThatMoved = lastAction.boxes
-            .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition));
-        boxesThatMoved
-            .forEach(movedBox =>
-                this.boxes
-                    .find(tileBox => movedBox.id === tileBox.getId())?.setTilePosition(movedBox.nextPosition));
 
-        const animationsPromises: Promise<any>[] = boxesThatMoved
+        const animationsPromises: Promise<any>[] = lastAction.boxes
+            .filter(box => box.nextPosition.isDifferentOf(box.currentPosition))
             .map(async movedBox => {
                 const spriteBoxMoved = this.boxes
                     .find(tileBox => movedBox.id === tileBox.getId())!;
 
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-                await spriteBoxMoved?.animate({spritePosition: spritePosition});
+                await spriteBoxMoved?.animate({spritePosition: spritePosition, tilePosition: movedBox.nextPosition});
             });
 
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
-            if (hero.nextPosition.isDifferentOf(this.hero.getTilePosition())) {
+            if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
-                this.hero.setTilePosition(hero.nextPosition);
                 await this.hero!.animate({
-                    spritePosition, orientation: hero.direction, animationPushedBox: !!boxesThatMoved
+                    tilePosition: hero.nextPosition,
+                    spritePosition, orientation: hero.direction, animationPushedBox: !!lastAction.boxes
                         .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)
                 });
             }
@@ -122,9 +117,6 @@ export class GameStage {
         animationsPromises.push(heroAnimationPromise());
 
         this.updateActorsCoveringSituation();
-
-        animationsPromises.push(...this.staticActors
-            .map(actor => actor.animate({spritePosition: actor.getTilePosition()})));
         await Promise.all(animationsPromises);
 
         this.animationsAreOver = true;

@@ -10,8 +10,8 @@ type EventListener = (args: any) => any;
 
 export class EventEmitter {
     private static instance: EventEmitter = new EventEmitter();
+    private lastValues: { [propname: string]: any };
     private readonly eventListener: Map<EventName, EventListener[]> = new Map();
-    private readonly lastValues: { [propname: string]: any };
 
     private constructor() {
         this.lastValues = {};
@@ -38,4 +38,12 @@ export class EventEmitter {
         return EventEmitter.instance;
     }
 
+    public static clear() {
+        EventEmitter.instance.lastValues = {};
+
+        Object.keys(EventName)
+            .filter(key => !isNaN(Number(key)))
+            .map(key => Number(key) as EventName)
+            .forEach(event => EventEmitter.instance.eventListener.set(event, []));
+    }
 }

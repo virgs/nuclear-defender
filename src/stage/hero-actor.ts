@@ -44,7 +44,6 @@ export class HeroActor implements GameActor {
     }
 
     public setTilePosition(tilePosition: Point): void {
-        this.tilePosition = tilePosition;
     }
 
     public checkAction(): Actions {
@@ -55,6 +54,7 @@ export class HeroActor implements GameActor {
 
     public async animate(data: AnimateData): Promise<void> {
         return new Promise<void>((resolve) => {
+            this.tilePosition = data.tilePosition;
             if (data.animationPushedBox) {
                 this.scene.sound.play(sounds.pushingBox.key, {volume: 0.25});
             }

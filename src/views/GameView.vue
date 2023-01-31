@@ -28,10 +28,6 @@ export default defineComponent({
   mounted() {
     //@ts-ignore
     history.replaceState({urlPath: this.$router.currentRoute.fullPath}, '', '/nuclear-defender');
-    EventEmitter
-        .listenToEvent(EventName.RESTART_LEVEL, () => this.resetClick());
-    EventEmitter
-        .listenToEvent(EventName.QUIT_LEVEL, () => this.exitClick());
 
     const interval = 100;
     this.timer = setInterval(() => {
@@ -48,6 +44,11 @@ export default defineComponent({
   },
   methods: {
     forceRerender() {
+      EventEmitter.clear()
+      EventEmitter
+          .listenToEvent(EventName.RESTART_LEVEL, () => this.resetClick());
+      EventEmitter
+          .listenToEvent(EventName.QUIT_LEVEL, () => this.exitClick());
       this.componentKey += 1;
     },
     resetClick() {

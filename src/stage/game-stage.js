@@ -73,33 +73,27 @@ export class GameStage {
     }
     async updateAnimations(lastAction) {
         this.animationsAreOver = false;
-        const boxesThatMoved = lastAction.boxes
-            .filter(movementBox => movementBox.currentPosition.isDifferentOf(movementBox.nextPosition));
-        boxesThatMoved
-            .forEach(movedBox => this.boxes
-            .find(tileBox => movedBox.id === tileBox.getId())?.setTilePosition(movedBox.nextPosition));
-        const animationsPromises = boxesThatMoved
+        const animationsPromises = lastAction.boxes
+            .filter(box => box.nextPosition.isDifferentOf(box.currentPosition))
             .map(async (movedBox) => {
             const spriteBoxMoved = this.boxes
                 .find(tileBox => movedBox.id === tileBox.getId());
             const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-            await spriteBoxMoved?.animate({ spritePosition: spritePosition });
+            await spriteBoxMoved?.animate({ spritePosition: spritePosition, tilePosition: movedBox.nextPosition });
         });
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
-            if (hero.nextPosition.isDifferentOf(this.hero.getTilePosition())) {
+            if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
-                this.hero.setTilePosition(hero.nextPosition);
                 await this.hero.animate({
-                    spritePosition, orientation: hero.direction, animationPushedBox: !!boxesThatMoved
+                    tilePosition: hero.nextPosition,
+                    spritePosition, orientation: hero.direction, animationPushedBox: !!lastAction.boxes
                         .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)
                 });
             }
         };
         animationsPromises.push(heroAnimationPromise());
         this.updateActorsCoveringSituation();
-        animationsPromises.push(...this.staticActors
-            .map(actor => actor.animate({ spritePosition: actor.getTilePosition() })));
         await Promise.all(animationsPromises);
         this.animationsAreOver = true;
     }

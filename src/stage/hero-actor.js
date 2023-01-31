@@ -31,7 +31,6 @@ export class HeroActor {
         return this.tilePosition;
     }
     setTilePosition(tilePosition) {
-        this.tilePosition = tilePosition;
     }
     checkAction() {
         const actionInputBuffer = this.actionInputBuffer || Actions.STAND;
@@ -40,6 +39,7 @@ export class HeroActor {
     }
     async animate(data) {
         return new Promise((resolve) => {
+            this.tilePosition = data.tilePosition;
             if (data.animationPushedBox) {
                 this.scene.sound.play(sounds.pushingBox.key, { volume: 0.25 });
             }
