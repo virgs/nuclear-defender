@@ -1,10 +1,10 @@
-import { Point } from '../math/point';
-import { Tiles } from '../levels/tiles';
-import { HeroMovementHandler } from '../engine/hero-movement-handler';
-import { SpringMovementHandler } from '../engine/spring-movement-handler';
-import { TreadmillMovementHandler } from '../engine/treadmill-movement-handler';
-import { OilyFloorMovementHandler } from '../engine/oily-floor-movement-handler';
-import { OneWayDoorMovementHandler } from '../engine/one-way-door-movement-handler';
+import { Point } from '@/math/point';
+import { Tiles } from '@/levels/tiles';
+import { HeroMovementHandler } from '@/engine/hero-movement-handler';
+import { SpringMovementHandler } from '@/engine/spring-movement-handler';
+import { TreadmillMovementHandler } from '@/engine/treadmill-movement-handler';
+import { OilyFloorMovementHandler } from '@/engine/oily-floor-movement-handler';
+import { OneWayDoorMovementHandler } from '@/engine/one-way-door-movement-handler';
 export class MovementOrchestrator {
     static BLOCKER_FEATURES = new Set([Tiles.box, Tiles.hero, Tiles.wall, Tiles.empty]);
     static PUSHER_FEATURES = new Set([Tiles.hero, Tiles.treadmil, Tiles.spring]);

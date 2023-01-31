@@ -5,10 +5,10 @@ import {Actions} from '@/constants/actions';
 import {Directions} from '@/constants/directions';
 import {MetricEmitter, Metrics} from './metric-emitter';
 import {configuration} from '@/constants/configuration';
-import type {MovementAnalysis, PushedBox} from './analyser/movement-analyser';
 import {MovementAnalyser} from './analyser/movement-analyser';
-import type {MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
 import {MovementOrchestrator} from '@/engine/movement-orchestrator';
+import type {MovementAnalysis, PushedBox} from './analyser/movement-analyser';
+import type {MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
 import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
 type SolutionCandidate = {
@@ -32,6 +32,8 @@ export type SolutionOutput = {
     aborted: boolean;
 }
 
+//https://github.com/rvdweerd/BoxPusher-Reinforcement-Learning
+//https://github.com/caozixuan/genetic-algorithm/blob/master/genetic_algorithm.py
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
 export class SokobanSolver {
 

@@ -106,6 +106,7 @@ import {getAllLevels} from '@/levels/levels';
 import {mapActionToChar} from '@/constants/actions';
 import {MapValidator} from '@/levels/map-validator';
 import {LongTermStore} from '@/store/long-term-store';
+import {configuration} from '@/constants/configuration';
 import {CursorLocalizer} from '@/levels/cursor-localizer';
 import {EventEmitter, EventName} from '@/events/event-emitter';
 import PhaserContainer from '../components/PhaserContainer.vue';
@@ -137,7 +138,7 @@ export default defineComponent({
 <ul>
 <li>Each text line represents a line in the map</li>
 <li>Every feature is represented by a letter. Sometimes an orientation letter is needed and those are marked with a * in the list bellow</li>
-<li><b>[</b> and <b>]</b> put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a target (<b>.</b>); and <b>[@.]</b>: hero positioned on a target. They don't get nested.</li>
+<li><b>[</b> and <b>]</b> put multiple features in the same spot: <b>[ls.]</b>: left oriented spring (<b>ls</b>) on a radioactive stone (<b>.</b>); and <b>[@.]</b>: hero positioned on a radioactive stone. They don't nest.</li>
 <li>Numbers multiply next feature: <b>4$</b> means four barrels in a row. The same as <b>$$$$</b>; and <b>3[o.]</b> is the same as <b>[o.][o.][o.]</b> </li>
 </ul>
 
@@ -148,7 +149,7 @@ export default defineComponent({
 <li><b>-</b> empty</li>
 <li><b>&nbsp</b> floor</li>
 <li><b>#</b> wall</li>
-<li><b>.</b> target</li>
+<li><b>.</b> radioactive stone</li>
 <li><b>o</b> oily floor</li>
 <li><b>s</b> spring*</li>
 <li><b>t</b> treadmill*</li>
@@ -295,6 +296,9 @@ export default defineComponent({
 
         this.mapIsValid = true;
       } catch (exc: any) {
+        if (configuration.debug.mapEditorValidation) {
+          console.log(exc)
+        }
         this.editorInvalidError = exc.message;
       }
     },

@@ -69,7 +69,10 @@ export const configuration = {
             iterationNumber: false,
         },
         sleepForInMs: 10,
-        iterationPeriodToSleep: 500,
+        iterationPeriodToSleep: 400,
         distanceCalculator: new ManhattanDistanceCalculator()
+    },
+    debug: {
+        mapEditorValidation: true
     }
 };

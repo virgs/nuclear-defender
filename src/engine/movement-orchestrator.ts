@@ -1,14 +1,14 @@
-import {Point} from '../math/point';
-import {Tiles} from '../levels/tiles';
-import type {Actions} from '../constants/actions';
-import type {Directions} from '../constants/directions';
-import {HeroMovementHandler} from '../engine/hero-movement-handler';
-import {SpringMovementHandler} from '../engine/spring-movement-handler';
-import {TreadmillMovementHandler} from '../engine/treadmill-movement-handler';
-import {OilyFloorMovementHandler} from '../engine/oily-floor-movement-handler';
-import type {FeatureMovementHandler} from '../engine/feature-movement-handler';
-import {OneWayDoorMovementHandler} from '../engine/one-way-door-movement-handler';
-import type {MultiLayeredMap} from '../levels/standard-sokoban-annotation-tokennizer';
+import {Point} from '@/math/point';
+import {Tiles} from '@/levels/tiles';
+import type {Actions} from '@/constants/actions';
+import type {Directions} from '@/constants/directions';
+import {HeroMovementHandler} from '@/engine/hero-movement-handler';
+import {SpringMovementHandler} from '@/engine/spring-movement-handler';
+import {TreadmillMovementHandler} from '@/engine/treadmill-movement-handler';
+import {OilyFloorMovementHandler} from '@/engine/oily-floor-movement-handler';
+import type {FeatureMovementHandler} from '@/engine/feature-movement-handler';
+import {OneWayDoorMovementHandler} from '@/engine/one-way-door-movement-handler';
+import type {MultiLayeredMap} from '@/levels/standard-sokoban-annotation-tokennizer';
 
 export type Movement = {
     id: number,

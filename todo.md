@@ -1,5 +1,3 @@
-[Article describing how to solve it](https://www.cs.huji.ac.il/~ai/projects/2012/SokobanWP/)
-
 ## Add each target as dynamic light (nevermind)
 - https://www.emanueleferonato.com/2015/12/10/calculating-dynamic-light-and-shadows-in-tile-based-roguelike-games-part-1-bresenhams-line-algorithm/
 - https://jwiese.eu/en/blog/2018/04/phaser-3-realtime-ligthing/
@@ -10,7 +8,6 @@
 
 
 ## Next steps
-- Build it for production (webpack?)
 - Fix Undo logic
 
         //Note needed only when loading from file

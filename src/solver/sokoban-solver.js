@@ -6,6 +6,8 @@ import { MetricEmitter, Metrics } from './metric-emitter';
 import { configuration } from '@/constants/configuration';
 import { MovementAnalyser } from './analyser/movement-analyser';
 import { MovementOrchestrator } from '@/engine/movement-orchestrator';
+//https://github.com/rvdweerd/BoxPusher-Reinforcement-Learning
+//https://github.com/caozixuan/genetic-algorithm/blob/master/genetic_algorithm.py
 //https://isaaccomputerscience.org/concepts/dsa_search_a_star?examBoard=all&stage=all
 export class SokobanSolver {
     static actionsList = Object.keys(Actions)
