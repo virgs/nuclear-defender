@@ -4,7 +4,7 @@ import { Actions } from '@/constants/actions';
 import { Directions } from '@/constants/directions';
 import { MetricEmitter, Metrics } from './metric-emitter';
 import { configuration } from '@/constants/configuration';
-import { MovementAnalyser } from './analyser/movement-analyser';
+import { MoveAnalyser } from './analyser/move-analyser';
 import { MovementOrchestrator } from '@/engine/movement-orchestrator';
 //https://github.com/rvdweerd/BoxPusher-Reinforcement-Learning
 //https://github.com/caozixuan/genetic-algorithm/blob/master/genetic_algorithm.py
@@ -28,7 +28,7 @@ export class SokobanSolver {
         this.iterations = 0;
         this.aborted = false;
         this.movementCoordinator = new MovementOrchestrator({ strippedMap: this.strippedMap });
-        this.movementAnalyser = new MovementAnalyser({
+        this.movementAnalyser = new MoveAnalyser({
             staticFeatures: input.staticFeatures,
             strippedMap: this.strippedMap,
             distanceCalculator: configuration.solver.distanceCalculator

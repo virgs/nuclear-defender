@@ -16,7 +16,7 @@ export type MovementAnalysis = {
     isDeadLocked: boolean
 }
 
-export class MovementAnalyser {
+export class MoveAnalyser {
     private readonly targets: Point[];
     private readonly distanceCalculator: DistanceCalculator;
     private readonly strippedMap: MultiLayeredMap;

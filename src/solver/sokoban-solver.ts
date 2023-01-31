@@ -5,9 +5,9 @@ import {Actions} from '@/constants/actions';
 import {Directions} from '@/constants/directions';
 import {MetricEmitter, Metrics} from './metric-emitter';
 import {configuration} from '@/constants/configuration';
-import {MovementAnalyser} from './analyser/movement-analyser';
+import {MoveAnalyser} from './analyser/move-analyser';
 import {MovementOrchestrator} from '@/engine/movement-orchestrator';
-import type {MovementAnalysis, PushedBox} from './analyser/movement-analyser';
+import type {MovementAnalysis, PushedBox} from './analyser/move-analyser';
 import type {MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
 import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
@@ -47,7 +47,7 @@ export class SokobanSolver {
     private candidatesToVisit: Heap<SolutionCandidate> = new Heap((a: SolutionCandidate, b: SolutionCandidate) => a.distanceSum - b.distanceSum);
     private candidatesVisitedSet: Set<string> = new Set();
     private readonly strippedMap: MultiLayeredMap;
-    private readonly movementAnalyser: MovementAnalyser;
+    private readonly movementAnalyser: MoveAnalyser;
     private readonly metricEmitter: MetricEmitter;
     private aborted: boolean;
     private startTime?: number;
@@ -61,7 +61,7 @@ export class SokobanSolver {
         this.aborted = false;
 
         this.movementCoordinator = new MovementOrchestrator({strippedMap: this.strippedMap});
-        this.movementAnalyser = new MovementAnalyser({
+        this.movementAnalyser = new MoveAnalyser({
             staticFeatures: input.staticFeatures,
             strippedMap: this.strippedMap,
             distanceCalculator: configuration.solver.distanceCalculator

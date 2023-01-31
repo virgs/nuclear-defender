@@ -31,8 +31,8 @@ export class CursorLocalizer {
         const initialGroupping = text.indexOf('[');
         if (initialGroupping !== -1) {
             const endingGrouppingTag = text.indexOf(']', initialGroupping);
-            if (endingGrouppingTag !== -1) {
-                return endingGrouppingTag +
+            if (endingGrouppingTag > initialGroupping) {
+                return endingGrouppingTag - initialGroupping +
                     this.countNumbersOfElementsInGrouppingTag(text.substring(endingGrouppingTag));
             }
             return text.length - initialGroupping;
@@ -41,11 +41,17 @@ export class CursorLocalizer {
     }
 
     private countNumbers(text: string): number {
-        return text
+        let number = 0;
+        const reduce = text
             .match(/(\d*)/g)
             ?.reduce((acc, count) => {
                 let value = Number(count);
-                return acc + value > 0 ? value - 1 : 0;
+                if (value > 0) {
+                    ++number;
+                }
+                return acc + value;
             }, 0) || 0;
+
+        return reduce > 0 ? reduce - 2 * number : 0;
     }
 }

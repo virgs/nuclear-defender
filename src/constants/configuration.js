@@ -34,7 +34,7 @@ export const configuration = {
         },
         scaleLimits: {
             max: 1.15,
-            min: .25
+            min: .15
         },
         scale: 0,
         mapLimits: {

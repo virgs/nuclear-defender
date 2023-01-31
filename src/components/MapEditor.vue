@@ -59,9 +59,6 @@
                                :key="editorRefreshKey" :scene="scene"
                                @processedMap="processedMap"/>
             </div>
-            <div v-if="loading" :style="loadingStyle"
-                 class="spinner-border" role="status">
-            </div>
           </div>
           <div class="col-4 col-lg-2 order-3 order-lg-4" style="text-align: left;">
             <label class="form-label sokoban-label" style="float: none">
@@ -122,7 +119,6 @@ export default defineComponent({
   data() {
     const customLevel = LongTermStore.getCustomLevel()!;
     return {
-      loading: false,
       title: customLevel.title,
       codedMapText: customLevel.map,
       scene: customLevel as Level,
@@ -198,14 +194,6 @@ export default defineComponent({
     [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
   },
   computed: {
-    loadingStyle() {
-      return {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        color: !this.mapIsValid ? 'var(--danger-color)' : 'var(--radioactive-color)'
-      };
-    },
     titleIsValid() {
       return this.title.length < 25;
     },
@@ -263,7 +251,6 @@ export default defineComponent({
       this.stringActions = undefined;
       this.editorInvalidError = 'Verifying solution. It may take a few minutes.';
       this.mapIsValid = false;
-      this.loading = true;
 
       //@ts-ignore
       this.scene = {
@@ -277,7 +264,6 @@ export default defineComponent({
         this.mapIsValid = true;
         return;
       }
-      this.loading = false;
       try {
         if (output.error) {
           throw output.error;
