@@ -44,7 +44,7 @@ export class LevelDifficultyEstimator {
         }
         const sums = this.factors.reduce((acc, factor) => {
             const difficultFactor = factor(solution);
-            if (configuration.solver.debug.estimator) {
+            if (configuration.debug.solver.estimator) {
                 console.log(difficultFactor);
             }
             return {

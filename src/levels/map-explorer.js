@@ -61,8 +61,8 @@ export class MapExplorer {
             .map(item => item.point);
         return {
             wrapped: wrapped,
-            mapLeaks: mapLeaks,
-            acessibleEmpty: acessibleEmpty,
+            leaks: mapLeaks,
+            acessibleEmpties: acessibleEmpty,
             unwrapped: unwrapped
         };
     }

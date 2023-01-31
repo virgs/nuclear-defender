@@ -1,6 +1,7 @@
 import {Tiles} from '@/levels/tiles';
 import type {Point} from '@/math/point';
 import type {Directions} from '@/constants/directions';
+import {configuration} from '@/constants/configuration';
 import type {DeadLockDetector} from './dead-lock-detector';
 import type {DistanceCalculator} from '@/math/distance-calculator';
 import {BoxClusterDeadlockDetector} from './box-cluster-deadlock-detector';
@@ -45,7 +46,7 @@ export class MoveAnalyser {
                 id: pushedBox.id,
                 direction: pushedBox.direction!
             } : undefined,
-            sumOfEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestAvailableTarget(movement),
+            sumOfEveryBoxToTheClosestTarget: configuration.solver.distanceToTheClosestBox ? this.sumOfEveryBoxToTheClosestTarget(movement) : this.sumOfEveryBoxToTheClosestAvailableTarget(movement),
             isDeadLocked: isDeadLocked
         };
     }
@@ -71,4 +72,21 @@ export class MoveAnalyser {
             }, 0);
     }
 
+    private sumOfEveryBoxToTheClosestTarget(movement: MovementOrchestratorOutput): number {
+        return movement.boxes
+            .reduce((sum, box) => {
+                const shortestDistanceToAvailableTarget = this.targets
+                    .reduce((acc, target, targetIndex) => {
+                        const distance = this.distanceCalculator.distance(target, box.nextPosition);
+                        if (acc.value === -1 || distance < acc.value) {
+                            return {
+                                value: distance,
+                                index: targetIndex
+                            };
+                        }
+                        return acc;
+                    }, {value: -1, index: -1});
+                return sum + shortestDistanceToAvailableTarget.value;
+            }, 0);
+    }
 }

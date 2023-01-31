@@ -14,7 +14,7 @@ export class MetricEmitter {
         this.startTime = new Date().getTime();
         this.metricMap = new Map();
     }
-    async measureTime(metric, method) {
+    async add(metric, method) {
         const before = new Date().getTime();
         const result = await method();
         const after = new Date().getTime();

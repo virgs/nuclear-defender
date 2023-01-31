@@ -5,8 +5,8 @@ import type {OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer
 
 export type MapExploration = {
     wrapped: Point[];
-    acessibleEmpty: Point[];
-    mapLeaks: Point[];
+    acessibleEmpties: Point[];
+    leaks: Point[];
     unwrapped: Point[]
 };
 
@@ -73,8 +73,8 @@ export class MapExplorer {
             .map(item => item.point);
         return {
             wrapped: wrapped,
-            mapLeaks: mapLeaks,
-            acessibleEmpty: acessibleEmpty,
+            leaks: mapLeaks,
+            acessibleEmpties: acessibleEmpty,
             unwrapped: unwrapped
         }
     }

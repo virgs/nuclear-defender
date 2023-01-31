@@ -1,4 +1,5 @@
 import { Tiles } from '@/levels/tiles';
+import { configuration } from '@/constants/configuration';
 import { BoxClusterDeadlockDetector } from './box-cluster-deadlock-detector';
 import { BoxGluedToWallDetector } from './box-glued-to-wall-deadlock-detector';
 export class MoveAnalyser {
@@ -29,7 +30,7 @@ export class MoveAnalyser {
                 id: pushedBox.id,
                 direction: pushedBox.direction
             } : undefined,
-            sumOfEveryBoxToTheClosestTarget: this.sumOfEveryBoxToTheClosestAvailableTarget(movement),
+            sumOfEveryBoxToTheClosestTarget: configuration.solver.distanceToTheClosestBox ? this.sumOfEveryBoxToTheClosestTarget(movement) : this.sumOfEveryBoxToTheClosestAvailableTarget(movement),
             isDeadLocked: isDeadLocked
         };
     }
@@ -50,6 +51,23 @@ export class MoveAnalyser {
             }, { value: -1, index: -1 });
             availableTargets = availableTargets
                 .filter((_, index) => index !== shortestDistanceToAvailableTarget.index);
+            return sum + shortestDistanceToAvailableTarget.value;
+        }, 0);
+    }
+    sumOfEveryBoxToTheClosestTarget(movement) {
+        return movement.boxes
+            .reduce((sum, box) => {
+            const shortestDistanceToAvailableTarget = this.targets
+                .reduce((acc, target, targetIndex) => {
+                const distance = this.distanceCalculator.distance(target, box.nextPosition);
+                if (acc.value === -1 || distance < acc.value) {
+                    return {
+                        value: distance,
+                        index: targetIndex
+                    };
+                }
+                return acc;
+            }, { value: -1, index: -1 });
             return sum + shortestDistanceToAvailableTarget.value;
         }, 0);
     }

@@ -56,7 +56,7 @@ export class MapValidator {
             throw new Error('Not even me can solve this map. Keep on trying to make a solvable one.');
         }
 
-        if (configuration.solver.debug.metrics) {
+        if (configuration.debug.solver.metrics) {
             console.log(solutionOutput);
         }
         console.log('done validating map');

@@ -4,8 +4,11 @@ import { EventEmitter, EventName } from '@/events/event-emitter';
 export class MapEditorCursorFollower {
     config;
     sprite;
+    lastChangeInstant;
+    tween;
     constructor(config) {
         this.config = config;
+        this.lastChangeInstant = 0;
         this.sprite = this.config.scene.add.sprite(0, 0, configuration.selectorTextureKey);
         this.sprite.scale = configuration.world.scale;
         this.sprite.setOrigin(0);
@@ -18,6 +21,16 @@ export class MapEditorCursorFollower {
         const x = Math.min(position.x, map.width - 1);
         const y = Math.min(position.y, map.height - 1);
         const worldPosition = this.config.screenPropertiesCalculator.getWorldPositionFromTilePosition(new Point(x, y));
+        this.sprite.alpha = 1;
         this.sprite.setPosition(worldPosition.x, worldPosition.y);
+        if (this.tween) {
+            this.tween.stop();
+        }
+        this.tween = this.config.scene.tweens.add({
+            targets: this.sprite,
+            alpha: 0,
+            duration: 10000,
+            ease: 'FadeOut',
+        });
     }
 }

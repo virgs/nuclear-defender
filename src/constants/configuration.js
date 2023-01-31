@@ -38,8 +38,8 @@ export const configuration = {
         },
         scale: 0,
         mapLimits: {
-            lines: 20,
-            rows: 25,
+            lines: 15,
+            rows: 15,
             features: 30
         }
     },
@@ -63,16 +63,17 @@ export const configuration = {
         resolvedLevelsKey: 'resolvedLevelsKey'
     },
     solver: {
-        debug: {
+        sleepForInMs: 10,
+        iterationPeriodToSleep: 400,
+        distanceCalculator: new ManhattanDistanceCalculator(),
+        distanceToTheClosestBox: false
+    },
+    debug: {
+        mapEditorValidation: false,
+        solver: {
             metrics: true,
             estimator: true,
             iterationNumber: false,
         },
-        sleepForInMs: 10,
-        iterationPeriodToSleep: 400,
-        distanceCalculator: new ManhattanDistanceCalculator()
-    },
-    debug: {
-        mapEditorValidation: true
     }
 };

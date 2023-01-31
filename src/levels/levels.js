@@ -23,6 +23,7 @@ export const getEnabledLevels = () => {
     return getAllLevels()
         .filter((_, index) => index < numberOfEnabledLevels);
 };
+//https://github.com/ianormy/PythonistaSokoban/blob/main/boxban_levels.txt
 //http://www.games4brains.de/sokoban-leveldesign.php
 //http://www.game-sokoban.com/index.php?mode=catalog
 //http://www.abelmartin.com/rj/sokoban_colecciones.html
@@ -242,7 +243,6 @@ export const getAllLevels = () => [
 #  #.  .#@ #
 ##    #   ##
  ##########
-
 `,
         title: 'english muffin potato'
     },

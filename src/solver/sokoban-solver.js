@@ -66,7 +66,7 @@ export class SokobanSolver {
             distanceSum: 0
         };
         initialCandidate.hash = await this.metricEmitter
-            .measureTime(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
+            .add(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
         this.candidatesToVisit.push(initialCandidate);
         this.iterations = 0;
         let cpuBreath = 0;
@@ -81,8 +81,8 @@ export class SokobanSolver {
             }
             if (cpuBreath > configuration.solver.iterationPeriodToSleep) {
                 cpuBreath = 0;
-                await this.metricEmitter.measureTime(Metrics.BREATHING_TIME, async () => {
-                    if (configuration.solver.debug.iterationNumber) {
+                await this.metricEmitter.add(Metrics.BREATHING_TIME, async () => {
+                    if (configuration.debug.solver.iterationNumber) {
                         console.log(this.iterations);
                     }
                     await new Promise(resolve => setTimeout(() => {
@@ -90,15 +90,15 @@ export class SokobanSolver {
                     }, configuration.solver.sleepForInMs));
                 });
             }
-            candidate = await this.metricEmitter.measureTime(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
+            candidate = await this.metricEmitter.add(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
-        if (configuration.solver.debug.metrics) {
+        if (configuration.debug.solver.metrics) {
             this.metricEmitter.log();
         }
         return foundSolution;
     }
     async checkSolution(candidate) {
-        if (await this.metricEmitter.measureTime(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash))) {
+        if (await this.metricEmitter.add(Metrics.VISISTED_LIST_CHECK, () => !this.candidateWasVisitedBefore(candidate.hash))) {
             this.candidatesVisitedSet.add(candidate.hash);
             if (this.candidateSolvesMap(candidate.boxes)) {
                 return candidate;
@@ -116,7 +116,7 @@ export class SokobanSolver {
                 lastActionResult: candidate.lastActionResult
             });
             if (afterAction.mapChanged) {
-                const analysis = await this.metricEmitter.measureTime(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
+                const analysis = await this.metricEmitter.add(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
                 const moveCost = 100;
                 const heroMovementCost = action === Actions.STAND ? moveCost * .95 : moveCost;
                 let currentBoxesLine = 0;
@@ -139,9 +139,9 @@ export class SokobanSolver {
                     // distanceSum: candidate.distanceSum + heroMovementCost
                     distanceSum: candidate.distanceSum + heroMovementCost + analysis.sumOfEveryBoxToTheClosestTarget
                 };
-                newCandidate.hash = await this.metricEmitter.measureTime(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(newCandidate));
+                newCandidate.hash = await this.metricEmitter.add(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(newCandidate));
                 if (!analysis.isDeadLocked) {
-                    await this.metricEmitter.measureTime(Metrics.ADD_CANDIDATE, () => this.candidatesToVisit.push(newCandidate));
+                    await this.metricEmitter.add(Metrics.ADD_CANDIDATE, () => this.candidatesToVisit.push(newCandidate));
                 }
             }
         }

@@ -271,7 +271,6 @@ export default defineComponent({
 
         const solutionOutput = await MapValidator.getInstance().validate(output.processedMap);
         if (solutionOutput.aborted) {
-          console.log('ignoring aborted');
           return;
         }
         this.estimative = new LevelDifficultyEstimator().estimate(solutionOutput);
