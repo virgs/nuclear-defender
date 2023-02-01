@@ -32,8 +32,7 @@ export const getEnabledLevels = () => {
 export const getAllLevels = () => [
     LongTermStore.getCustomLevel(),
     {
-        map: `
-2-3#|2-#.#
+        map: `2-3#|2-#.#
 2-# 4#
 3#$ $.#
 #.$ @3#

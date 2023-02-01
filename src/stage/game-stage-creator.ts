@@ -14,6 +14,7 @@ import type {GameActor, GameActorConfig} from './game-actor';
 import {MapEditorCursorFollower} from './map-editor-cursor-follower';
 import type {ScreenPropertiesCalculator} from '@/math/screen-properties-calculator';
 import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
+import {configuration} from "@/constants/configuration";
 
 export type StageCreatorConfig = {
     playable: boolean;
@@ -123,7 +124,8 @@ export class GameStageCreator {
         const tilesAround = this.getTilesAround(tilePosition.x, tilePosition.y);
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
         if (this.constructorMap.has(item.code)) {
-            const gameActor = this.constructorMap.get(item.code)!({
+            const config: GameActorConfig = {
+                assetSheetKey: configuration.tiles.spriteSheetKey,
                 playable: this.playable,
                 code: item.code,
                 scene: this.scene,
@@ -132,7 +134,8 @@ export class GameStageCreator {
                 tilePosition: tilePosition,
                 contentAround: tilesAround,
                 id: this.actorCounter++
-            } as GameActorConfig);
+            };
+            const gameActor = this.constructorMap.get(item.code)!(config);
 
             this.actorMap.get(item.code)!.push(gameActor);
             return gameActor;

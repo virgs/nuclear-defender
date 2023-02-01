@@ -2,13 +2,14 @@ import type Phaser from 'phaser';
 import {Tiles} from '@/levels/tiles';
 import type {Point} from '@/math/point';
 import {sounds} from '@/constants/sounds';
-import {GameObjectCreator} from '@/stage/game-object-creator';
 import type {Directions} from '@/constants/directions';
 import {configuration} from '@/constants/configuration';
+import {GameObjectCreator} from '@/stage/game-object-creator';
 import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
-import type {AnimateData, GameActor, GameActorConfig} from '@/stage/game-actor';
+import type {GameActor, GameActorConfig} from '@/stage/game-actor';
+import type {DynamicGameActor, MoveData} from '@/stage/dynamic-game-actor';
 
-export class BoxActor implements GameActor {
+export class BoxActor implements DynamicGameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly image: Phaser.GameObjects.Image;
     private readonly id: number;
@@ -25,7 +26,7 @@ export class BoxActor implements GameActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.image = new GameObjectCreator(config).createImage();
+        this.image = new GameObjectCreator(config).createImage(config.code);
         this.isOnTarget = false;
     }
 
@@ -37,14 +38,13 @@ export class BoxActor implements GameActor {
         return this.id;
     }
 
-    public async animate(data: AnimateData) {
+    public async move(data: MoveData) {
         return new Promise<void>(resolve => {
             this.tilePosition = data.tilePosition;
             console.log(this.currentTween, this.tweens.getAllTweens().length)
             if (this.currentTween) {
                 console.log('abort ', this.id, this.tilePosition);
                 // this.currentTween?.tween.complete();
-                console.log('stp[[img')
                 this.currentTween?.tween.stop();
                 console.log('stopped')
                 this.currentTween?.resolve();
@@ -76,14 +76,6 @@ export class BoxActor implements GameActor {
 
     public getTileCode(): Tiles {
         return Tiles.box;
-    }
-
-    public getOrientation(): Directions | undefined {
-        return undefined;
-    }
-
-    public isCovered(): boolean {
-        return false;
     }
 
     public cover(staticActors: GameActor[]): void {

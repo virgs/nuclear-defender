@@ -1,4 +1,4 @@
-import {Tiles} from '../levels/tiles';
+import {Tiles} from '@/levels/tiles';
 
 export class TileDepthCalculator {
 

@@ -3,26 +3,21 @@ import {Tiles} from '@/levels/tiles';
 import type {Point} from '@/math/point';
 import {sounds} from '@/constants/sounds';
 import {GameObjectCreator} from '@/stage/game-object-creator';
-import type {Directions} from '@/constants/directions';
-import type {AnimateData, GameActor, GameActorConfig} from '@/stage/game-actor';
+import type {GameActor, GameActorConfig} from '@/stage/game-actor';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
     private readonly image: Phaser.GameObjects.Image;
     private readonly id: number;
+    private readonly tilePosition: Point;
     private covered: boolean;
-    private tilePosition: Point;
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.image = new GameObjectCreator(config).createImage();
+        this.image = new GameObjectCreator(config).createImage(config.code);
         this.covered = false;
-    }
-
-    public isCovered(): boolean {
-        return this.covered;
     }
 
     public cover(actors: GameActor[]): void {
@@ -48,17 +43,6 @@ export class OilyFloorActor implements GameActor {
 
     public getTilePosition(): Point {
         return this.tilePosition;
-    }
-
-    public setTilePosition(tilePosition: Point): void {
-        this.tilePosition = tilePosition;
-    }
-
-    public getOrientation(): Directions | undefined {
-        return undefined;
-    }
-
-    public async animate(data: AnimateData): Promise<any> {
     }
 
 }

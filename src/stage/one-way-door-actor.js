@@ -3,19 +3,13 @@ import { GameObjectCreator } from './game-object-creator';
 export class OneWayDoorActor {
     sprite;
     id;
-    covered;
     tilePosition;
     constructor(config) {
         this.id = config.id;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite();
-        this.covered = false;
-    }
-    isCovered() {
-        return this.covered;
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
     }
     cover() {
-        this.covered = true;
     }
     getId() {
         return this.id;
@@ -25,13 +19,5 @@ export class OneWayDoorActor {
     }
     getTilePosition() {
         return this.tilePosition;
-    }
-    setTilePosition(tilePosition) {
-        this.tilePosition = tilePosition;
-    }
-    getOrientation() {
-        return undefined;
-    }
-    async animate() {
     }
 }

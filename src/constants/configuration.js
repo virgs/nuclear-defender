@@ -1,10 +1,11 @@
 import floorTexture from '../assets/tiles/floor-texture.jpg';
 import tileSheetAsset from '../assets/tiles/sokoban_tilesheet.png';
+import wallSheetAsset from '../assets/tiles/wall_sprites.png';
 import selectorTexture from '../assets/tiles/transparent-selector.png';
 import thumbnailTexture from '../assets/levels/thumbnail.png';
 import tileSheetAssetNormal from '../assets/tiles/sokoban_tilessheet_normal.png';
 import { ManhattanDistanceCalculator } from '@/math/manhattan-distance-calculator';
-const verticalPerspective = .65;
+const verticalPerspective = .8;
 const tileHeight = 50;
 const tileWidth = 40;
 export const configuration = {
@@ -20,6 +21,8 @@ export const configuration = {
         verticalPerspective: verticalPerspective,
         verticalSize: tileHeight,
         horizontalSize: tileWidth,
+        wallSheetKey: 'wallSheetKey',
+        wallSheetAsset: wallSheetAsset,
         spriteSheetKey: 'tiles',
         sheetAsset: tileSheetAsset,
         sheetAssetNormal: tileSheetAssetNormal,
@@ -51,7 +54,7 @@ export const configuration = {
         radioactive: '#d4fa00',
         controlled: '#ff3c91',
         background: '#dddddd',
-        ambientColor: '#777777'
+        ambientColor: '#BBBBBB'
     },
     html: {
         gameScene: {}

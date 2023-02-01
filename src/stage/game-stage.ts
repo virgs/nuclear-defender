@@ -1,15 +1,16 @@
-import {Point} from '../math/point';
+import {Point} from '@/math/point';
 import type {BoxActor} from './box-actor';
 import type {HeroActor} from './hero-actor';
 import type {GameActor} from './game-actor';
-import {Actions} from '../constants/actions';
-import {dynamicTiles, Tiles} from '../levels/tiles';
-import {EventEmitter, EventName} from '../events/event-emitter';
-import {HeroActionRecorder} from '../engine/hero-action-recorder';
-import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '../engine/movement-orchestrator';
-import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import type {ScreenPropertiesCalculator} from '../math/screen-properties-calculator';
-import type {MultiLayeredMap} from '../levels/standard-sokoban-annotation-tokennizer';
+import {Actions} from '@/constants/actions';
+import {dynamicTiles, Tiles} from '@/levels/tiles';
+import {EventEmitter, EventName} from '@/events/event-emitter';
+import {HeroActionRecorder} from '@/engine/hero-action-recorder';
+import {MovementOrchestrator} from '@/engine/movement-orchestrator';
+import type {ScreenPropertiesCalculator} from '@/math/screen-properties-calculator';
+import type {MultiLayeredMap} from '@/levels/standard-sokoban-annotation-tokennizer';
+import type {MovementOrchestratorInput, MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
+import {configuration} from "@/constants/configuration";
 
 export class GameStage {
     private readonly strippedMap: MultiLayeredMap;
@@ -100,14 +101,15 @@ export class GameStage {
                     .find(tileBox => movedBox.id === tileBox.getId())!;
 
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-                await spriteBoxMoved?.animate({spritePosition: spritePosition, tilePosition: movedBox.nextPosition});
+                await spriteBoxMoved?.move({duration: configuration.updateCycleInMs, spritePosition: spritePosition, tilePosition: movedBox.nextPosition});
             });
 
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
             if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
-                await this.hero!.animate({
+                await this.hero!.move({
+                    duration: configuration.updateCycleInMs,
                     tilePosition: hero.nextPosition,
                     spritePosition, orientation: hero.direction, animationPushedBox: !!lastAction.boxes
                         .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)

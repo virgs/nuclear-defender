@@ -7,22 +7,15 @@ import type {GameActor, GameActorConfig} from './game-actor';
 export class OneWayDoorActor implements GameActor {
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
-    private covered: boolean;
-    private tilePosition: Point;
+    private readonly tilePosition: Point;
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite();
-        this.covered = false;
-    }
-
-    public isCovered(): boolean {
-        return this.covered;
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
     }
 
     public cover(): void {
-        this.covered = true;
     }
 
     public getId(): number {
@@ -35,17 +28,6 @@ export class OneWayDoorActor implements GameActor {
 
     public getTilePosition(): Point {
         return this.tilePosition;
-    }
-
-    public setTilePosition(tilePosition: Point): void {
-        this.tilePosition = tilePosition;
-    }
-
-    public getOrientation(): Directions | undefined {
-        return undefined;
-    }
-
-    public async animate(): Promise<any> {
     }
 
 }

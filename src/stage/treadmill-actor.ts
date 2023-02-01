@@ -11,15 +11,15 @@ export class TreadmillActor implements GameActor {
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly orientation: Directions;
+    private readonly tilePosition: Point;
     private covered: boolean;
-    private tilePosition: Point;
 
     constructor(config: GameActorConfig) {
-        this.orientation = config.orientation;
+        this.orientation = config.orientation!;
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
         this.covered = false;
 
         switch (this.orientation) {
@@ -35,10 +35,6 @@ export class TreadmillActor implements GameActor {
             case Directions.RIGHT:
                 break;
         }
-    }
-
-    public isCovered(): boolean {
-        return this.covered;
     }
 
     public cover(actors: GameActor[]): void {
@@ -64,17 +60,6 @@ export class TreadmillActor implements GameActor {
 
     public getTilePosition(): Point {
         return this.tilePosition;
-    }
-
-    public setTilePosition(tilePosition: Point): void {
-        this.tilePosition = tilePosition;
-    }
-
-    public getOrientation(): Directions | undefined {
-        return this.orientation;
-    }
-
-    public async animate(): Promise<any> {
     }
 
 }

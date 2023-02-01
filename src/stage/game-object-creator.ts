@@ -10,14 +10,14 @@ export class GameObjectCreator {
         this.config = config;
     }
 
-    public createSprite(): Phaser.GameObjects.Sprite {
+    public createSprite(frame: number): Phaser.GameObjects.Sprite {
         return this.prepareGameObject(this.config.scene.add.sprite(this.config.worldPosition.x, this.config.worldPosition.y,
-            configuration.tiles.spriteSheetKey, this.config.code)) as Phaser.GameObjects.Sprite;
+            this.config.assetSheetKey, frame)) as Phaser.GameObjects.Sprite;
     }
 
-    public createImage(): Phaser.GameObjects.Image {
+    public createImage(frame: number): Phaser.GameObjects.Image {
         return this.prepareGameObject(this.config.scene.add.image(this.config.worldPosition.x, this.config.worldPosition.y,
-            configuration.tiles.spriteSheetKey, this.config.code)) as Phaser.GameObjects.Image;
+            this.config.assetSheetKey, frame)) as Phaser.GameObjects.Image;
     }
 
     private prepareGameObject(image: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image):

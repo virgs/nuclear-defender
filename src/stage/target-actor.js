@@ -4,7 +4,8 @@ import { GameObjectCreator } from './game-object-creator';
 import { configuration } from '@/constants/configuration';
 export class TargetActor {
     static UNCOVERED_LIGHT_INTENSITY = .66;
-    static COVERED_LIGHT_INTENSITY = .15;
+    static BOX_COVERED_LIGHT_INTENSITY = .15;
+    static HERO_COVERED_LIGHT_INTENSITY = .05;
     static LIGHT_UNCOVERED_COLOR = Phaser.Display.Color.HexStringToColor(configuration.colors.radioactive).color;
     static LIGHT_COVERED_COLOR = Phaser.Display.Color.HexStringToColor(configuration.colors.controlled).color;
     static LIGHT_RADIUS = configuration.world.tileSize.horizontal * 3;
@@ -12,14 +13,13 @@ export class TargetActor {
     scene;
     id;
     tilePosition;
-    covered;
+    coveredBy;
     intensityModifier;
     constructor(config) {
         this.id = config.id;
         this.scene = config.scene;
-        this.covered = false;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
         this.intensityModifier = 2; // it will always have itself as a target
         config.contentAround
             .forEach(line => line
@@ -43,10 +43,13 @@ export class TargetActor {
             duration: Math.random() * 5000 + 3000,
             useFrames: true,
             onUpdate: () => {
-                const intensity = Math.random() * .25;
-                if (this.covered) {
+                const intensity = Math.random() * .15;
+                if (this.coveredBy === Tiles.hero) {
+                    light.intensity = TargetActor.HERO_COVERED_LIGHT_INTENSITY * this.intensityModifier + intensity;
+                }
+                else if (this.coveredBy === Tiles.wall) {
                     light.setColor(TargetActor.LIGHT_COVERED_COLOR);
-                    light.intensity = TargetActor.COVERED_LIGHT_INTENSITY * this.intensityModifier + intensity;
+                    light.intensity = TargetActor.BOX_COVERED_LIGHT_INTENSITY * this.intensityModifier + intensity;
                 }
                 else {
                     light.setColor(TargetActor.LIGHT_UNCOVERED_COLOR);
@@ -62,30 +65,20 @@ export class TargetActor {
     getTilePosition() {
         return this.tilePosition;
     }
-    setTilePosition(tilePosition) {
-        this.tilePosition = tilePosition;
-    }
     cover(actors) {
-        if (actors
-            .some(actor => actor.getTileCode() === Tiles.box || actor.getTileCode() === Tiles.hero)) {
-            this.covered = true;
+        const cover = actors
+            .find(actor => actor.getTileCode() === Tiles.box || actor.getTileCode() === Tiles.hero);
+        if (cover) {
+            this.coveredBy = cover.getTileCode();
         }
         else {
-            this.covered = false;
+            this.coveredBy = undefined;
         }
-    }
-    isCovered() {
-        return this.covered;
     }
     getTileCode() {
         return Tiles.target;
     }
     getId() {
         return this.id;
-    }
-    getOrientation() {
-        return undefined;
-    }
-    async animate() {
     }
 }

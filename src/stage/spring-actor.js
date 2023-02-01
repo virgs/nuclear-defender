@@ -7,14 +7,14 @@ export class SpringActor {
     sprite;
     id;
     orientation;
-    covered;
     tilePosition;
+    covered;
     constructor(config) {
         this.orientation = config.orientation;
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
         this.covered = false;
         switch (this.orientation) {
             case Directions.LEFT:
@@ -30,9 +30,6 @@ export class SpringActor {
                 this.sprite.flipX = true;
                 break;
         }
-    }
-    isCovered() {
-        return this.covered;
     }
     cover(actors) {
         if (actors
@@ -62,13 +59,5 @@ export class SpringActor {
     }
     getTilePosition() {
         return this.tilePosition;
-    }
-    setTilePosition(tilePosition) {
-        this.tilePosition = tilePosition;
-    }
-    getOrientation() {
-        return this.orientation;
-    }
-    async animate() {
     }
 }

@@ -1,9 +1,10 @@
-import { Point } from '../math/point';
-import { Actions } from '../constants/actions';
-import { dynamicTiles, Tiles } from '../levels/tiles';
-import { EventEmitter, EventName } from '../events/event-emitter';
-import { HeroActionRecorder } from '../engine/hero-action-recorder';
-import { MovementOrchestrator } from '../engine/movement-orchestrator';
+import { Point } from '@/math/point';
+import { Actions } from '@/constants/actions';
+import { dynamicTiles, Tiles } from '@/levels/tiles';
+import { EventEmitter, EventName } from '@/events/event-emitter';
+import { HeroActionRecorder } from '@/engine/hero-action-recorder';
+import { MovementOrchestrator } from '@/engine/movement-orchestrator';
+import { configuration } from "@/constants/configuration";
 export class GameStage {
     strippedMap;
     movementCoordinator;
@@ -79,13 +80,14 @@ export class GameStage {
             const spriteBoxMoved = this.boxes
                 .find(tileBox => movedBox.id === tileBox.getId());
             const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-            await spriteBoxMoved?.animate({ spritePosition: spritePosition, tilePosition: movedBox.nextPosition });
+            await spriteBoxMoved?.move({ duration: configuration.updateCycleInMs, spritePosition: spritePosition, tilePosition: movedBox.nextPosition });
         });
         const heroAnimationPromise = async () => {
             const hero = lastAction.hero;
             if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
                 const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
-                await this.hero.animate({
+                await this.hero.move({
+                    duration: configuration.updateCycleInMs,
                     tilePosition: hero.nextPosition,
                     spritePosition, orientation: hero.direction, animationPushedBox: !!lastAction.boxes
                         .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)

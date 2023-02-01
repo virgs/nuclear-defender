@@ -19,7 +19,7 @@ export class HeroActor {
         this.heroAnimator = new HeroAnimator();
         this.tweens = config.scene.tweens;
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
-        this.sprite = new GameObjectCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite.anims.create(item));
         this.tilePosition = config.tilePosition;
@@ -30,14 +30,12 @@ export class HeroActor {
     getTilePosition() {
         return this.tilePosition;
     }
-    setTilePosition(tilePosition) {
-    }
     checkAction() {
         const actionInputBuffer = this.actionInputBuffer || Actions.STAND;
         this.actionInputBuffer = undefined;
         return actionInputBuffer;
     }
-    async animate(data) {
+    async move(data) {
         return new Promise((resolve) => {
             this.tilePosition = data.tilePosition;
             if (data.animationPushedBox) {
@@ -66,20 +64,11 @@ export class HeroActor {
             }
         });
     }
-    getSprite() {
-        return this.sprite;
-    }
     getTileCode() {
         return Tiles.hero;
     }
     getId() {
         return this.id;
-    }
-    getOrientation() {
-        return undefined;
-    }
-    isCovered() {
-        return false;
     }
     cover() {
     }

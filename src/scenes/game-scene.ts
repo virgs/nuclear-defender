@@ -65,6 +65,14 @@ export class GameScene extends Phaser.Scene {
                 frameHeight: configuration.tiles.verticalSize
             }
         });
+        this.load.spritesheet({
+            key: configuration.tiles.wallSheetKey,
+            url: configuration.tiles.wallSheetAsset,
+            frameConfig: {
+                frameWidth: configuration.tiles.horizontalSize,
+                frameHeight: configuration.tiles.verticalSize
+            }
+        });
         Object.keys(sounds)
             .forEach(item => {
                 const sound = sounds[item];

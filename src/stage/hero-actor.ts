@@ -1,15 +1,16 @@
 import {Tiles} from '@/levels/tiles';
 import type {Point} from '@/math/point';
 import {sounds} from '@/constants/sounds';
-import {GameObjectCreator} from './game-object-creator';
+import type {GameActorConfig} from './game-actor';
 import type {Directions} from '@/constants/directions';
+import {GameObjectCreator} from './game-object-creator';
 import {HeroAnimator} from '@/animations/hero-animator';
 import {EventEmitter, EventName} from '@/events/event-emitter';
 import {Actions, mapDirectionToAction} from '@/constants/actions';
 import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
-import type {AnimateData, GameActor, GameActorConfig} from './game-actor';
+import type {DynamicGameActor, MoveData} from '@/stage/dynamic-game-actor';
 
-export class HeroActor implements GameActor {
+export class HeroActor implements DynamicGameActor {
     private readonly heroAnimator: HeroAnimator;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
@@ -27,7 +28,7 @@ export class HeroActor implements GameActor {
         this.tweens = config.scene.tweens;
         //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Tilemaps.Tilemap-createFromTiles
 
-        this.sprite = new GameObjectCreator(config).createSprite();
+        this.sprite = new GameObjectCreator(config).createSprite(config.code);
 
         this.heroAnimator.createAnimations()
             .forEach(item => this.sprite!.anims.create(item));
@@ -43,16 +44,13 @@ export class HeroActor implements GameActor {
         return this.tilePosition;
     }
 
-    public setTilePosition(tilePosition: Point): void {
-    }
-
     public checkAction(): Actions {
         const actionInputBuffer = this.actionInputBuffer || Actions.STAND;
         this.actionInputBuffer = undefined;
         return actionInputBuffer;
     }
 
-    public async animate(data: AnimateData): Promise<void> {
+    public async move(data: MoveData): Promise<void> {
         return new Promise<void>((resolve) => {
             this.tilePosition = data.tilePosition;
             if (data.animationPushedBox) {
@@ -82,24 +80,12 @@ export class HeroActor implements GameActor {
         });
     }
 
-    public getSprite(): Phaser.GameObjects.Sprite {
-        return this.sprite;
-    }
-
     public getTileCode(): Tiles {
         return Tiles.hero;
     }
 
     public getId(): Tiles {
         return this.id;
-    }
-
-    public getOrientation(): Directions | undefined {
-        return undefined;
-    }
-
-    public isCovered(): boolean {
-        return false;
     }
 
     public cover(): void {

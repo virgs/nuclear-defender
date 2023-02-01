@@ -11,6 +11,7 @@ import { TreadmillActor } from './treadmill-actor';
 import { OilyFloorActor } from './oily-floor-actor';
 import { OneWayDoorActor } from './one-way-door-actor';
 import { MapEditorCursorFollower } from './map-editor-cursor-follower';
+import { configuration } from "@/constants/configuration";
 export class GameStageCreator {
     scene;
     constructorMap;
@@ -98,7 +99,8 @@ export class GameStageCreator {
         const tilesAround = this.getTilesAround(tilePosition.x, tilePosition.y);
         const worldPosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(tilePosition);
         if (this.constructorMap.has(item.code)) {
-            const gameActor = this.constructorMap.get(item.code)({
+            const config = {
+                assetSheetKey: configuration.tiles.spriteSheetKey,
                 playable: this.playable,
                 code: item.code,
                 scene: this.scene,
@@ -107,7 +109,8 @@ export class GameStageCreator {
                 tilePosition: tilePosition,
                 contentAround: tilesAround,
                 id: this.actorCounter++
-            });
+            };
+            const gameActor = this.constructorMap.get(item.code)(config);
             this.actorMap.get(item.code).push(gameActor);
             return gameActor;
         }

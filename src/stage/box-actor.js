@@ -1,7 +1,7 @@
 import { Tiles } from '@/levels/tiles';
 import { sounds } from '@/constants/sounds';
-import { GameObjectCreator } from '@/stage/game-object-creator';
 import { configuration } from '@/constants/configuration';
+import { GameObjectCreator } from '@/stage/game-object-creator';
 import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 export class BoxActor {
     tweens;
@@ -16,7 +16,7 @@ export class BoxActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.image = new GameObjectCreator(config).createImage();
+        this.image = new GameObjectCreator(config).createImage(config.code);
         this.isOnTarget = false;
     }
     getTilePosition() {
@@ -25,14 +25,13 @@ export class BoxActor {
     getId() {
         return this.id;
     }
-    async animate(data) {
+    async move(data) {
         return new Promise(resolve => {
             this.tilePosition = data.tilePosition;
             console.log(this.currentTween, this.tweens.getAllTweens().length);
             if (this.currentTween) {
                 console.log('abort ', this.id, this.tilePosition);
                 // this.currentTween?.tween.complete();
-                console.log('stp[[img');
                 this.currentTween?.tween.stop();
                 console.log('stopped');
                 this.currentTween?.resolve();
@@ -61,12 +60,6 @@ export class BoxActor {
     }
     getTileCode() {
         return Tiles.box;
-    }
-    getOrientation() {
-        return undefined;
-    }
-    isCovered() {
-        return false;
     }
     cover(staticActors) {
         if (staticActors

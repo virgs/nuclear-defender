@@ -5,11 +5,11 @@ export class GameObjectCreator {
     constructor(config) {
         this.config = config;
     }
-    createSprite() {
-        return this.prepareGameObject(this.config.scene.add.sprite(this.config.worldPosition.x, this.config.worldPosition.y, configuration.tiles.spriteSheetKey, this.config.code));
+    createSprite(frame) {
+        return this.prepareGameObject(this.config.scene.add.sprite(this.config.worldPosition.x, this.config.worldPosition.y, this.config.assetSheetKey, frame));
     }
-    createImage() {
-        return this.prepareGameObject(this.config.scene.add.image(this.config.worldPosition.x, this.config.worldPosition.y, configuration.tiles.spriteSheetKey, this.config.code));
+    createImage(frame) {
+        return this.prepareGameObject(this.config.scene.add.image(this.config.worldPosition.x, this.config.worldPosition.y, this.config.assetSheetKey, frame));
     }
     prepareGameObject(image) {
         image.scale = configuration.world.scale;

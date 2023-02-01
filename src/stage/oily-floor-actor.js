@@ -5,17 +5,14 @@ export class OilyFloorActor {
     scene;
     image;
     id;
-    covered;
     tilePosition;
+    covered;
     constructor(config) {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.image = new GameObjectCreator(config).createImage();
+        this.image = new GameObjectCreator(config).createImage(config.code);
         this.covered = false;
-    }
-    isCovered() {
-        return this.covered;
     }
     cover(actors) {
         if (actors
@@ -38,13 +35,5 @@ export class OilyFloorActor {
     }
     getTilePosition() {
         return this.tilePosition;
-    }
-    setTilePosition(tilePosition) {
-        this.tilePosition = tilePosition;
-    }
-    getOrientation() {
-        return undefined;
-    }
-    async animate(data) {
     }
 }
