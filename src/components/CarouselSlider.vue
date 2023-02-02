@@ -10,11 +10,7 @@
                     'custom-level': index === 0,
                     'tns-item': true}"
            :style="carouselContainerStyle(index)">
-        <div style="position:absolute;">
-          <h4 class="level
-          -number">{{ currentDisplayIndex(index) }}</h4>
-        </div>
-        <img alt="" class="img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
+        <img alt="" class="p-2 img-fluid tns-lazy-img carousel-thumbnail" :data-src="thumbnail(index)"
              height="60"
              :style="mapStyle(index)">
         <img v-if="customItem(index)" alt="" class="img-fluid custom-made-stamp" src="/assets/images/custom-stamp.png">
@@ -29,7 +25,7 @@
         <i class="fa-solid fa-chevron-right"></i>
       </li>
     </ul>
-    <h3 class="mt-2 level-title">{{ currentTitle }}</h3>
+    <h3 class="mt-4 level-title">{{currentDisplayIndex}}{{ currentTitle }}</h3>
     <h3 class="mt-2 level-solution-data">{{ currentSolutionData }}</h3>
   </div>
 </template>
@@ -39,8 +35,8 @@
 import {tns} from 'tiny-slider';
 import {defineComponent} from 'vue';
 import {getEnabledLevels} from '@/levels/levels';
-import {LongTermStore} from '@/store/long-term-store';
 import type {LevelCompleteData} from '@/store/long-term-store';
+import {LongTermStore} from '@/store/long-term-store';
 
 export default defineComponent({
   name: 'CarouselSlider',
@@ -54,6 +50,7 @@ export default defineComponent({
     };
   },
   mounted() {
+    //https://flickity.metafizzy.co/
     //Note: rebuilding the slider doenst work, so I rebuild the whole component
     //https://github.com/ganlanyuan/tiny-slider
     const visibleItems = this.enabledLevels.length === 2 ? 2 : 3; //it seems the carousel doesn't work properly when there is only 2 items
@@ -134,13 +131,11 @@ export default defineComponent({
       };
 
     },
-    currentDisplayIndex(): (index: number) => string {
-      return (index: number): string => {
-        if (index === 0) {
-          return '';
-        }
-        return index.toString();
-      };
+    currentDisplayIndex(): string {
+      if (this.currentIndex === 0) {
+        return '-: ';
+      }
+      return this.currentIndex.toString() + ': ';
     },
     customItem(): (index: number) => boolean {
       return (index: number): boolean => {

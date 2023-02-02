@@ -25,10 +25,11 @@ export class BoxActor {
     getId() {
         return this.id;
     }
-    async move(data) {
+    async update(data) {
+        //TODO check if it really moves: this.tilePosition.isDifferentOf(data.tilePosition)
+        //if it doesn't, just return
         return new Promise(resolve => {
             this.tilePosition = data.tilePosition;
-            console.log(this.currentTween, this.tweens.getAllTweens().length);
             if (this.currentTween) {
                 console.log('abort ', this.id, this.tilePosition);
                 // this.currentTween?.tween.complete();

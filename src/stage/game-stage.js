@@ -59,40 +59,39 @@ export class GameStage {
                     boxes: this.boxes.map(box => ({ point: box.getTilePosition(), id: box.getId() })),
                     lastActionResult: previousLastAction
                 };
-                await this.makeMove(input);
+                const output = await this.movementCoordinator.update(input);
+                this.heroActionRecorder.registerMovement(input, output);
+                if (output.mapChanged) {
+                    this.mapChangedLastCycle = true;
+                    await this.updateAnimations(output);
+                    this.checkLevelComplete();
+                }
             }
         }
     }
-    async makeMove(input) {
-        const output = await this.movementCoordinator.update(input);
-        this.heroActionRecorder.registerMovement(input, output);
-        if (output.mapChanged) {
-            this.mapChangedLastCycle = true;
-            await this.updateAnimations(output);
-            this.checkLevelComplete();
-        }
-    }
-    async updateAnimations(lastAction) {
+    async updateAnimations(output) {
         this.animationsAreOver = false;
-        const animationsPromises = lastAction.boxes
+        const animationsPromises = output.boxes
             .filter(box => box.nextPosition.isDifferentOf(box.currentPosition))
             .map(async (movedBox) => {
             const spriteBoxMoved = this.boxes
                 .find(tileBox => movedBox.id === tileBox.getId());
             const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(movedBox.nextPosition);
-            await spriteBoxMoved?.move({ duration: configuration.updateCycleInMs, spritePosition: spritePosition, tilePosition: movedBox.nextPosition });
+            await spriteBoxMoved.update({
+                duration: configuration.updateCycleInMs,
+                spritePosition: spritePosition,
+                tilePosition: movedBox.nextPosition
+            });
         });
         const heroAnimationPromise = async () => {
-            const hero = lastAction.hero;
-            if (hero.nextPosition.isDifferentOf(hero.currentPosition)) {
-                const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
-                await this.hero.move({
-                    duration: configuration.updateCycleInMs,
-                    tilePosition: hero.nextPosition,
-                    spritePosition, orientation: hero.direction, animationPushedBox: !!lastAction.boxes
-                        .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)
-                });
-            }
+            const hero = output.hero;
+            const spritePosition = this.screenPropertiesCalculator.getWorldPositionFromTilePosition(hero.nextPosition);
+            await this.hero.update({
+                duration: configuration.updateCycleInMs,
+                tilePosition: hero.nextPosition,
+                spritePosition, orientation: hero.direction, animationPushedBox: !!output.boxes
+                    .find(box => box.currentPosition.isEqualTo(hero.nextPosition) && box.direction === hero.direction)
+            });
         };
         animationsPromises.push(heroAnimationPromise());
         this.updateActorsCoveringSituation();

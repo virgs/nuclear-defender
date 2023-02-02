@@ -11,5 +11,5 @@ export type MoveData = {
 };
 
 export interface DynamicGameActor extends GameActor {
-    move(data: MoveData): Promise<any>;
+    update(data: MoveData): Promise<any>;
 }

@@ -83,7 +83,6 @@ export const getAllLevels = () => [
 # .$  oo.#
 10#
 `,
-        thumbnailPath: configuration.thumbnailTextureKey,
         title: 'Minidevotron poket', //7000000 iterations, 8minutes
     }, {
         map: `

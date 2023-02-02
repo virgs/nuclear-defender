@@ -38,10 +38,11 @@ export class BoxActor implements DynamicGameActor {
         return this.id;
     }
 
-    public async move(data: MoveData) {
+    public async update(data: MoveData) {
+        //TODO check if it really moves: this.tilePosition.isDifferentOf(data.tilePosition)
+        //if it doesn't, just return
         return new Promise<void>(resolve => {
             this.tilePosition = data.tilePosition;
-            console.log(this.currentTween, this.tweens.getAllTweens().length)
             if (this.currentTween) {
                 console.log('abort ', this.id, this.tilePosition);
                 // this.currentTween?.tween.complete();

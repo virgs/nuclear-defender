@@ -6,7 +6,7 @@ import thumbnailTexture from '../assets/levels/thumbnail.png';
 import tileSheetAssetNormal from '../assets/tiles/sokoban_tilessheet_normal.png';
 import {ManhattanDistanceCalculator} from '@/math/manhattan-distance-calculator';
 
-const verticalPerspective = .8;
+const verticalPerspective = .79; //cos(perspective-angle) it should be .8, however, due to rounding stuff, it makes a small pixel line between some sprites
 const tileHeight = 50;
 const tileWidth = 40;
 export const configuration = {

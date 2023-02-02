@@ -1,15 +1,11 @@
-import {Directions} from '../constants/directions';
-import type {AnimateData} from '../stage/game-actor';
-import {configuration} from '../constants/configuration';
+import type {Point} from '@/math/point';
+import {Directions} from '@/constants/directions';
+import {configuration} from '@/constants/configuration';
 
-export type HeroMovement = {
-    tween: {
-        x?: number | string,
-        y?: number | string,
-        duration: number,
-    }
-    walking: HeroAnimation,
-    idle: HeroAnimation
+export type SpriteMovement = {
+    x?: number | string,
+    y?: number | string,
+    duration: number,
 };
 
 enum HeroAnimation {
@@ -30,23 +26,8 @@ animationMap.set(Directions.RIGHT, {walking: HeroAnimation.RIGHT, idle: HeroAnim
 animationMap.set(Directions.UP, {walking: HeroAnimation.UP, idle: HeroAnimation.IDLE_UP});
 
 export class HeroAnimator {
-    //split tween and animation. Tween is only for movement
-    public getAnimation(data: AnimateData): HeroMovement {
-        const animation: HeroMovement = {
-            walking: HeroAnimation.DOWN,
-            idle: HeroAnimation.IDLE_DOWN,
-            tween: {
-                x: data.spritePosition.x,
-                y: data.spritePosition.y,
-                duration: configuration.updateCycleInMs,
-            }
-        };
-        if (data.orientation !== undefined && animationMap.has(data.orientation)) {
-            const animationFromMap = animationMap.get(data.orientation)!;
-            animation.walking = animationFromMap.walking;
-            animation.idle = animationFromMap.idle;
-        }
-        return animation;
+    public getAnimation(orientation: Directions) {
+        return animationMap.get(orientation);
     }
 
     public createAnimations() {
@@ -54,7 +35,8 @@ export class HeroAnimator {
             {
                 key: HeroAnimation.IDLE_DOWN,
                 //TODO replace magic values with enum codes
-                frames: this.generateFrames(52, 1)
+                frames: this.generateFrames(52, 1),
+                startFrame: 52,
             },
             {
                 key: HeroAnimation.IDLE_LEFT,
@@ -72,29 +54,30 @@ export class HeroAnimator {
                 key: HeroAnimation.DOWN,
                 frames: this.generateFrames(52, 3),
                 frameRate: configuration.frameRate,
-                repeat: -1
+                // repeat: -1
             },
             {
                 key: HeroAnimation.LEFT,
                 frames: this.generateFrames(81, 3),
                 frameRate: configuration.frameRate,
-                repeat: -1
+                // repeat: -1
             },
             {
                 key: HeroAnimation.UP,
                 frames: this.generateFrames(55, 3),
                 frameRate: configuration.frameRate,
-                repeat: -1
+                // repeat: -1
             },
             {
                 key: HeroAnimation.RIGHT,
                 frames: this.generateFrames(78, 3),
                 frameRate: configuration.frameRate,
-                repeat: -1
+                // repeat: -1
             },
         ];
     }
 
+    //TODO phaser has a smiliar method built-in. Use it: https://hopefourie.medium.com/successfully-integrating-phaser-3-into-your-react-redux-app-part-3-28628c7b4d4
     private generateFrames(initialFrame: number, numOfFrames: number) {
         return Array.from(new Array(numOfFrames))
             .map((_, index) => ({

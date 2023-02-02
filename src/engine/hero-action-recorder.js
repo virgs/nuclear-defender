@@ -14,7 +14,9 @@ export class HeroActionRecorder {
         return this.mementos[this.mementos.length - 1]?.output;
     }
     registerMovement(input, output) {
-        this.mementos.push({ input: input, output: output });
+        const memento = { input: input, output: output };
+        console.log(memento);
+        this.mementos.push(memento);
     }
     async undo() {
         console.log('mementos: ' + this.mementos.length);
@@ -30,16 +32,36 @@ export class HeroActionRecorder {
             if (memento.input.heroAction === Actions.STAND) {
                 continue;
             }
-            const oneBeforeThisMemento = this.mementos.pop();
-            if (!oneBeforeThisMemento) {
-                return;
-            }
-            console.log(oneBeforeThisMemento);
+            // const oneBeforeThisMemento = this.mementos.pop();
+            // if (!oneBeforeThisMemento) {
+            //     return;
+            // }
+            // console.log(oneBeforeThisMemento)
+            const output = {
+                boxes: memento.output.boxes
+                    .map(box => ({
+                    id: box.id,
+                    currentPosition: box.nextPosition,
+                    code: box.code,
+                    nextPosition: box.currentPosition,
+                    direction: box.direction,
+                })),
+                hero: {
+                    id: memento.output.hero.id,
+                    code: memento.output.hero.code,
+                    currentPosition: memento.output.hero.nextPosition,
+                    nextPosition: memento.output.hero.currentPosition,
+                    direction: memento.output.hero.direction
+                    // direction: getOppositeDirectionOf(memento.output.hero.direction!)
+                },
+                mapChanged: true
+            };
             console.log(memento);
-            console.log(oneAfterThisMemento);
-            console.log(oneAfterTheAfterMemento);
-            await this.engine.updateAnimations(oneBeforeThisMemento.output);
-            // await this.engine.makeMove(afterLastAction);
+            // console.log(oneAfterThisMemento)
+            // console.log(oneAfterTheAfterMemento)
+            // await this.engine.updateAnimations(oneBeforeThisMemento.output);
+            // oneBeforeThisMemento.output.mapChanged = true;
+            await this.engine.updateAnimations(output);
             return;
         }
         // let lastAction: MovementOrchestratorInput | undefined = this.mementos.pop();
