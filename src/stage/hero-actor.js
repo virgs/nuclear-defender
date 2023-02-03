@@ -47,36 +47,24 @@ export class HeroActor {
             if (data.animationPushedBox) {
                 this.scene.sound.play(sounds.pushingBox.key, { volume: 0.25 });
             }
-            const heroMovement = this.getMove(data.spritePosition, data.duration);
-            if (heroMovement) {
-                this.tweens.add({
-                    ...heroMovement,
-                    targets: this.sprite,
-                    onInit: () => {
-                        this.sprite.anims.play(this.heroAnimator.getAnimation(this.orientation).walking, true);
-                    },
-                    onUpdate: () => {
-                        this.sprite.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
-                    },
-                    onComplete: () => {
-                        this.sprite.anims.play(this.heroAnimator.getAnimation(this.orientation).idle, true);
-                        resolve();
-                    },
-                    onCompleteScope: this //doc purposes
-                });
-            }
-            else {
-                resolve();
-            }
+            this.tweens.add({
+                targets: this.sprite,
+                x: data.spritePosition.x,
+                y: data.spritePosition.y,
+                duration: data.duration,
+                onInit: () => {
+                    this.sprite.anims.play(this.heroAnimator.getAnimation(this.orientation).walking, true);
+                },
+                onUpdate: () => {
+                    this.sprite.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
+                },
+                onComplete: () => {
+                    this.sprite.anims.play(this.heroAnimator.getAnimation(this.orientation).idle, true);
+                    resolve();
+                },
+                onCompleteScope: this //doc purposes
+            });
         });
-    }
-    //TODO move it to SpriteMover class
-    getMove(newSpritePosition, duration) {
-        return {
-            x: newSpritePosition.x,
-            y: newSpritePosition.y,
-            duration: duration,
-        };
     }
     getTileCode() {
         return Tiles.hero;

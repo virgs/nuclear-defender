@@ -1,3 +1,4 @@
+import { Point } from '@/math/point';
 export var Directions;
 (function (Directions) {
     Directions[Directions["LEFT"] = 0] = "LEFT";
@@ -36,4 +37,16 @@ directionCharMap.set('d', Directions.DOWN);
 directionCharMap.set('r', Directions.RIGHT);
 export const getDirectionFromChar = (char) => {
     return directionCharMap.get(char.toLowerCase());
+};
+export const getPointFromDirection = (direction) => {
+    switch (direction) {
+        case Directions.LEFT:
+            return new Point(-1, 0);
+        case Directions.UP:
+            return new Point(0, -1);
+        case Directions.RIGHT:
+            return new Point(1, 0);
+        case Directions.DOWN:
+            return new Point(0, 1);
+    }
 };

@@ -1,3 +1,5 @@
+import {Point} from '@/math/point';
+
 export enum Directions {
     LEFT,
     UP,
@@ -40,3 +42,16 @@ directionCharMap.set('r', Directions.RIGHT);
 export const getDirectionFromChar = (char: string): Directions | undefined => {
     return directionCharMap.get(char.toLowerCase());
 };
+
+export const getPointFromDirection = (direction: Directions): Point => {
+    switch (direction) {
+        case Directions.LEFT:
+            return new Point(-1, 0);
+        case Directions.UP:
+            return new Point(0, -1);
+        case Directions.RIGHT:
+            return new Point(1, 0);
+        case Directions.DOWN:
+            return new Point(0, 1);
+    }
+}

@@ -1,6 +1,5 @@
 import { Tiles } from '@/levels/tiles';
 import { sounds } from '@/constants/sounds';
-import { configuration } from '@/constants/configuration';
 import { GameObjectCreator } from '@/stage/game-object-creator';
 import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 export class BoxActor {
@@ -16,7 +15,8 @@ export class BoxActor {
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.image = new GameObjectCreator(config).createImage(config.code);
+        this.image = new GameObjectCreator(config)
+            .createImage(config.code);
         this.isOnTarget = false;
     }
     getTilePosition() {
@@ -26,8 +26,9 @@ export class BoxActor {
         return this.id;
     }
     async update(data) {
-        //TODO check if it really moves: this.tilePosition.isDifferentOf(data.tilePosition)
-        //if it doesn't, just return
+        if (this.tilePosition.isEqualTo(data.tilePosition)) {
+            return;
+        }
         return new Promise(resolve => {
             this.tilePosition = data.tilePosition;
             if (this.currentTween) {
@@ -39,12 +40,10 @@ export class BoxActor {
                 this.currentTween = undefined;
             }
             const tween = {
+                targets: this.image,
                 x: data.spritePosition.x,
                 y: data.spritePosition.y,
-                duration: configuration.updateCycleInMs,
-                targets: this.image,
-                onInit: () => {
-                },
+                duration: data.duration,
                 onUpdate: () => {
                     this.image.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.image.y));
                 },

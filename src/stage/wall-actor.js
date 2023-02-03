@@ -1,59 +1,53 @@
 import { Tiles } from '@/levels/tiles';
 import { Point } from '@/math/point';
-import { configuration } from '@/constants/configuration';
-import { GameObjectCreator } from '@/stage/game-object-creator';
+import { getPointFromDirection } from '@/constants/directions';
+import { AnimationCreator } from '@/animations/animation-creator';
+import { AnimationAtlas, SpriteSheetLines } from '@/animations/animation-atlas';
 export class WallActor {
     id;
     tilePosition;
-    static adjacentPoints = [new Point(1, 2),
-        new Point(1, 0),
-        new Point(0, 1),
-        new Point(2, 1)]; //right
-    static adjacentCorners = [
-        {
-            corner: new Point(2, 0),
-            sides: [new Point(1, 0),
-                new Point(2, 1)] //right
-        },
-        {
-            corner: new Point(0, 0),
-            sides: [new Point(1, 0),
-                new Point(0, 1) //left
-            ],
-        }, {
-            corner: new Point(0, 2),
-            sides: [new Point(0, 1),
-                new Point(1, 2)] //down
-        }, {
-            corner: new Point(2, 2),
-            sides: [new Point(1, 2),
-                new Point(2, 1)] //right,
-        }
-    ];
+    adjacentPoints;
+    contentAround;
+    animationConfig;
     constructor(config) {
         this.id = config.id;
+        this.contentAround = config.contentAround;
         this.tilePosition = config.tilePosition;
-        config.assetSheetKey = configuration.tiles.wallSheetKey;
-        this.createPicture(config);
-        this.createCorners(config);
+        this.adjacentPoints = AnimationAtlas.orientationOrder
+            .map((direction => getPointFromDirection(direction).sum(new Point(1, 1))));
+        this.animationConfig = {
+            playable: config.playable,
+            scene: config.scene,
+            spriteSheetLine: SpriteSheetLines.WALL,
+            worldPosition: config.worldPosition
+        };
+        this.createPicture();
+        this.createCorners();
     }
-    createPicture(config) {
-        const frame = WallActor.adjacentPoints
+    createPicture() {
+        const frame = this.adjacentPoints
             .reduce((acc, item, index) => {
-            return acc + (config.contentAround[item.y][item.x]
+            return acc + (this.contentAround[item.y][item.x]
                 .some(layer => layer.code === Tiles.wall) ? 0 : Math.pow(2, index));
-        }, 0); //TODO adjust initial value to Tiles.wall when there is more than the wall in this sheet
-        new GameObjectCreator(config).createImage(frame);
+        }, 0); //TODO adjust initial value to SpriteSheetLines.WALL when there is more than the wall in this sheet
+        new AnimationCreator(this.animationConfig).createImage(frame);
     }
-    createCorners(config) {
-        WallActor.adjacentCorners
+    createCorners() {
+        AnimationAtlas.wall.cornersOrder
             .forEach((item, index) => {
-            if (item.sides
-                .every(side => config.contentAround[side.y][side.x]
-                .some(layer => layer.code === Tiles.wall)) && config.contentAround[item.corner.y][item.corner.x]
-                .every(layer => layer.code !== Tiles.wall)) {
-                const frame = 0 + Math.pow(2, 4) + index; //TODO adjust initial value to Tiles.wall when there is more than the wall in this sheet
-                new GameObjectCreator(config).createImage(frame);
+            const corner = item
+                .reduce((acc, side) => acc.sum(getPointFromDirection(side)), new Point(1, 1)); //shift to the center that is the point 1,1
+            if (item
+                .every(side => {
+                const point = getPointFromDirection(side).sum(new Point(1, 1));
+                return this.contentAround[point.y][point.x]
+                    .some(layer => layer.code === Tiles.wall);
+            }) &&
+                this.contentAround[corner.y][corner.x]
+                    .every(layer => layer.code !== Tiles.wall)) {
+                const frame = 0 + Math.pow(2, 4) + index; //TODO adjust initial value to SpriteSheetLines.WALL when there is more than the wall in this sheet
+                // new GameObjectCreator(config).createImage(frame);
+                new AnimationCreator(this.animationConfig).createImage(frame);
             }
         });
     }

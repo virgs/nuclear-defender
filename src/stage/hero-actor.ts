@@ -5,7 +5,6 @@ import type {GameActorConfig} from './game-actor';
 import {Directions} from '@/constants/directions';
 import {GameObjectCreator} from './game-object-creator';
 import {HeroAnimator} from '@/animations/hero-animator';
-import type {SpriteMovement} from '@/animations/hero-animator';
 import {EventEmitter, EventName} from '@/events/event-emitter';
 import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
 import type {DynamicGameActor, MoveData} from '@/stage/dynamic-game-actor';
@@ -64,36 +63,24 @@ export class HeroActor implements DynamicGameActor {
                 this.scene.sound.play(sounds.pushingBox.key, {volume: 0.25});
             }
 
-            const heroMovement = this.getMove(data.spritePosition, data.duration);
-            if (heroMovement) {
-                this.tweens!.add({
-                    ...heroMovement,
-                    targets: this.sprite,
-                    onInit: () => {
-                        this.sprite!.anims.play(this.heroAnimator.getAnimation(this.orientation)!.walking, true);
-                    },
-                    onUpdate: () => {
-                        this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
-                    },
-                    onComplete: () => {
-                        this.sprite!.anims.play(this.heroAnimator.getAnimation(this.orientation)!.idle, true);
-                        resolve();
-                    },
-                    onCompleteScope: this //doc purposes
-                });
-            } else {
-                resolve();
-            }
+            this.tweens!.add({
+                targets: this.sprite,
+                x: data.spritePosition.x,
+                y: data.spritePosition.y,
+                duration: data.duration,
+                onInit: () => {
+                    this.sprite!.anims.play(this.heroAnimator.getAnimation(this.orientation)!.walking, true);
+                },
+                onUpdate: () => {
+                    this.sprite!.setDepth(new TileDepthCalculator().calculate(Tiles.hero, this.sprite.y));
+                },
+                onComplete: () => {
+                    this.sprite!.anims.play(this.heroAnimator.getAnimation(this.orientation)!.idle, true);
+                    resolve();
+                },
+                onCompleteScope: this //doc purposes
+            });
         });
-    }
-
-    //TODO move it to SpriteMover class
-    public getMove(newSpritePosition: Point, duration: number): SpriteMovement {
-        return {
-            x: newSpritePosition.x,
-            y: newSpritePosition.y,
-            duration: duration,
-        };
     }
 
     public getTileCode(): Tiles {

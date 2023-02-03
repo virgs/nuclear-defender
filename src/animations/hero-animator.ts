@@ -1,12 +1,5 @@
-import type {Point} from '@/math/point';
 import {Directions} from '@/constants/directions';
 import {configuration} from '@/constants/configuration';
-
-export type SpriteMovement = {
-    x?: number | string,
-    y?: number | string,
-    duration: number,
-};
 
 enum HeroAnimation {
     IDLE_DOWN = 'IDLE_DOWN',
