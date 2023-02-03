@@ -13,7 +13,7 @@ export class BoxActor implements DynamicGameActor {
     private readonly id: number;
     private readonly scene: Phaser.Scene;
     private tilePosition: Point;
-    private isOnTarget: boolean;
+    private onTarget?: number;
     private currentTween?: {
         tween: Phaser.Tweens.Tween,
         resolve: () => any
@@ -26,7 +26,6 @@ export class BoxActor implements DynamicGameActor {
         this.tweens = config.scene.tweens;
         this.image = new GameObjectCreator(config)
             .createImage(config.code);
-        this.isOnTarget = false;
     }
 
     public getTilePosition() {
@@ -78,23 +77,25 @@ export class BoxActor implements DynamicGameActor {
     }
 
     public cover(staticActors: GameActor[]): void {
-        if (staticActors
-            .some(actor => actor.getTileCode() === Tiles.target)) {
+        const onTarget = staticActors
+            .find(actor => actor.getTileCode() === Tiles.target);
+        if (onTarget) {
             this.image.setFrame(Tiles.boxOnTarget);
+            const targetId = onTarget.getId();
 
-            if (!this.isOnTarget) {
-                this.isOnTarget = true;
+            if (this.onTarget !== targetId) {
+                this.onTarget = targetId;
                 this.scene.sound.play(sounds.boxOnTarget.key, {volume: 0.5});
             }
         } else {
-            if (this.isOnTarget) {
-                this.isOnTarget = false;
+            if (this.onTarget !== undefined) {
+                this.onTarget = undefined;
                 this.image.setFrame(Tiles.box);
             }
         }
     }
 
     public getIsOnTarget(): boolean {
-        return this.isOnTarget;
+        return this.onTarget !== undefined;
     }
 }

@@ -1,4 +1,5 @@
-import floorTexture from '../assets/tiles/floor-texture.jpg';
+// import floorTexture from '../assets/tiles/floor-texture.jpg';
+import floorTexture from '../assets/tiles/floor_texture.jpg'; //Pinto's
 import tileSheetAsset from '../assets/tiles/sokoban_tilesheet.png';
 import wallSheetAsset from '../assets/tiles/wall_sprites.png';
 import selectorTexture from '../assets/tiles/transparent-selector.png';

@@ -25,12 +25,12 @@ export class TargetActor implements GameActor {
         this.tilePosition = config.tilePosition;
         this.sprite = new GameObjectCreator(config).createSprite(config.code);
 
-        this.intensityModifier = 2; // it will always have itself as a target
+        this.intensityModifier = 1.5; // it will always have itself as a target
         config.contentAround
             .forEach(line => line
                 .forEach(item => item
                     .filter(layer => layer.code === Tiles.target)
-                    .forEach(() => this.intensityModifier *= .5)));
+                    .forEach(() => this.intensityModifier *= .66)));
         if (config.playable) {
             this.addLight();
         }

@@ -63,8 +63,8 @@ export class GameStage {
 
     public async update(): Promise<void> {
         if (this.animationsAreOver && !this.levelComplete) {
-            this.nextMoves.push(this.hero.checkAction());
-            const heroAction = this.nextMoves.shift()!;
+            const heroAction = this.nextMoves.shift() || this.hero.checkAction();
+            // console.log(this.nextMoves.length, this.nextMoves)
 
             if (this.mapChangedLastCycle || heroAction !== Actions.STAND) {
                 this.mapChangedLastCycle = false;

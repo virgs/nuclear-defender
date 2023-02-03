@@ -8,7 +8,7 @@ export class BoxActor {
     id;
     scene;
     tilePosition;
-    isOnTarget;
+    onTarget;
     currentTween;
     constructor(config) {
         this.id = config.id;
@@ -17,7 +17,6 @@ export class BoxActor {
         this.tweens = config.scene.tweens;
         this.image = new GameObjectCreator(config)
             .createImage(config.code);
-        this.isOnTarget = false;
     }
     getTilePosition() {
         return this.tilePosition;
@@ -62,22 +61,24 @@ export class BoxActor {
         return Tiles.box;
     }
     cover(staticActors) {
-        if (staticActors
-            .some(actor => actor.getTileCode() === Tiles.target)) {
+        const onTarget = staticActors
+            .find(actor => actor.getTileCode() === Tiles.target);
+        if (onTarget) {
             this.image.setFrame(Tiles.boxOnTarget);
-            if (!this.isOnTarget) {
-                this.isOnTarget = true;
+            const targetId = onTarget.getId();
+            if (this.onTarget !== targetId) {
+                this.onTarget = targetId;
                 this.scene.sound.play(sounds.boxOnTarget.key, { volume: 0.5 });
             }
         }
         else {
-            if (this.isOnTarget) {
-                this.isOnTarget = false;
+            if (this.onTarget !== undefined) {
+                this.onTarget = undefined;
                 this.image.setFrame(Tiles.box);
             }
         }
     }
     getIsOnTarget() {
-        return this.isOnTarget;
+        return this.onTarget !== undefined;
     }
 }

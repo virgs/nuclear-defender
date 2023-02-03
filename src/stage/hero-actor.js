@@ -47,6 +47,7 @@ export class HeroActor {
             if (data.animationPushedBox) {
                 this.scene.sound.play(sounds.pushingBox.key, { volume: 0.25 });
             }
+            this.orientation = data.orientation;
             this.tweens.add({
                 targets: this.sprite,
                 x: data.spritePosition.x,
