@@ -2,8 +2,8 @@ import {Tiles} from '@/levels/tiles';
 import {Point} from '@/math/point';
 import type {GameActor, GameActorConfig} from './game-actor';
 import {getPointFromDirection} from '@/constants/directions';
-import {AnimationCreator} from '@/animations/animation-creator';
 import type {AnimationConfig} from '@/animations/animation-creator';
+import {AnimationCreator} from '@/animations/animation-creator';
 import {AnimationAtlas, SpriteSheetLines} from '@/animations/animation-atlas';
 import type {OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
@@ -28,6 +28,7 @@ export class WallActor implements GameActor {
             spriteSheetLine: SpriteSheetLines.WALL,
             worldPosition: config.worldPosition
         };
+
         this.createPicture();
         this.createCorners();
     }

@@ -31,6 +31,8 @@ export const configuration = {
         tilemapKey: 'tilemap',
         layerName: 'Level',
         tilesetName: 'sokoban',
+        numOfFramesPerLine: 36,
+        framesPerAnimation: 3
     },
     world: {
         tileSize: { //after rescaling...

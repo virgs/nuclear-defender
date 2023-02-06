@@ -57,12 +57,17 @@ export class HeroActor implements DynamicGameActor {
     }
 
     public async update(data: MoveData): Promise<void> {
+        if (this.tilePosition.isEqualTo(data.tilePosition)) {
+            return
+        }
         return new Promise<void>((resolve) => {
             this.tilePosition = data.tilePosition;
             if (data.animationPushedBox) {
                 this.scene.sound.play(sounds.pushingBox.key, {volume: 0.25});
             }
-            this.orientation = data.orientation!
+            if (data.orientation !== undefined) {
+                this.orientation = data.orientation
+            }
 
             this.tweens!.add({
                 targets: this.sprite,

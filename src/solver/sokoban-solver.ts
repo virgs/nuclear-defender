@@ -5,10 +5,10 @@ import {Actions} from '@/constants/actions';
 import {Directions} from '@/constants/directions';
 import {MetricEmitter, Metrics} from './metric-emitter';
 import {configuration} from '@/constants/configuration';
-import {MoveAnalyser} from './analyser/move-analyser';
-import {MovementOrchestrator} from '@/engine/movement-orchestrator';
 import type {MovementAnalysis, PushedBox} from './analyser/move-analyser';
+import {MoveAnalyser} from './analyser/move-analyser';
 import type {MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
+import {MovementOrchestrator} from '@/engine/movement-orchestrator';
 import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
 
 type SolutionCandidate = {
@@ -43,6 +43,13 @@ export class SokobanSolver {
 
     private iterations: number;
     private movementCoordinator: MovementOrchestrator;
+    //    moves.sort((a, b) => {
+    //       // Prioritize moves that push boxes onto goals
+    //       const boxesOnGoals = (b[2] - a[2]) * 1000;
+    //       // Then sort by the total Manhattan distance of boxes to goals
+    //       const boxToGoalDistanceTotal = a[3] - b[3];
+    //       return boxesOnGoals + boxToGoalDistanceTotal;
+    //     });
     //a.foo - b.foo; ==> heap.pop(); gets the smallest
     private candidatesToVisit: Heap<SolutionCandidate> = new Heap((a: SolutionCandidate, b: SolutionCandidate) => a.distanceSum - b.distanceSum);
     private candidatesVisitedSet: Set<string> = new Set();
@@ -159,7 +166,8 @@ export class SokobanSolver {
             });
 
             if (afterAction.mapChanged) {
-                const analysis: MovementAnalysis = await this.metricEmitter.add(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
+                const analysis: MovementAnalysis = await this.metricEmitter
+                    .add(Metrics.MOVE_ANALYSYS, () => this.movementAnalyser.analyse(afterAction));
                 const moveCost = 100;
                 const heroMovementCost = action === Actions.STAND ? moveCost * .95 : moveCost;
                 let currentBoxesLine = 0;
