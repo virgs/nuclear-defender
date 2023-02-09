@@ -3,6 +3,7 @@ import {configuration} from '@/constants/configuration';
 import type {SolutionOutput} from '@/solver/sokoban-solver';
 
 type DifficultFactor = {
+    condition?: (solution: SolutionOutput) => boolean,
     value: number,
     weight: number, //0 to 1
 }
@@ -15,20 +16,21 @@ export class LevelDifficultyEstimator {
 
         this.factors = [
             (solution: SolutionOutput) => ({
+                condition: (solution) => solution.actions?.length! > 50,
                 value: this.getDifficulty(solution.actions!
                     .filter(action => action !== Actions.STAND)
                     .length, 200), weight: .15
             }),
             (solution: SolutionOutput) => ({
+                condition: (solution) => solution.actions?.length! > 50,
                 value: this.getDifficulty(solution.counterIntuitiveMoves! / solution.actions?.length!, 1),
                 weight: .5
             }),
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.boxesLine!, 80), weight: .75}),
             (solution: SolutionOutput) => ({
+                condition: (solution) => solution.actions?.length! < 20,
                 value: this.getDifficulty(solution.actions!
-                    .filter(action => {
-                        return action === Actions.STAND;
-                    }).length / solution.actions!.length, 1), weight: .15
+                    .filter(action => action === Actions.STAND).length / solution.actions!.length, 1), weight: .15
             }), //timing factor (be it waiting of pressing key at the right time)
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.totalTime, 60000), weight: .25}),
             (solution: SolutionOutput) => ({value: this.getDifficulty(solution.iterations, 750000), weight: .15}),
@@ -46,6 +48,9 @@ export class LevelDifficultyEstimator {
             const difficultFactor = factor(solution);
             if (configuration.debug.solver.estimator) {
                 console.log(difficultFactor);
+            }
+            if (difficultFactor.condition && !difficultFactor.condition(solution)) {
+                return acc;
             }
             return {
                 value: acc.value + (difficultFactor.value * difficultFactor.weight),

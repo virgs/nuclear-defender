@@ -1,8 +1,5 @@
 <template>
   <div id="carousel-slider-parent">
-    <span style="display: flex;">
-      <label class="form-label sokoban-label">Select your level</label>
-    </span>
     <div id="carousel-slider" style="">
       <div v-for="(_, index) in enabledLevels"
            :class="{'carousel-container': true,
@@ -25,7 +22,7 @@
         <i class="fa-solid fa-chevron-right"></i>
       </li>
     </ul>
-    <h3 class="mt-4 level-title">{{currentDisplayIndex}}{{ currentTitle }}</h3>
+    <h3 class="mt-4 level-title">{{currentDisplayIndex}}</h3>
     <h3 class="mt-2 level-solution-data">{{ currentSolutionData }}</h3>
   </div>
 </template>
@@ -133,9 +130,9 @@ export default defineComponent({
     },
     currentDisplayIndex(): string {
       if (this.currentIndex === 0) {
-        return '-: ';
+        return '-';
       }
-      return this.currentIndex.toString() + ': ';
+      return this.currentIndex.toString();
     },
     customItem(): (index: number) => boolean {
       return (index: number): boolean => {

@@ -45,12 +45,8 @@ const launch = (containerId: string, config: SceneConfig, router: any) => {
         // physics: {default: 'arcade'},
         // backgroundColor: '#000000',
         transparent: true,
-        plugins: {},
         audio: {
             disableWebAudio: true
-        },
-        dom: {
-            // createContainer: true
         },
         scene: [GameScene]
     });

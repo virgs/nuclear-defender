@@ -73,7 +73,7 @@ export class MapExplorer {
             .map(item => item.point);
         return {
             wrapped: wrapped,
-            leaks: mapLeaks,
+            leaks: [...new Set(mapLeaks)],
             acessibleEmpties: acessibleEmpty,
             unwrapped: unwrapped
         }

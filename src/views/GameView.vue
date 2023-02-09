@@ -59,6 +59,7 @@ export default defineComponent({
       EventEmitter.emit(EventName.UNDO_BUTTON_CLICKED);
     },
     exitClick() {
+      this.forceRerender();
       this.$router.push('/');
     }
   }
@@ -71,7 +72,7 @@ export default defineComponent({
     <div class="row align-items-center mx-0" style="max-width: 100vw">
       <div class="col-12 pt-2 px-4" id="game-view-title-id" style="text-align: left">
         <h1 class="sokoban-display display-6 fw-normal" style="user-select: none">
-          {{ display }}: {{ scene.title }}
+          Level {{ display }}
         </h1>
       </div>
       <div class="col-12 px-4" id="game-view-time-id">

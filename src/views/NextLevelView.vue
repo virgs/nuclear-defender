@@ -16,7 +16,7 @@
       <div class="row row-cols-1 justify-content-end gy-3">
         <div class="col" style="text-align: center">
           <h1 class="sokoban-display display-3 fw-normal" style="user-select: none;">
-            Level '{{ config.display }}' complete!</h1>
+            Level '{{ config.levelIndex }}' complete!</h1>
         </div>
         <div class="col my-1">
           <h4 class="sokoban-display fw-normal"
