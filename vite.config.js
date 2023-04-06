@@ -6,6 +6,7 @@ export default defineConfig(
     {
         plugins: [vue()],
         base: "/nuclear-defender",
+        assetsInclude: ["**/*.m4a", "**/*.json"],
         resolve: {
             alias: {
                 "@": fileURLToPath(new URL("./src", import.meta.url)),

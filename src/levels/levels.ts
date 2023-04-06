@@ -465,15 +465,15 @@ export const getAllLevels = (): Level[] => [
         title: 'houston situation'
     }, {
         map: `
-  #####
+--#####
 ###@  #
-# $*#$##
+# $[$.]#$##
 # #  . #
 # . $# #
 ## #.  #
- #    ##
- ###  #
-   ####
+-#    ##
+-###  #
+---####
 `,
         title: 'brazilian home kitchen'
     }, {
@@ -554,7 +554,7 @@ export const getAllLevels = (): Level[] => [
         title: 'left business'
     }, {
         map: `
- #####
+-#####
 ##  .#
 # $#.##
 #     #
@@ -576,7 +576,7 @@ export const getAllLevels = (): Level[] => [
 -###  #
 ---####
 `,
-        title: 'run forrest'
+        title: 'run forrest' // this one takes 17s to run
     }, {
         map: `
 --#####

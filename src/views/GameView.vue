@@ -92,7 +92,7 @@ export default defineComponent({
           <div class="row mx-2" id="gameview-buttons-container">
             <div class="col-12">
               <div class="row justify-content-center mt-2">
-                <div class="col-auto col-lg-3 d-grid gap-2">
+                <div class="col-auto col-lg-6 d-grid gap-2">
                   <button class="btn btn-primary sokoban-outlined-button"
                           data-bs-toggle="modal" data-bs-target="#confirmation-modal"
                           @click="confirmationButton = exitClick" type="button">
@@ -102,7 +102,7 @@ export default defineComponent({
                     <span v-if="!smallScreenDisplay" class="mx-2">Quit</span>
                   </button>
                 </div>
-                <div class="col-auto col-lg-3 d-grid gap-2">
+                <div class="col-auto col-lg-6 d-grid gap-2">
                   <button class="btn btn-primary sokoban-outlined-button"
                           data-bs-toggle="modal" data-bs-target="#confirmation-modal"
                           @click="confirmationButton = resetClick" type="button">
@@ -112,7 +112,7 @@ export default defineComponent({
                     <span v-if="!smallScreenDisplay" class="mx-2">Restart</span>
                   </button>
                 </div>
-                <div class="col-auto col-lg-3 d-grid gap-2">
+                <!-- <div class="col-auto col-lg-3 d-grid gap-2">
                   <button class="btn btn-primary sokoban-call-for-action-button"
                           @click="undoClick"
                           type="button">
@@ -121,7 +121,7 @@ export default defineComponent({
                     </span>
                     <span v-if="!smallScreenDisplay" class="mx-2">Undo</span>
                   </button>
-                </div>
+                </div> -->
               </div>
             </div>
             <DirectionalButtons class="col-12 align-self-end mb-4" v-if="smallScreenDisplay"/>

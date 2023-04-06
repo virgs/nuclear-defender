@@ -71,7 +71,7 @@ export class MovementOrchestrator {
     }
 
     public update(input: MovementOrchestratorInput): MovementOrchestratorOutput {
-        this.hero = this.initializeFeature(input.hero, Tiles.box);
+        this.hero = this.initializeFeature(input.hero, Tiles.hero);
         this.boxes = input.boxes
             .map(box => this.initializeFeature(box, Tiles.box));
         const actConfig = {

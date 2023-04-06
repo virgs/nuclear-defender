@@ -1,15 +1,15 @@
 import Heap from 'heap';
-import {Tiles} from '@/levels/tiles';
-import type {Point} from '@/math/point';
-import {Actions} from '@/constants/actions';
-import {Directions} from '@/constants/directions';
-import {MetricEmitter, Metrics} from './metric-emitter';
-import {configuration} from '@/constants/configuration';
-import type {MovementAnalysis, PushedBox} from './analyser/move-analyser';
-import {MoveAnalyser} from './analyser/move-analyser';
-import type {MovementOrchestratorOutput} from '@/engine/movement-orchestrator';
-import {MovementOrchestrator} from '@/engine/movement-orchestrator';
-import type {MultiLayeredMap, OrientedTile} from '@/levels/standard-sokoban-annotation-tokennizer';
+import { Tiles } from '@/levels/tiles';
+import type { Point } from '@/math/point';
+import { Actions } from '@/constants/actions';
+import { Directions } from '@/constants/directions';
+import { MetricEmitter, Metrics } from './metric-emitter';
+import { configuration } from '@/constants/configuration';
+import type { MovementAnalysis, PushedBox } from './analyser/move-analyser';
+import { MoveAnalyser } from './analyser/move-analyser';
+import type { MovementOrchestratorOutput } from '@/engine/movement-orchestrator';
+import { MovementOrchestrator } from '@/engine/movement-orchestrator';
+import type { MultiLayeredMap, OrientedTile } from '@/levels/standard-sokoban-annotation-tokennizer';
 
 type SolutionCandidate = {
     actions: Actions[],
@@ -67,7 +67,7 @@ export class SokobanSolver {
         this.iterations = 0;
         this.aborted = false;
 
-        this.movementCoordinator = new MovementOrchestrator({strippedMap: this.strippedMap});
+        this.movementCoordinator = new MovementOrchestrator({ strippedMap: this.strippedMap });
         this.movementAnalyser = new MoveAnalyser({
             staticFeatures: input.staticFeatures,
             strippedMap: this.strippedMap,
@@ -84,15 +84,15 @@ export class SokobanSolver {
 
     public async solve(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionOutput> {
         this.startTime = new Date().getTime();
-         const solution = await this.startAlgorithm(dynamicMap);
-         return {
-             aborted: this.aborted,
-             actions: solution?.actions,
-             boxesLine: solution?.boxesLine,
-             counterIntuitiveMoves: solution?.counterIntuitiveMoves,
-             iterations: this.iterations,
-             totalTime: Date.now() - this.startTime
-         }
+        const solution = await this.startAlgorithm(dynamicMap);
+        return {
+            aborted: this.aborted,
+            actions: solution?.actions,
+            boxesLine: solution?.boxesLine,
+            counterIntuitiveMoves: solution?.counterIntuitiveMoves,
+            iterations: this.iterations,
+            totalTime: Date.now() - this.startTime
+        }
     }
 
     private async startAlgorithm(dynamicMap: Map<Tiles, Point[]>): Promise<SolutionCandidate | undefined> {
@@ -101,40 +101,24 @@ export class SokobanSolver {
         const initialCandidate: SolutionCandidate = {
             boxesLine: 0,
             counterIntuitiveMoves: 0,
-            lastPushedBox: {id: -1, direction: Directions.UP},
+            lastPushedBox: { id: -1, direction: Directions.UP },
             actions: [],
-            hero: {point: hero, id: 0},
+            hero: { point: hero, id: 0 },
             boxes: boxes
-                .map((box, index) => ({point: box, id: index + 1})),
+                .map((box, index) => ({ point: box, id: index + 1 })),
             distanceSum: 0
         };
         initialCandidate.hash = await this.metricEmitter
             .add(Metrics.HASH_CALCULATION, () => this.calculateHashOfSolution(initialCandidate));
         this.candidatesToVisit.push(initialCandidate);
 
-        this.iterations = 0;
-        let cpuBreath = 0;
         let foundSolution: SolutionCandidate | undefined = undefined;
         let candidate: SolutionCandidate | undefined = initialCandidate;
         while (candidate && !this.aborted) {
             ++this.iterations;
-            ++cpuBreath;
-
             foundSolution = await this.checkSolution(candidate);
             if (foundSolution) {
                 break;
-            }
-            if (cpuBreath > configuration.solver.iterationPeriodToSleep) {
-                cpuBreath = 0;
-
-                await this.metricEmitter.add(Metrics.BREATHING_TIME, async () => {
-                    if (configuration.debug.solver.iterationNumber) {
-                        console.log(this.iterations);
-                    }
-                    await new Promise(resolve => setTimeout(() => {
-                        resolve(undefined);
-                    }, configuration.solver.sleepForInMs));
-                });
             }
             candidate = await this.metricEmitter.add(Metrics.POP_CANDIDATE, () => this.candidatesToVisit.pop());
         }
@@ -182,8 +166,8 @@ export class SokobanSolver {
                     lastPushedBox: analysis.pushedBox || candidate.lastPushedBox,
                     boxesLine: candidate.boxesLine + currentBoxesLine,
                     boxes: afterAction.boxes
-                        .map(box => ({point: box.nextPosition, id: box.id})),
-                    hero: {point: afterAction.hero.nextPosition, id: afterAction.hero.id},
+                        .map(box => ({ point: box.nextPosition, id: box.id })),
+                    hero: { point: afterAction.hero.nextPosition, id: afterAction.hero.id },
                     actions: candidate.actions.concat(action),
                     lastActionResult: afterAction,
                     counterIntuitiveMoves: counterIntuitiveMoves,

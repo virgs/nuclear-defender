@@ -71,8 +71,6 @@ export const configuration = {
 
     },
     solver: {
-        sleepForInMs: 10,
-        iterationPeriodToSleep: 400,
         distanceCalculator: new ManhattanDistanceCalculator(),
         distanceToTheClosestBox: false
 

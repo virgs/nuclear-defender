@@ -1,5 +1,6 @@
 import {Directions} from '@/constants/directions';
 import {EventEmitter, EventName} from '@/events/event-emitter';
+import * as Phaser from 'phaser';
 
 type InputValue = {
     event: EventName,
@@ -19,7 +20,7 @@ export class InputManager {
 
         //does not accept holding event
         this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z), {
-            event: EventName.UNDO_BUTTON_CLICKED,
+            // event: EventName.UNDO_BUTTON_CLICKED,
         });
         this.shortcutKeys.set(scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R), {
             event: EventName.RESTART_LEVEL,
