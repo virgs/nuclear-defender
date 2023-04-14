@@ -12,7 +12,7 @@ import { FeaturesOverlayConstrainVerifier } from '@/levels/constrain-verifiers/f
 import { TooManyFeaturesConstrainVerifier } from '@/levels/constrain-verifiers/too-many-features-constrain-verifier';
 import { NumberOfBoxesAndTargetsConstrainVerifier } from '@/levels/constrain-verifiers/number-of-boxes-and-targets-constrain-verifier';
 
-const webWorkerSolver = new SolverMapWorker();
+// const webWorkerSolver = new SolverMapWorker();
 export class MapValidator {
     //Singleton so vue doesn't watch it. It affects performance
     private static readonly instance: MapValidator = new MapValidator();
@@ -62,7 +62,7 @@ export class MapValidator {
                 timeoutInMs: 60 * 1000
             }
 
-            webWorkerSolver.onmessage = (event: MessageEvent<SolverWorkerResponse>) => {
+            this.webWorkerSolver.onmessage = (event: MessageEvent<SolverWorkerResponse>) => {
                 const data = event.data;
                 console.log('done validating map');
                 console.log(data);
@@ -77,7 +77,7 @@ export class MapValidator {
             };
 
             console.log('checking whether the map is solvable');
-            webWorkerSolver.postMessage(request);
+            this.webWorkerSolver.postMessage(request);
         });
 
     }

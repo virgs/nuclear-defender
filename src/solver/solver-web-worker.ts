@@ -4,10 +4,10 @@ import { Point } from "@/math/point";
 import { SokobanSolver, type SolutionOutput } from "./sokoban-solver";
 
 export type SolverWorkerRequest = {
-    staticFeatures: Map<Tiles, ({_x: number, _y: number} | Point)[]>;
+    staticFeatures: Map<Tiles, (StrippedPoint | Point)[]>;
     timeoutInMs: number;
     strippedMap: MultiLayeredMap;
-    dynamicMap: Map<Tiles, ({_x: number, _y: number} | Point)[]>;
+    dynamicMap: Map<Tiles, (StrippedPoint | Point)[]>;
 };
 
 export type SolverWorkerResponse = {
@@ -16,16 +16,26 @@ export type SolverWorkerResponse = {
     error?: string,
 };
 
-const mapMapPointToClass = (input: Map<Tiles, {_x: number, _y: number}[]>): Map<Tiles, Point[]> => {
+interface StrippedPoint {
+    _x: number;
+    _y: number;
+}
+
+const mapMapPointToClass = (input: Map<Tiles, (StrippedPoint | Point)[]>): Map<Tiles, Point[]> => {
     const result: Map<Tiles, Point[]> = new Map();
     for (let [key, value] of input.entries()) {
         result.set(key, value
-            .map(item => new Point(item._x, item._y)));
+            .map((item => {
+                const stripped: StrippedPoint = item as StrippedPoint;
+                return new Point(stripped._x, stripped._y);
+            })));
     }
     return result;
 }
 
 let solver: SokobanSolver | undefined;
+
+console.log('solver running')
 
 self.onmessage = async function (event: MessageEvent<SolverWorkerRequest>) {
     console.log('solver got message')
@@ -39,6 +49,7 @@ self.onmessage = async function (event: MessageEvent<SolverWorkerRequest>) {
             strippedMap: event.data.strippedMap
         });
         timeout = setTimeout(() => {
+            console.log('timed out')
             solver?.abort();
             solver = undefined;
             throw Error(`Solver timedout`);

@@ -1,9 +1,9 @@
-import {Tiles} from '@/levels/tiles';
-import type {Point} from '@/math/point';
-import {sounds} from '@/constants/sounds';
-import {Directions} from '@/constants/directions';
-import {GameObjectCreator} from './game-object-creator';
-import type {GameActor, GameActorConfig} from './game-actor';
+import { Tiles } from '@/levels/tiles';
+import type { Point } from '@/math/point';
+import { sounds } from '@/constants/sounds';
+import { Directions } from '@/constants/directions';
+import { GameObjectCreator } from './game-object-creator';
+import type { GameActor, GameActorConfig } from './game-actor';
 
 export class SpringActor implements GameActor {
     private readonly scene: Phaser.Scene;
@@ -18,21 +18,21 @@ export class SpringActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite(config.code);
         this.covered = false;
 
         switch (this.orientation) {
             case Directions.LEFT:
-                // this.sprite.setRotation(Math.PI / 2);
-                //     this.sprite.flipY = true
+                this.sprite = new GameObjectCreator(config).createSprite(config.code + 2);
+                this.sprite.flipX = true
                 break;
             case Directions.UP:
-                this.sprite.flipY = true;
-                // this.sprite.setRotation(Math.PI);
+                this.sprite = new GameObjectCreator(config).createSprite(config.code);
+                break;
+            case Directions.DOWN:
+                this.sprite = new GameObjectCreator(config).createSprite(config.code + 1);
                 break;
             case Directions.RIGHT:
-                // this.sprite.setRotation(Math.PI / 2);
-                this.sprite.flipX = true;
+                this.sprite = new GameObjectCreator(config).createSprite(config.code + 2);
                 break;
         }
     }
@@ -43,7 +43,7 @@ export class SpringActor implements GameActor {
 
             if (!this.covered) {
                 this.covered = true;
-                this.scene.sound.play(sounds.springEngage.key, {volume: 0.15});
+                this.scene.sound.play(sounds.springEngage.key, { volume: 0.15 });
             }
         } else {
             //TODO add smoke effect?
@@ -52,7 +52,7 @@ export class SpringActor implements GameActor {
             // https://www.html5gamedevs.com/topic/46393-phaser-3-tweens-and-particles/
             // https://rexrainbow.github.io/phaser3-rex-notes/docs/site/particles/
             if (this.covered) {
-                this.scene.sound.play(sounds.springRelease.key, {volume: 0.15});
+                this.scene.sound.play(sounds.springRelease.key, { volume: 0.15 });
                 this.covered = false;
             }
         }

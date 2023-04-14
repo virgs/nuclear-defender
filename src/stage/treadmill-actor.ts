@@ -1,10 +1,10 @@
 import type Phaser from 'phaser';
-import {Tiles} from '@/levels/tiles';
-import type {Point} from '@/math/point';
-import {sounds} from '@/constants/sounds';
-import {Directions} from '@/constants/directions';
-import {GameObjectCreator} from './game-object-creator';
-import type {GameActor, GameActorConfig} from './game-actor';
+import { Tiles } from '@/levels/tiles';
+import type { Point } from '@/math/point';
+import { sounds } from '@/constants/sounds';
+import { Directions } from '@/constants/directions';
+import { GameObjectCreator } from './game-object-creator';
+import type { GameActor, GameActorConfig } from './game-actor';
 
 export class TreadmillActor implements GameActor {
     private readonly scene: Phaser.Scene;
@@ -19,20 +19,22 @@ export class TreadmillActor implements GameActor {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.sprite = new GameObjectCreator(config).createSprite(config.code);
         this.covered = false;
 
         switch (this.orientation) {
             case Directions.LEFT:
-                this.sprite.flipX = true;
+                this.sprite = new GameObjectCreator(config).createSprite(config.code + 1);
                 break;
             case Directions.UP:
-                // this.sprite.flipY = true
+                this.sprite = new GameObjectCreator(config).createSprite(config.code);
+                this.sprite.flipY = true
                 break;
             case Directions.DOWN:
-                // this.sprite.flipY = true
+                this.sprite = new GameObjectCreator(config).createSprite(config.code);
                 break;
             case Directions.RIGHT:
+                this.sprite = new GameObjectCreator(config).createSprite(config.code + 1);
+                this.sprite.flipX = true;
                 break;
         }
     }
@@ -45,7 +47,7 @@ export class TreadmillActor implements GameActor {
         } else {
             if (this.covered) {
                 this.covered = false;
-                this.scene.sound.play(sounds.treadmil.key, {volume: 0.35});
+                this.scene.sound.play(sounds.treadmil.key, { volume: 0.35 });
             }
         }
     }

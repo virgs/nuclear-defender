@@ -1,6 +1,6 @@
 // import floorTexture from '../assets/tiles/floor-texture.jpg';
 import floorTexture from '../assets/tiles/floor_texture.jpg'; //Pinto's
-import tileSheetAsset from '../assets/tiles/sokoban_tilesheet.png';
+import tileSheetAsset from '../assets/tiles/sokoban_tilesheet_new.png';
 import wallSheetAsset from '../assets/tiles/wall_sprites.png';
 import selectorTexture from '../assets/tiles/transparent-selector.png';
 import thumbnailTexture from '../assets/levels/thumbnail.png';
@@ -45,8 +45,8 @@ export const configuration = {
         },
         scale: 0,
         mapLimits: {
-            lines: 15,
-            rows: 15,
+            lines: 20,
+            rows: 20,
             features: 30
         }
     },
