@@ -9,6 +9,7 @@ export class FeaturesOverlayConstrainVerifier implements MapConstrainVerifier {
         const boxesPosition = output.removedFeatures.get(Tiles.box)!;
 
         this.checkOilOverUse(output);
+        this.checkGoalAndSpringOverUse(output);
         this.checkDuplicateElementsAtSamePosition(output);
         this.checkBoxesOverUse(boxesPosition, heroPosition);
         this.checkWallsOverUse(output, heroPosition, boxesPosition);
@@ -57,8 +58,18 @@ export class FeaturesOverlayConstrainVerifier implements MapConstrainVerifier {
                     throw Error(`Oily floors and treadmils don't go well together. Didn't you go to school?. Fix error at (${oil.y + 1}, ${oil.x + 1}).`);
                 }
                 if (output.pointMap.get(Tiles.spring)!
-                    .some(treadmil => treadmil.isEqualTo(oil))) {
+                    .some(spring => spring.isEqualTo(oil))) {
                     throw Error(`Oily floors and springs are like a rainbow and something that doesn't like rainbows at all. They don't mix. Fix error at (${oil.y + 1}, ${oil.x + 1}).`);
+                }
+            });
+    }
+
+    private checkGoalAndSpringOverUse(output: ProcessedMap) {
+        output.pointMap.get(Tiles.target)!
+            .forEach(target => {
+                if (output.pointMap.get(Tiles.spring)!
+                    .some(spring => spring.isEqualTo(target))) {
+                    throw Error(`Spring and goals are not good thing to share a location. What would you expect? That the spring would push the goal? Hello?! Fix error at (${target.y + 1}, ${target.x + 1}).`);
                 }
             });
     }

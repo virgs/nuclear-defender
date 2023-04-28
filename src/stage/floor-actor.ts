@@ -1,9 +1,9 @@
-import {Tiles} from '@/levels/tiles';
-import type {Point} from '@/math/point';
-import {configuration} from '@/constants/configuration';
-import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
-import type {StageCreatorConfig} from '@/stage/game-stage-creator';
-import type {ScreenPropertiesCalculator} from '@/math/screen-properties-calculator';
+import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { configuration } from '@/constants/configuration';
+import type { Point } from '@/math/point';
+import type { ScreenPropertiesCalculator } from '@/math/screen-properties-calculator';
+import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
+import type { StageCreatorConfig } from '@/stage/game-stage-creator';
 
 export class FloorActor {
     private readonly floorPic: Phaser.GameObjects.Image;
@@ -18,7 +18,7 @@ export class FloorActor {
         if (config.playable) {
             this.floorPic.setPipeline('Light2D');
         }
-        this.floorPic.setDepth(new TileDepthCalculator().calculate(Tiles.floor, -10));
+        this.floorPic.setDepth(new TileDepthCalculator().newCalculate(SpriteSheetLines.FLOOR, -10));
     }
 
     public addTileMask(tilePosition: Point): void {

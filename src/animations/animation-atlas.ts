@@ -3,6 +3,7 @@ import {Directions} from '@/constants/directions';
 import {configuration} from '@/constants/configuration';
 
 // order in the file
+
 export enum SpriteSheetLines {
     HERO,
     SPRING,
@@ -10,8 +11,10 @@ export enum SpriteSheetLines {
     ONE_WAY_DOOR_BACK,
     ONE_WAY_DOOR_FRONT,
     BOX,
+    TARGET,
     OIL,
-    WALL
+    WALL,
+    FLOOR
 }
 
 type AnimationState = {
@@ -118,7 +121,7 @@ export const AnimationAtlas: AnimationAtlasData = {
     wall: {
         spriteSheet: SpriteSheetLines.WALL,
         oriented: false,
-        assetSheetKey: configuration.tiles.wallSheetKey,
+        assetSheetKey: configuration.tiles.newSpriteSheetKey,
         cornersOrder: [[Directions.UP, Directions.RIGHT],
             [Directions.UP, Directions.LEFT],
             [Directions.LEFT, Directions.DOWN],

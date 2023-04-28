@@ -1,10 +1,10 @@
 import {Point} from '@/math/point';
 
 export enum Directions {
-    LEFT,
-    UP,
-    RIGHT,
-    DOWN
+    DOWN = 0,
+    UP = 1,
+    LEFT = 2,
+    RIGHT = 3,
 }
 
 export const getOppositeDirectionOf = (direction: Directions): Directions => {

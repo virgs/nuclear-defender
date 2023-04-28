@@ -1,7 +1,7 @@
 // import floorTexture from '../assets/tiles/floor-texture.jpg';
 import floorTexture from '../assets/tiles/floor_texture.jpg'; //Pinto's
 import tileSheetAsset from '../assets/tiles/sokoban_tilesheet_new.png';
-import wallSheetAsset from '../assets/tiles/wall_sprites.png';
+import newSheetAsset from '../assets/tiles/sprites-v2.png';
 import selectorTexture from '../assets/tiles/transparent-selector.png';
 import thumbnailTexture from '../assets/levels/thumbnail.png';
 import tileSheetAssetNormal from '../assets/tiles/sokoban_tilessheet_normal.png';
@@ -23,8 +23,8 @@ export const configuration = {
         verticalPerspective: verticalPerspective,
         verticalSize: tileHeight,
         horizontalSize: tileWidth,
-        wallSheetKey: 'wallSheetKey',
-        wallSheetAsset: wallSheetAsset,
+        newSpriteSheetKey: 'newSheetAssetKey',
+        wallSheetAsset: newSheetAsset,
         spriteSheetKey: 'tiles',
         sheetAsset: tileSheetAsset,
         sheetAssetNormal: tileSheetAssetNormal,
@@ -32,7 +32,8 @@ export const configuration = {
         layerName: 'Level',
         tilesetName: 'sokoban',
         numOfFramesPerLine: 36,
-        framesPerAnimation: 3
+        framesPerAnimation: 3,
+        oilFramesNum: 4
     },
     world: {
         tileSize: { //after rescaling...

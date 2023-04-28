@@ -27,7 +27,7 @@ export class HeroActionRecorder {
 
     public registerMovement(input: MovementOrchestratorInput, output: MovementOrchestratorOutput) {
         const memento = {input: input, output: output};
-        console.log(memento)
+        // console.log(memento)
         this.mementos.push(memento);
     }
 

@@ -66,7 +66,7 @@ export class GameScene extends Phaser.Scene {
             }
         });
         this.load.spritesheet({
-            key: configuration.tiles.wallSheetKey,
+            key: configuration.tiles.newSpriteSheetKey,
             url: configuration.tiles.wallSheetAsset,
             frameConfig: {
                 frameWidth: configuration.tiles.horizontalSize,

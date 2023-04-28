@@ -1,22 +1,35 @@
+import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
+import { configuration } from '@/constants/configuration';
+import { sounds } from '@/constants/sounds';
+import { Tiles } from '@/levels/tiles';
+import type { Point } from '@/math/point';
+import type { GameActor, GameActorConfig } from '@/stage/game-actor';
 import type Phaser from 'phaser';
-import {Tiles} from '@/levels/tiles';
-import type {Point} from '@/math/point';
-import {sounds} from '@/constants/sounds';
-import {GameObjectCreator} from '@/stage/game-object-creator';
-import type {GameActor, GameActorConfig} from '@/stage/game-actor';
 
 export class OilyFloorActor implements GameActor {
     private readonly scene: Phaser.Scene;
-    private readonly image: Phaser.GameObjects.Image;
     private readonly id: number;
     private readonly tilePosition: Point;
+    private readonly animationConfig: AnimationConfig;
+
     private covered: boolean;
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
         this.scene = config.scene;
         this.tilePosition = config.tilePosition;
-        this.image = new GameObjectCreator(config).createImage(config.code);
+        this.animationConfig = {
+            playable: config.playable,
+            scene: config.scene,
+            spriteSheetLine: SpriteSheetLines.OIL,
+            worldPosition: config.worldPosition,
+        };
+
+        new AnimationCreator(this.animationConfig)
+            .createImage(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine + 
+                Math.floor(Math.random() * configuration.tiles.oilFramesNum));
+
         this.covered = false;
     }
 
@@ -28,7 +41,7 @@ export class OilyFloorActor implements GameActor {
         } else {
             if (this.covered) {
                 this.covered = false;
-                this.scene.sound.play(sounds.oil.key, {volume: 0.1});
+                this.scene.sound.play(sounds.oil.key, { volume: 0.1 });
             }
         }
     }

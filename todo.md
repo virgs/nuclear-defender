@@ -18,3 +18,9 @@
         //     this.cache.tilemap.remove(configuration.tiles.tilemapKey);
         // });
 
+
+
+1. Óleo e esteiras precisam ocupar o chão do cubo de perspectiva, e não o teto
+2. Estreitar suporte da porta direcional para caber o barril e o boneco dentro
+3. Existe uma linha com cor diferente no sprite Wall quando não há um batente na parte esquerda do teto.
+4. Perspectiva da mola e da parede estão diferentes, não tão encaixando

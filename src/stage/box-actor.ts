@@ -1,17 +1,19 @@
+import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
+import { configuration } from '@/constants/configuration';
+import { sounds } from '@/constants/sounds';
+import { Tiles } from '@/levels/tiles';
+import type { Point } from '@/math/point';
+import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
+import type { DynamicGameActor, MoveData } from '@/stage/dynamic-game-actor';
+import type { GameActor, GameActorConfig } from '@/stage/game-actor';
 import type Phaser from 'phaser';
-import {Tiles} from '@/levels/tiles';
-import type {Point} from '@/math/point';
-import {sounds} from '@/constants/sounds';
-import {GameObjectCreator} from '@/stage/game-object-creator';
-import {TileDepthCalculator} from '@/scenes/tile-depth-calculator';
-import type {GameActor, GameActorConfig} from '@/stage/game-actor';
-import type {DynamicGameActor, MoveData} from '@/stage/dynamic-game-actor';
 
 export class BoxActor implements DynamicGameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
     private readonly image: Phaser.GameObjects.Image;
     private readonly id: number;
-    private readonly scene: Phaser.Scene;
+    private readonly animationConfig: AnimationConfig;
     private tilePosition: Point;
     private onTarget?: number;
     private currentTween?: {
@@ -19,13 +21,21 @@ export class BoxActor implements DynamicGameActor {
         resolve: () => any
     };
 
+
     constructor(config: GameActorConfig) {
         this.id = config.id;
-        this.scene = config.scene;
         this.tilePosition = config.tilePosition;
         this.tweens = config.scene.tweens;
-        this.image = new GameObjectCreator(config)
-            .createImage(config.code);
+
+        this.animationConfig = {
+            playable: config.playable,
+            scene: config.scene,
+            spriteSheetLine: SpriteSheetLines.BOX,
+            worldPosition: config.worldPosition,
+        };
+
+        this.image = new AnimationCreator(this.animationConfig)
+            .createImage(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine);
     }
 
     public getTilePosition() {
@@ -56,7 +66,7 @@ export class BoxActor implements DynamicGameActor {
                 y: data.spritePosition.y,
                 duration: data.duration,
                 onUpdate: () => {
-                    this.image.setDepth(new TileDepthCalculator().calculate(Tiles.box, this.image.y));
+                    this.image.setDepth(new TileDepthCalculator().newCalculate(SpriteSheetLines.BOX, this.image.y));
                 },
                 onComplete: () => {
                     resolve();
@@ -80,17 +90,17 @@ export class BoxActor implements DynamicGameActor {
         const onTarget = staticActors
             .find(actor => actor.getTileCode() === Tiles.target);
         if (onTarget) {
-            this.image.setFrame(Tiles.boxOnTarget);
+            this.image.setFrame(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine + configuration.tiles.framesPerAnimation);
             const targetId = onTarget.getId();
 
             if (this.onTarget !== targetId) {
                 this.onTarget = targetId;
-                this.scene.sound.play(sounds.boxOnTarget.key, {volume: 0.5});
+                this.animationConfig.scene.sound.play(sounds.boxOnTarget.key, { volume: 0.5 });
             }
         } else {
             if (this.onTarget !== undefined) {
                 this.onTarget = undefined;
-                this.image.setFrame(Tiles.box);
+                this.image.setFrame(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine);
             }
         }
     }
