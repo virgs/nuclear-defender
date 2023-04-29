@@ -8,7 +8,7 @@ import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 import type { DynamicGameActor, MoveData } from '@/stage/dynamic-game-actor';
 import { Actions, mapActionToDirection, mapDirectionToAction } from '@/constants/actions';
 import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { configuration } from '@/constants/configuration';
 
 enum SpriteAnimation {

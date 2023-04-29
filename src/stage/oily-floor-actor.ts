@@ -1,4 +1,4 @@
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
 import { configuration } from '@/constants/configuration';
 import { sounds } from '@/constants/sounds';

@@ -1,4 +1,4 @@
-import type { SpriteSheetLines } from '@/animations/animation-atlas';
+import type { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { configuration } from '@/constants/configuration';
 import type { Point } from '@/math/point';
 import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';

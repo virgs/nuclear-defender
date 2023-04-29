@@ -1,4 +1,4 @@
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
 import { configuration } from '@/constants/configuration';
 import { sounds } from '@/constants/sounds';
@@ -117,7 +117,7 @@ export class BoxActor implements DynamicGameActor {
         } else {
             if (this.onTarget !== undefined) {
                 this.onTarget = undefined;
-                this.sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.OFF_TARGET] + '.IDLE', repeat: -1, duration: configuration.updateCycleInMs }, true);
+                this.sprite.anims.play({ key: 'IDLE.' + SpriteAnimation[SpriteAnimation.OFF_TARGET], repeat: -1, duration: configuration.updateCycleInMs }, true);
             }
         }
     }

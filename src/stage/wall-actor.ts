@@ -4,7 +4,7 @@ import type { GameActor, GameActorConfig } from './game-actor';
 import { Directions, getAllDirections, getPointFromDirection } from '@/constants/directions';
 import type { AnimationConfig } from '@/animations/animation-creator';
 import { AnimationCreator } from '@/animations/animation-creator';
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import type { OrientedTile } from '@/levels/standard-sokoban-annotation-tokennizer';
 import { configuration } from '@/constants/configuration';
 

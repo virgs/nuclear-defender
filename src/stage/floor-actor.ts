@@ -1,4 +1,4 @@
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { configuration } from '@/constants/configuration';
 import type { Point } from '@/math/point';
 import type { ScreenPropertiesCalculator } from '@/math/screen-properties-calculator';

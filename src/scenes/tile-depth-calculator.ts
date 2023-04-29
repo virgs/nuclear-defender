@@ -1,4 +1,4 @@
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { Tiles } from '@/levels/tiles';
 
 export class TileDepthCalculator {

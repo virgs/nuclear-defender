@@ -1,4 +1,4 @@
-import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/sprite-sheet-lines';
 import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
 import { configuration } from '@/constants/configuration';
 import { Directions, getDirectionsAsString } from '@/constants/directions';
@@ -16,7 +16,6 @@ export class OneWayDoorActor implements GameActor {
     private readonly sprites: Phaser.GameObjects.Sprite[];
     private readonly id: number;
     private readonly tilePosition: Point;
-    private readonly animationConfig: AnimationConfig[];
     private readonly orientation: Directions;
 
     private covered: boolean;
@@ -26,7 +25,6 @@ export class OneWayDoorActor implements GameActor {
         this.tilePosition = config.tilePosition;
         this.orientation = config.orientation!;
         this.covered = false;
-        this.animationConfig = [];
         this.sprites = [];
 
         [SpriteSheetLines.ONE_WAY_DOOR_BACK, SpriteSheetLines.ONE_WAY_DOOR_FRONT]
@@ -37,7 +35,6 @@ export class OneWayDoorActor implements GameActor {
                     spriteSheetLine: spriteSheetLines,
                     worldPosition: config.worldPosition,
                 };
-                this.animationConfig.push(animationConfig);
 
                 const animationCreator = new AnimationCreator(animationConfig);
                 const sprite = animationCreator
