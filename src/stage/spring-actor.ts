@@ -58,9 +58,7 @@ export class SpringActor implements GameActor {
                 this.covered = true;
                 this.scene.sound.play(sounds.springEngage.key, { volume: 0.15 });
 
-                this.sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.COVERING] + '.' + Directions[this.orientation], repeat: 0, duration: configuration.updateCycleInMs }, true)
-                    .once('animationcomplete', () => {
-                    });
+                this.sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.COVERING] + '.' + Directions[this.orientation], repeat: 0, duration: configuration.updateCycleInMs }, true);
             }
         } else {
             //TODO add smoke effect?

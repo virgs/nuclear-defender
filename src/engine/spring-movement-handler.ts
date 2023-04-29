@@ -1,8 +1,8 @@
-import {Tiles} from '../levels/tiles';
-import type {Point} from '../math/point';
-import {MovementOrchestrator} from '../engine/movement-orchestrator';
-import {Directions, getOppositeDirectionOf} from '../constants/directions';
-import type {ActData, FeatureMovementHandler} from '../engine/feature-movement-handler';
+import { Tiles } from '../levels/tiles';
+import type { Point } from '../math/point';
+import { MovementOrchestrator } from '../engine/movement-orchestrator';
+import { Directions, getOppositeDirectionOf } from '../constants/directions';
+import type { ActData, FeatureMovementHandler } from '../engine/feature-movement-handler';
 
 export class SpringMovementHandler implements FeatureMovementHandler {
     private readonly position: Point;
@@ -52,6 +52,10 @@ export class SpringMovementHandler implements FeatureMovementHandler {
     }
 
     public allowEnteringMovement(direction: Directions): boolean {
+        const isCovered = this.coordinator.getFeaturesAtPosition(this.position).some(feature => feature.code === Tiles.box)
+        if (isCovered) {
+            return this.orientation !== direction;
+        }
         return this.orientation === getOppositeDirectionOf(direction);
     }
 
