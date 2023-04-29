@@ -9,9 +9,14 @@ import type { DynamicGameActor, MoveData } from '@/stage/dynamic-game-actor';
 import type { GameActor, GameActorConfig } from '@/stage/game-actor';
 import type Phaser from 'phaser';
 
+enum SpriteAnimation {
+    OFF_TARGET = 0,
+    ON_TARGET = 1,
+}
+
 export class BoxActor implements DynamicGameActor {
     private readonly tweens: Phaser.Tweens.TweenManager;
-    private readonly image: Phaser.GameObjects.Image;
+    private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly animationConfig: AnimationConfig;
     private tilePosition: Point;
@@ -34,8 +39,20 @@ export class BoxActor implements DynamicGameActor {
             worldPosition: config.worldPosition,
         };
 
-        this.image = new AnimationCreator(this.animationConfig)
-            .createImage(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine);
+        const animationCreator = new AnimationCreator(this.animationConfig);
+        this.sprite = animationCreator
+            .createSprite(animationCreator.getCurrentInitialFrame(SpriteSheetLines.BOX, 0, SpriteAnimation.OFF_TARGET));
+
+        const states = Object.keys(SpriteAnimation)
+            .filter(key => !isNaN(Number(key)))
+            .map(key => SpriteAnimation[Number(key) as SpriteAnimation])
+
+        animationCreator.createAnimations(SpriteSheetLines.BOX, states, ['IDLE'])
+            .forEach(animation => {
+                // animation.key = animation.key.split('.')[0];
+                console.log(animation)
+                return this.sprite!.anims.create(animation);
+            });
     }
 
     public getTilePosition() {
@@ -61,12 +78,12 @@ export class BoxActor implements DynamicGameActor {
                 this.currentTween = undefined;
             }
             const tween = {
-                targets: this.image,
+                targets: this.sprite,
                 x: data.spritePosition.x,
                 y: data.spritePosition.y,
                 duration: data.duration,
                 onUpdate: () => {
-                    this.image.setDepth(new TileDepthCalculator().newCalculate(SpriteSheetLines.BOX, this.image.y));
+                    this.sprite.setDepth(new TileDepthCalculator().newCalculate(SpriteSheetLines.BOX, this.sprite.y));
                 },
                 onComplete: () => {
                     resolve();
@@ -90,7 +107,7 @@ export class BoxActor implements DynamicGameActor {
         const onTarget = staticActors
             .find(actor => actor.getTileCode() === Tiles.target);
         if (onTarget) {
-            this.image.setFrame(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine + configuration.tiles.framesPerAnimation);
+            this.sprite.anims.play({ key: 'IDLE.' + SpriteAnimation[SpriteAnimation.ON_TARGET], repeat: -1, duration: configuration.updateCycleInMs }, true);
             const targetId = onTarget.getId();
 
             if (this.onTarget !== targetId) {
@@ -100,7 +117,7 @@ export class BoxActor implements DynamicGameActor {
         } else {
             if (this.onTarget !== undefined) {
                 this.onTarget = undefined;
-                this.image.setFrame(this.animationConfig.spriteSheetLine * configuration.tiles.numOfFramesPerLine);
+                this.sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.OFF_TARGET] + '.IDLE', repeat: -1, duration: configuration.updateCycleInMs }, true);
             }
         }
     }

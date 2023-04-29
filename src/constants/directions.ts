@@ -1,4 +1,4 @@
-import {Point} from '@/math/point';
+import { Point } from '@/math/point';
 
 export enum Directions {
     DOWN = 0,
@@ -6,6 +6,13 @@ export enum Directions {
     LEFT = 2,
     RIGHT = 3,
 }
+
+export const getAllDirections = (): Directions[] => Object.keys(Directions)
+    .filter(key => !isNaN(Number(key)))
+    .map(key => Number(key) as Directions);
+
+export const getDirectionsAsString = (): string[] => getAllDirections()
+    .map(direction => Directions[direction])
 
 export const getOppositeDirectionOf = (direction: Directions): Directions => {
     switch (direction) {

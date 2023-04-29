@@ -2,8 +2,7 @@ import { Tiles } from '@/levels/tiles';
 import type { Point } from '@/math/point';
 import { sounds } from '@/constants/sounds';
 import type { GameActorConfig } from './game-actor';
-import { Directions } from '@/constants/directions';
-import { HeroAnimator } from '@/animations/hero-animator';
+import { Directions, getDirectionsAsString } from '@/constants/directions';
 import { EventEmitter, EventName } from '@/events/event-emitter';
 import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 import type { DynamicGameActor, MoveData } from '@/stage/dynamic-game-actor';
@@ -20,7 +19,6 @@ enum SpriteAnimation {
 
 
 export class HeroActor implements DynamicGameActor {
-    private readonly heroAnimator: HeroAnimator;
     private readonly sprite: Phaser.GameObjects.Sprite;
     private readonly id: number;
     private readonly scene: Phaser.Scene;
@@ -34,7 +32,6 @@ export class HeroActor implements DynamicGameActor {
     public constructor(config: GameActorConfig) {
         this.id = config.id;
         this.scene = config.scene;
-        this.heroAnimator = new HeroAnimator();
         this.orientation = Directions.DOWN;
         this.tilePosition = config.tilePosition;
 
@@ -51,13 +48,13 @@ export class HeroActor implements DynamicGameActor {
 
         const animationCreator = new AnimationCreator(this.animationConfig);
         this.sprite = animationCreator
-            .createSprite(animationCreator.getCurrentInitialFrame(SpriteSheetLines.HERO, this.orientation, SpriteAnimation.FACING));
+            .createSprite(animationCreator.getCurrentInitialFrame(SpriteSheetLines.HERO, this.orientation, SpriteAnimation.IDLE));
 
         const states = Object.keys(SpriteAnimation)
             .filter(key => !isNaN(Number(key)))
             .map(key => SpriteAnimation[Number(key) as SpriteAnimation])
 
-        animationCreator.createAnimations(SpriteSheetLines.HERO, states)
+        animationCreator.createAnimations(SpriteSheetLines.HERO, getDirectionsAsString(), states)
             .forEach(animation => this.sprite!.anims.create(animation));
 
 
@@ -73,7 +70,6 @@ export class HeroActor implements DynamicGameActor {
         const actionInputBuffer: Actions = this.actionInputBuffer || Actions.STAND;
         if (actionInputBuffer !== Actions.STAND) {
             this.orientation = mapActionToDirection(actionInputBuffer)!
-            // const animation = this.heroAnimator.getAnimation(this.orientation)!;
             this.sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.IDLE] + '.' + Directions[this.orientation], repeat: -1, duration: configuration.updateCycleInMs }, true);
         }
         this.actionInputBuffer = undefined;
@@ -82,12 +78,14 @@ export class HeroActor implements DynamicGameActor {
 
     public async update(data: MoveData): Promise<void> {
         if (this.tilePosition.isEqualTo(data.tilePosition)) {
-            return
+            return;
         }
         return new Promise<void>((resolve) => {
             this.tilePosition = data.tilePosition;
             if (data.animationPushedBox) {
                 this.scene.sound.play(sounds.pushingBox.key, { volume: 0.25 });
+                //TODO change animation to pushing
+                console.log(SpriteAnimation[SpriteAnimation.PUSHING] + '.' + Directions[this.orientation])
             }
             if (data.orientation !== undefined) {
                 this.orientation = data.orientation

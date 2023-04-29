@@ -1,7 +1,7 @@
 import { SpriteSheetLines } from '@/animations/animation-atlas';
 import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
 import { configuration } from '@/constants/configuration';
-import { Directions } from '@/constants/directions';
+import { Directions, getDirectionsAsString } from '@/constants/directions';
 import { sounds } from '@/constants/sounds';
 import { Tiles } from '@/levels/tiles';
 import type { Point } from '@/math/point';
@@ -45,7 +45,7 @@ export class SpringActor implements GameActor {
             .filter(key => !isNaN(Number(key)))
             .map(key => SpriteAnimation[Number(key) as SpriteAnimation])
 
-        animationCreator.createAnimations(SpriteSheetLines.SPRING, states)
+        animationCreator.createAnimations(SpriteSheetLines.SPRING, getDirectionsAsString(), states)
             .forEach(animation => this.sprite!.anims.create(animation));
     }
 

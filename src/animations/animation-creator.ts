@@ -1,6 +1,5 @@
 import type { SpriteSheetLines } from '@/animations/animation-atlas';
 import { configuration } from '@/constants/configuration';
-import { Directions } from '@/constants/directions';
 import type { Point } from '@/math/point';
 import { TileDepthCalculator } from '@/scenes/tile-depth-calculator';
 import type Phaser from 'phaser';
@@ -39,24 +38,22 @@ export class AnimationCreator {
             configuration.tiles.newSpriteSheetKey, frame)) as Phaser.GameObjects.Sprite;
     }
 
-    public getCurrentInitialFrame(spriteSheetLine: SpriteSheetLines, orientation: Directions, stateIndex: number): number {
+    public getCurrentInitialFrame(spriteSheetLine: SpriteSheetLines, orientation: number, stateIndex: number): number {
         const numberOfDirections = 4;
         return spriteSheetLine * configuration.tiles.numOfFramesPerLine +
             configuration.tiles.framesPerAnimation * numberOfDirections * stateIndex +
             configuration.tiles.framesPerAnimation * orientation;
     }
 
-    public createAnimations(spriteSheetLine: SpriteSheetLines, animationStates: string[]): Animation[] {
+    public createAnimations(spriteSheetLine: SpriteSheetLines, orientations: string[], animationStates: string[]): Animation[] {
         const animations: Animation[] = [];
         animationStates
             .forEach((spriteAnimation, spriteAnimationIndex) => {
-                Object.keys(Directions)
-                    .filter(key => !isNaN(Number(key)))
-                    .map(key => Number(key) as Directions)
-                    .forEach(direction => {
-                        const initialFrame = this.getCurrentInitialFrame(spriteSheetLine, direction, spriteAnimationIndex)
+                orientations
+                    .forEach((orientation, orientationIndex) => {
+                        const initialFrame = this.getCurrentInitialFrame(spriteSheetLine, orientationIndex, spriteAnimationIndex)
                         const animation = {
-                            key: spriteAnimation + '.' + Directions[direction],
+                            key: spriteAnimation + '.' + orientation,
                             frames: Array.from(new Array(configuration.tiles.framesPerAnimation))
                                 .map((_, index) => ({
                                     key: configuration.tiles.newSpriteSheetKey,

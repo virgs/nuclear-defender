@@ -1,10 +1,10 @@
 import { Tiles } from '@/levels/tiles';
 import { Point } from '@/math/point';
 import type { GameActor, GameActorConfig } from './game-actor';
-import { getPointFromDirection } from '@/constants/directions';
+import { Directions, getAllDirections, getPointFromDirection } from '@/constants/directions';
 import type { AnimationConfig } from '@/animations/animation-creator';
 import { AnimationCreator } from '@/animations/animation-creator';
-import { AnimationAtlas, SpriteSheetLines } from '@/animations/animation-atlas';
+import { SpriteSheetLines } from '@/animations/animation-atlas';
 import type { OrientedTile } from '@/levels/standard-sokoban-annotation-tokennizer';
 import { configuration } from '@/constants/configuration';
 
@@ -20,7 +20,7 @@ export class WallActor implements GameActor {
         this.contentAround = config.contentAround;
         this.tilePosition = config.tilePosition;
 
-        this.adjacentPoints = AnimationAtlas.orientationOrder
+        this.adjacentPoints = getAllDirections()
             .map((direction => getPointFromDirection(direction).sum(new Point(1, 1))))
 
         this.animationConfig = {
@@ -45,7 +45,12 @@ export class WallActor implements GameActor {
     }
 
     private createCorners() {
-        AnimationAtlas.wall.cornersOrder!
+        const cornersOrder = [[Directions.UP, Directions.RIGHT],
+        [Directions.UP, Directions.LEFT],
+        [Directions.LEFT, Directions.DOWN],
+        [Directions.DOWN, Directions.RIGHT]
+        ]
+        cornersOrder
             .forEach((item, index) => {
                 const corner = item
                     .reduce((acc, side) => acc.sum(getPointFromDirection(side)), new Point(1, 1)); //shift to the center that is the point 1,1

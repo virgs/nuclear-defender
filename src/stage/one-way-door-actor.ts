@@ -1,39 +1,86 @@
+import { SpriteSheetLines } from '@/animations/animation-atlas';
+import { AnimationCreator, type AnimationConfig } from '@/animations/animation-creator';
+import { configuration } from '@/constants/configuration';
+import { Directions, getDirectionsAsString } from '@/constants/directions';
 import { Tiles } from '@/levels/tiles';
 import type { Point } from '@/math/point';
-import { GameObjectCreator } from './game-object-creator';
-import { Directions } from '@/constants/directions';
 import type { GameActor, GameActorConfig } from './game-actor';
 
+enum SpriteAnimation {
+    FACING = 0,
+    COVERING = 1,
+    UNCOVERING = 2
+}
+
 export class OneWayDoorActor implements GameActor {
-    private readonly sprite: Phaser.GameObjects.Sprite;
+    private readonly sprites: Phaser.GameObjects.Sprite[];
     private readonly id: number;
     private readonly tilePosition: Point;
+    private readonly animationConfig: AnimationConfig[];
+    private readonly orientation: Directions;
+
+    private covered: boolean;
 
     constructor(config: GameActorConfig) {
         this.id = config.id;
         this.tilePosition = config.tilePosition;
-        
-        switch (config.orientation) {
-            case Directions.LEFT:
-                this.sprite = new GameObjectCreator(config).createSprite(config.code + 2);
-                this.sprite.flipX = true
-                break;
-                case Directions.UP:
-                this.sprite = new GameObjectCreator(config).createSprite(config.code);
-                break;
-            case Directions.DOWN:
-                this.sprite = new GameObjectCreator(config).createSprite(config.code - 1);
-                break;
-            case Directions.RIGHT:
-                this.sprite = new GameObjectCreator(config).createSprite(config.code - 2);
-                break;
+        this.orientation = config.orientation!;
+        this.covered = false;
+        this.animationConfig = [];
+        this.sprites = [];
+
+        [SpriteSheetLines.ONE_WAY_DOOR_BACK, SpriteSheetLines.ONE_WAY_DOOR_FRONT]
+            .forEach(spriteSheetLines => {
+                const animationConfig = {
+                    playable: config.playable,
+                    scene: config.scene,
+                    spriteSheetLine: spriteSheetLines,
+                    worldPosition: config.worldPosition,
+                };
+                this.animationConfig.push(animationConfig);
+
+                const animationCreator = new AnimationCreator(animationConfig);
+                const sprite = animationCreator
+                    .createSprite(animationCreator.getCurrentInitialFrame(spriteSheetLines, this.orientation, SpriteAnimation.FACING));
+
+                const states = Object.keys(SpriteAnimation)
+                    .filter(key => !isNaN(Number(key)))
+                    .map(key => SpriteAnimation[Number(key) as SpriteAnimation])
+
+                animationCreator.createAnimations(spriteSheetLines, getDirectionsAsString(), states)
+                    .forEach(animation => sprite!.anims.create(animation));
+                this.sprites.push(sprite);
+            });
+    }
+
+    public cover(actors: GameActor[]): void {
+        if (actors
+            .some(actor => [Tiles.box, Tiles.hero].includes(actor.getTileCode()))) {
+            //TODO add particle effect?
+            if (!this.covered) {
+                this.sprites
+                    .forEach(sprite => {
+                        sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.COVERING] + '.' + Directions[this.orientation], repeat: 0, duration: configuration.updateCycleInMs }, true);
+                    })
+                console.log('covered')
+            }
+            this.covered = true;
+        } else {
+            if (this.covered) {
+                console.log('uncovered')
+                this.covered = false;
+                console.log(SpriteAnimation[SpriteAnimation.UNCOVERING] + '.' + Directions[this.orientation])
+                this.sprites
+                    .forEach(sprite => {
+                        sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.UNCOVERING] + '.' + Directions[this.orientation], repeat: 0, duration: configuration.updateCycleInMs }, true)
+                            .once('animationcomplete', () => {
+                                sprite.anims.play({ key: SpriteAnimation[SpriteAnimation.FACING] + '.' + Directions[this.orientation], repeat: -1, duration: configuration.updateCycleInMs }, true);
+                            });
+
+                    })
+            }
         }
-
     }
-
-    public cover(): void {
-    }
-
     public getId(): number {
         return this.id;
     }
